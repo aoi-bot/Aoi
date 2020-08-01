@@ -24,6 +24,7 @@ bot = aoi.AoiBot(command_prefix=get_prefix)
 
 extensions = [
     "cogs.administration.aoi",
+    "cogs.administration.information",
     "cogs.settings.guildsettings"
 ]
 

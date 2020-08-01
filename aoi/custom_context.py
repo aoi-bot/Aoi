@@ -51,7 +51,7 @@ class AoiContext(commands.Context):
         embed = discord.Embed(
             title=title,
             description=description,
-            colour=(await self.get_color(typ) if typ else clr)
+            colour=(await self.get_color(typ) if not clr else clr)
         )
         if thumbnail:
             embed.set_thumbnail(url=thumbnail)
