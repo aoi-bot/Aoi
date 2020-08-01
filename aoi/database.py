@@ -13,7 +13,6 @@ class _GuildSetting:
     info_color: int
 
 
-
 class AoiDatabase:
     def __init__(self):
         self.db: Optional[Connection] = None
@@ -44,6 +43,7 @@ class AoiDatabase:
                 error_color=0xaa0000,
                 info_color=0x0000aa
             )
+            self.prefixes[guild] = ","
         return self.guild_settings[guild]
 
     async def set_ok_color(self, guild: int, value: str):

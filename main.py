@@ -6,6 +6,7 @@ import dotenv
 from discord.ext import commands
 
 import aoi
+import asyncio
 
 logging.basicConfig(level=logging.INFO)
 
@@ -13,6 +14,9 @@ dotenv.load_dotenv(".env")
 
 
 def get_prefix(_bot: aoi.AoiBot, message: discord.Message):
+    if message.guild.id not in _bot.db.prefixes:
+        asyncio.create_task(_bot.db.guild_setting(message.guild.id))
+        return commands.when_mentioned_or(",")(_bot, message)
     return commands.when_mentioned_or(_bot.db.prefixes[message.guild.id])(_bot, message)
 
 
