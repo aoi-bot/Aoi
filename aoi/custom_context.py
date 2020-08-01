@@ -13,21 +13,21 @@ class AoiContext(commands.Context):
         await self.send(embed=discord.Embed(
             title=title,
             description=f"{user if user else ''}{message}",
-            colour=self.get_color(self.INFO)
+            colour=await self.get_color(self.INFO)
         ))
 
     async def send_ok(self, message: str, *, user: discord.abc.User = None, title: str = None):
         await self.send(embed=discord.Embed(
             title=title,
             description=f"{user if user else ''}{message}",
-            colour=self.get_color(self.OK)
+            colour=await self.get_color(self.OK)
         ))
 
     async def send_error(self, message: str, *, user: discord.abc.User = None, title: str = None):
         await self.send(embed=discord.Embed(
             title=title,
             description=f"{user if user else ''}{message}",
-            colour=self.get_color(self.ERROR)
+            colour=await self.get_color(self.ERROR)
         ))
 
     async def get_color(self, typ: int):

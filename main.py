@@ -13,7 +13,8 @@ dotenv.load_dotenv(".env")
 bot = aoi.AoiBot(command_prefix=commands.when_mentioned_or(","))
 
 extensions = [
-    "cogs.administration.aoi"
+    "cogs.administration.aoi",
+    "cogs.settings.guildsettings"
 ]
 
 for ext in extensions:

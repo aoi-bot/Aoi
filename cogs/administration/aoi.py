@@ -46,6 +46,5 @@ class Aoi(commands.Cog):
                     await ctx.send_ok("Avatar changed!")
 
 
-
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Aoi(bot))

@@ -13,6 +13,7 @@ class _GuildSetting:
     info_color: int
 
 
+
 class AoiDatabase:
     def __init__(self):
         self.db: Optional[Connection] = None
@@ -40,3 +41,18 @@ class AoiDatabase:
                 info_color=0x0000aa
             )
         return self.guild_settings[guild]
+
+    async def set_ok_color(self, guild: int, value: str):
+        await self.db.execute(f"UPDATE guild_settings SET OkColor=? WHERE Guild=?", (value, guild))
+        await self.db.commit()
+        self.guild_settings[guild].ok_color = int(value, 16)
+
+    async def set_error_color(self, guild: int, value: str):
+        await self.db.execute(f"UPDATE guild_settings SET ErrorColor=? WHERE Guild=?", (value, guild))
+        await self.db.commit()
+        self.guild_settings[guild].ok_color = int(value, 16)
+
+    async def set_info_color(self, guild: int, value: str):
+        await self.db.execute(f"UPDATE guild_settings SET InfoColor=? WHERE Guild=?", (value, guild))
+        await self.db.commit()
+        self.guild_settings[guild].ok_color = int(value, 16)
