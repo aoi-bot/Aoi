@@ -18,15 +18,19 @@ class AoiDatabase:
     def __init__(self):
         self.db: Optional[Connection] = None
         self.guild_settings: Dict[int, _GuildSetting] = {}
+        self.prefixes: Dict[int, str] = {}
 
     async def load(self):
+        logging.info("database:Connecting to database")
         self.db = await aiosqlite.connect("database.db")
-        logging.info("[DB] Loading database into memory")
+        logging.info("database:Loading database into memory")
         cursor = await self.db.execute("SELECT * from guild_settings")
         rows = await cursor.fetchall()
         await cursor.close()
         for r in rows:
             self.guild_settings[r[0]] = _GuildSetting(*(int(color, 16) for color in r[1:4]))
+            self.prefixes[r[0]] = r[4]
+        logging.info("database:Database loaded")
 
     async def close(self):
         await self.db.close()
@@ -56,3 +60,8 @@ class AoiDatabase:
         await self.db.execute(f"UPDATE guild_settings SET InfoColor=? WHERE Guild=?", (value, guild))
         await self.db.commit()
         self.guild_settings[guild].info_color = int(value, 16)
+
+    async def set_prefix(self, guild: int, prefix: str):
+        await self.db.execute(f"UPDATE guild_settings SET Prefix=? WHERE Guild=?", (prefix, guild))
+        await self.db.commit()
+        self.prefixes[guild] = prefix

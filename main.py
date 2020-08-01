@@ -2,15 +2,21 @@ import logging
 import os
 
 import discord
-from discord.ext import commands
 import dotenv
+from discord.ext import commands
 
 import aoi
 
 logging.basicConfig(level=logging.INFO)
+
 dotenv.load_dotenv(".env")
 
-bot = aoi.AoiBot(command_prefix=commands.when_mentioned_or(","))
+
+def get_prefix(_bot: aoi.AoiBot, message: discord.Message):
+    return commands.when_mentioned_or(_bot.db.prefixes[message.guild.id])(_bot, message)
+
+
+bot = aoi.AoiBot(command_prefix=get_prefix)
 
 extensions = [
     "cogs.administration.aoi",
@@ -20,9 +26,11 @@ extensions = [
 for ext in extensions:
     bot.load_extension(ext)
 
+
 @bot.event
 async def on_ready():
     logging.info("Bot online!")
     await bot.change_presence(activity=discord.Game("Hello :)"))
+
 
 bot.run(os.getenv("TOKEN"))

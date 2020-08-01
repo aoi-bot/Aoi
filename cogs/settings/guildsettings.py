@@ -38,6 +38,9 @@ class GuildSettings(commands.Cog):
                 return await ctx.send_error("Invalid color")
             # noinspection PyArgumentList
             return await color_funcs[setting](ctx, color)
+        if setting == "prefix":
+            await self.bot.db.set_prefix(ctx.guild.id, value)
+            return await ctx.send_ok(f"Prefix set to `{value}`")
         await ctx.send_error("Invalid config")
 
     @commands.has_guild_permissions(manage_guild=True)
@@ -49,7 +52,8 @@ class GuildSettings(commands.Cog):
             fields=[
                 ("Embed Colors", f"ErrorColor: `{conversions.hex_color_to_string(colors.error_color)}`\n"
                                  f"InfoColor: `{conversions.hex_color_to_string(colors.info_color)}`\n"
-                                 f"OKColor: `{conversions.hex_color_to_string(colors.ok_color)}`")
+                                 f"OKColor: `{conversions.hex_color_to_string(colors.ok_color)}`"),
+                ("Prefix", self.bot.db.prefixes[ctx.guild.id])
             ]
         )
 
