@@ -45,7 +45,8 @@ class AoiContext(commands.Context):
                     typ: int = INFO,
                     fields: List[Tuple[str, str]] = None,
                     thumbnail: str = None,
-                    clr: discord.Colour = None):
+                    clr: discord.Colour = None,
+                    footer: str = None):
         if typ and clr:
             raise ValueError("typ and clr can not be both defined")
         embed = discord.Embed(
@@ -53,6 +54,8 @@ class AoiContext(commands.Context):
             description=description,
             colour=(await self.get_color(typ) if not clr else clr)
         )
+        if footer:
+            embed.set_footer(text=footer)
         if thumbnail:
             embed.set_thumbnail(url=thumbnail)
         for r in fields:
