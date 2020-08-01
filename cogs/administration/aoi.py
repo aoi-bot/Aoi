@@ -45,6 +45,13 @@ class Aoi(commands.Cog):
                 else:
                     await ctx.send_ok("Avatar changed!")
 
+    @commands.command(brief="Gives a link to invite Aoi to your server")
+    async def invite(self, ctx: aoi.AoiContext):
+        permissions_int = 84992
+        invite_url = f"https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=" \
+                     f"{permissions_int}&scope=bot"
+        await ctx.send_info(f"Invite me to your server [here]({invite_url})")
+
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Aoi(bot))
