@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 
 import aoi
+from utils import conversions
 
 
 class Information(commands.Cog):
@@ -37,6 +38,25 @@ class Information(commands.Cog):
             thumbnail=member.avatar_url
         )
 
+    @commands.command(brief="Shows info on the current server", aliases=["sinfo"])
+    async def serverinfo(self, ctx: aoi.AoiContext):
+        guild: discord.Guild = ctx.guild
+        created = guild.created_at.strftime("%c")
+        voice_channels = len(guild.voice_channels)
+        text_channels = len(guild.text_channels)
+        roles = len(guild.roles) - 1
+        await ctx.embed(
+            title=f"Info for {guild}",
+            fields=[
+                ("ID", guild.id),
+                ("Created at", created),
+                ("Channels", f"{voice_channels} Voice, {text_channels} Text"),
+                ("System Channel", (guild.system_channel.mention if guild.system_channel else "None")),
+                ("Members", guild.member_count),
+                ("Roles", roles),
+                ("Features", "\n".join(guild.features) if guild.features else "None")
+            ]
+        )
 
     @commands.command(brief="Shows info on a role", aliases=["rinfo"])
     async def roleinfo(self, ctx: aoi.AoiContext, role: discord.Role):
@@ -46,7 +66,11 @@ class Information(commands.Cog):
             fields=[
                 ("ID", role.id),
                 ("Members", len(role.members)),
-                ("Color", conversions.color_to_string())
+                ("Color", conversions.color_to_string(role.colour)),
+                ("Hoisted", role.hoist),
+                ("Mentionable", role.mentionable),
+                ("Position", role.position),
+                ("Created at", role.created_at.strftime("%c"))
             ]
         )
 
