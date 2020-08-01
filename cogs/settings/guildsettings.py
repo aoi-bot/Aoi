@@ -33,7 +33,7 @@ class GuildSettings(commands.Cog):
         brief="Sets the Error embed color"
     )
     async def errorcolor(self, ctx: aoi.AoiContext, color: discord.Color):
-        await self.bot.db.set_info_color(ctx.guild.id, conversions.color_to_string(color))
+        await self.bot.db.set_error_color(ctx.guild.id, conversions.color_to_string(color))
         await ctx.send_ok("Color changed!")
 
 

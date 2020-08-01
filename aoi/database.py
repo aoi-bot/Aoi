@@ -50,9 +50,9 @@ class AoiDatabase:
     async def set_error_color(self, guild: int, value: str):
         await self.db.execute(f"UPDATE guild_settings SET ErrorColor=? WHERE Guild=?", (value, guild))
         await self.db.commit()
-        self.guild_settings[guild].ok_color = int(value, 16)
+        self.guild_settings[guild].error_color = int(value, 16)
 
     async def set_info_color(self, guild: int, value: str):
         await self.db.execute(f"UPDATE guild_settings SET InfoColor=? WHERE Guild=?", (value, guild))
         await self.db.commit()
-        self.guild_settings[guild].ok_color = int(value, 16)
+        self.guild_settings[guild].info_color = int(value, 16)
