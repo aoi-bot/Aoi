@@ -38,5 +38,18 @@ class Information(commands.Cog):
         )
 
 
+    @commands.command(brief="Shows info on a role", aliases=["rinfo"])
+    async def roleinfo(self, ctx: aoi.AoiContext, role: discord.Role):
+        await ctx.embed(
+            clr=role.colour,
+            title=f"Info for {role}",
+            fields=[
+                ("ID", role.id),
+                ("Members", len(role.members)),
+                ("Color", conversions.color_to_string())
+            ]
+        )
+
+
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Information(bot))
