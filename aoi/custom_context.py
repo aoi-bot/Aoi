@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import discord
 from discord.ext import commands
@@ -44,11 +44,14 @@ class AoiContext(commands.Context):
                     title: str = None,
                     typ: int = INFO,
                     fields: List[Tuple[str, str]] = None,
-                    thumbnail: str = None):
+                    thumbnail: str = None,
+                    clr: discord.Colour = None):
+        if typ and clr:
+            raise ValueError("typ and clr can not be both defined")
         embed = discord.Embed(
             title=title,
             description=description,
-            colour=await self.get_color(typ)
+            colour=(await self.get_color(typ) if typ else clr)
         )
         if thumbnail:
             embed.set_thumbnail(url=thumbnail)
