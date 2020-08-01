@@ -26,7 +26,7 @@ class AoiDatabase:
         rows = await cursor.fetchall()
         await cursor.close()
         for r in rows:
-            self.guild_settings[r[0]] = _GuildSetting(*(int(color, 16) for color in r[1:]))
+            self.guild_settings[r[0]] = _GuildSetting(*(int(color, 16) for color in r[1:4]))
 
     async def close(self):
         await self.db.close()

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, Optional
 
 import discord
 from discord.ext import commands
@@ -11,6 +11,7 @@ class AoiBot(commands.Bot):
     def __init__(self, *args, **kwargs):
         super(AoiBot, self).__init__(*args, **kwargs)
         self.db: Optional[AoiDatabase] = None
+        self.prefixes: Dict[int, str] = {}
 
     async def on_message(self, message: discord.Message):
         ctx = await self.get_context(message, cls=AoiContext)
