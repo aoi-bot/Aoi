@@ -43,12 +43,15 @@ class AoiContext(commands.Context):
                     description: str = None,
                     title: str = None,
                     typ: int = INFO,
-                    fields: List[Tuple[str, str]] = None):
+                    fields: List[Tuple[str, str]] = None,
+                    thumbnail: str = None):
         embed = discord.Embed(
             title=title,
             description=description,
             colour=await self.get_color(typ)
         )
+        if thumbnail:
+            embed.set_thumbnail(url=thumbnail)
         for r in fields:
             embed.add_field(name=r[0], value=r[1])
         await self.send(embed=embed)
