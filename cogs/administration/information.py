@@ -1,3 +1,5 @@
+from typing import List
+
 import discord
 from discord.ext import commands
 
@@ -92,6 +94,14 @@ class Information(commands.Cog):
                 ("Created at", role.created_at.strftime("%c"))
             ]
         )
+
+    @commands.has_permissions(manage_guild=True)
+    @commands.command(brief="Shows mentionable roles")
+    async def menroles(self, ctx: aoi.AoiContext):
+        r: discord.Role
+        roles: List[discord.Role] = [r for r in ctx.guild.roles if r.mentionable]
+        await ctx.send_info(" ".join(r.mention for r in roles)
+                            if roles else "None", title="Mentionable Roles")
 
 
 def setup(bot: aoi.AoiBot) -> None:
