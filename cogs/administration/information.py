@@ -45,6 +45,19 @@ class Information(commands.Cog):
         voice_channels = len(guild.voice_channels)
         text_channels = len(guild.text_channels)
         roles = len(guild.roles) - 1
+        statuses = {
+            "dnd": 0,
+            "idle": 0,
+            "online": 0,
+            "bot": 0,
+            "offline": 0
+        }
+        m: discord.Member
+        for m in guild.members:
+            if m.bot:
+                statuses["bot"] += 1
+            else:
+                statuses[str(m.status)] += 1
         await ctx.embed(
             title=f"Info for {guild}",
             fields=[
@@ -54,8 +67,14 @@ class Information(commands.Cog):
                 ("System Channel", (guild.system_channel.mention if guild.system_channel else "None")),
                 ("Members", guild.member_count),
                 ("Roles", roles),
-                ("Features", "\n".join(guild.features) if guild.features else "None")
-            ]
+                ("Features", "\n".join(guild.features) if guild.features else "None"),
+                ("Breakdown", f":green_circle: {statuses['online']} online\n"
+                              f":yellow_circle: {statuses['idle']} idle\n"
+                              f":red_circle: {statuses['dnd']} dnd\n"
+                              f":white_circle: {statuses['offline']} offline\n"
+                              f":robot: {statuses['bot']} bots\n")
+            ],
+            thumbnail=guild.icon_url
         )
 
     @commands.command(brief="Shows info on a role", aliases=["rinfo"])
