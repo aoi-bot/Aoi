@@ -4,29 +4,39 @@ import discord
 from discord.ext import commands
 
 
+def _wrap_user(user: discord.abc.User):
+    return f"**{user}** "
+
+
 class AoiContext(commands.Context):
     INFO = 0
     ERROR = 1
     OK = 2
 
     async def send_info(self, message: str, *, user: discord.abc.User = None, title: str = None):
+        if not user:
+            user = self.author
         await self.send(embed=discord.Embed(
             title=title,
-            description=f"{user if user else ''}{message}",
+            description=f"{_wrap_user(user) if user else ''}{message}",
             colour=await self.get_color(self.INFO)
         ))
 
     async def send_ok(self, message: str, *, user: discord.abc.User = None, title: str = None):
+        if not user:
+            user = self.author
         await self.send(embed=discord.Embed(
             title=title,
-            description=f"{user if user else ''}{message}",
+            description=f"{_wrap_user(user) if user else ''}{message}",
             colour=await self.get_color(self.OK)
         ))
 
     async def send_error(self, message: str, *, user: discord.abc.User = None, title: str = None):
+        if not user:
+            user = self.author
         await self.send(embed=discord.Embed(
             title=title,
-            description=f"{user if user else ''}{message}",
+            description=f"{_wrap_user(user) if user else ''}{message}",
             colour=await self.get_color(self.ERROR)
         ))
 

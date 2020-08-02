@@ -26,7 +26,8 @@ extensions = [
     "cogs.administration.aoi",
     "cogs.administration.information",
     "cogs.administration.roles",
-    "cogs.settings.guildsettings"
+    "cogs.settings.guildsettings",
+    "cogs.errorhandler"
 ]
 
 for ext in extensions:
