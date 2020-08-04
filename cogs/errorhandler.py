@@ -5,6 +5,15 @@ import discord
 from discord.ext import commands
 import aoi
 
+def _(s: str):
+    for k, v in {
+        "colour": "color"
+    }.items():
+        s = s.replace(k, v)\
+            .replace(k.title(), v.title())\
+            .replace(k.lower(), v.lower())\
+            .replace(k.upper(), v.upper())
+    return s
 
 class ErrorHandler(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
@@ -32,7 +41,9 @@ class ErrorHandler(commands.Cog):
             except discord.HTTPException:
                 pass
         elif isinstance(error, aoi.RoleError):
-            await ctx.send_error(str(error))
+            await ctx.send_error(_(str(error)))
+        elif isinstance(error, commands.BadArgument):
+            await ctx.send_error(_(str(error)))
         else:
             print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
             traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
