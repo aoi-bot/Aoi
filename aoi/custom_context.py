@@ -1,7 +1,9 @@
+from types import coroutine
 from typing import List, Tuple, Union
 
 import discord
 from discord.ext import commands
+import disputils
 
 
 def _wrap_user(user: discord.abc.User):
@@ -12,6 +14,25 @@ class AoiContext(commands.Context):
     INFO = 0
     ERROR = 1
     OK = 2
+
+    async def confirm(self, message: str, confirmed: str, denied: str):
+        conf = disputils.BotConfirmation(self, color=await self.get_color(self.INFO))
+        await conf.confirm(message)
+        if conf.confirmed:
+            await conf.update(text=confirmed, color=await self.get_color(self.OK))
+        else:
+            await conf.update(text=denied, color=await self.get_color(self.ERROR))
+        return conf.confirmed
+
+    async def confirm_coro(self, message: str, confirmed: str, denied: str, coro: coroutine):
+        conf = disputils.BotConfirmation(self, color=await self.get_color(self.INFO))
+        await conf.confirm(message)
+        if conf.confirmed:
+            await coro
+            await conf.update(text=confirmed, color=await self.get_color(self.OK))
+        else:
+            await conf.update(text=denied, color=await self.get_color(self.ERROR))
+        return conf.confirmed
 
     async def send_info(self, message: str, *, user: discord.abc.User = None, title: str = None):
         if not user:
