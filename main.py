@@ -26,6 +26,7 @@ extensions = [
     "cogs.administration.aoi",
     "cogs.administration.information",
     "cogs.administration.roles",
+    "cogs.administration.guild",
     "cogs.settings.guildsettings",
     "cogs.errorhandler"
 ]
