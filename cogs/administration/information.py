@@ -69,6 +69,7 @@ class Information(commands.Cog):
                 ("System Channel", (guild.system_channel.mention if guild.system_channel else "None")),
                 ("Members", guild.member_count),
                 ("Roles", roles),
+                ("Region", guild.region),
                 ("Features", "\n".join(guild.features) if guild.features else "None"),
                 ("Breakdown", f":green_circle: {statuses['online']} online\n"
                               f":yellow_circle: {statuses['idle']} idle\n"
