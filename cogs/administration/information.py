@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 import discord
 from discord.ext import commands
@@ -10,6 +10,47 @@ from utils import conversions
 class Information(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
+
+    @commands.guild_only()
+    @commands.command(brief="Shows info on a channel, role, member, or message")
+    async def info(self, ctx: aoi.AoiContext, obj: Union[
+        discord.Role,
+        discord.TextChannel,
+        discord.Message,
+        discord.VoiceChannel,
+        discord.Member
+    ]):
+        if isinstance(obj, discord.Role):
+            if obj.id in [r.id for r in ctx.guild.roles]:
+                return await self.roleinfo(ctx, obj)
+            else:
+                raise commands.BadArgument("Role not in server")
+        if isinstance(obj, discord.Member):
+            return await self.userinfo(ctx, obj)
+        if isinstance(obj, discord.VoiceChannel):
+            if obj.id in [vc.id for vc in ctx.guild.voice_channels]:
+                return await self.voiceinfo(ctx, channel=obj)
+            else:
+                raise commands.BadArgument("Channel not in server")
+        if isinstance(obj, discord.TextChannel):
+            if obj.id in [tc.id for tc in ctx.guild.text_channels]:
+                return await self.textinfo(ctx, channel=obj)
+            else:
+                raise commands.BadArgument("Channel not in server")
+        if isinstance(obj, discord.Message):
+            chan: discord.TextChannel = obj.channel
+            author: discord.Member = obj.author
+            if chan.guild.id not in [tc.id for tc in ctx.guild.text_channels]:
+                raise commands.BadArgument("Message not in server")
+            return await ctx.embed(
+                title=f"Info for message",
+                fields=[
+                    ("ID", obj.id),
+                    ("Channel", f"{chan} | {chan.mention}"),
+                    ("Author", f"{author} | {author.mention}"),
+                    ("Sent at", obj.created_at.strftime('%c'))
+                ]
+            )
 
     @commands.command(brief="Shows info on a user", aliases=["uinfo"])
     async def userinfo(self, ctx: aoi.AoiContext, member: discord.Member = None):
@@ -104,6 +145,28 @@ class Information(commands.Cog):
         await ctx.send_info(" ".join(r.mention for r in roles)
                             if roles else "None", title="Mentionable Roles")
 
+    @commands.command(brief="Shows info on a voice channel", aliases=["vinfo"])
+    async def voiceinfo(self, ctx: aoi.AoiContext, *, channel: discord.VoiceChannel):
+        await ctx.embed(
+            title=f"Info for {channel}",
+            fields=[
+                ("ID", channel.id),
+                ("Created at", channel.created_at.strftime("%c")),
+                ("Max Users", channel.user_limit or "No Limit"),
+                ("Bitrate", f"{channel.bitrate//1000}kbps"),
+            ]
+        )
+
+    @commands.command(brief="Shows info on a text channel", aliases=["tcinfo"])
+    async def textinfo(self, ctx: aoi.AoiContext, *, channel: discord.TextChannel):
+        await ctx.embed(
+            title=f"Info for {channel}",
+            fields=[
+                ("ID", channel.id),
+                ("Created at", channel.created_at.strftime("%c")),
+                ("Slowmode", f"{channel.slowmode_delay}s" if channel.slowmode_delay else "No Slowmode")
+            ]
+        )
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Information(bot))
