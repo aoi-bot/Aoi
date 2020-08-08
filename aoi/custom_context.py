@@ -1,3 +1,4 @@
+import io
 from types import coroutine
 from typing import List, Tuple, Union
 
@@ -77,6 +78,7 @@ class AoiContext(commands.Context):
                     fields: List[Tuple[str, str]] = None,
                     thumbnail: str = None,
                     clr: discord.Colour = None,
+                    image: Union[str, io.BufferedIOBase] = None,
                     footer: str = None):
         if typ and clr:
             raise ValueError("typ and clr can not be both defined")
@@ -85,10 +87,17 @@ class AoiContext(commands.Context):
             description=description,
             colour=(await self.get_color(typ) if not clr else clr)
         )
+        if isinstance(image, str):
+            embed.set_image(url=image)
+            f = None
+        else:
+            image.seek(0)
+            f = discord.File(image, filename="image.png")
+            embed.set_image(url="attachment://image.png")
         if footer:
             embed.set_footer(text=footer)
         if thumbnail:
             embed.set_thumbnail(url=thumbnail)
-        for r in fields:
+        for r in fields or []:
             embed.add_field(name=r[0], value=r[1])
-        await self.send(embed=embed)
+        await self.send(embed=embed, file=f)

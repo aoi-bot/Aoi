@@ -28,6 +28,7 @@ extensions = [
     "cogs.administration.roles",
     "cogs.administration.guild",
     "cogs.settings.guildsettings",
+    "cogs.misc",
     "cogs.errorhandler"
 ]
 
