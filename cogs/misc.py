@@ -55,7 +55,7 @@ class Miscellaneous(commands.Cog):
                       aliases=["rancolor", "ranclr"])
     async def randomcolors(self, ctx: aoi.AoiContext, num: Optional[int] = 4, sort: str = "hue"):
         clrs: List[discord.Colour] = []
-        if num > 250 or num < 3:
+        if num > 250 or num < 2:
             raise commands.BadArgument("Number of colors must be 2-250")
         for i in range(num):
             clrs.append(discord.Colour(
