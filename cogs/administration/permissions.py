@@ -19,20 +19,6 @@ class Permissions(commands.Cog):
         self.db = self.bot.db
         logging.info("perms:Ready!")
 
-    def find_cog(self, name: str, *,
-                 allow_ambiguous=False,
-                 allow_none=False) -> Union[List[str], str]:
-        found = []
-        for c in self.bot.cogs:
-            if c.lower().startswith(name.lower()):
-                found.append(c)
-        if not found and not allow_none:
-            raise commands.BadArgument(f"Module {name} not found.")
-        if len(found) > 1 and not allow_ambiguous:
-            raise commands.BadArgument(f"Name {name} can refer to multiple modules: "
-                                       f"{', '.join(found)}. Use a more specific name.")
-        return found
-
     @commands.command(brief="View the entire permission chain", aliases=["lp"])
     async def listperms(self, ctx: aoi.AoiContext):
         perms = await self.db.get_permissions(ctx.guild.id)
@@ -70,7 +56,7 @@ class Permissions(commands.Cog):
     @commands.command(brief="Disable or enable a module in a channel", aliases=["cm"])
     async def chnlmdl(self, ctx: aoi.AoiContext, channel: discord.TextChannel,
                       enabled: disenable(), module):
-        module = self.find_cog(module)[0]
+        module = self.bot.find_cog(module)[0]
         await self.db.add_permission(ctx.guild.id, f"cm {channel.id} {enabled} {module}")
         await ctx.send_ok(f"**cm <#{channel.id}> {enabled} {module}** added.", trash=False)
 
@@ -86,13 +72,15 @@ class Permissions(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.command(brief="Disable or enable a module server-wide", aliases=["sm"])
     async def svrmdl(self, ctx: aoi.AoiContext, module: str, enabled: disenable()):
-        module = self.find_cog(module)[0]
+        module = self.bot.find_cog(module)[0]
         await self.db.add_permission(ctx.guild.id, f"sm {module} {enabled}")
         await ctx.send_ok(f"**sm {module} {enabled}** added.", trash=False)
 
     @commands.command(brief="Shows a permission guide")
     async def permguide(self, ctx: aoi.AoiContext):
-        pass
+        await ctx.page_predefined(
+
+        )
 
 
 def setup(bot: aoi.AoiBot) -> None:

@@ -1,4 +1,4 @@
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Union
 
 import discord
 from discord.ext import commands
@@ -43,3 +43,17 @@ class AoiBot(commands.Bot):
 
         await self.login(*args, bot=bot)
         await self.connect(reconnect=reconnect)
+
+    def find_cog(self, name: str, *,
+                 allow_ambiguous=False,
+                 allow_none=False) -> Union[List[str], str]:
+        found = []
+        for c in self.cogs:
+            if c.lower().startswith(name.lower()):
+                found.append(c)
+        if not found and not allow_none:
+            raise commands.BadArgument(f"Module {name} not found.")
+        if len(found) > 1 and not allow_ambiguous:
+            raise commands.BadArgument(f"Name {name} can refer to multiple modules: "
+                                       f"{', '.join(found)}. Use a more specific name.")
+        return found
