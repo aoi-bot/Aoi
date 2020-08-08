@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 
 import aoi
-from utils import conversions
+from libs import conversions
 
 
 class Information(commands.Cog):

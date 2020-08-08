@@ -44,6 +44,9 @@ class ErrorHandler(commands.Cog):
                 pass
         elif isinstance(error, aoi.RoleError):
             await ctx.send_error(_(str(error)))
+        elif isinstance(error, aoi.PermissionFailed):
+            if (await self.bot.db.guild_setting(ctx.guild.id)).perm_errors:
+                await ctx.send_error(str(error))
         elif isinstance(error, commands.BadArgument):
             await ctx.send_error(_(str(error)))
         else:

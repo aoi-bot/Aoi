@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 import aiosqlite
 from aiosqlite import Connection
@@ -11,6 +11,7 @@ class _GuildSetting:
     ok_color: int
     error_color: int
     info_color: int
+    perm_errors: bool
 
 
 class AoiDatabase:
@@ -18,6 +19,7 @@ class AoiDatabase:
         self.db: Optional[Connection] = None
         self.guild_settings: Dict[int, _GuildSetting] = {}
         self.prefixes: Dict[int, str] = {}
+        self.perm_chains: Dict[int, List[str]] = {}
 
     async def load(self):
         logging.info("database:Connecting to database")
@@ -27,8 +29,14 @@ class AoiDatabase:
         rows = await cursor.fetchall()
         await cursor.close()
         for r in rows:
-            self.guild_settings[r[0]] = _GuildSetting(*(int(color, 16) for color in r[1:4]))
+            self.guild_settings[r[0]] = _GuildSetting(*(int(color, 16) for color in r[1:4]),
+                                                      r[5])
             self.prefixes[r[0]] = r[4]
+        cursor = await self.db.execute("SELECT * from permissions")
+        rows = await cursor.fetchall()
+        await cursor.close()
+        for r in rows:
+            self.perm_chains[r[0]] = r[1].split(";")
         logging.info("database:Database loaded")
 
     async def close(self):
@@ -41,7 +49,8 @@ class AoiDatabase:
             self.guild_settings[guild] = _GuildSetting(
                 ok_color=0x00aa00,
                 error_color=0xaa0000,
-                info_color=0x0000aa
+                info_color=0x0000aa,
+                perm_errors=True
             )
             self.prefixes[guild] = ","
         return self.guild_settings[guild]
@@ -65,3 +74,34 @@ class AoiDatabase:
         await self.db.execute(f"UPDATE guild_settings SET Prefix=? WHERE Guild=?", (prefix, guild))
         await self.db.commit()
         self.prefixes[guild] = prefix
+
+    async def get_permissions(self, guild: int):
+        if guild not in self.perm_chains:
+            await self.db.execute("INSERT INTO permissions (guild) values (?)", (guild,))
+            await self.db.commit()
+            self.perm_chains[guild] = ["asm enable"]
+        return [s for s in self.perm_chains[guild]]
+
+    async def set_permissions(self, guild: int, perms: List[str]):
+        self.perm_chains[guild] = [s for s in perms]
+        await self.db.execute("UPDATE permissions SET permissions=? WHERE guild=?",
+                              (";".join(perms), guild))
+
+    async def add_permission(self, guild: int, perm: str):
+        logging.info(f"db:adding permission {guild}:{perm}")
+        self.perm_chains[guild].append(perm)
+        await self.db.execute("UPDATE permissions SET permissions=? WHERE guild=?",
+                              (";".join(self.perm_chains[guild]), guild))
+        await self.db.commit()
+
+    async def remove_permission(self, guild: int, perm: int):
+        del self.perm_chains[guild][perm]
+        await self.db.execute("UPDATE permissions SET permissions=? WHERE guild=?",
+                              (";".join(self.perm_chains[guild]), guild))
+        await self.db.commit()
+
+    async def clear_permissions(self, guild: int):
+        self.perm_chains[guild] = ["asm enable"]
+        await self.db.execute("UPDATE permissions SET permissions=? WHERE guild=?",
+                              (";".join(self.perm_chains[guild]), guild))
+        await self.db.commit()

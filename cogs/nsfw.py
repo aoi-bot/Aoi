@@ -8,7 +8,7 @@ import gelbooru
 import random
 import logging
 
-class Gelbooru(commands.Cog):
+class NSFW(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
         self.gelbooru = None
@@ -42,4 +42,4 @@ class Gelbooru(commands.Cog):
 
 
 def setup(bot: aoi.AoiBot) -> None:
-    bot.add_cog(Gelbooru(bot))
+    bot.add_cog(NSFW(bot))
