@@ -181,3 +181,7 @@ class AoiContext(commands.Context):
                                                 await self.pages(lst, n, title,
                                                                  fmt=fmt, sep=sep))
         await paginator.run()
+
+    async def page_predefined(self, *embeds: List[discord.Embed]):
+        paginator = disputils.BotEmbedPaginator(self, embeds)
+        await paginator.run()
