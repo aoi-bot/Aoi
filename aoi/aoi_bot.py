@@ -35,7 +35,7 @@ class AoiBot(commands.Bot):
         self.db = AoiDatabase()
         self.banned_tags = os.getenv("BANNED_TAGS").split(",")
         self.gelbooru_user = os.getenv("GELBOORU_USER")
-        self.gelbooru_key = os.getenv("GELBOORU_KEY")
+        self.gelbooru_key = os.getenv("GELBOORU_API_KEY")
         await self.db.load()
 
         if kwargs:

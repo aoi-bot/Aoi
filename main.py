@@ -23,16 +23,25 @@ def get_prefix(_bot: aoi.AoiBot, message: discord.Message):
 bot = aoi.AoiBot(command_prefix=get_prefix)
 
 extensions = [
+    # administration cogs
     "cogs.administration.aoi",
     "cogs.administration.information",
     "cogs.administration.roles",
     "cogs.administration.guild",
-    "cogs.settings.guildsettings",
+
+    # nsfw cogs
+    "cogs.nsfw.gelbooru",
+
+    # misc/fun cogs
     "cogs.misc",
-    "cogs.errorhandler"
+
+    # utility and config cogs
+    "cogs.errorhandler",
+    "cogs.settings.guildsettings"
 ]
 
 for ext in extensions:
+    logging.info(f"cog:loading {ext}")
     bot.load_extension(ext)
 
 

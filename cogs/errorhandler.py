@@ -33,6 +33,8 @@ class ErrorHandler(commands.Cog):
         
         if isinstance(error, ignored):
             return
+        if isinstance(error, commands.NSFWChannelRequired):
+            await ctx.send_error("This command can only be used in nsfw channels")
         if isinstance(error, commands.DisabledCommand):
             await ctx.send_error(f'{ctx.command} has been disabled.')
         elif isinstance(error, commands.NoPrivateMessage):
