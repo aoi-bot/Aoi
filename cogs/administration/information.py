@@ -11,6 +11,10 @@ class Information(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
 
+    @property
+    def description(self):
+        return "Get information about parts of your server"
+
     @commands.guild_only()
     @commands.command(brief="Shows info on a channel, role, member, or message")
     async def info(self, ctx: aoi.AoiContext, obj: Union[

@@ -13,6 +13,10 @@ class Permissions(commands.Cog):
         self.db: Optional[aoi.AoiDatabase] = None
         bot.loop.create_task(self._init())
 
+    @property
+    def description(self):
+        return "Commands to change command permissions"
+
     async def _init(self):
         logging.info("perms:Waiting for bot")
         await self.bot.wait_until_ready()

@@ -7,6 +7,10 @@ class Aoi(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
 
+    @property
+    def description(self):
+        return "Commands having to do with the bot herself"
+
     @commands.command(
         brief="Shows bot stats"
     )
@@ -24,26 +28,6 @@ class Aoi(commands.Cog):
                          f"{text_channels} Text Channels\n"
                          f"{voice_channels} Voice Channels\n")
         ])
-
-    @commands.is_owner()
-    @commands.command(
-        brief="Set's the bot's avatar",
-        aliases=["setav"]
-    )
-    async def setavatar(self, ctx: aoi.AoiContext, *, url: str):
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url=url) as resp:
-                try:
-                    await self.bot.user.edit(avatar=await resp.read())
-                except discord.HTTPException as err:
-                    if err.status == 429:
-                        await ctx.send_error("You're editing your avatar too fast!")
-                    else:
-                        await ctx.send_error("An error occurred while changing my avatar.")
-                except discord.InvalidArgument:
-                    await ctx.send_error("Invalid image format.")
-                else:
-                    await ctx.send_ok("Avatar changed!")
 
     @commands.command(brief="Gives a link to invite Aoi to your server")
     async def invite(self, ctx: aoi.AoiContext):

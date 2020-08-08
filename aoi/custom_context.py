@@ -109,7 +109,8 @@ class AoiContext(commands.Context):
                     thumbnail: str = None,
                     clr: discord.Colour = None,
                     image: Union[str, io.BufferedIOBase] = None,
-                    footer: str = None):
+                    footer: str = None,
+                    not_inline: List[int] = []):
         if typ and clr:
             raise ValueError("typ and clr can not be both defined")
         embed = discord.Embed(
@@ -117,19 +118,22 @@ class AoiContext(commands.Context):
             description=description,
             colour=(await self.get_color(typ) if not clr else clr)
         )
-        if isinstance(image, str):
-            embed.set_image(url=image)
-            f = None
+        if image:
+            if isinstance(image, str):
+                embed.set_image(url=image)
+                f = None
+            else:
+                image.seek(0)
+                f = discord.File(image, filename="image.png")
+                embed.set_image(url="attachment://image.png")
         else:
-            image.seek(0)
-            f = discord.File(image, filename="image.png")
-            embed.set_image(url="attachment://image.png")
+            f = None
         if footer:
             embed.set_footer(text=footer)
         if thumbnail:
             embed.set_thumbnail(url=thumbnail)
-        for r in fields or []:
-            embed.add_field(name=r[0], value=r[1])
+        for n, r in enumerate(fields or []):
+            embed.add_field(name=r[0], value=r[1], inline=n not in not_inline)
         msg = await self.send(embed=embed, file=f)
         await self.trash_reaction(msg)
 

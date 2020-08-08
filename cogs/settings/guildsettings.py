@@ -9,6 +9,10 @@ class GuildSettings(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
 
+    @property
+    def description(self):
+        return "Change and view Aoi's configuration in your server"
+
     async def okcolor(self, ctx: aoi.AoiContext, color: discord.Color):
         await self.bot.db.set_ok_color(ctx.guild.id, conversions.color_to_string(color))
         await ctx.send_ok("Color changed!")

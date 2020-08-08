@@ -9,6 +9,10 @@ class Roles(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
 
+    @property
+    def description(self):
+        return "Commands to modify roles"
+
     @commands.has_permissions(manage_roles=True)
     @commands.command(brief="Toggles if a role is mentionable", aliases=["rolem", "mentionable"])
     async def rolementionable(self, ctx: aoi.AoiContext, *, role: discord.Role):

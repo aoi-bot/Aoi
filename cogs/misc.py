@@ -13,6 +13,10 @@ class Miscellaneous(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
 
+    @property
+    def description(self):
+        return "Miscellaneous commands that don't really fit anywhere else"
+
     @commands.command(brief="Shows a color")
     async def color(self, ctx: aoi.AoiContext, *, color: discord.Colour):
         img = Image.new("RGB", (120, 120), color.to_rgb())

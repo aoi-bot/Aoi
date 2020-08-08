@@ -14,6 +14,11 @@ class NSFW(commands.Cog):
         self.gelbooru = None
         bot.loop.create_task(self._init())
 
+
+    @property
+    def description(self):
+        return ":smirk:"
+
     async def _init(self):
         logging.info("gelb:Waiting for bot")
         await self.bot.wait_until_ready()

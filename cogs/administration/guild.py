@@ -8,6 +8,10 @@ class Guilds(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
 
+    @property
+    def description(self):
+        return "Commands for managing servers"
+
     @commands.has_permissions(manage_guild=True)
     @commands.command(aliases=["guildnm", "servernm"],
                       brief="Renames the server")

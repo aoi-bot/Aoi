@@ -20,7 +20,7 @@ def get_prefix(_bot: aoi.AoiBot, message: discord.Message):
     return commands.when_mentioned_or(_bot.db.prefixes[message.guild.id])(_bot, message)
 
 
-bot = aoi.AoiBot(command_prefix=get_prefix)
+bot = aoi.AoiBot(command_prefix=get_prefix, help_command=None)
 
 extensions = [
     # administration cogs
@@ -36,7 +36,8 @@ extensions = [
 
     # utility and config cogs
     "cogs.errorhandler",
-    "cogs.settings.guildsettings"
+    "cogs.settings.guildsettings",
+    "cogs.help"
 ]
 
 for ext in extensions:
@@ -61,6 +62,8 @@ async def permission_check(ctx: aoi.AoiContext):
         can_use = can
         if not can:
             current_n = _n
+    if ctx.command.name == 'help':
+        return True
 
     if ctx.command.cog.qualified_name == "Permissions":
         return True
