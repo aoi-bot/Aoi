@@ -31,7 +31,7 @@ extensions = [
     "cogs.administration.permissions",
 
     # misc/fun cogs
-    "cogs.misc",
+    "cogs.colors",
     "cogs.nsfw",
 
     # utility and config cogs

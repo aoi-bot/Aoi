@@ -9,13 +9,13 @@ import colorsys
 from PIL import Image, ImageDraw
 
 
-class Miscellaneous(commands.Cog):
+class Colors(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
 
     @property
     def description(self):
-        return "Miscellaneous commands that don't really fit anywhere else"
+        return "Commands to do with color"
 
     @commands.command(brief="Shows a color")
     async def color(self, ctx: aoi.AoiContext, *, color: discord.Colour):
@@ -93,4 +93,4 @@ class Miscellaneous(commands.Cog):
 
 
 def setup(bot: aoi.AoiBot) -> None:
-    bot.add_cog(Miscellaneous(bot))
+    bot.add_cog(Colors(bot))
