@@ -3,8 +3,9 @@ import math
 import discord
 from discord.ext import commands
 import aoi
-from libs.converters import integer
+from libs.converters import integer, allowed_strings
 from libs.expressions import evaluate
+
 
 def _get_prime_factors(number):
     pfact = {}
@@ -66,6 +67,30 @@ class Math(commands.Cog):
     async def calc(self, ctx: aoi.AoiContext, *, expr: str):
         res = evaluate(expr)
         await ctx.send_info(f"Expression Result:\n{res}")
+
+    @commands.command(
+        brief="Converts between bases",
+        aliases=["baseconv", "bconv"]
+    )
+    async def baseconvert(self, ctx: aoi.AoiBot,
+                          base1: allowed_strings("hex", "dec", "bin", "oct"),
+                          base2: allowed_strings("hex", "dec", "bin", "oct"),
+                          value: str):
+        try:
+            dec = int(value, {"hex": 16,
+                              "dec": 10,
+                              "bin": 2,
+                              "oct": 8}[base1])
+        except ValueError:
+            raise commands.BadArgument(f"\n{value} is not a valid {base1} number")
+        conv = {"hex": hex,
+                "dec": int,
+                "bin": bin,
+                "oct": oct}[base2](dec)
+        if base2 == "dec":
+            return await ctx.send_info(f"\n{base1} `{value}` is {base2} `{conv:,}`")
+        return await ctx.send_info(f"\n{base1} `{value}` is {base2} `{conv}`")
+
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Math(bot))
