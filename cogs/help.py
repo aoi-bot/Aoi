@@ -15,13 +15,13 @@ class Help(commands.Cog):
     async def modules(self, ctx: aoi.AoiContext):
         await ctx.embed(title="Modules", description="\n".join(
             f"**{cog.qualified_name}** - {cog.description}" for cog in
-            [self.bot.get_cog(c) for c in sorted(self.bot.cogs)]
+            [self.bot.get_cog(c) for c in sorted(self.bot.cogs) if self.bot.get_cog(c).description]
         ), footer=f"Do {ctx.prefix}commands module_name to view commands in a module")
 
     @commands.command(brief="Lists commands within a module", name="commands",
                       aliases=["cmds"])
     async def cmds(self, ctx: aoi.AoiContext, module: str):
-        cog: commands.Cog = self.bot.get_cog(self.bot.find_cog(module)[0])
+        cog: commands.Cog = self.bot.get_cog(self.bot.find_cog(module, check_description=True)[0])
         c: commands.Command
         await ctx.embed(
             title=f"Commands for {cog.qualified_name} module",

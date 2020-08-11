@@ -46,11 +46,15 @@ class AoiBot(commands.Bot):
 
     def find_cog(self, name: str, *,
                  allow_ambiguous=False,
-                 allow_none=False) -> Union[List[str], str]:
+                 allow_none=False,
+                 check_description=False) -> Union[List[str], str]:
         found = []
         for c in self.cogs:
             if c.lower().startswith(name.lower()):
                 found.append(c)
+            if c.lower() == name.lower():
+                found = [c]
+                break
         if not found and not allow_none:
             raise commands.BadArgument(f"Module {name} not found.")
         if len(found) > 1 and not allow_ambiguous:
