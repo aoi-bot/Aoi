@@ -1,10 +1,8 @@
-import asyncio
 from typing import List
 
-import discord
 from discord.ext import commands
 import aoi
-import gelbooru
+from wrappers import gelbooru
 import random
 import logging
 
