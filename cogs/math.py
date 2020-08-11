@@ -36,6 +36,7 @@ class Math(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
 
+    @property
     def description(self):
         return "Commands to do basic math"
 
@@ -72,7 +73,7 @@ class Math(commands.Cog):
         brief="Converts between bases",
         aliases=["baseconv", "bconv"]
     )
-    async def baseconvert(self, ctx: aoi.AoiBot,
+    async def baseconvert(self, ctx: aoi.AoiContext,
                           base1: allowed_strings("hex", "dec", "bin", "oct"),
                           base2: allowed_strings("hex", "dec", "bin", "oct"),
                           value: str):
@@ -90,6 +91,15 @@ class Math(commands.Cog):
         if base2 == "dec":
             return await ctx.send_info(f"\n{base1} `{value}` is {base2} `{conv:,}`")
         return await ctx.send_info(f"\n{base1} `{value}` is {base2} `{conv}`")
+
+    @commands.command(
+        brief="Multiply two large numbers",
+        aliases=["bmult"]
+    )
+    async def bigmultiply(self, ctx: aoi.AoiContext,
+                          num1: int,
+                          num2: int):
+        await ctx.send_info(f"\n`{num1:,}` * `{num2:,}` = `{num1*num2:,}`")
 
 
 def setup(bot: aoi.AoiBot) -> None:
