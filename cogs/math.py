@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 import aoi
 from libs.converters import integer
-
+from libs.expressions import evaluate
 
 def _get_prime_factors(number):
     pfact = {}
@@ -59,6 +59,13 @@ class Math(commands.Cog):
         await ctx.send_info(
             f"{number} is {'not' if len(_get_prime_factors(number).keys()) > 1 else ''} prime"
         )
+
+    @commands.command(
+        brief="Evaluates an expression"
+    )
+    async def calc(self, ctx: aoi.AoiContext, *, expr: str):
+        res = evaluate(expr)
+        await ctx.send_info(f"Expression Result:\n{res}")
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Math(bot))
