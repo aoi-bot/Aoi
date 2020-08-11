@@ -229,7 +229,7 @@ def _infix_to_postfix(infix: List[Union[str, float]]):
         postfix.append(stack.pop())
     return postfix
 
-def evaluate(expression: str):
+async def evaluate(expression: str):
     try:
         tokenized = _tokenize(expression)
         postfix = _infix_to_postfix(tokenized)

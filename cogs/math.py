@@ -66,7 +66,7 @@ class Math(commands.Cog):
         brief="Evaluates an expression"
     )
     async def calc(self, ctx: aoi.AoiContext, *, expr: str):
-        res = evaluate(expr)
+        res = await evaluate(expr)
         await ctx.send_info(f"Expression Result:\n{res}")
 
     @commands.command(
