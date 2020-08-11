@@ -33,6 +33,7 @@ extensions = [
     # misc/fun cogs
     "cogs.colors",
     "cogs.nsfw",
+    "cogs.math",
 
     # utility and config cogs
     "cogs.errorhandler",
