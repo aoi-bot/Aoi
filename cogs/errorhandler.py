@@ -49,6 +49,13 @@ class ErrorHandler(commands.Cog):
                 await ctx.send_error(str(error))
         elif isinstance(error, commands.BadArgument):
             await ctx.send_error(_(str(error)))
+        elif isinstance(error, aoi.DomainError):
+            await ctx.send_error(f"Domain Error - the value supplied was outside of the "
+                                 f"valid input range of `{error.token}`")
+        elif isinstance(error, aoi.SyntaxError):
+            await ctx.send_error(f"Syntax Error - An error occured while parsing the expression")
+        elif isinstance(error, aoi.MathError):
+            await ctx.send_error(f"Math Error - An error occured while evaluating the expression")
         else:
             print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
             traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)

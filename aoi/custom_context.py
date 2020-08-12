@@ -133,7 +133,7 @@ class AoiContext(commands.Context):
         if thumbnail:
             embed.set_thumbnail(url=thumbnail)
         for n, r in enumerate(fields or []):
-            embed.add_field(name=r[0], value=r[1], inline=n not in not_inline)
+            embed.add_field(name=r[0], value=r[1] or "None", inline=n not in not_inline)
         msg = await self.send(embed=embed, file=f)
         await self.trash_reaction(msg)
 
