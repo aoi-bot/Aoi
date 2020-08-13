@@ -43,7 +43,7 @@ class Help(commands.Cog):
                                                            f"permission guide"),
                                            ("Command Help", f"`{ctx.prefix}help command_name` to "
                                                             f"view help for a command"),
-                                           ("Support Server", f"Still need help? Join our [support"
+                                           ("Support Server", f"Still need help? Join our [support "
                                                               f"server](https://discord.gg/pCgEj8t)")],
                                    not_inline=[0, 1, 2, 3, 4])
         cmd: commands.Command = self.bot.get_command(command.lower())
