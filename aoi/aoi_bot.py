@@ -32,7 +32,7 @@ class AoiBot(commands.Bot):
         """
         bot = kwargs.pop('bot', True)
         reconnect = kwargs.pop('reconnect', True)
-        self.db = AoiDatabase()
+        self.db = AoiDatabase(self)
         self.banned_tags = os.getenv("BANNED_TAGS").split(",")
         self.gelbooru_user = os.getenv("GELBOORU_USER")
         self.gelbooru_key = os.getenv("GELBOORU_API_KEY")
