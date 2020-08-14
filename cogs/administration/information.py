@@ -16,13 +16,15 @@ class Information(commands.Cog):
         return "Get information about parts of your server"
 
     @commands.guild_only()
-    @commands.command(brief="Shows info on a channel, role, member, or message")
+    @commands.command(brief="Shows info on a channel, role, member, emoji, or message")
     async def info(self, ctx: aoi.AoiContext, obj: Union[
         discord.Role,
         discord.TextChannel,
         discord.Message,
         discord.VoiceChannel,
-        discord.Member
+        discord.Member,
+        discord.Emoji,
+        discord.PartialEmoji
     ]):
         if isinstance(obj, discord.Role):
             if obj.id in [r.id for r in ctx.guild.roles]:
@@ -55,6 +57,8 @@ class Information(commands.Cog):
                     ("Sent at", obj.created_at.strftime('%c'))
                 ]
             )
+        if isinstance(obj, (discord.Emoji, discord.PartialEmoji)):
+            return await self.emojiinfo(ctx, obj)
 
     @commands.command(brief="Shows info on a user", aliases=["uinfo"])
     async def userinfo(self, ctx: aoi.AoiContext, member: discord.Member = None):
@@ -174,13 +178,39 @@ class Information(commands.Cog):
         )
 
     @commands.command(
+        brief="Shows info on an emoji",
+        aliases=["einfo"]
+    )
+    async def emojiinfo(self, ctx: aoi.AoiContext, emoji: Union[discord.Emoji, discord.PartialEmoji]):
+        def _(typ):
+            return f"https://cdn.discordapp.com/emojis/{emoji.id}.{typ}?v=1"
+        if isinstance(emoji, discord.PartialEmoji) and \
+                (not emoji.is_custom_emoji() or emoji.is_unicode_emoji()):
+            return await ctx.send_error("Emoji must be a custom emoji")
+        await ctx.embed(
+            title=f"Info for {emoji}",
+            fields=[
+                ("ID", emoji.id),
+                ("Name", emoji.name),
+                ("Animated", emoji.animated),
+                ("Links", f"[jpeg]({_('jpeg')}) "
+                          f"[png]({_('png')}) "
+                          f"[gif]({_('gif')}) "
+                          f"[webp]({_('webp')}) "),
+                ("Usage", f"\\<{'a' if emoji.animated else ''}\\:{emoji.name}:{emoji.id}>")
+            ],
+            not_inline=[3, 4],
+            thumbnail=_("gif")
+        )
+
+    @commands.command(
         brief="Shows the server's emojis"
     )
     async def emojis(self, ctx: aoi.AoiContext):
         if not ctx.guild.emojis:
             return await ctx.send_info("Server has no emojis")
         await ctx.paginate(
-            lst=[f"{str(e)} \\{str(e)}" for e in ctx.guild.emojis],
+            lst=[f"{str(e)} | {e.name} | {e.id}" for e in ctx.guild.emojis],
             n=20,
             title=f"{ctx.guild}'s emojis",
             numbered=False

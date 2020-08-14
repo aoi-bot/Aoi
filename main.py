@@ -34,6 +34,7 @@ extensions = [
     "cogs.colors",
     "cogs.nsfw",
     "cogs.math",
+    "cogs.messages",
 
     # utility and config cogs
     "cogs.errorhandler",
