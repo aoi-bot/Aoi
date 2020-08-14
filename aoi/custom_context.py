@@ -1,7 +1,7 @@
 import asyncio
 import io
 from types import coroutine
-from typing import List, Tuple, Union, Any
+from typing import List, Tuple, Union, Any, Callable
 
 import discord
 from discord.ext import commands
@@ -57,7 +57,7 @@ class AoiContext(commands.Context):
         return conf.confirmed
 
     async def send_info(self, message: str, *, user: discord.abc.User = None,
-                      title: str = None, trash: bool = True):
+                        title: str = None, trash: bool = True):
         if not user:
             user = self.author
         msg = await self.send(embed=discord.Embed(
@@ -81,7 +81,7 @@ class AoiContext(commands.Context):
             await self.trash_reaction(msg)
 
     async def send_error(self, message: str, *, user: discord.abc.User = None,
-                      title: str = None, trash: bool = True):
+                         title: str = None, trash: bool = True):
         if not user:
             user = self.author
         msg = await self.send(embed=discord.Embed(
@@ -147,7 +147,7 @@ class AoiContext(commands.Context):
         return [lst[i * n:(i + 1) * n] for i in range((len(lst) + n - 1) // n)]
 
     async def pages(self, lst: List[Any], n: int,
-              title: str, *, fmt: str = "%s", sep: str = "\n", color=None) \
+                    title: str, *, fmt: str = "%s", sep: str = "\n", color=None) \
             -> List[discord.Embed]:
         # noinspection GrazieInspection
         """
@@ -192,3 +192,27 @@ class AoiContext(commands.Context):
     async def page_predefined(self, *embeds: List[discord.Embed]):
         paginator = disputils.BotEmbedPaginator(self, embeds)
         await paginator.run()
+
+    async def input(self, typ: type, cancel_str: str = "cancel", ch: Callable = None, err=None, check_author=True,
+                     return_author=False, del_error=60, del_response=False, timeout=60.0):
+        def check(m):
+            return ((m.author == self.author and m.channel == self.channel) or not check_author) and not m.author.bot
+
+        while True:
+            try:
+                inp: discord.Message = await self.bot.wait_for('message', check=check, timeout=timeout)
+                if del_response:
+                    await inp.delete()
+                if inp.content.lower() == cancel_str.lower():
+                    return (None, None) if return_author else None
+                res = typ(inp.content.lower())
+                if ch:
+                    if not ch(res): raise ValueError
+                return (res, inp.author) if return_author else res
+            except ValueError:
+                await self.send(err or "That's not a valid response, try again" +
+                                ("" if not cancel_str else f" or type `{cancel_str}` to quit"), delete_after=del_error)
+                continue
+            except asyncio.TimeoutError:
+                await self.send("You took too long to respond ): Try to start over", delete_after=del_error)
+                return (None, None) if return_author else None
