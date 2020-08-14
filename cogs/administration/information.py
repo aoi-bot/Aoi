@@ -180,7 +180,7 @@ class Information(commands.Cog):
         if not ctx.guild.emojis:
             return await ctx.send_info("Server has no emojis")
         await ctx.paginate(
-            lst=[f"{str(e)} \\{str(e)}" for e in ctx.guild.emojis],
+            lst=[f"{str(e)} | {e.name} | {e.id}" for e in ctx.guild.emojis],
             n=20,
             title=f"{ctx.guild}'s emojis",
             numbered=False
