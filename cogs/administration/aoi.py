@@ -36,6 +36,12 @@ class Aoi(commands.Cog):
                      f"{permissions_int}&scope=bot"
         await ctx.send_info(f"Invite me to your server [here]({invite_url})")
 
+    @commands.command(
+        brief="Shows Aoi's latency to discord"
+    )
+    async def ping(self, ctx: aoi.AoiContext):
+        await ctx.send_info(f":ping_pong: {round(self.bot.latency*1000)}ms")
+
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Aoi(bot))
