@@ -1,10 +1,13 @@
+from __future__ import annotations
+
 import logging
 from dataclasses import dataclass
-from typing import Dict, Optional, List
-
+from typing import Dict, Optional, List, TYPE_CHECKING
 import aiosqlite
 from aiosqlite import Connection
 
+if TYPE_CHECKING:
+    import aoi
 
 @dataclass
 class _GuildSetting:
@@ -15,11 +18,12 @@ class _GuildSetting:
 
 
 class AoiDatabase:
-    def __init__(self):
+    def __init__(self, bot: aoi.AoiBot):
         self.db: Optional[Connection] = None
         self.guild_settings: Dict[int, _GuildSetting] = {}
         self.prefixes: Dict[int, str] = {}
         self.perm_chains: Dict[int, List[str]] = {}
+        self.bot = bot
 
     async def load(self):
         logging.info("database:Connecting to database")
@@ -38,6 +42,11 @@ class AoiDatabase:
         for r in rows:
             self.perm_chains[r[0]] = r[1].split(";")
         logging.info("database:Database loaded")
+
+        # load guilds that dont exist in the database
+        for i in self.bot.guilds:
+            await self.guild_setting(i.id)
+            await self.get_permissions(i.id)
 
     async def close(self):
         await self.db.close()

@@ -1,3 +1,5 @@
+from typing import Union
+
 import discord
 from discord.ext import commands
 import aoi
@@ -20,7 +22,7 @@ class Guilds(commands.Cog):
                                f"Server renamed to `{name}`",
                                "Server rename cancelled",
                                ctx.guild.edit(name=name))
-        
+
     @commands.has_permissions(manage_guild=True)
     @commands.command(aliases=["guildav", "serverav", "servericon"],
                       brief="Sets the server's icon")
@@ -52,6 +54,34 @@ class Guilds(commands.Cog):
     async def regions(self, ctx: aoi.AoiContext):
         await ctx.send_info(" ".join(map(str, discord.VoiceRegion)),
                             title="Voice Regions")
+
+    @commands.has_permissions(manage_emojis=True)
+    @commands.command(
+        brief="Deletes up to 10 emojis",
+        aliases=["de"]
+    )
+    async def delemoji(self, ctx: aoi.AoiContext, emojis: commands.Greedy[Union[discord.Emoji, discord.PartialEmoji]]):
+        e: discord.Emoji
+        if len(emojis) < 1:
+            raise commands.BadArgument("Must send an emoji")
+        if len(emojis) > 10:
+            raise commands.BadArgument("Must be less than 10 emojis")
+        for e in emojis:
+            if isinstance(e, discord.PartialEmoji) or e.guild_id != ctx.guild.id:
+                return await ctx.send_error(f"{e} is not from this server. This command can only be used with emojis "
+                                            f"that belong to this server.")
+
+        async def _del():
+            _e: discord.Emoji
+            for _e in emojis:
+                await _e.delete(reason=f"Bulk delete | {ctx.author} | {ctx.author.id}")
+
+        await ctx.confirm_coro(
+            "Delete " + " ".join(map(str, emojis)) + "?",
+            "Emojis deleted",
+            "Emoji deletion cancelled",
+            _del()
+        )
 
 
 def setup(bot: aoi.AoiBot) -> None:

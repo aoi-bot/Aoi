@@ -147,16 +147,18 @@ class AoiContext(commands.Context):
         return [lst[i * n:(i + 1) * n] for i in range((len(lst) + n - 1) // n)]
 
     async def pages(self, lst: List[Any], n: int,
-              title: str, *, fmt: str = "%s", sep: str = "\n") \
+              title: str, *, fmt: str = "%s", sep: str = "\n", color=None) \
             -> List[discord.Embed]:
         # noinspection GrazieInspection
         """
             Paginates a list into embeds to use with :class:disputils.BotEmbedPaginator
+
             :param lst: the list to paginate
             :param n: the number of elements per page
             :param title: the title of the embed
             :param fmt: a % string used to format the resulting page
             :param sep: the string to join the list elements with
+            :param color: color
             :return: a list of embeds
             """
         l: List[List[str]] = self.group_list([str(i) for i in lst], n)
@@ -165,7 +167,7 @@ class AoiContext(commands.Context):
             discord.Embed(
                 title=f"{title} - {i + 1}/{len(pgs)}",
                 description=fmt % pg,
-                color=await self.get_color(self.OK)
+                color=color or await self.get_color(self.OK)
             ) for i, pg in enumerate(pgs)
         ]
 
@@ -183,7 +185,8 @@ class AoiContext(commands.Context):
             lst = self.numbered(lst)
         paginator = disputils.BotEmbedPaginator(self,
                                                 await self.pages(lst, n, title,
-                                                                 fmt=fmt, sep=sep))
+                                                                 fmt=fmt, sep=sep,
+                                                                 color=await self.get_color(self.INFO)))
         await paginator.run()
 
     async def page_predefined(self, *embeds: List[discord.Embed]):
