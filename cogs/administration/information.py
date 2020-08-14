@@ -122,7 +122,8 @@ class Information(commands.Cog):
                               f":white_circle: {statuses['offline']} offline\n"
                               f":robot: {statuses['bot']} bots\n")
             ],
-            thumbnail=guild.icon_url
+            thumbnail=guild.icon_url,
+            footer=f"Do `{ctx.prefix}emojis` to show server emojis."
         )
 
     @commands.command(brief="Shows info on a role", aliases=["rinfo"])
@@ -157,7 +158,7 @@ class Information(commands.Cog):
                 ("ID", channel.id),
                 ("Created at", channel.created_at.strftime("%c")),
                 ("Max Users", channel.user_limit or "No Limit"),
-                ("Bitrate", f"{channel.bitrate//1000}kbps"),
+                ("Bitrate", f"{channel.bitrate // 1000}kbps"),
             ]
         )
 
@@ -171,6 +172,20 @@ class Information(commands.Cog):
                 ("Slowmode", f"{channel.slowmode_delay}s" if channel.slowmode_delay else "No Slowmode")
             ]
         )
+
+    @commands.command(
+        brief="Shows the server's emojis"
+    )
+    async def emojis(self, ctx: aoi.AoiContext):
+        if not ctx.guild.emojis:
+            return await ctx.send_info("Server has no emojis")
+        await ctx.paginate(
+            lst=[f"{str(e)} \\{str(e)}" for e in ctx.guild.emojis],
+            n=20,
+            title=f"{ctx.guild}'s emojis",
+            numbered=False
+        )
+
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Information(bot))
