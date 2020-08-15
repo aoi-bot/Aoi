@@ -36,6 +36,7 @@ extensions = [
     "cogs.math",
     "cogs.messages",
     "cogs.geolocation",
+    "cogs.nasa",
 
     # utility and config cogs
     "cogs.errorhandler",

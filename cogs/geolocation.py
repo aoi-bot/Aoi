@@ -34,7 +34,8 @@ class GeoLocation(commands.Cog):
                 ("Resolved address", result.formatted_address),
                 ("Location", result.geometry.location)
             ] + ([
-                ("Bounds", f"{result.geometry.northeast}\n")
+                ("Bounds", f"{result.geometry.northeast}\n"
+                           f"{result.geometry.southwest}\n")
             ] if result.geometry.northeast else []),
             not_inline=[0, 1, 2]
         )

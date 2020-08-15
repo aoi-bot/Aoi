@@ -15,8 +15,8 @@ class LocationCoordinates:
     long: float
 
     def __str__(self):
-        return f"{self.lat:.6}°{'N' if self.lat > 0 else 'S'} " \
-               f"{self.long:.6}°{'E' if self.long > 0 else 'W'} "
+        return f"{abs(self.lat):.8}°{'N' if self.lat > 0 else 'S'} " \
+               f"{abs(self.long):.8}°{'E' if self.long > 0 else 'W'} "
 
 
 @dataclass(frozen=True)

@@ -12,5 +12,13 @@ class Weather(commands.Cog):
         return "Look up weather data for a location"
 
 
+    @commands.command(
+        brief="Look up a current satellite image"
+    )
+    async def satellite(self, lat: float, long: float):
+        raise NotImplemented
+
+
+
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Weather(bot))

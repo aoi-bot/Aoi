@@ -1,7 +1,7 @@
-import typing
-from discord.ext import commands
-
 import math
+import typing
+
+from discord.ext import commands
 
 
 def allowed_strings(*values, preserve_case: bool = False) \
@@ -49,7 +49,6 @@ def disenable() \
 def integer(*, max_digits=10,
             force_positive=False) \
         -> typing.Callable[[str], int]:
-
     def converter(arg: str) -> int:
         arg = arg.replace(",", "")
 
@@ -79,3 +78,21 @@ def integer(*, max_digits=10,
 
     return converter
 
+
+def latlong() -> typing.Callable[[str], float]:
+    def converter(arg: str) -> float:
+        arg = arg.lower().replace("°", "")
+        try:
+            if arg.endswith("e") or arg.endswith("n"):
+                n = float(arg[:-1])
+            elif arg.endswith("s") or arg.endswith("w"):
+                n = -float(arg[:-1])
+            else:
+                n = float(arg)
+        except ValueError:
+            raise commands.BadArgument("Value must be in the format -9.9N, -9.9")
+        if not (-180 <= n <= 180):
+            raise commands.BadArgument("Value out of range")
+        return n
+
+    return converter
