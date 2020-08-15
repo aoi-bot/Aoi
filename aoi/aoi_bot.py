@@ -19,6 +19,7 @@ class AoiBot(commands.Bot):
         self.gelbooru_user: str = ""
         self.weather_gov: str = ""
         self.google: str = ""
+        self.nasa: str = ""
 
     async def on_message(self, message: discord.Message):
         ctx = await self.get_context(message, cls=AoiContext)
@@ -40,6 +41,7 @@ class AoiBot(commands.Bot):
         self.gelbooru_key = os.getenv("GELBOORU_API_KEY")
         self.weather_gov = os.getenv("WEATHER_GOV_API")
         self.google = os.getenv("GOOGLE_API_KEY")
+        self.nasa = os.getenv("NASA")
         await self.db.load()
 
         if kwargs:
