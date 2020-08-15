@@ -18,6 +18,7 @@ class AoiBot(commands.Bot):
         self.gelbooru_key: str = ""
         self.gelbooru_user: str = ""
         self.weather_gov: str = ""
+        self.google: str = ""
 
     async def on_message(self, message: discord.Message):
         ctx = await self.get_context(message, cls=AoiContext)

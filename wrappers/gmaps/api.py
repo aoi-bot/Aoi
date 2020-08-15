@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import urllib.parse
-from typing import TYPE_CHECKING, List
+from typing import List
 
 import aiohttp
 
 from ..gmaps import helpers as h
+
 
 class GeoLocation:
     def __init__(self,
@@ -33,11 +34,11 @@ class GeoLocation:
                 northeast=h.LocationCoordinates(
                     lat=loc["geometry"]["bounds"]["northeast"]["lat"],
                     long=loc["geometry"]["bounds"]["northeast"]["lng"]
-                ),
+                ) if "bounds" in loc["geometry"] else None,
                 southwest=h.LocationCoordinates(
                     lat=loc["geometry"]["bounds"]["southwest"]["lat"],
                     long=loc["geometry"]["bounds"]["southwest"]["lng"]
-                ),
+                ) if "bounds" in loc["geometry"] else None,
             )
             comps = [
                 h.LocationComponent(
