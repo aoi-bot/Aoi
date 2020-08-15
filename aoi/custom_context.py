@@ -104,6 +104,7 @@ class AoiContext(commands.Context):
     async def embed(self, *,
                     description: str = None,
                     title: str = None,
+                    title_url: str = None,
                     typ: int = INFO,
                     fields: List[Tuple[str, str]] = None,
                     thumbnail: str = None,
@@ -116,7 +117,8 @@ class AoiContext(commands.Context):
         embed = discord.Embed(
             title=title,
             description=description,
-            colour=(await self.get_color(typ) if not clr else clr)
+            colour=(await self.get_color(typ) if not clr else clr),
+            title_url=title_url
         )
         if image:
             if isinstance(image, str):
