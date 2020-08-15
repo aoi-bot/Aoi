@@ -57,7 +57,7 @@ class AoiContext(commands.Context):
         return conf.confirmed
 
     async def send_info(self, message: str, *, user: discord.abc.User = None,
-                        title: str = None, trash: bool = True):
+                        title: str = None, trash: bool = False):
         if not user:
             user = self.author
         msg = await self.send(embed=discord.Embed(
@@ -69,7 +69,7 @@ class AoiContext(commands.Context):
             await self.trash_reaction(msg)
 
     async def send_ok(self, message: str, *, user: discord.abc.User = None,
-                      title: str = None, trash: bool = True):
+                      title: str = None, trash: bool = False):
         if not user:
             user = self.author
         msg = await self.send(embed=discord.Embed(
@@ -81,7 +81,7 @@ class AoiContext(commands.Context):
             await self.trash_reaction(msg)
 
     async def send_error(self, message: str, *, user: discord.abc.User = None,
-                         title: str = None, trash: bool = True):
+                         title: str = None, trash: bool = False):
         if not user:
             user = self.author
         msg = await self.send(embed=discord.Embed(
