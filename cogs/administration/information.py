@@ -76,10 +76,10 @@ class Information(commands.Cog):
                 ("Joined Server", joined_at),
                 ("Joined Discord", created_at),
                 (f"Hoisted Roles ({len(hoisted_roles)}) ",
-                 " ".join([r.mention for r in hoisted_roles[0:5]]) if hoisted_roles
+                 " ".join([r.mention for r in hoisted_roles[-1:-6:-1]]) if hoisted_roles
                  else "None"),
                 (f"Normal Roles ({len(normal_roles) - 1})",
-                 " ".join([r.mention for r in normal_roles[1:5] if r.id not in
+                 " ".join([r.mention for r in normal_roles[-1:-6:-1] if r.id not in
                            [x.id for x in hoisted_roles]]) if len(normal_roles) > 1
                  else "None"),
                 ("Top Role", member.roles[-1].mention),
