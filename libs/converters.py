@@ -1,5 +1,7 @@
+import datetime
 import math
 import typing
+import dateparser
 
 from discord.ext import commands
 
@@ -93,6 +95,16 @@ def latlong() -> typing.Callable[[str], float]:
             raise commands.BadArgument("Value must be in the format -9.9N, -9.9")
         if not (-180 <= n <= 180):
             raise commands.BadArgument("Value out of range")
+        return n
+
+    return converter
+
+
+def dtime() -> typing.Callable[[str], datetime.datetime]:
+    def converter(arg: str) -> datetime.datetime:
+        n = dateparser.parse(arg)
+        if not n:
+            raise commands.BadArgument("Invalid date")
         return n
 
     return converter
