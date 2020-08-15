@@ -17,6 +17,7 @@ class AoiBot(commands.Bot):
         self.banned_tags: List[str] = []
         self.gelbooru_key: str = ""
         self.gelbooru_user: str = ""
+        self.weather_gov: str = ""
 
     async def on_message(self, message: discord.Message):
         ctx = await self.get_context(message, cls=AoiContext)
@@ -36,6 +37,8 @@ class AoiBot(commands.Bot):
         self.banned_tags = os.getenv("BANNED_TAGS").split(",")
         self.gelbooru_user = os.getenv("GELBOORU_USER")
         self.gelbooru_key = os.getenv("GELBOORU_API_KEY")
+        self.weather_gov = os.getenv("WEATHER_GOV_API")
+        self.google = os.getenv("GOOGLE_API_KEY")
         await self.db.load()
 
         if kwargs:
