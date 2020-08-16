@@ -1,5 +1,8 @@
+import asyncio
+import sys
 from typing import Dict, Optional, List, Union
 
+import aiohttp.client_exceptions
 import discord
 from discord.ext import commands
 import logging
@@ -49,7 +52,20 @@ class AoiBot(commands.Bot):
         if kwargs:
             raise TypeError("unexpected keyword argument(s) %s" % list(kwargs.keys()))
 
-        await self.login(*args, bot=bot)
+        for i in range(0, 6):
+            try:
+                await self.login(*args, bot=bot)
+                break
+            except aiohttp.client_exceptions.ClientConnectionError as e:
+                logging.warning(f"bot:Connection {i}/6 failed")
+                logging.warning(f"bot:  {e}")
+                logging.warning(f"bot: waiting {2**(i+1)} seconds")
+                await asyncio.sleep(2**(i+1))
+                logging.info("bot:attempting to reconnect")
+        else:
+            logging.error("bot: FATAL failed after 6 attempts")
+            return
+
         await self.connect(reconnect=reconnect)
 
     def find_cog(self, name: str, *,
