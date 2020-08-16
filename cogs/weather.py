@@ -56,13 +56,13 @@ class Weather(commands.Cog):
         brief="Look up an hourly forecast"
     )
     async def wxhourly(self, ctx: aoi.AoiContext, *, location: gmaps.LocationCoordinates):
-        conditions = (await self.wx.lookup_hourly(location))[:24]
-        await ctx.embed(
+        conditions = (await self.wx.lookup_hourly(location))
+        await ctx.paginate(
+            fmt=f"Resolved Address: {location.location or location}```%s```\n",
+            lst=[cond.line() for cond in conditions],
+            n=24,
             title="Weather lookup",
-            description=f"Resolved Address: {location.location or location}\n"
-                        f"Start: {conditions[0].start}\n```" +
-                        "\n".join(cond.line() for cond in conditions) +
-                        "```"
+            thumbnails=[c.icon for c in conditions[3::24]]
         )
 
 

@@ -149,7 +149,8 @@ class AoiContext(commands.Context):
         return [lst[i * n:(i + 1) * n] for i in range((len(lst) + n - 1) // n)]
 
     async def pages(self, lst: List[Any], n: int,
-                    title: str, *, fmt: str = "%s", sep: str = "\n", color=None) \
+                    title: str, *, fmt: str = "%s",
+                    thumbnails: List[str] = None, sep: str = "\n", color=None) \
             -> List[discord.Embed]:
         # noinspection GrazieInspection
         """
@@ -160,18 +161,28 @@ class AoiContext(commands.Context):
             :param title: the title of the embed
             :param fmt: a % string used to format the resulting page
             :param sep: the string to join the list elements with
+            :param thumbnails: thumbnail
             :param color: color
             :return: a list of embeds
             """
         l: List[List[str]] = self.group_list([str(i) for i in lst], n)
         pgs = [sep.join(page) for page in l]
-        return [
-            discord.Embed(
-                title=f"{title} - {i + 1}/{len(pgs)}",
-                description=fmt % pg,
-                color=color or await self.get_color(self.OK)
-            ) for i, pg in enumerate(pgs)
-        ]
+        if not thumbnails:
+            return [
+                discord.Embed(
+                    title=f"{title} - {i + 1}/{len(pgs)}",
+                    description=fmt % pg,
+                    color=color or await self.get_color(self.OK),
+                ) for i, pg in enumerate(pgs)
+            ]
+        else:
+            return [
+                discord.Embed(
+                    title=f"{title} - {i + 1}/{len(pgs)}",
+                    description=fmt % pg,
+                    color=color or await self.get_color(self.OK),
+                ).set_thumbnail(url=thumbnails[i]) for i, pg in enumerate(pgs)
+            ]
 
     def numbered(self, lst: List[Any]) -> List[str]:
         """
@@ -182,12 +193,13 @@ class AoiContext(commands.Context):
 
     async def paginate(self, lst: List[Any], n: int,
                        title: str, *, fmt: str = "%s", sep: str = "\n",
-                       numbered: bool = False):
+                       numbered: bool = False, thumbnails: List[str] = None):
         if numbered:
             lst = self.numbered(lst)
         paginator = disputils.BotEmbedPaginator(self,
                                                 await self.pages(lst, n, title,
                                                                  fmt=fmt, sep=sep,
+                                                                 thumbnails=thumbnails,
                                                                  color=await self.get_color(self.INFO)))
         await paginator.run()
 
@@ -196,7 +208,7 @@ class AoiContext(commands.Context):
         await paginator.run()
 
     async def input(self, typ: type, cancel_str: str = "cancel", ch: Callable = None, err=None, check_author=True,
-                     return_author=False, del_error=60, del_response=False, timeout=60.0):
+                    return_author=False, del_error=60, del_response=False, timeout=60.0):
         def check(m):
             return ((m.author == self.author and m.channel == self.channel) or not check_author) and not m.author.bot
 
