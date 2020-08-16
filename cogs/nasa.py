@@ -68,7 +68,7 @@ class Nasa(commands.Cog):
     @commands.command(
         brief="Gets the astronomy picture of the day"
     )
-    async def apod(self, ctx: aoi.AoiContext, date: dtime() = None):
+    async def apod(self, ctx: aoi.AoiContext, *, date: dtime() = None):
         if not date:
             date = datetime.datetime.now()
         dt = date.strftime('%Y-%m-%d')
@@ -78,13 +78,19 @@ class Nasa(commands.Cog):
                     async with sess.get(f"https://api.nasa.gov/planetary/apod?api_key={self.bot.nasa}&"
                                         f"date={dt}") as resp:
                         js = await resp.json()
-            hdurl = js["hdurl"]
+            if js.get("code", None) in [404, 400, 403, 401]:
+                self.apod_cache[dt] = (str(js["code"]), "404", "404",
+                                       js["msg"])
+                return await ctx.send_error(js["msg"])
             url = js["url"]
+            hdurl = js.get("hdurl", url)
             expl = js["explanation"][:1900]
-            title = js["title"]
+            title = js["title"] + " " + dt
             self.apod_cache[dt] = (title, hdurl, url, expl)
         else:
             title, hdurl, url, expl = self.apod_cache[dt]
+            if title == "404":
+                await ctx.send_error(expl)
         await ctx.embed(
             title=title,
             description=f"{expl}\n\n[Normal Resolution]({url})  [High Resolution]({hdurl})",

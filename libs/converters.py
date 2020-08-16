@@ -102,7 +102,12 @@ def latlong() -> typing.Callable[[str], float]:
 
 def dtime() -> typing.Callable[[str], datetime.datetime]:
     def converter(arg: str) -> datetime.datetime:
-        n = dateparser.parse(arg)
+        n = dateparser.parse(arg,
+                             [
+                                 "%m/%d/%y",
+                                 "%m-%d-%y",
+                                 "%-m-%-d-%Y",
+                             ])
         if not n:
             raise commands.BadArgument("Invalid date")
         return n
