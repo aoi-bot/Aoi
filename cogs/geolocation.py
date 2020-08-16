@@ -15,7 +15,7 @@ class GeoLocation(commands.Cog):
     async def _init(self):
         logging.info("geo:waiting for bot")
         await self.bot.wait_until_ready()
-        self.gmap = gmaps.GeoLocation(self.bot.google)
+        self.gmap = self.bot.gmap
         logging.info("geo:ready!")
 
     @property

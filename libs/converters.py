@@ -5,6 +5,8 @@ import dateparser
 
 from discord.ext import commands
 
+import aoi
+from wrappers import gmaps
 
 def allowed_strings(*values, preserve_case: bool = False) \
         -> typing.Callable[[str], str]:

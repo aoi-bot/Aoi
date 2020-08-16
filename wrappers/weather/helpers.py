@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -18,3 +19,17 @@ class LatLongLookupResult:
     forecast_grid_data_endpoint: str
     time_zone: str
     radar_station: str
+
+
+@dataclass(frozen=True)
+class WeatherCondition:
+    start: datetime.datetime
+    end: datetime.datetime
+    is_day: bool
+    temp: int
+    temp_unit: str
+    wind: int
+    wind_unit: str
+    wind_direction: str
+    icon: str
+    short_forecast: str

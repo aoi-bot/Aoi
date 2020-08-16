@@ -1,9 +1,9 @@
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 
 import aiohttp
 
 from wrappers import gmaps
-from .helpers import LatLongLookupResult
+from .helpers import LatLongLookupResult, WeatherCondition
 
 
 class WeatherGov:
@@ -36,3 +36,7 @@ class WeatherGov:
         )
         self.grid_cache[(lat, long)] = result
         return result
+
+    async def lookup_weather(self, grid: LatLongLookupResult) -> \
+            List[WeatherCondition]:
+        pass

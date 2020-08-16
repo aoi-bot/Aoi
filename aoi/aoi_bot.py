@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands
 import logging
 import os
-
+from wrappers import gmaps as gmaps
 from .custom_context import AoiContext
 from .database import AoiDatabase
 
@@ -24,6 +24,7 @@ class AoiBot(commands.Bot):
         self.google: str = ""
         self.nasa: str = ""
         self.accuweather: str = ""
+        self.gmap: Optional[gmaps.GeoLocation] = None
 
     async def on_message(self, message: discord.Message):
         ctx = await self.get_context(message, cls=AoiContext)
@@ -47,6 +48,7 @@ class AoiBot(commands.Bot):
         self.google = os.getenv("GOOGLE_API_KEY")
         self.nasa = os.getenv("NASA")
         self.accuweather = os.getenv("ACCUWEATHER")
+        self.gmap = gmaps.GeoLocation(self.google)
         await self.db.load()
 
         if kwargs:
