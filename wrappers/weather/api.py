@@ -4,7 +4,7 @@ import aiohttp
 
 from wrappers import gmaps
 from .helpers import LatLongLookupResult, WeatherCondition
-
+from datetime import datetime
 
 class WeatherGov:
     def __init__(self, key: str):
@@ -37,6 +37,24 @@ class WeatherGov:
         self.grid_cache[(lat, long)] = result
         return result
 
-    async def lookup_weather(self, grid: LatLongLookupResult) -> \
+    async def lookup_hourly(self, location: gmaps.LocationCoordinates) -> \
             List[WeatherCondition]:
-        pass
+        grid = await self.lookup_grid(location.lat, location.long)
+        async with aiohttp.ClientSession() as sess:
+            async with sess.get(grid.forecast_hourly_endpoint) as resp:
+                js = (await resp.json())["properties"]["periods"]
+        return [
+            WeatherCondition(
+                start=datetime.fromisoformat(wc["startTime"]),
+                end=datetime.fromisoformat(wc["endTime"]),
+                is_day=wc["isDaytime"],
+                temp=wc["temperature"],
+                temp_unit=wc["temperatureUnit"],
+                wind=wc["windSpeed"].split()[0],
+                wind_unit=wc["windSpeed"].split()[1],
+                wind_direction=wc["windDirection"],
+                icon=wc["icon"],
+                short_forecast=wc["shortForecast"]
+            )
+            for wc in js
+        ]

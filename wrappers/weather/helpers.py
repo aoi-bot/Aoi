@@ -33,3 +33,7 @@ class WeatherCondition:
     wind_direction: str
     icon: str
     short_forecast: str
+
+    def line(self):
+        return f"{self.start.strftime('%m-%d %H:%M'):>7}{'D' if self.is_day else 'N'} {self.temp:>4}°{self.temp_unit} " \
+               f"{str(self.wind) + self.wind_unit:>10} {self.wind_direction:>2}"

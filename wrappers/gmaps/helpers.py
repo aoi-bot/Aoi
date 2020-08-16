@@ -34,9 +34,10 @@ class LocationComponent:
 
 class LocationCoordinates:
 
-    def __init__(self, lat, long):
+    def __init__(self, lat: float, long: float, location: str=None):
         self.lat = lat
         self.long = long
+        self.location = location
 
     def __str__(self):
         return f"{abs(self.lat):.8}°{'N' if self.lat > 0 else 'S'} " \
@@ -58,7 +59,11 @@ class LocationCoordinates:
         res = await ctx.bot.gmap.lookup_address(arg)
         if not res:
             raise commands.BadArgument("Invalid location")
-        return res[0].geometry.location
+        return cls(
+            res[0].geometry.location.lat,
+            res[0].geometry.location.long,
+            res[0].formatted_address
+        )
 
 
 @dataclass(frozen=True)

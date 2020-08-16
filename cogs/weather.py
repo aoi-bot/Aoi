@@ -51,6 +51,21 @@ class Weather(commands.Cog):
             ]
         )
 
+    @commands.cooldown(1, 60, type=commands.BucketType.user)
+    @commands.command(
+        brief="Look up an hourly forecast"
+    )
+    async def wxhourly(self, ctx: aoi.AoiContext, *, location: gmaps.LocationCoordinates):
+        conditions = (await self.wx.lookup_hourly(location))[:24]
+        await ctx.embed(
+            title="Weather lookup",
+            description=f"Resolved Address: {location.location or location}\n"
+                        f"Start: {conditions[0].start}\n```" +
+                        "\n".join(cond.line() for cond in conditions) +
+                        "```"
+        )
+
+
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Weather(bot))
