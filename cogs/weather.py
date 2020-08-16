@@ -31,6 +31,26 @@ class Weather(commands.Cog):
         return "Look up weather data for a location"
 
     @commands.command(
+        brief="A map of the amount of rain from the current storm"
+    )
+    async def stormrain(self, ctx: aoi.AoiContext, location: gmaps.LocationCoordinates):
+        res = await self.wx.lookup_grid(location.lat, location.long)
+        radar = res.radar_station[-3:]
+        await ctx.embed(
+            image=f"https://radar.weather.gov/ridge/lite/NTP/{radar}_0.png"
+        )
+
+    @commands.command(
+        brief="A map of the amount of rain from the last hour"
+    )
+    async def hourrain(self, ctx: aoi.AoiContext, location: gmaps.LocationCoordinates):
+        res = await self.wx.lookup_grid(location.lat, location.long)
+        radar = res.radar_station[-3:]
+        await ctx.embed(
+            image=f"https://radar.weather.gov/ridge/lite/N1P/{radar}_0.png"
+        )
+
+    @commands.command(
         brief="Look up a looping radar"
     )
     async def radarloop(self, ctx: aoi.AoiContext, location: gmaps.LocationCoordinates):
