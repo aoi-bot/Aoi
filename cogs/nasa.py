@@ -23,8 +23,10 @@ class Nasa(commands.Cog):
         brief="Get a LANDSAT-8 image of a lat/long"
     )
     @commands.cooldown(1, 60, type=commands.BucketType.user)
-    async def landsat(self, ctx: aoi.AoiContext, lat: latlong(), long: latlong(),
+    async def landsat(self, ctx: aoi.AoiContext, coords: gmaps.LocationCoordinates,
                       date: dtime() = None):
+        lat = coords.lat
+        long = coords.long
         dt = date or datetime.datetime.now()
         url = f"https://api.nasa.gov/planetary/earth/imagery?" \
               f"lon={long}&lat={lat}&dim=0.15&api_key={self.bot.nasa}" \
@@ -36,31 +38,6 @@ class Nasa(commands.Cog):
                     buf.write(await resp.content.read())
         await ctx.embed(
             title=f"{lat} {long} {dt.strftime('%Y-%m-%d')}",
-            image=buf
-        )
-
-    @commands.cooldown(1, 60, type=commands.BucketType.user)
-    @commands.command(
-        brief="Get a LANDSAT-8 image of a location"
-    )
-    async def landsatloc(self, ctx: aoi.AoiContext, place: str,
-                         date: dtime() = None):
-        gmap = gmaps.GeoLocation(self.bot.google)
-        r = (await gmap.lookup_address(place))[0]
-        lat = r.geometry.location.lat
-        long = r.geometry.location.long
-        dt = date or datetime.datetime.now()
-        url = f"https://api.nasa.gov/planetary/earth/imagery?" \
-              f"lon={long}&lat={lat}&dim=0.15&api_key={self.bot.nasa}" \
-              f"&date={dt.strftime('%Y-%m-%d')}"
-        buf = io.BytesIO()
-        async with ctx.typing():
-            async with aiohttp.ClientSession() as sess:
-                async with sess.get(url) as resp:
-                    buf.write(await resp.content.read())
-        await ctx.embed(
-            title=f"{lat} {long} {dt.strftime('%Y-%m-%d')}",
-            description=r.formatted_address,
             image=buf
         )
 
