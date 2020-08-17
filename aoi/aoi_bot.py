@@ -1,10 +1,13 @@
+import asyncio
+import sys
 from typing import Dict, Optional, List, Union
 
+import aiohttp.client_exceptions
 import discord
 from discord.ext import commands
 import logging
 import os
-
+from wrappers import gmaps as gmaps
 from .custom_context import AoiContext
 from .database import AoiDatabase
 
@@ -17,6 +20,11 @@ class AoiBot(commands.Bot):
         self.banned_tags: List[str] = []
         self.gelbooru_key: str = ""
         self.gelbooru_user: str = ""
+        self.weather_gov: str = ""
+        self.google: str = ""
+        self.nasa: str = ""
+        self.accuweather: str = ""
+        self.gmap: Optional[gmaps.GeoLocation] = None
 
     async def on_message(self, message: discord.Message):
         ctx = await self.get_context(message, cls=AoiContext)
@@ -36,12 +44,30 @@ class AoiBot(commands.Bot):
         self.banned_tags = os.getenv("BANNED_TAGS").split(",")
         self.gelbooru_user = os.getenv("GELBOORU_USER")
         self.gelbooru_key = os.getenv("GELBOORU_API_KEY")
+        self.weather_gov = os.getenv("WEATHER_GOV_API")
+        self.google = os.getenv("GOOGLE_API_KEY")
+        self.nasa = os.getenv("NASA")
+        self.accuweather = os.getenv("ACCUWEATHER")
+        self.gmap = gmaps.GeoLocation(self.google)
         await self.db.load()
 
         if kwargs:
             raise TypeError("unexpected keyword argument(s) %s" % list(kwargs.keys()))
 
-        await self.login(*args, bot=bot)
+        for i in range(0, 6):
+            try:
+                await self.login(*args, bot=bot)
+                break
+            except aiohttp.client_exceptions.ClientConnectionError as e:
+                logging.warning(f"bot:Connection {i}/6 failed")
+                logging.warning(f"bot:  {e}")
+                logging.warning(f"bot: waiting {2**(i+1)} seconds")
+                await asyncio.sleep(2**(i+1))
+                logging.info("bot:attempting to reconnect")
+        else:
+            logging.error("bot: FATAL failed after 6 attempts")
+            return
+
         await self.connect(reconnect=reconnect)
 
     def find_cog(self, name: str, *,

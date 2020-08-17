@@ -1,13 +1,17 @@
 from __future__ import annotations
 
+import datetime
+import enum
 import logging
 from dataclasses import dataclass
 from typing import Dict, Optional, List, TYPE_CHECKING
+
 import aiosqlite
 from aiosqlite import Connection
 
 if TYPE_CHECKING:
     import aoi
+
 
 @dataclass
 class _GuildSetting:
@@ -17,6 +21,23 @@ class _GuildSetting:
     perm_errors: bool
 
 
+@dataclass(frozen=True)
+class _Punishment:
+    user: int
+    guild: int
+    staff: int
+    typ: int
+    reason: str
+    time: datetime.datetime
+
+
+class PunishmentType:
+    BAN = 0
+    KICK = 1
+    MUTE = 2
+    WARN = 3
+
+
 class AoiDatabase:
     def __init__(self, bot: aoi.AoiBot):
         self.db: Optional[Connection] = None
@@ -24,6 +45,38 @@ class AoiDatabase:
         self.prefixes: Dict[int, str] = {}
         self.perm_chains: Dict[int, List[str]] = {}
         self.bot = bot
+
+    async def lookup_punishments(self, user: int) -> List[_Punishment]:
+        cursor = await self.db.execute("SELECT * from punishments where user=?", (user,))
+        punishments = await cursor.fetchall()
+        return [
+            _Punishment(
+                *p[:5],
+                time=datetime.datetime.fromtimestamp(p[5])
+            )
+            for p in punishments
+        ]
+
+    async def add_punishment(self, user: int, guild: int, staff: int, typ: int,
+                             reason: str = None):
+        await self.db.execute("INSERT INTO punishments "
+                              "(user, guild, staff, type, reason, timestamp) values"
+                              "(?,?,?,?,?,?)",
+                              (user, guild, staff, typ, reason, datetime.datetime.now().timestamp())
+                              )
+        await self.db.commit()
+
+    async def add_user_ban(self, user: int, ctx: aoi.AoiContext, reason: str = None):
+        await self.add_punishment(user, ctx.guild.id, ctx.author.id, PunishmentType.BAN, reason)
+
+    async def add_user_mute(self, user: int, ctx: aoi.AoiContext, reason: str = None):
+        await self.add_punishment(user, ctx.guild.id, ctx.author.id, PunishmentType.MUTE, reason)
+
+    async def add_user_warn(self, user: int, ctx: aoi.AoiContext, reason: str = None):
+        await self.add_punishment(user, ctx.guild.id, ctx.author.id, PunishmentType.WARN, reason)
+
+    async def add_user_kick(self, user: int, ctx: aoi.AoiContext, reason: str = None):
+        await self.add_punishment(user, ctx.guild.id, ctx.author.id, PunishmentType.KICK, reason)
 
     async def load(self):
         logging.info("database:Connecting to database")
