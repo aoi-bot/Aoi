@@ -4,7 +4,7 @@ import asyncio
 import datetime
 import logging
 from dataclasses import dataclass
-from typing import Dict, Optional, List, TYPE_CHECKING
+from typing import Dict, Optional, List, TYPE_CHECKING, Union
 
 import aiosqlite
 import discord
@@ -88,18 +88,24 @@ class AoiDatabase:
         await self.cache_flush()
         await self.db.close()
 
-    async def ensure_xp_entry(self, msg: discord.Message):
+    async def ensure_xp_entry(self, msg: Union[discord.Message, discord.Member]):
+        if isinstance(msg, discord.Message):
+            guild_id = msg.guild.id
+            user_id = msg.author.id
+        else:
+            guild_id = msg.guild.id
+            user_id = msg.id
         logging.log(15, "xp:ensure:waiting for lock")
         async with self.xp_lock:
             logging.log(15, "xp:ensure:-got lock")
-            if msg.guild.id not in self.xp:
-                self.xp[msg.guild.id] = {}
-            if msg.author.id not in self.xp[msg.guild.id]:
-                self.xp[msg.guild.id][msg.author.id] = 0
-            if msg.guild.id not in self.changed_xp:
-                self.changed_xp[msg.guild.id] = []
-            if msg.author.id not in self.changed_xp[msg.guild.id]:
-                self.changed_xp[msg.guild.id].append(msg.author.id)
+            if guild_id not in self.xp:
+                self.xp[guild_id] = {}
+            if user_id not in self.xp[guild_id]:
+                self.xp[guild_id][user_id] = 0
+            if guild_id not in self.changed_xp:
+                self.changed_xp[guild_id] = []
+            if user_id not in self.changed_xp[guild_id]:
+                self.changed_xp[guild_id].append(user_id)
         logging.log(15, f"xp:ensure:-releasing lock")
 
     async def add_xp(self, msg: discord.Message):
