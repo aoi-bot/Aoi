@@ -111,6 +111,23 @@ class XP(commands.Cog):
         self.bot.db.xp[member.guild.id][member.id] = xp
         await self.bot.db.cache_flush()
 
+    @commands.command(
+        brief="Checks server xp leaderboard"
+    )
+    async def xplb(self, ctx: aoi.AoiContext, page: int = 1):
+        r = self._get_ranked(ctx.guild.id)
+        _n_per_page = 10
+        top_10 = {k: (n, r[k]) for n, k in enumerate(list(r.keys())[(page-1) * _n_per_page:page * _n_per_page])}
+        await ctx.embed(
+            title="Leaderboard",
+            fields=[
+                (f"#{v[0] + 1 + (page-1) * _n_per_page} {self.bot.get_user(k)}",
+                 f"Level {_level(v[1])[0]} - {v[1]} xp") for k, v in top_10.items()
+            ],
+            not_inline=list(range(_n_per_page))
+        )
+
+
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(XP(bot))
