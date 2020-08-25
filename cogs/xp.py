@@ -27,16 +27,17 @@ def _level(xp: int):
         if v > xp:
             return n - 1, lvl_list[n] - (v - xp)
 
+def _font(size: int) -> PIL.ImageFont.ImageFont:
+    return PIL.ImageFont.truetype(
+            "assets/merged.ttf", size=size)
 
 class XP(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
         fp = open("assets/background.png", "rb")
         self.img: PIL.Image.Image = PIL.Image.open(fp)
-        self.level_font: PIL.ImageFont.ImageFont = PIL.ImageFont.truetype(
-            "assets/DejaVuSans-Oblique.ttf", size=42)
-        self.text_font: PIL.ImageFont.ImageFont = PIL.ImageFont.truetype(
-            "assets/DejaVuSans-Oblique.ttf", size=30)
+        self.level_font: PIL.ImageFont.ImageFont = _font(42)
+        self.text_font: PIL.ImageFont.ImageFont = _font(30)
 
     @commands.command()
     async def xp(self, ctx: aoi.AoiContext, member: discord.Member = None):
@@ -46,12 +47,24 @@ class XP(commands.Cog):
         l, x = _level(xp)
         buf = io.BytesIO()
         img = self.img.copy()
+        poly_width = 243 * x / _xp_per_level(l+1)
+        poly = [(119, 11), (112, 59), (112 + poly_width, 59), (119+poly_width, 11)]
+        overlay = PIL.Image.new("RGBA", img.size, (0, 0, 0, 0))
+        PIL.ImageDraw.Draw(overlay).polygon(poly, fill=(130, 36, 252, 80))
+        img = PIL.Image.alpha_composite(img, overlay)
         draw = PIL.ImageDraw.Draw(img)
         draw.text((21, 13), text=str(l), font=self.level_font,
                   fill=(78, 1, 172))
-        name_size = draw.textsize(member.name, font=self.text_font)[0]
+        name_font = _font(30)
+        name_size, name_height = draw.textsize(member.name, font=self.text_font)
+        sz = 30
+        while name_size > 330 and sz > 4:
+            sz -= 1
+            print(f"try {sz}")
+            name_font = _font(sz)
+            name_size, name_height = draw.textsize(member.name, font=name_font)
         # y 15 x 190 64
-        draw.text((190 - name_size / 2, 196), text=member.name, font=self.text_font,
+        draw.text((190 - name_size / 2, 214-name_height/2), text=member.name, font=name_font,
                   fill=(78, 1, 172))
         rem_level_size = draw.textsize(f"{x}/"
                                        f"{_xp_per_level(l + 1)}", font=self.text_font)[0]

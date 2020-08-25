@@ -8,7 +8,7 @@ from discord.ext import commands
 
 import aoi
 
-logging.basicConfig(level=15)
+logging.basicConfig(level=logging.INFO)
 logging.addLevelName(15, "BDBG")
 dotenv.load_dotenv(".env")
 
