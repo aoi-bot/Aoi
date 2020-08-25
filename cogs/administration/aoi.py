@@ -42,6 +42,14 @@ class Aoi(commands.Cog):
     async def ping(self, ctx: aoi.AoiContext):
         await ctx.send_info(f":ping_pong: {round(self.bot.latency*1000)}ms")
 
+    @commands.is_owner()
+    @commands.command(
+        brief="Log AOI out"
+    )
+    async def die(self, ctx: aoi.AoiContext):
+        await self.bot.db.close()
+        await self.bot.logout()
+
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Aoi(bot))

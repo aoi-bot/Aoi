@@ -7,6 +7,8 @@ import discord
 from discord.ext import commands
 import logging
 import os
+
+import aoi
 from wrappers import gmaps as gmaps
 from .custom_context import AoiContext
 from .database import AoiDatabase
@@ -27,8 +29,11 @@ class AoiBot(commands.Bot):
         self.gmap: Optional[gmaps.GeoLocation] = None
 
     async def on_message(self, message: discord.Message):
-        ctx = await self.get_context(message, cls=AoiContext)
+        ctx: aoi.AoiContext = await self.get_context(message, cls=AoiContext)
         await self.invoke(ctx)
+        if not ctx.command and not message.author.bot:
+            await self.db.ensure_xp_entry(message)
+            await self.db.add_xp(message)
 
     async def start(self, *args, **kwargs):
         """|coro|
