@@ -1,5 +1,6 @@
 import io
 import itertools
+from typing import Dict
 
 import PIL
 import PIL.Image
@@ -27,9 +28,11 @@ def _level(xp: int):
         if v > xp:
             return n - 1, lvl_list[n] - (v - xp)
 
+
 def _font(size: int) -> PIL.ImageFont.ImageFont:
     return PIL.ImageFont.truetype(
-            "assets/merged.ttf", size=size)
+        "assets/merged.ttf", size=size)
+
 
 class XP(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
@@ -39,20 +42,35 @@ class XP(commands.Cog):
         self.level_font: PIL.ImageFont.ImageFont = _font(42)
         self.text_font: PIL.ImageFont.ImageFont = _font(30)
 
+    def _get_ranked(self, guild: id) -> Dict[int, int]:
+        order = sorted(self.bot.db.xp[guild].items(), key=lambda x: x[1], reverse=True)
+        return {o[0]: o[1] for o in order}
+
+    def _get_rank(self, member: discord.Member) -> int:
+        # only called in xp, so no need for ensure_xp_entry
+        r = 0
+        for k, v in self._get_ranked(member.guild.id).items():
+            r += 1
+            if k == member.id:
+                return r
+
     @commands.command()
     async def xp(self, ctx: aoi.AoiContext, member: discord.Member = None):
         member = member or ctx.author
         await self.bot.db.ensure_xp_entry(member)
         xp = self.bot.db.xp[ctx.guild.id][member.id]
         l, x = _level(xp)
+        r = self._get_rank(member)
         buf = io.BytesIO()
         img = self.img.copy()
-        poly_width = 243 * x / _xp_per_level(l+1)
-        poly = [(119, 11), (112, 59), (112 + poly_width, 59), (119+poly_width, 11)]
+        poly_width = 243 * x / _xp_per_level(l + 1)
+        poly = [(119, 11), (112, 59), (112 + poly_width, 59), (119 + poly_width, 11)]
         overlay = PIL.Image.new("RGBA", img.size, (0, 0, 0, 0))
         PIL.ImageDraw.Draw(overlay).polygon(poly, fill=(130, 36, 252, 80))
         img = PIL.Image.alpha_composite(img, overlay)
         draw = PIL.ImageDraw.Draw(img)
+        draw.text((8, 75), text=f"#{r}", font=_font(24),
+                  fill=(78, 1, 172))
         draw.text((21, 13), text=str(l), font=self.level_font,
                   fill=(78, 1, 172))
         name_font = _font(30)
@@ -64,7 +82,7 @@ class XP(commands.Cog):
             name_font = _font(sz)
             name_size, name_height = draw.textsize(member.name, font=name_font)
         # y 15 x 190 64
-        draw.text((190 - name_size / 2, 214-name_height/2), text=member.name, font=name_font,
+        draw.text((190 - name_size / 2, 214 - name_height / 2), text=member.name, font=name_font,
                   fill=(78, 1, 172))
         rem_level_size = draw.textsize(f"{x}/"
                                        f"{_xp_per_level(l + 1)}", font=self.text_font)[0]
