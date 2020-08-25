@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 
@@ -6,10 +7,9 @@ import dotenv
 from discord.ext import commands
 
 import aoi
-import asyncio
 
 logging.basicConfig(level=logging.INFO)
-
+logging.addLevelName(15, "BDBG")
 dotenv.load_dotenv(".env")
 
 
@@ -38,6 +38,7 @@ extensions = [
     "cogs.geolocation",
     "cogs.nasa",
     "cogs.weather",
+    "cogs.xp",
 
     # utility and config cogs
     "cogs.errorhandler",
