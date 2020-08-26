@@ -4,7 +4,7 @@ import asyncio
 import datetime
 import logging
 from dataclasses import dataclass
-from typing import Dict, Optional, List, TYPE_CHECKING, Union
+from typing import Dict, Optional, List, TYPE_CHECKING, Union, Tuple
 
 import aiosqlite
 import discord
@@ -48,10 +48,15 @@ class AoiDatabase:
         self.perm_chains: Dict[int, List[str]] = {}
         self.bot = bot
         self.xp_lock = asyncio.Lock()
+        self.title_lock = asyncio.Lock()
+        self.global_currency_lock = asyncio.Lock()
         self.xp: Dict[int, Dict[int, int]] = {}
         self.changed_xp: Dict[int, List[int]] = {}
+        self.badges: Dict[int, List[str]] = {}
         self.global_currency: Dict[int, int] = {}
+        self.changed_global_currency: List[int] = []
         self.global_xp: Dict[int, int] = {}
+        self.titles: Dict[int, str] = {}
         self.xp_cooldown = commands.CooldownMapping.from_cooldown(
             1.0, 180.0, commands.BucketType.member)
 
@@ -86,14 +91,51 @@ class AoiDatabase:
                 self.xp[r[1]] = {}
             self.xp[r[1]][r[0]] = r[2]
             self.global_xp[r[0]] = self.global_xp.get(r[0], 0) + r[2]
-        self._cache_flush_loop.start()
 
         # load global currency
+        cursor = await self.db.execute("SELECT * from global_currency")
+        rows = await cursor.fetchall()
+        await cursor.close()
+        for r in rows:
+            self.global_currency[r[0]] = r[1]
 
+        cursor = await self.db.execute("SELECT * from user")
+        rows = await cursor.fetchall()
+        await cursor.close()
+        for r in rows:
+            self.titles[r[0]] = r[1]
+            self.badges[r[0]] = r[2].split(",")
+
+        self._cache_flush_loop.start()
 
     async def close(self):
         await self.cache_flush()
         await self.db.close()
+
+    async def get_global_currency(self, member: discord.Member):
+        async with self.global_currency_lock:
+            if member.id not in self.global_currency:
+                self.global_currency[member.id] = 0
+                if member.id not in self.changed_global_currency:
+                    self.changed_global_currency.append(member.id)
+        return self.global_currency[member.id]
+
+    async def add_global_currency(self, member: discord.Member, amount: int):
+        async with self.global_currency_lock:
+            if member.id not in self.global_currency:
+                self.global_currency[member.id] = amount
+                if member.id not in self.changed_global_currency:
+                    self.changed_global_currency.append(member.id)
+
+    async def get_badges_titles(self, member: discord.Member) -> Tuple[str, List[str]]:
+        async with self.title_lock:
+            if member.id not in self.titles:
+                self.titles[member.id] = ""
+                self.badges[member.id] = []
+                await self.db.execute("insert into tables (user, title, badges) "
+                                      "values (?,?,?)", (member.id, "", ""))
+                await self.db.commit()
+            return self.titles[member.id], self.badges[member.id]
 
     async def ensure_xp_entry(self, msg: Union[discord.Message, discord.Member]):
         if isinstance(msg, discord.Message):
@@ -165,6 +207,17 @@ class AoiDatabase:
             await self.db.commit()
             self.changed_xp = {}
         logging.log(15, "xp:flush:released")
+        async with self.global_currency_lock:
+            for u in self.changed_global_currency:
+                a = await self.db.execute("SELECT * from global_currency where user=?",
+                                          (u,))
+                if not await a.fetchall():
+                    await self.db.execute("insert into global_currency (user, amount) "
+                                          "values (?,?)", (u, 0))
+                await self.db.execute("update global_currency set amount=? where user=?",
+                                      (u, self.global_currency[u]))
+            await self.db.commit()
+            self.changed_global_currency = []
 
     async def lookup_punishments(self, user: int) -> List[_Punishment]:
         cursor = await self.db.execute("SELECT * from punishments where user=?", (user,))

@@ -39,6 +39,8 @@ extensions = [
     "cogs.nasa",
     "cogs.weather",
     "cogs.xp",
+    "cogs.profile",
+    "cogs.currency",
 
     # utility and config cogs
     "cogs.errorhandler",
