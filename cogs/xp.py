@@ -44,6 +44,10 @@ class XP(commands.Cog):
         self.level_font: PIL.ImageFont.ImageFont = _font(42)
         self.text_font: PIL.ImageFont.ImageFont = _font(30)
 
+    @property
+    def description(self):
+        return "Commands dealing with XP"
+
     @commands.is_owner()
     @commands.command(
         brief="Reloads the xp images"

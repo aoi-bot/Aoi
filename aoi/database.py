@@ -50,6 +50,7 @@ class AoiDatabase:
         self.xp_lock = asyncio.Lock()
         self.xp: Dict[int, Dict[int, int]] = {}
         self.changed_xp: Dict[int, List[int]] = {}
+        self.global_currency: Dict[int, int] = {}
         self.global_xp: Dict[int, int] = {}
         self.xp_cooldown = commands.CooldownMapping.from_cooldown(
             1.0, 180.0, commands.BucketType.member)
@@ -86,6 +87,9 @@ class AoiDatabase:
             self.xp[r[1]][r[0]] = r[2]
             self.global_xp[r[0]] = self.global_xp.get(r[0], 0) + r[2]
         self._cache_flush_loop.start()
+
+        # load global currency
+
 
     async def close(self):
         await self.cache_flush()
