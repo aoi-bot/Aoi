@@ -15,9 +15,9 @@ class Currency(commands.Cog):
 
     @commands.is_owner()
     @commands.command(
-        brief="Give or take currency"
+        brief="Give or take currency globally"
     )
-    async def award(self, ctx: aoi.AoiContext, member: Optional[discord.Member], amount: int):
+    async def award_g(self, ctx: aoi.AoiContext, member: Optional[discord.Member], amount: int):
         member = member or ctx.author
         await self.bot.db.add_global_currency(member, amount)
         await ctx.send_info(f"Added ${amount} to {member.mention}. Their new total is "
