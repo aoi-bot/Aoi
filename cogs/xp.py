@@ -37,12 +37,29 @@ def _font(size: int) -> PIL.ImageFont.ImageFont:
 class XP(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
-        fp = open("assets/background.png", "rb")
-        self.img: PIL.Image.Image = PIL.Image.open(fp)
+        self.fp = open("assets/background.png", "rb")
+        self.xp_img: PIL.Image.Image = PIL.Image.open(self.fp)
+        self.fp_g = open("assets/g_background.png", "rb")
+        self.g_xp_img: PIL.Image.Image = PIL.Image.open(self.fp_g)
         self.level_font: PIL.ImageFont.ImageFont = _font(42)
         self.text_font: PIL.ImageFont.ImageFont = _font(30)
 
-    def _get_ranked(self, guild: id) -> Dict[int, int]:
+    @commands.is_owner()
+    @commands.command(
+        brief="Reloads the xp images"
+    )
+    async def xpr(self, ctx: aoi.AoiContext):
+        self.fp.close()
+        self.fp_g.close()
+        self.fp = open("assets/background.png", "rb")
+        self.xp_img: PIL.Image.Image = PIL.Image.open(self.fp)
+        self.fp_g = open("assets/g_background.png", "rb")
+        self.g_xp_img: PIL.Image.Image = PIL.Image.open(self.fp_g)
+        self.level_font: PIL.ImageFont.ImageFont = _font(42)
+        self.text_font: PIL.ImageFont.ImageFont = _font(30)
+        await ctx.send_ok("Images and fonts reloaded")
+
+    def _get_ranked(self, guild: int) -> Dict[int, int]:
         order = sorted(self.bot.db.xp[guild].items(), key=lambda x: x[1], reverse=True)
         return {o[0]: o[1] for o in order}
 
@@ -54,7 +71,19 @@ class XP(commands.Cog):
             if k == member.id:
                 return r
 
-    @commands.command()
+    def _get_global_rank(self, member: discord.Member) -> int:
+        order = sorted(self.bot.db.global_xp.items(), key=lambda x: x[1], reverse=True)
+        ordered = {o[0]: o[1] for o in order}
+        r = 0
+        for k, v in ordered.items():
+            r += 1
+            if k == member.id:
+                return r
+
+
+    @commands.command(
+        brief="Gets the XP of a user"
+    )
     async def xp(self, ctx: aoi.AoiContext, member: discord.Member = None):
         member = member or ctx.author
         await self.bot.db.ensure_xp_entry(member)
@@ -62,7 +91,7 @@ class XP(commands.Cog):
         l, x = _level(xp)
         r = self._get_rank(member)
         buf = io.BytesIO()
-        img = self.img.copy()
+        img = self.xp_img.copy()
         poly_width = 243 * x / _xp_per_level(l + 1)
         poly = [(119, 11), (112, 59), (112 + poly_width, 59), (119 + poly_width, 11)]
         overlay = PIL.Image.new("RGBA", img.size, (0, 0, 0, 0))
@@ -93,6 +122,50 @@ class XP(commands.Cog):
         img.save(fp=buf, format="png")
         buf.seek(0)
         await ctx.send(file=(discord.File(buf, "xp.png")))
+
+    @commands.command(
+        brief="Gets the global XP of a user"
+    )
+    async def gxp(self, ctx: aoi.AoiContext, member: discord.Member = None):
+        color = (229, 34, 147)
+        dark_color = tuple(map(lambda _x: int(_x/1.2), color))
+        member = member or ctx.author
+        await self.bot.db.ensure_xp_entry(member)
+        xp = self.bot.db.global_xp[member.id]
+        l, x = _level(xp)
+        r = self._get_global_rank(member)
+        buf = io.BytesIO()
+        img = self.g_xp_img.copy()
+        poly_width = 243 * x / _xp_per_level(l + 1)
+        poly = [(119, 11), (112, 59), (112 + poly_width, 59), (119 + poly_width, 11)]
+        overlay = PIL.Image.new("RGBA", img.size, (0, 0, 0, 0))
+        PIL.ImageDraw.Draw(overlay).polygon(poly, fill=color + (120,))
+        img = PIL.Image.alpha_composite(img, overlay)
+        draw = PIL.ImageDraw.Draw(img)
+        draw.text((8, 75), text=f"#{r}", font=_font(24),
+                  fill=color)
+        draw.text((21, 13), text=str(l), font=self.level_font,
+                  fill=color)
+        name_font = _font(30)
+        name_size, name_height = draw.textsize(member.name, font=self.text_font)
+        sz = 30
+        while name_size > 330 and sz > 4:
+            sz -= 1
+            print(f"try {sz}")
+            name_font = _font(sz)
+            name_size, name_height = draw.textsize(member.name, font=name_font)
+        # y 15 x 190 64
+        draw.text((190 - name_size / 2, 214 - name_height / 2), text=member.name, font=name_font,
+                  fill=color)
+        rem_level_size = draw.textsize(f"{x}/"
+                                       f"{_xp_per_level(l + 1)}", font=self.text_font)[0]
+        # y 10 x 111 364
+        draw.text((230 - rem_level_size / 2, 19), text=f"{x}/"
+                                                       f"{_xp_per_level(l + 1)}", font=self.text_font,
+                  fill=color)
+        img.save(fp=buf, format="png")
+        buf.seek(0)
+        await ctx.send(file=(discord.File(buf, "gxp.png")))
 
     @commands.is_owner()
     @commands.command(
