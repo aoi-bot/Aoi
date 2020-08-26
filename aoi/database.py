@@ -50,6 +50,7 @@ class AoiDatabase:
         self.xp_lock = asyncio.Lock()
         self.xp: Dict[int, Dict[int, int]] = {}
         self.changed_xp: Dict[int, List[int]] = {}
+        self.global_xp: Dict[int, int] = {}
         self.xp_cooldown = None
 
     async def load(self):
@@ -82,6 +83,7 @@ class AoiDatabase:
             if r[1] not in self.xp:
                 self.xp[r[1]] = {}
             self.xp[r[1]][r[0]] = r[2]
+            self.global_xp[r[0]] = self.global_xp.get(r[0], 0) + r[2]
         self._cache_flush_loop.start()
 
     async def close(self):
@@ -98,6 +100,10 @@ class AoiDatabase:
         logging.log(15, "xp:ensure:waiting for lock")
         async with self.xp_lock:
             logging.log(15, "xp:ensure:-got lock")
+            if user_id not in self.global_xp:
+                self.global_xp[user_id] = 0
+                for _, v in self.xp.items():
+                    self.global_xp[user_id] += v.get(user_id, 0)
             if guild_id not in self.xp:
                 self.xp[guild_id] = {}
             if user_id not in self.xp[guild_id]:
@@ -117,6 +123,7 @@ class AoiDatabase:
         async with self.xp_lock:
             logging.log(15, f"xp:add:-got lock")
             self.xp[msg.guild.id][msg.author.id] += 3
+            self.global_xp[msg.author.id] += 3
             if msg.author.id not in self.changed_xp[msg.guild.id]:
                 logging.log(15, f"xp:add:-adding user change for {msg.author}")
                 self.changed_xp[msg.guild.id].append(msg.author.id)
