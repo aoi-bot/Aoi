@@ -9,7 +9,7 @@ from typing import Dict, Optional, List, TYPE_CHECKING, Union
 import aiosqlite
 import discord
 from aiosqlite import Connection
-from discord.ext import tasks
+from discord.ext import tasks, commands
 
 if TYPE_CHECKING:
     import aoi
@@ -51,7 +51,8 @@ class AoiDatabase:
         self.xp: Dict[int, Dict[int, int]] = {}
         self.changed_xp: Dict[int, List[int]] = {}
         self.global_xp: Dict[int, int] = {}
-        self.xp_cooldown = None
+        self.xp_cooldown = commands.CooldownMapping.from_cooldown(
+            1.0, 180.0, commands.BucketType.member)
 
     async def load(self):
         logging.info("database:Connecting to database")
@@ -117,8 +118,18 @@ class AoiDatabase:
     async def add_xp(self, msg: discord.Message):
         if msg.author.bot:
             return
+        if self.xp_cooldown.get_bucket(msg).update_rate_limit():
+            return
         logging.log(15, f"xp:add:ensure xp entry for {msg.author}")
         await self.ensure_xp_entry(msg)
+        c = 0
+        for i in msg.guild.members:
+            if not i.bot:
+                c += 1
+            if c == 3:
+                break
+        if c < 3:
+            return
         logging.log(15, f"xp:add:waiting for lock")
         async with self.xp_lock:
             logging.log(15, f"xp:add:-got lock")
@@ -137,7 +148,6 @@ class AoiDatabase:
         logging.log(15, "xp:flush:waiting for lock")
         async with self.xp_lock:
             logging.log(15, "xp:flush:-got lock")
-            print(self.changed_xp)
             for guild, users in self.changed_xp.items():
                 for u in users:
                     xp = self.xp[guild][u]
