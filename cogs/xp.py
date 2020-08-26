@@ -59,7 +59,7 @@ class XP(commands.Cog):
         self.text_font: PIL.ImageFont.ImageFont = _font(30)
         await ctx.send_ok("Images and fonts reloaded")
 
-    def _get_ranked(self, guild: id) -> Dict[int, int]:
+    def _get_ranked(self, guild: int) -> Dict[int, int]:
         order = sorted(self.bot.db.xp[guild].items(), key=lambda x: x[1], reverse=True)
         return {o[0]: o[1] for o in order}
 
@@ -70,6 +70,16 @@ class XP(commands.Cog):
             r += 1
             if k == member.id:
                 return r
+
+    def _get_global_rank(self, member: discord.Member) -> int:
+        order = sorted(self.bot.db.global_xp.items(), key=lambda x: x[1], reverse=True)
+        ordered = {o[0]: o[1] for o in order}
+        r = 0
+        for k, v in ordered.items():
+            r += 1
+            if k == member.id:
+                return r
+
 
     @commands.command(
         brief="Gets the XP of a user"
@@ -123,6 +133,7 @@ class XP(commands.Cog):
         await self.bot.db.ensure_xp_entry(member)
         xp = self.bot.db.global_xp[member.id]
         l, x = _level(xp)
+        r = self._get_global_rank(member)
         buf = io.BytesIO()
         img = self.g_xp_img.copy()
         poly_width = 243 * x / _xp_per_level(l + 1)
@@ -131,6 +142,8 @@ class XP(commands.Cog):
         PIL.ImageDraw.Draw(overlay).polygon(poly, fill=color + (120,))
         img = PIL.Image.alpha_composite(img, overlay)
         draw = PIL.ImageDraw.Draw(img)
+        draw.text((8, 75), text=f"#{r}", font=_font(24),
+                  fill=color)
         draw.text((21, 13), text=str(l), font=self.level_font,
                   fill=color)
         name_font = _font(30)
