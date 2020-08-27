@@ -1,9 +1,9 @@
-import asyncio
+import io
 import io
 import itertools
 import sys
 import traceback
-from typing import Dict, Any, Tuple, Union
+from typing import Dict, Union
 
 import PIL
 import PIL.Image as I
@@ -22,15 +22,27 @@ print(lvl_list[:6])
 print(ttl_lvl_list[:6])
 
 
+def crop_center(pil_img, crop_width, crop_height):
+    img_width, img_height = pil_img.size
+    return pil_img.crop(((img_width - crop_width) // 2,
+                         (img_height - crop_height) // 2,
+                         (img_width + crop_width) // 2,
+                         (img_height + crop_height) // 2))
+
+
+def crop_max_square(pil_img):
+    return crop_center(pil_img, min(pil_img.size), min(pil_img.size))
+
+
 def _cur_string(cur: int):
     neg = abs(cur) != cur
     cur = abs(cur)
     if cur < 1000:
         return f"{'-' if neg else ''}${cur}"
     elif cur < 100000:
-        return f"{'-' if neg else ''}${round(cur/100)/10}K"
+        return f"{'-' if neg else ''}${round(cur / 100) / 10}K"
     elif cur < 1000000:
-        return f"{'-' if neg else ''}${round(cur/1000)}K"
+        return f"{'-' if neg else ''}${round(cur / 1000)}K"
     elif cur < 1000000000:
         return f"{'-' if neg else ''}${round(cur / 1000000)}M"
     elif cur < 1000000000000:
@@ -133,8 +145,9 @@ class Profile(commands.Cog):
                         _buf.write(await resp.content.read())
                 _buf.seek(0)
                 card_bg = I.open(_buf)
+                card_bg = crop_max_square(card_bg)
                 card_bg = card_bg.resize((512, 512))
-        except Exception as error: # noqa
+        except Exception as error:  # noqa
             card_bg = self.default_bg.copy()
             traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
         card_bg = card_bg.convert("RGBA")
@@ -228,6 +241,7 @@ class Profile(commands.Cog):
                     _buf.write(await resp.content.read())
             _buf.seek(0)
             card_bg = I.open(_buf)
+            card_bg = crop_max_square(card_bg)
             card_bg = card_bg.resize((512, 512))
             _buf2 = io.BytesIO()
             card_bg.save(_buf2, format="png")
@@ -239,13 +253,12 @@ class Profile(commands.Cog):
                     self.bot.db.changed_global_users.append(ctx.author.id)
                 self.bot.db.backgrounds[ctx.author.id] = url
                 await self.bot.db.cache_flush()
-        except Exception as error: # noqa
+        except Exception as error:  # noqa
             if cur_removed:
                 await self.bot.db.award_global_currency(ctx.author, 7500)
             await ctx.send_error("An error occured while setting the background - your currency was not "
                                  "affected")
             traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
-
 
 
 def setup(bot: aoi.AoiBot) -> None:
