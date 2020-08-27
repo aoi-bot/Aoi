@@ -49,6 +49,10 @@ class GlobalShop(commands.Cog):
         amt = r[2]
         title = r[1]
 
+        for r in self.bot.db.owned_titles[ctx.author.id]:
+            if title.lower() == r.lower():
+                return await ctx.send_error("You already own that title")
+
         async def _buy():
             await self.bot.db.award_global_currency(ctx.author, -amt)
             await self.bot.db.add_title(ctx.author, title)
@@ -79,6 +83,7 @@ class GlobalShop(commands.Cog):
     async def equiptitle(self, ctx: aoi.AoiContext, num: int):
         try:
             await self.bot.db.equip_title(ctx.author, num)
+            await ctx.send_ok("Title equipped!")
         except IndexError:
             await ctx.send_error(f"You don't own a title with that index. Do `{ctx.prefix}mytitles` to "
                                  f"view your titles")
