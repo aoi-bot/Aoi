@@ -62,7 +62,7 @@ class GlobalShop(commands.Cog):
             f"Bought `{title}` for ${amt:,}. Do `{ctx.prefix}mytitles` to see your titles.",
             f"Cancelled purchase")
 
-        if amt > self.bot.db.get_global_currency(ctx.author):
+        if amt > await self.bot.db.get_global_currency(ctx.author):
             return await ctx.send_error("That title costs more than you have")
 
         await self.bot.db.award_global_currency(ctx.author, -amt)
