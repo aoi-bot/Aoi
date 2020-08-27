@@ -143,6 +143,12 @@ class Profile(commands.Cog):
                                          32, img_draw, w_pad=24)
         img_draw.text((x, y), f"Level {server_level} - # {self._get_rank(member)}",
                       font=_font(sz))
+
+        x, y, _, _, sz = _center_and_fit(115.8, 319, 257.5, 370,
+                                         f"${await self.bot.db.get_global_currency(member)}",
+                                         32, img_draw, w_pad=24)
+        img_draw.text((x, y), f"${await self.bot.db.get_global_currency(member)}",
+                      font=_font(sz))
         buf = io.BytesIO()
         img.save(fp=buf, format="png")
         buf.seek(0)

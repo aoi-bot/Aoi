@@ -56,6 +56,7 @@ class Aoi(commands.Cog):
     )
     async def flush(self, ctx: aoi.AoiContext):
         await self.bot.db.cache_flush()
+        await ctx.send_ok("Cache flushed to disk")
 
 
 def setup(bot: aoi.AoiBot) -> None:
