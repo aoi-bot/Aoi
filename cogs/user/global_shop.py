@@ -50,7 +50,7 @@ class GlobalShop(commands.Cog):
         title = r[1]
 
         async def _buy():
-            await self.bot.db.award_guild_currency(ctx.author, -amt)
+            await self.bot.db.award_global_currency(ctx.author, -amt)
             await self.bot.db.add_title(ctx.author, title)
 
         await ctx.confirm_coro(
