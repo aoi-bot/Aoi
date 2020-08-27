@@ -172,6 +172,11 @@ class Profile(commands.Cog):
         img_draw = D.Draw(img)
 
         # draw text
+        await self.bot.db.ensure_user_entry(member)
+        x, y, _, _, sz = _center_and_fit(454, 162, 190, 111, (await self.bot.db.get_titles(member))[0], 32, img_draw,
+                                         w_pad=24)
+        img_draw.text((x, y), (await self.bot.db.get_titles(member))[0], font=_font(sz))
+
         x, y, _, _, sz = _center_and_fit(217.6, 80, 480, 32, member.name, 32, img_draw,
                                          w_pad=24)
         img_draw.text((x, y), member.name, font=_font(sz))
