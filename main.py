@@ -44,6 +44,7 @@ extensions = [
     "cogs.user.profile",
     "cogs.user.currency",
     "cogs.user.global_shop",
+    "cogs.user.gambling",
 
     # utility and config cogs
     "cogs.errorhandler",
