@@ -50,7 +50,7 @@ class GlobalShop(commands.Cog):
         amt = r[2]
         title = r[1]
 
-        if amt > self.bot.db.get_global_currency(ctx.author):
+        if amt > await self.bot.db.get_global_currency(ctx.author):
             return await ctx.send_error("That title costs more than you have")
 
         for r in self.bot.db.owned_titles[ctx.author.id]:
