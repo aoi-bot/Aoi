@@ -244,6 +244,7 @@ class AoiDatabase:
                 self.changed_global_currency.append(member.id)
 
     async def get_badges_titles(self, member: discord.Member) -> Tuple[str, List[str], List[str], List[str], str]:
+        await self.ensure_user_entry(member)
         async with self.title_lock:
             if member.id not in self.titles:
                 self.titles[member.id] = ""
