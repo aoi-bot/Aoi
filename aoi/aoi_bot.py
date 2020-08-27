@@ -34,6 +34,7 @@ class AoiBot(commands.Bot):
         if not ctx.command and not message.author.bot:
             await self.db.ensure_xp_entry(message)
             await self.db.add_xp(message)
+            await self.db.add_global_currency(message)
 
     async def start(self, *args, **kwargs):
         """|coro|

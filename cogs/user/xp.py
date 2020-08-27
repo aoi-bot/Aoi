@@ -171,12 +171,6 @@ class XP(commands.Cog):
         buf.seek(0)
         await ctx.send(file=(discord.File(buf, "gxp.png")))
 
-    @commands.is_owner()
-    @commands.command(
-        brief="Flush XP to database manually"
-    )
-    async def flushxp(self, ctx: aoi.AoiContext):
-        await self.bot.db.cache_flush()
 
     @commands.is_owner()
     @commands.command(

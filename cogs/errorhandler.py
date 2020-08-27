@@ -3,17 +3,20 @@ import traceback
 
 import discord
 from discord.ext import commands
+
 import aoi
+
 
 def _(s: str):
     for k, v in {
         "colour": "color"
     }.items():
-        s = s.replace(k, v)\
-            .replace(k.title(), v.title())\
-            .replace(k.lower(), v.lower())\
+        s = s.replace(k, v) \
+            .replace(k.title(), v.title()) \
+            .replace(k.lower(), v.lower()) \
             .replace(k.upper(), v.upper())
     return s
+
 
 class ErrorHandler(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
@@ -27,16 +30,24 @@ class ErrorHandler(commands.Cog):
         if cog:
             if cog._get_overridden_method(cog.cog_command_error) is not None:
                 return
-        ignored = (commands.CommandNotFound, )
+        ignored = (commands.CommandNotFound,)
 
         error = getattr(error, 'original', error)
-        
+
         if isinstance(error, ignored):
             return
         if isinstance(error, commands.NSFWChannelRequired):
-            await ctx.send_error("This command can only be used in nsfw channels")
+            await ctx.send_error("This command can only be used in NSFW channels")
         if isinstance(error, commands.DisabledCommand):
             await ctx.send_error(f'{ctx.command} has been disabled.')
+        elif isinstance(error, (
+                commands.NotOwner,
+                commands.MissingPermissions,
+                commands.BotMissingAnyRole,
+                commands.MissingRole,
+                commands.BotMissingPermissions
+        )):
+            await ctx.send_error(_(str(error)))
         elif isinstance(error, commands.NoPrivateMessage):
             try:
                 await ctx.author.send(f'{ctx.command} can not be used in Private Messages.')

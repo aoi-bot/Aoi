@@ -38,7 +38,13 @@ extensions = [
     "cogs.geolocation",
     "cogs.nasa",
     "cogs.weather",
-    "cogs.xp",
+
+    # user/currency cogs
+    "cogs.user.xp",
+    "cogs.user.profile",
+    "cogs.user.currency",
+    "cogs.user.global_shop",
+    "cogs.user.gambling",
 
     # utility and config cogs
     "cogs.errorhandler",
