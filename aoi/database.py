@@ -185,6 +185,9 @@ class AoiDatabase:
         for r in rows:
             self.currency_gains[r[0]] = r[1]
 
+        for i in self.bot.guilds:
+            await self.ensure_currency_gain(i)
+
         cursor = await self.db.execute("select * from guild_currency")
         rows = await cursor.fetchall()
         await cursor.close()
@@ -192,6 +195,10 @@ class AoiDatabase:
             if r[0] not in self.guild_currency:
                 self.guild_currency[r[0]] = {}
             self.guild_currency[r[0]][r[1]] = r[2]
+
+        for i in self.bot.guilds:
+            for m in i.members:
+                await self.ensure_user_entry(m)
 
         self._cache_flush_loop.start()
 
