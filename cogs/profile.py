@@ -118,16 +118,7 @@ class Profile(commands.Cog):
                         _buf.write(await resp.content.read())
                 _buf.seek(0)
                 card_bg = I.open(_buf)
-                w, h = card_bg.size
-                if w > h:
-                    card_bg = card_bg.resize((int(512 * w/h), h))
-                else:
-                    card_bg = card_bg.resize((w, int(512 * h/w)))
-                left = (card_bg.size[0] - 512) / 2
-                top = (card_bg.size[1] - 512) / 2
-                right = (card_bg.size[0] + 512) / 2
-                bottom = (card_bg.size[1] + 512) / 2
-                card_bg = card_bg.crop((left, top, right, bottom))
+                card_bg = card_bg.resize((512, 512))
         except Exception as error: # noqa
             card_bg = self.default_bg.copy()
             traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
@@ -211,16 +202,7 @@ class Profile(commands.Cog):
                     _buf.write(await resp.content.read())
             _buf.seek(0)
             card_bg = I.open(_buf)
-            w, h = card_bg.size
-            if w > h:
-                card_bg = card_bg.resize((int(512 * w/h), h))
-            else:
-                card_bg = card_bg.resize((w, int(512 * h/w)))
-            left = (card_bg.size[0] - 512) / 2
-            top = (card_bg.size[1] - 512) / 2
-            right = (card_bg.size[0] + 512) / 2
-            bottom = (card_bg.size[1] + 512) / 2
-            card_bg = card_bg.crop((left, top, right, bottom))
+            card_bg = card_bg.resize((512, 512))
             _buf2 = io.BytesIO()
             card_bg.save(_buf2, format="png")
             await ctx.embed(image=_buf2, trash_reaction=False)
