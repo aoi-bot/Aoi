@@ -64,6 +64,7 @@ class AoiDatabase:
         self.badges: Dict[int, List[str]] = {}
         self.owned_badges: Dict[int, List[str]] = {}
         self.backgrounds: Dict[int, str] = {}
+        self.changed_global_users: List[int] = []
 
         self.xp_cooldown = commands.CooldownMapping.from_cooldown(
             1.0, 180.0, commands.BucketType.member)
@@ -245,6 +246,22 @@ class AoiDatabase:
                                       (self.global_currency[u], u))
             await self.db.commit()
             self.changed_global_currency = []
+        async with self.title_lock:
+            for u in self.changed_global_users:
+                a = await self.db.execute("select * from user_global where user=?", (u,))
+                if not await a.fetchall():
+                    await self.db.execute("insert into user_global (user, title, badges, owned_titles, owned_badges,"
+                                          "background) "
+                                          "values (?,?,?,?,?,?)", (u, "", "", "", "", ""))
+                await self.db.execute("update user_global set title=?, badges=?, owned_titles=?, "
+                                      "owned_badges=?, background=? where user=?",
+                                      (self.titles[u],
+                                       ",".join(self.badges[u]),
+                                       ",".join(self.owned_titles[u]),
+                                       ",".join(self.owned_badges[u]),
+                                       self.backgrounds[u],
+                                       u))
+            await self.db.commit()
 
     async def lookup_punishments(self, user: int) -> List[_Punishment]:
         cursor = await self.db.execute("SELECT * from punishments where user=?", (user,))

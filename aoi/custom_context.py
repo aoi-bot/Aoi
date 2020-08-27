@@ -111,7 +111,8 @@ class AoiContext(commands.Context):
                     clr: discord.Colour = None,
                     image: Union[str, io.BufferedIOBase] = None,
                     footer: str = None,
-                    not_inline: List[int] = []):
+                    not_inline: List[int] = [],
+                    trash_reaction: bool = True):
         if typ and clr:
             raise ValueError("typ and clr can not be both defined")
         embed = discord.Embed(
@@ -137,7 +138,8 @@ class AoiContext(commands.Context):
         for n, r in enumerate(fields or []):
             embed.add_field(name=r[0], value=r[1] or "None", inline=n not in not_inline)
         msg = await self.send(embed=embed, file=f)
-        await self.trash_reaction(msg)
+        if trash_reaction:
+            await self.trash_reaction(msg)
 
     def group_list(self, lst: List[Any], n: int) -> List[List[Any]]:
         """

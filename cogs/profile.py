@@ -1,6 +1,8 @@
 import asyncio
 import io
 import itertools
+import sys
+import traceback
 from typing import Dict, Any, Tuple, Union
 
 import PIL
@@ -37,9 +39,7 @@ def _center(x, y, x2, y2, w, h):
 def _fit(w, h, text, size, draw, *, w_pad=5, h_pad=5):
     _w, _h = draw.textsize(text, font=_font(size))
     while ((_w > w - w_pad * 2) or (_h > h - h_pad * 2)) and size > 4:
-        print(_w, w, w + w_pad * 2)
         size -= 1
-        print(f"try {size}")
         _w, _h = draw.textsize(text, font=_font(size))
     return _w, _h, size
 
@@ -117,19 +117,21 @@ class Profile(commands.Cog):
                         resp.raise_for_status()
                         _buf.write(await resp.content.read())
                 _buf.seek(0)
-                card_bg = I.open(self._buf)
-                w, h = card_bg.size()
+                card_bg = I.open(_buf)
+                w, h = card_bg.size
                 if w > h:
-                    card_bg = card_bg.resize(int(500 * w/h), h)
+                    card_bg = card_bg.resize((int(512 * w/h), h))
                 else:
-                    card_bg = card_bg.resize(w, int(500 * h/w))
-                left = (card_bg.size[0] - 500) / 2
-                top = (card_bg.size[1] - 500) / 2
-                right = (card_bg.size[0] + 500) / 2
-                bottom = (card_bg.size[1] + 500) / 2
+                    card_bg = card_bg.resize((w, int(512 * h/w)))
+                left = (card_bg.size[0] - 512) / 2
+                top = (card_bg.size[1] - 512) / 2
+                right = (card_bg.size[0] + 512) / 2
+                bottom = (card_bg.size[1] + 512) / 2
                 card_bg = card_bg.crop((left, top, right, bottom))
-        except: # noqa
+        except Exception as error: # noqa
             card_bg = self.default_bg.copy()
+            traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+        card_bg = card_bg.convert("RGBA")
         await self.bot.db.ensure_xp_entry(member)
         global_xp = self.bot.db.global_xp[member.id]
         server_xp = self.bot.db.xp[ctx.guild.id][member.id]
@@ -191,6 +193,51 @@ class Profile(commands.Cog):
         img.save(fp=buf, format="png")
         buf.seek(0)
         await ctx.send(file=(discord.File(buf, "profile.png")))
+
+    @commands.command(
+        brief="Change your profile card for $7500 (global)"
+    )
+    async def profilecard(self, ctx: aoi.AoiContext, url: str):
+        if await self.bot.db.get_global_currency(ctx.author) < 7500:
+            return await ctx.send_error("You don't have enough global currency for this.")
+        try:
+            cur_removed = False
+            # make sure that the user has a record in the db
+            _, _, _, _, _ = await self.bot.db.get_badges_titles(ctx.author)
+            _buf = io.BytesIO()
+            async with aiohttp.ClientSession() as sess:
+                async with sess.get(url) as resp:
+                    resp.raise_for_status()
+                    _buf.write(await resp.content.read())
+            _buf.seek(0)
+            card_bg = I.open(_buf)
+            w, h = card_bg.size
+            if w > h:
+                card_bg = card_bg.resize((int(512 * w/h), h))
+            else:
+                card_bg = card_bg.resize((w, int(512 * h/w)))
+            left = (card_bg.size[0] - 512) / 2
+            top = (card_bg.size[1] - 512) / 2
+            right = (card_bg.size[0] + 512) / 2
+            bottom = (card_bg.size[1] + 512) / 2
+            card_bg = card_bg.crop((left, top, right, bottom))
+            _buf2 = io.BytesIO()
+            card_bg.save(_buf2, format="png")
+            await ctx.embed(image=_buf2, trash_reaction=False)
+            if await ctx.confirm("Set this image as your background?", "Image set", "Image not set"):
+                await self.bot.db.award_global_currency(ctx.author, -7500)
+                cur_removed = True
+                if ctx.author.id not in self.bot.db.changed_global_users:
+                    self.bot.db.changed_global_users.append(ctx.author.id)
+                self.bot.db.backgrounds[ctx.author.id] = url
+                await self.bot.db.cache_flush()
+        except Exception as error: # noqa
+            if cur_removed:
+                await self.bot.db.award_global_currency(ctx.author, 7500)
+            await ctx.send_error("An error occured while setting the background - your currency was not "
+                                 "affected")
+            traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+
 
 
 def setup(bot: aoi.AoiBot) -> None:
