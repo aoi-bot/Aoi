@@ -1,3 +1,4 @@
+import asyncio
 import io
 import itertools
 from typing import Dict, Any, Tuple, Union
@@ -6,6 +7,7 @@ import PIL
 import PIL.Image as I
 import PIL.ImageDraw as D
 import PIL.ImageFont as F
+import aiohttp
 import discord
 from discord.ext import commands
 
@@ -63,6 +65,16 @@ class Profile(commands.Cog):
         self.fp = open("assets/profile.png", "rb")
         self.background: PIL.Image.Image = PIL.Image.open(self.fp)
         self.level_font: PIL.ImageFont.ImageFont = _font(42)
+        self._buf = io.BytesIO()
+        self.default_bg = None
+        bot.loop.create_task(self._init())
+
+    async def _init(self):
+        async with aiohttp.ClientSession() as sess:
+            async with sess.get("https://i.imgur.com/3b42LpU.jpg") as resp:
+                self._buf.write(await resp.content.read())
+        self._buf.seek(0)
+        self.default_bg = I.open(self._buf)
 
     @property
     def description(self):
@@ -94,6 +106,30 @@ class Profile(commands.Cog):
     )
     async def profile(self, ctx: aoi.AoiContext, member: discord.Member = None):
         member = member or ctx.author
+        try:
+            _, _, _, _, bg = await self.bot.db.get_badges_titles(member)
+            if not bg:
+                card_bg = self.default_bg.copy()
+            else:
+                _buf = io.BytesIO()
+                async with aiohttp.ClientSession() as sess:
+                    async with sess.get(bg) as resp:
+                        resp.raise_for_status()
+                        _buf.write(await resp.content.read())
+                _buf.seek(0)
+                card_bg = I.open(self._buf)
+                w, h = card_bg.size()
+                if w > h:
+                    card_bg = card_bg.resize(int(500 * w/h), h)
+                else:
+                    card_bg = card_bg.resize(w, int(500 * h/w))
+                left = (card_bg.size[0] - 500) / 2
+                top = (card_bg.size[1] - 500) / 2
+                right = (card_bg.size[0] + 500) / 2
+                bottom = (card_bg.size[1] + 500) / 2
+                card_bg = card_bg.crop((left, top, right, bottom))
+        except: # noqa
+            card_bg = self.default_bg.copy()
         await self.bot.db.ensure_xp_entry(member)
         global_xp = self.bot.db.global_xp[member.id]
         server_xp = self.bot.db.xp[ctx.guild.id][member.id]
@@ -149,6 +185,8 @@ class Profile(commands.Cog):
                                          32, img_draw, w_pad=24)
         img_draw.text((x, y), f"${await self.bot.db.get_global_currency(member)}",
                       font=_font(sz))
+        card_bg = card_bg.convert("RGBA")
+        img = I.alpha_composite(card_bg, img)
         buf = io.BytesIO()
         img.save(fp=buf, format="png")
         buf.seek(0)

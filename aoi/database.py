@@ -43,20 +43,28 @@ class PunishmentType:
 class AoiDatabase:
     def __init__(self, bot: aoi.AoiBot):
         self.db: Optional[Connection] = None
+        self.bot = bot
+
         self.guild_settings: Dict[int, _GuildSetting] = {}
         self.prefixes: Dict[int, str] = {}
         self.perm_chains: Dict[int, List[str]] = {}
-        self.bot = bot
+
         self.xp_lock = asyncio.Lock()
         self.title_lock = asyncio.Lock()
         self.global_currency_lock = asyncio.Lock()
+
         self.xp: Dict[int, Dict[int, int]] = {}
         self.changed_xp: Dict[int, List[int]] = {}
-        self.badges: Dict[int, List[str]] = {}
         self.global_currency: Dict[int, int] = {}
         self.changed_global_currency: List[int] = []
         self.global_xp: Dict[int, int] = {}
+
         self.titles: Dict[int, str] = {}
+        self.owned_titles: Dict[int, List[str]] = {}
+        self.badges: Dict[int, List[str]] = {}
+        self.owned_badges: Dict[int, List[str]] = {}
+        self.backgrounds: Dict[int, str] = {}
+
         self.xp_cooldown = commands.CooldownMapping.from_cooldown(
             1.0, 180.0, commands.BucketType.member)
         self.global_currency_cooldown = commands.CooldownMapping.from_cooldown(
@@ -101,12 +109,15 @@ class AoiDatabase:
         for r in rows:
             self.global_currency[r[0]] = r[1]
 
-        cursor = await self.db.execute("SELECT * from user")
+        cursor = await self.db.execute("SELECT * from user_global")
         rows = await cursor.fetchall()
         await cursor.close()
         for r in rows:
             self.titles[r[0]] = r[1]
             self.badges[r[0]] = r[2].split(",")
+            self.owned_titles[r[0]] = r[3].split(",")
+            self.owned_badges[r[0]] = r[4].split(",")
+            self.backgrounds[r[0]] = r[5]
 
         self._cache_flush_loop.start()
 
@@ -124,15 +135,18 @@ class AoiDatabase:
             if member.id not in self.changed_global_currency:
                 self.changed_global_currency.append(member.id)
 
-    async def get_badges_titles(self, member: discord.Member) -> Tuple[str, List[str]]:
+    async def get_badges_titles(self, member: discord.Member) -> Tuple[str, List[str], List[str], List[str], str]:
         async with self.title_lock:
             if member.id not in self.titles:
                 self.titles[member.id] = ""
                 self.badges[member.id] = []
-                await self.db.execute("insert into tables (user, title, badges) "
-                                      "values (?,?,?)", (member.id, "", ""))
+                self.owned_badges[member.id] = []
+                self.owned_titles[member.id] = []
+                await self.db.execute("insert into user_global (user, title, badges, owned_titles, owned_badges) "
+                                      "values (?,?,?,?,?)", (member.id, "", "", "", ""))
                 await self.db.commit()
-            return self.titles[member.id], self.badges[member.id]
+            return self.titles[member.id], self.badges[member.id], self.owned_titles[member.id],\
+                    self.owned_badges[member.id], self.backgrounds[member.id]
 
     async def ensure_xp_entry(self, msg: Union[discord.Message, discord.Member]):
         if isinstance(msg, discord.Message):
