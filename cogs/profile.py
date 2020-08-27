@@ -22,6 +22,21 @@ print(lvl_list[:6])
 print(ttl_lvl_list[:6])
 
 
+def _cur_string(cur: int):
+    neg = abs(cur) != cur
+    cur = abs(cur)
+    if cur < 1000:
+        return f"{'-' if neg else ''}${cur}"
+    elif cur < 100000:
+        return f"{'-' if neg else ''}${round(cur/100)/10}K"
+    elif cur < 1000000:
+        return f"{'-' if neg else ''}${round(cur/1000)}K"
+    elif cur < 1000000000:
+        return f"{'-' if neg else ''}${round(cur / 1000000)}M"
+    elif cur < 1000000000000:
+        return f"{'-' if neg else ''}${round(cur / 1000000000)}B"
+
+
 def _xp_per_level(lvl: int):
     return lvl_list[lvl]
 
@@ -174,9 +189,9 @@ class Profile(commands.Cog):
                       font=_font(sz))
 
         x, y, _, _, sz = _center_and_fit(115.8, 319, 257.5, 370,
-                                         f"${await self.bot.db.get_global_currency(member)}",
+                                         f"{_cur_string(await self.bot.db.get_global_currency(member))}",
                                          32, img_draw, w_pad=24)
-        img_draw.text((x, y), f"${await self.bot.db.get_global_currency(member)}",
+        img_draw.text((x, y), f"{_cur_string(await self.bot.db.get_global_currency(member))}",
                       font=_font(sz))
         card_bg = card_bg.convert("RGBA")
         img = I.alpha_composite(card_bg, img)
