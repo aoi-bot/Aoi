@@ -50,6 +50,13 @@ class Aoi(commands.Cog):
         await self.bot.db.close()
         await self.bot.logout()
 
+    @commands.is_owner()
+    @commands.command(
+        brief="Flush XP/Currency to database manually"
+    )
+    async def flush(self, ctx: aoi.AoiContext):
+        await self.bot.db.cache_flush()
+
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Aoi(bot))
