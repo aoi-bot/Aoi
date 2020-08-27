@@ -193,6 +193,12 @@ class Profile(commands.Cog):
                                          32, img_draw, w_pad=24)
         img_draw.text((x, y), f"{_cur_string(await self.bot.db.get_global_currency(member))}",
                       font=_font(sz))
+
+        x, y, _, _, sz = _center_and_fit(94.5, 383, 236.2, 434,
+                                         f"{_cur_string(await self.bot.db.get_guild_currency(member))}",
+                                         32, img_draw, w_pad=24)
+        img_draw.text((x, y), f"{_cur_string(await self.bot.db.get_guild_currency(member))}",
+                      font=_font(sz))
         card_bg = card_bg.convert("RGBA")
         img = I.alpha_composite(card_bg, img)
         buf = io.BytesIO()

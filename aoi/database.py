@@ -52,12 +52,15 @@ class AoiDatabase:
         self.xp_lock = asyncio.Lock()
         self.title_lock = asyncio.Lock()
         self.global_currency_lock = asyncio.Lock()
+        self.guild_currency_lock = asyncio.Lock()
 
         self.xp: Dict[int, Dict[int, int]] = {}
         self.changed_xp: Dict[int, List[int]] = {}
         self.global_currency: Dict[int, int] = {}
         self.changed_global_currency: List[int] = []
         self.global_xp: Dict[int, int] = {}
+        self.guild_currency: Dict[int, Dict[int, int]] = {}
+        self.changed_guild_currency: Dict[int, List[int]] = {}
 
         self.titles: Dict[int, str] = {}
         self.owned_titles: Dict[int, List[str]] = {}
@@ -120,11 +123,42 @@ class AoiDatabase:
             self.owned_badges[r[0]] = r[4].split(",")
             self.backgrounds[r[0]] = r[5]
 
+        cursor = await self.db.execute("select * from guild_currency")
+        rows = await cursor.fetchall()
+        await cursor.close()
+        for r in rows:
+            if r[0] not in self.guild_currency:
+                self.guild_currency[r[0]] = {}
+            self.guild_currency[r[0]][r[1]] = r[2]
+
         self._cache_flush_loop.start()
 
     async def close(self):
         await self.cache_flush()
         await self.db.close()
+
+    async def ensure_guild_currency_entry(self, member: discord.Member):
+        logging.log(15, "guild_cur:ensure:waiting for lock")
+        async with self.guild_currency_lock:
+            logging.log(15, "guild_cur:ensure:-got lock")
+            if member.guild.id not in self.guild_currency:
+                self.guild_currency[member.guild.id] = {}
+            if member.id not in self.guild_currency[member.guild.id]:
+                self.guild_currency[member.guild.id][member.id] = 0
+            if member.guild.id not in self.changed_guild_currency:
+                self.changed_guild_currency[member.guild.id] = []
+            if member.id not in self.changed_guild_currency[member.guild.id]:
+                self.changed_guild_currency[member.guild.id].append(member.id)
+        logging.log(15, f"guild_cur:ensure:-releasing lock")
+
+    async def get_guild_currency(self, member: discord.Member) -> int:
+        await self.ensure_guild_currency_entry(member)
+        return self.guild_currency[member.guild.id][member.id]
+
+    async def award_guild_currency(self, member: discord.Member, amount: int):
+        await self.ensure_guild_currency_entry(member)
+        async with self.guild_currency_lock:
+            self.guild_currency[member.guild.id][member.id] += amount
 
     async def get_global_currency(self, member: discord.Member):
         await self.ensure_global_currency_entry(member)
@@ -179,7 +213,6 @@ class AoiDatabase:
                 self.global_currency[member.id] = 0
                 if member.id not in self.changed_global_currency:
                     self.changed_global_currency.append(member.id)
-
 
     async def add_xp(self, msg: discord.Message):
         if msg.author.bot:
@@ -262,6 +295,23 @@ class AoiDatabase:
                                        self.backgrounds[u],
                                        u))
             await self.db.commit()
+        async with self.guild_currency_lock:
+            logging.log(15, "guild_cur:flush:-got lock")
+            for guild, users in self.changed_guild_currency.items():
+                for u in users:
+                    currency = self.guild_currency[guild][u]
+                    logging.log(15, f"guild_cur:flush:-checking user {self.bot.get_user(u)}")
+                    a = await self.db.execute("SELECT * from guild_currency where guild = ? and user=?",
+                                              (guild, u))
+                    if not await a.fetchall():
+                        logging.log(15, f"guild_cur:flush:-adding user {self.bot.get_user(u)}")
+                        await self.db.execute("INSERT INTO guild_currency (user, guild, amount) values (?,?,?)",
+                                              (u, guild, 0))
+                    logging.log(15, f"guild_cur:flush:-updating user {self.bot.get_user(u)}")
+                    await self.db.execute("UPDATE guild_currency set amount=? where user=? and guild=?",
+                                          (currency, u, guild))
+            await self.db.commit()
+            self.changed_guild_currency = {}
 
     async def lookup_punishments(self, user: int) -> List[_Punishment]:
         cursor = await self.db.execute("SELECT * from punishments where user=?", (user,))
