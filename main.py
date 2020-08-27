@@ -43,6 +43,7 @@ extensions = [
     "cogs.user.xp",
     "cogs.user.profile",
     "cogs.user.currency",
+    "cogs.user.global_shop",
 
     # utility and config cogs
     "cogs.errorhandler",

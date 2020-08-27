@@ -74,6 +74,41 @@ class AoiDatabase:
         self.global_currency_cooldown = commands.CooldownMapping.from_cooldown(
             1.0, 60.0, commands.BucketType.user)
 
+    async def ensure_user_entry(self, member: discord.Member):
+        async with self.title_lock:
+            if member.id not in self.titles:
+                self.titles[member.id] = ""
+            if member.id not in self.owned_titles:
+                self.owned_titles[member.id] = []
+            if member.id not in self.badges:
+                self.badges[member.id] = []
+            if member.id not in self.owned_badges:
+                self.owned_badges[member.id] = {}
+            if member.id not in self.backgrounds:
+                self.backgrounds[member.id] = ""
+            if member.id not in self.changed_global_users:
+                self.changed_global_users.append(member.id)
+
+    async def get_titles(self, member: discord.Member) -> Tuple[str, List[str]]:
+        await self.ensure_user_entry(member)
+        return self.titles[member.id], self.owned_titles[member.id]
+
+    async def get_badges(self, member: discord.Member) -> Tuple[List[str], List[str]]:
+        await self.ensure_user_entry(member)
+        return self.badges[member.id], self.owned_badges[member.id]
+
+    async def add_title(self, member: discord.Member, title: str):
+        await self.ensure_user_entry(member)
+        async with self.title_lock:
+            self.owned_titles[member.id].append(title)
+        await self.cache_flush()
+
+    async def equip_title(self, member: discord.Member, index: int):
+        await self.ensure_user_entry(member)
+        async with self.title_lock:
+            self.titles[member.id] = self.owned_titles[member.id][index]
+        await self.cache_flush()
+
     async def load(self):
         logging.info("database:Connecting to database")
         self.db = await aiosqlite.connect("database.db")
@@ -180,8 +215,8 @@ class AoiDatabase:
                 await self.db.execute("insert into user_global (user, title, badges, owned_titles, owned_badges) "
                                       "values (?,?,?,?,?)", (member.id, "", "", "", ""))
                 await self.db.commit()
-            return self.titles[member.id], self.badges[member.id], self.owned_titles[member.id],\
-                    self.owned_badges[member.id], self.backgrounds[member.id]
+            return self.titles[member.id], self.badges[member.id], self.owned_titles[member.id], \
+                   self.owned_badges[member.id], self.backgrounds[member.id]
 
     async def ensure_xp_entry(self, msg: Union[discord.Message, discord.Member]):
         if isinstance(msg, discord.Message):
