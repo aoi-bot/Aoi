@@ -41,6 +41,7 @@ class GlobalShop(commands.Cog):
         brief="Buys a title"
     )
     async def buytitle(self, ctx: aoi.AoiContext, num: int):
+        await self.bot.db.ensure_user_entry(ctx.author)
         r = await (await self.bot.db.db.execute("select * from title_shop where id=?", (num,))).fetchone()
         if not r:
             return await ctx.send_error(f"Title with ID `{num}` does not exist. Do `{ctx.prefix}titleshop` to list "
