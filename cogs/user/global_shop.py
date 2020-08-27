@@ -50,20 +50,24 @@ class GlobalShop(commands.Cog):
         amt = r[2]
         title = r[1]
 
+        if amt > self.bot.db.get_global_currency(ctx.author):
+            return await ctx.send_error("That title costs more than you have")
+
         for r in self.bot.db.owned_titles[ctx.author.id]:
             if title.lower() == r.lower():
                 return await ctx.send_error("You already own that title")
 
-        async def _buy():
-            await self.bot.db.award_global_currency(ctx.author, -amt)
-            await self.bot.db.add_title(ctx.author, title)
-
-        await ctx.confirm_coro(
+        c = await ctx.confirm(
             f"Buy `{title}` for ${amt:,}?",
             f"Bought `{title}` for ${amt:,}. Do `{ctx.prefix}mytitles` to see your titles.",
-            f"Cancelled purchase",
-            _buy()
-        )
+            f"Cancelled purchase")
+
+        if amt > self.bot.db.get_global_currency(ctx.author):
+            return await ctx.send_error("That title costs more than you have")
+
+        await self.bot.db.award_global_currency(ctx.author, -amt)
+        await self.bot.db.add_title(ctx.author, title)
+
 
     @commands.command(
         brief="Lists your titles"
