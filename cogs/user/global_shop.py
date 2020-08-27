@@ -9,7 +9,7 @@ class GlobalShop(commands.Cog):
 
     @property
     def description(self):
-        return "Commands for managing the global shop"
+        return "Commands for managing and using the global shop"
 
     @commands.is_owner()
     @commands.command(

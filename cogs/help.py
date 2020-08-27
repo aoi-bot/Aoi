@@ -24,7 +24,12 @@ class Help(commands.Cog):
         async def _can_run(_c: commands.Command):
             for check in _c.checks:
                 try:
-                    if not await check(ctx):
+                    x = check(ctx)
+                    try:
+                        x = await x
+                    except TypeError:
+                        pass
+                    if not x:
                         return False
                 except discord.DiscordException:
                     return False
@@ -45,7 +50,12 @@ class Help(commands.Cog):
         async def _can_run(_c: commands.Command):
             for check in _c.checks:
                 try:
-                    if not await check(ctx):
+                    x = check(ctx)
+                    try:
+                        x = await x
+                    except TypeError:
+                        pass
+                    if not x:
                         return False
                 except discord.DiscordException:
                     return False
