@@ -45,19 +45,30 @@ class GuildSettings(commands.Cog):
         if setting == "prefix":
             await self.bot.db.set_prefix(ctx.guild.id, value)
             return await ctx.send_ok(f"Prefix set to `{value}`")
+        if setting == "currencygain":
+            try:
+                v = int(value)
+                if v < 0 or v > 50:
+                    return await ctx.send_error("Gain value must be between 0 and 50")
+                await self.bot.db.set_currency_gain(ctx.guild, v)
+                return await ctx.send_ok(f"Currency gain " + ("turned off" if not v else f"set to {v}/3min"))
+            except ValueError:
+                return await ctx.send_error("Gain value must be a number between 0 and 50")
         await ctx.send_error("Invalid config")
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.command(brief="Lists current configs for the server.")
     async def configs(self, ctx: aoi.AoiContext):
         colors = self.bot.db.guild_settings[ctx.guild.id]
+        gain = await self.bot.db.get_currency_gain(ctx.guild)
         await ctx.embed(
             title="Aoi Configs",
             fields=[
                 ("Embed Colors", f"ErrorColor: `{conversions.hex_color_to_string(colors.error_color)}`\n"
                                  f"InfoColor: `{conversions.hex_color_to_string(colors.info_color)}`\n"
                                  f"OKColor: `{conversions.hex_color_to_string(colors.ok_color)}`"),
-                ("Prefix", self.bot.db.prefixes[ctx.guild.id])
+                ("Prefix", self.bot.db.prefixes[ctx.guild.id]),
+                ("Currency Gain", "Off" if not gain else f"{gain}/3m")
             ]
         )
 

@@ -53,6 +53,7 @@ class AoiDatabase:
         self.title_lock = asyncio.Lock()
         self.global_currency_lock = asyncio.Lock()
         self.guild_currency_lock = asyncio.Lock()
+        self.currency_gain_lock = asyncio.Lock()
 
         self.xp: Dict[int, Dict[int, int]] = {}
         self.changed_xp: Dict[int, List[int]] = {}
@@ -61,6 +62,8 @@ class AoiDatabase:
         self.global_xp: Dict[int, int] = {}
         self.guild_currency: Dict[int, Dict[int, int]] = {}
         self.changed_guild_currency: Dict[int, List[int]] = {}
+        self.currency_gains: Dict[int, int] = {}
+        self.changed_currency_gains: List[int] = []
 
         self.titles: Dict[int, str] = {}
         self.owned_titles: Dict[int, List[str]] = {}
@@ -74,6 +77,24 @@ class AoiDatabase:
         self.global_currency_cooldown = commands.CooldownMapping.from_cooldown(
             1.0, 60.0, commands.BucketType.user)
 
+    async def ensure_currency_gain(self, guild: discord.Guild):
+        if guild.id not in self.currency_gains:
+            async with self.currency_gain_lock:
+                if guild.id not in self.changed_currency_gains:
+                    self.changed_currency_gains.append(guild.id)
+                self.currency_gains[guild.id] = 0
+
+    async def set_currency_gain(self, guild: discord.Guild, new: int):
+        await self.ensure_currency_gain(guild)
+        async with self.currency_gain_lock:
+            if guild.id not in self.changed_currency_gains:
+                self.changed_currency_gains.append(guild.id)
+            self.currency_gains[guild.id] = new
+
+    async def get_currency_gain(self, guild: discord.Guild):
+        await self.ensure_currency_gain(guild)
+        return self.currency_gains[guild.id]
+
     async def ensure_user_entry(self, member: discord.Member):
         async with self.title_lock:
             if member.id not in self.titles:
@@ -83,7 +104,7 @@ class AoiDatabase:
             if member.id not in self.badges:
                 self.badges[member.id] = []
             if member.id not in self.owned_badges:
-                self.owned_badges[member.id] = {}
+                self.owned_badges[member.id] = []
             if member.id not in self.backgrounds:
                 self.backgrounds[member.id] = ""
             if member.id not in self.changed_global_users:
@@ -158,6 +179,12 @@ class AoiDatabase:
             self.owned_badges[r[0]] = r[4].split(",")
             self.backgrounds[r[0]] = r[5]
 
+        cursor = await self.db.execute("select * from currency_gains")
+        rows = await cursor.fetchall()
+        await cursor.close()
+        for r in rows:
+            self.currency_gains[r[0]] = r[1]
+
         cursor = await self.db.execute("select * from guild_currency")
         rows = await cursor.fetchall()
         await cursor.close()
@@ -194,6 +221,10 @@ class AoiDatabase:
         await self.ensure_guild_currency_entry(member)
         async with self.guild_currency_lock:
             self.guild_currency[member.guild.id][member.id] += amount
+            if member.guild.id not in self.changed_guild_currency:
+                self.changed_guild_currency[member.guild.id] = []
+            if member.id not in self.changed_guild_currency[member.guild.id]:
+                self.changed_guild_currency[member.guild.id].append(member.id)
 
     async def get_global_currency(self, member: discord.Member):
         await self.ensure_global_currency_entry(member)
@@ -273,6 +304,13 @@ class AoiDatabase:
                 logging.log(15, f"xp:add:-adding user change for {msg.author}")
                 self.changed_xp[msg.guild.id].append(msg.author.id)
         logging.log(15, f"xp:add:-releasing lock")
+        await self.ensure_currency_gain(msg.guild)
+        async with self.guild_currency_lock:
+            self.guild_currency[msg.guild.id][msg.author.id] += self.currency_gains[msg.guild.id]
+            if msg.guild.id not in self.changed_guild_currency:
+                self.changed_guild_currency[msg.guild.id] = []
+            if msg.author.id not in self.changed_guild_currency[msg.guild.id]:
+                self.changed_guild_currency[msg.guild.id].append(msg.author.id)
 
     async def add_global_currency(self, msg: discord.Message):
         if self.global_currency_cooldown.get_bucket(msg).update_rate_limit():
@@ -347,6 +385,17 @@ class AoiDatabase:
                                           (currency, u, guild))
             await self.db.commit()
             self.changed_guild_currency = {}
+        async with self.currency_gain_lock:
+            for g in self.changed_currency_gains:
+                a = await self.db.execute("SELECT * from currency_gains where guild=?",
+                                          (g,))
+                if not await a.fetchall():
+                    await self.db.execute("insert into currency_gains (guild, gain) "
+                                          "values (?,?)", (g, 0))
+                await self.db.execute("update currency_gains set gain=? where guild=?",
+                                      (self.currency_gains[g], g))
+            await self.db.commit()
+            self.changed_currency_gains = []
 
     async def lookup_punishments(self, user: int) -> List[_Punishment]:
         cursor = await self.db.execute("SELECT * from punishments where user=?", (user,))
