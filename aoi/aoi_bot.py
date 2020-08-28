@@ -1,15 +1,14 @@
 import asyncio
-import sys
+import logging
+import os
 from typing import Dict, Optional, List, Union
 
 import aiohttp.client_exceptions
 import discord
 from discord.ext import commands
-import logging
-import os
 
 import aoi
-from wrappers import gmaps as gmaps
+from wrappers import gmaps as gmaps, imgur
 from .custom_context import AoiContext
 from .database import AoiDatabase
 
@@ -27,6 +26,9 @@ class AoiBot(commands.Bot):
         self.nasa: str = ""
         self.accuweather: str = ""
         self.gmap: Optional[gmaps.GeoLocation] = None
+        self.imgur_user: str = ""
+        self.imgur_secret: str = ""
+        self.imgur: Optional[imgur.Imgur] = None
 
     async def on_message(self, message: discord.Message):
         ctx: aoi.AoiContext = await self.get_context(message, cls=AoiContext)
@@ -54,7 +56,10 @@ class AoiBot(commands.Bot):
         self.google = os.getenv("GOOGLE_API_KEY")
         self.nasa = os.getenv("NASA")
         self.accuweather = os.getenv("ACCUWEATHER")
+        self.imgur_user = os.getenv("IMGUR")
+        self.imgur_secret = os.getenv("IMGUR_SECRET")
         self.gmap = gmaps.GeoLocation(self.google)
+        self.imgur = imgur.Imgur(self.imgur_user)
         await self.db.load()
 
         if kwargs:
@@ -67,8 +72,8 @@ class AoiBot(commands.Bot):
             except aiohttp.client_exceptions.ClientConnectionError as e:
                 logging.warning(f"bot:Connection {i}/6 failed")
                 logging.warning(f"bot:  {e}")
-                logging.warning(f"bot: waiting {2**(i+1)} seconds")
-                await asyncio.sleep(2**(i+1))
+                logging.warning(f"bot: waiting {2 ** (i + 1)} seconds")
+                await asyncio.sleep(2 ** (i + 1))
                 logging.info("bot:attempting to reconnect")
         else:
             logging.error("bot: FATAL failed after 6 attempts")

@@ -38,6 +38,7 @@ extensions = [
     "cogs.geolocation",
     "cogs.nasa",
     "cogs.weather",
+    "cogs.searches",
 
     # user/currency cogs
     "cogs.user.xp",
