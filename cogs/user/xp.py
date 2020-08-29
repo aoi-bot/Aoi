@@ -131,8 +131,7 @@ class XP(commands.Cog):
         brief="Gets the global XP of a user"
     )
     async def gxp(self, ctx: aoi.AoiContext, member: discord.Member = None):
-        color = (229, 34, 147)
-        dark_color = tuple(map(lambda _x: int(_x/1.2), color))
+        color = (0xff, 0x2a, 0x5b)
         member = member or ctx.author
         await self.bot.db.ensure_xp_entry(member)
         xp = self.bot.db.global_xp[member.id]
