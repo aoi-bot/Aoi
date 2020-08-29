@@ -5,6 +5,7 @@ from typing import Dict, Optional, List, Union
 
 import aiohttp.client_exceptions
 import discord
+import pixivapi
 from discord.ext import commands
 
 import aoi
@@ -19,6 +20,7 @@ class AoiBot(commands.Bot):
         self.db: Optional[AoiDatabase] = None
         self.prefixes: Dict[int, str] = {}
         self.banned_tags: List[str] = []
+        self.banned_pixiv_tags: List[str] = []
         self.gelbooru_key: str = ""
         self.gelbooru_user: str = ""
         self.weather_gov: str = ""
@@ -28,6 +30,9 @@ class AoiBot(commands.Bot):
         self.gmap: Optional[gmaps.GeoLocation] = None
         self.imgur_user: str = ""
         self.imgur_secret: str = ""
+        self.pixiv_user: str = ""
+        self.pixiv_password: str = ""
+        self.pixiv = pixivapi.Client()
         self.imgur: Optional[imgur.Imgur] = None
 
     async def on_message(self, message: discord.Message):
@@ -50,6 +55,7 @@ class AoiBot(commands.Bot):
         reconnect = kwargs.pop('reconnect', True)
         self.db = AoiDatabase(self)
         self.banned_tags = os.getenv("BANNED_TAGS").split(",")
+        self.banned_pixiv_tags = os.getenv("BANNED_TAGS").split(",") + os.getenv("BANNED_PIXIV_TAGS").split(",")
         self.gelbooru_user = os.getenv("GELBOORU_USER")
         self.gelbooru_key = os.getenv("GELBOORU_API_KEY")
         self.weather_gov = os.getenv("WEATHER_GOV_API")
@@ -60,6 +66,9 @@ class AoiBot(commands.Bot):
         self.imgur_secret = os.getenv("IMGUR_SECRET")
         self.gmap = gmaps.GeoLocation(self.google)
         self.imgur = imgur.Imgur(self.imgur_user)
+        self.pixiv_user = os.getenv("PIXIV")
+        self.pixiv_password = os.getenv("PIXIV_PASSWORD")
+        self.pixiv.login(self.pixiv_user, self.pixiv_password)
         await self.db.load()
 
         if kwargs:
