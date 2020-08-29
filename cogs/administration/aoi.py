@@ -58,6 +58,63 @@ class Aoi(commands.Cog):
         await self.bot.db.cache_flush()
         await ctx.send_ok("Cache flushed to disk")
 
+    @commands.is_owner()
+    @commands.command(
+        brief="List servers this server is part of"
+    )
+    async def guildlist(self, ctx: aoi.AoiContext):
+        await ctx.paginate(
+            [f"{g.id}\n{g.name}\n" for g in self.bot.guilds],
+            title="Servers Aoi is in",
+            n=5
+        )
+
+    @commands.is_owner()
+    @commands.command(
+        brief="Basic information about a server the bot is on"
+    )
+    async def guildinfo(self, ctx: aoi.AoiContext, guild: int):
+        guild: discord.Guild = self.bot.get_guild(guild)
+        if not guild:
+            return await ctx.send_error("I'm not in a guild with that ID")
+        created = guild.created_at.strftime("%c")
+        voice_channels = len(guild.voice_channels)
+        text_channels = len(guild.text_channels)
+        roles = len(guild.roles) - 1
+        statuses = {
+            "dnd": 0,
+            "idle": 0,
+            "online": 0,
+            "bot": 0,
+            "offline": 0
+        }
+        m: discord.Member
+        for m in guild.members:
+            if m.bot:
+                statuses["bot"] += 1
+            else:
+                statuses[str(m.status)] += 1
+        await ctx.embed(
+            title=f"Info for {guild}",
+            fields=[
+                ("ID", guild.id),
+                ("Created at", created),
+                ("Channels", f"{voice_channels} Voice, {text_channels} Text"),
+                ("System Channel", (guild.system_channel.mention if guild.system_channel else "None")),
+                ("Members", guild.member_count),
+                ("Roles", roles),
+                ("Region", guild.region),
+                ("Features", "\n".join(guild.features) if guild.features else "None"),
+                ("Breakdown", f":green_circle: {statuses['online']} online\n"
+                              f":yellow_circle: {statuses['idle']} idle\n"
+                              f":red_circle: {statuses['dnd']} dnd\n"
+                              f":white_circle: {statuses['offline']} offline\n"
+                              f":robot: {statuses['bot']} bots\n")
+            ],
+            thumbnail=guild.icon_url
+        )
+
+
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Aoi(bot))
