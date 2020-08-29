@@ -313,6 +313,7 @@ class AoiDatabase:
                 self.changed_xp[msg.guild.id].append(msg.author.id)
         logging.log(15, f"xp:add:-releasing lock")
         await self.ensure_currency_gain(msg.guild)
+        await self.ensure_guild_currency_entry(msg.author)
         async with self.guild_currency_lock:
             self.guild_currency[msg.guild.id][msg.author.id] += self.currency_gains[msg.guild.id]
             if msg.guild.id not in self.changed_guild_currency:
