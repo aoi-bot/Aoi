@@ -33,14 +33,15 @@ class NSFW(commands.Cog):
         posts: List[gelbooru.GelbooruPost]
         posts, f_tag, f_post = await self.gelbooru.get_posts(tags.split())
         if not posts:
-            return await ctx.send("No results were found for that search.")
+            return await ctx.send_error("No results were found for that search.")
         post = random.choice(posts)
         await ctx.embed(
             image=post.image_url,
             description=f"[Page]({post.page})",
             footer="Some images/tags were filtered from the search query and/or "
                    "results to comply with discord Terms of Service"
-            if f_tag or f_post else ""
+            if f_tag or f_post else "",
+            trash_reaction=False
         )
 
 

@@ -1,15 +1,15 @@
 import asyncio
-import sys
+import logging
+import os
 from typing import Dict, Optional, List, Union
 
 import aiohttp.client_exceptions
 import discord
+import pixivapi
 from discord.ext import commands
-import logging
-import os
 
 import aoi
-from wrappers import gmaps as gmaps
+from wrappers import gmaps as gmaps, imgur
 from .custom_context import AoiContext
 from .database import AoiDatabase
 
@@ -20,6 +20,7 @@ class AoiBot(commands.Bot):
         self.db: Optional[AoiDatabase] = None
         self.prefixes: Dict[int, str] = {}
         self.banned_tags: List[str] = []
+        self.banned_pixiv_tags: List[str] = []
         self.gelbooru_key: str = ""
         self.gelbooru_user: str = ""
         self.weather_gov: str = ""
@@ -27,6 +28,12 @@ class AoiBot(commands.Bot):
         self.nasa: str = ""
         self.accuweather: str = ""
         self.gmap: Optional[gmaps.GeoLocation] = None
+        self.imgur_user: str = ""
+        self.imgur_secret: str = ""
+        self.pixiv_user: str = ""
+        self.pixiv_password: str = ""
+        self.pixiv = pixivapi.Client()
+        self.imgur: Optional[imgur.Imgur] = None
 
     async def on_message(self, message: discord.Message):
         ctx: aoi.AoiContext = await self.get_context(message, cls=AoiContext)
@@ -48,13 +55,20 @@ class AoiBot(commands.Bot):
         reconnect = kwargs.pop('reconnect', True)
         self.db = AoiDatabase(self)
         self.banned_tags = os.getenv("BANNED_TAGS").split(",")
+        self.banned_pixiv_tags = os.getenv("BANNED_TAGS").split(",") + os.getenv("BANNED_PIXIV_TAGS").split(",")
         self.gelbooru_user = os.getenv("GELBOORU_USER")
         self.gelbooru_key = os.getenv("GELBOORU_API_KEY")
         self.weather_gov = os.getenv("WEATHER_GOV_API")
         self.google = os.getenv("GOOGLE_API_KEY")
         self.nasa = os.getenv("NASA")
         self.accuweather = os.getenv("ACCUWEATHER")
+        self.imgur_user = os.getenv("IMGUR")
+        self.imgur_secret = os.getenv("IMGUR_SECRET")
         self.gmap = gmaps.GeoLocation(self.google)
+        self.imgur = imgur.Imgur(self.imgur_user)
+        self.pixiv_user = os.getenv("PIXIV")
+        self.pixiv_password = os.getenv("PIXIV_PASSWORD")
+        self.pixiv.login(self.pixiv_user, self.pixiv_password)
         await self.db.load()
 
         if kwargs:
@@ -67,8 +81,8 @@ class AoiBot(commands.Bot):
             except aiohttp.client_exceptions.ClientConnectionError as e:
                 logging.warning(f"bot:Connection {i}/6 failed")
                 logging.warning(f"bot:  {e}")
-                logging.warning(f"bot: waiting {2**(i+1)} seconds")
-                await asyncio.sleep(2**(i+1))
+                logging.warning(f"bot: waiting {2 ** (i + 1)} seconds")
+                await asyncio.sleep(2 ** (i + 1))
                 logging.info("bot:attempting to reconnect")
         else:
             logging.error("bot: FATAL failed after 6 attempts")

@@ -1,6 +1,6 @@
 import io
 import itertools
-from typing import Dict
+from typing import Dict, Tuple
 
 import PIL
 import PIL.Image
@@ -84,28 +84,25 @@ class XP(commands.Cog):
             if k == member.id:
                 return r
 
-
-    @commands.command(
-        brief="Gets the XP of a user"
-    )
-    async def xp(self, ctx: aoi.AoiContext, member: discord.Member = None):
+    async def _xp_template(self, ctx: aoi.AoiContext, member: discord.Member,
+                           rank_func: callable, color: Tuple[int, int, int],
+                           template):
         member = member or ctx.author
         await self.bot.db.ensure_xp_entry(member)
         xp = self.bot.db.xp[ctx.guild.id][member.id]
         l, x = _level(xp)
-        r = self._get_rank(member)
-        buf = io.BytesIO()
-        img = self.xp_img.copy()
+        r = rank_func(member)
+        img = template.copy()
         poly_width = 243 * x / _xp_per_level(l + 1)
         poly = [(119, 11), (112, 59), (112 + poly_width, 59), (119 + poly_width, 11)]
         overlay = PIL.Image.new("RGBA", img.size, (0, 0, 0, 0))
-        PIL.ImageDraw.Draw(overlay).polygon(poly, fill=(130, 36, 252, 80))
+        PIL.ImageDraw.Draw(overlay).polygon(poly, fill=color + (80,))
         img = PIL.Image.alpha_composite(img, overlay)
         draw = PIL.ImageDraw.Draw(img)
         draw.text((8, 75), text=f"#{r}", font=_font(24),
-                  fill=(78, 1, 172))
+                  fill=color)
         draw.text((21, 13), text=str(l), font=self.level_font,
-                  fill=(78, 1, 172))
+                  fill=color)
         name_font = _font(30)
         name_size, name_height = draw.textsize(member.name, font=self.text_font)
         sz = 30
@@ -116,14 +113,21 @@ class XP(commands.Cog):
             name_size, name_height = draw.textsize(member.name, font=name_font)
         # y 15 x 190 64
         draw.text((190 - name_size / 2, 214 - name_height / 2), text=member.name, font=name_font,
-                  fill=(78, 1, 172))
+                  fill=color)
         rem_level_size = draw.textsize(f"{x}/"
                                        f"{_xp_per_level(l + 1)}", font=self.text_font)[0]
         # y 10 x 111 364
         draw.text((230 - rem_level_size / 2, 19), text=f"{x}/"
                                                        f"{_xp_per_level(l + 1)}", font=self.text_font,
-                  fill=(78, 1, 172))
-        img.save(fp=buf, format="png")
+                  fill=color)
+        return img
+
+    @commands.command(
+        brief="Gets the XP of a user"
+    )
+    async def xp(self, ctx: aoi.AoiContext, member: discord.Member = None):
+        buf = io.BytesIO()
+        (await self._xp_template(ctx, member, self._get_rank, (130, 36, 252), self.xp_img)).save(fp=buf, format="PNG")
         buf.seek(0)
         await ctx.send(file=(discord.File(buf, "xp.png")))
 
@@ -131,46 +135,10 @@ class XP(commands.Cog):
         brief="Gets the global XP of a user"
     )
     async def gxp(self, ctx: aoi.AoiContext, member: discord.Member = None):
-        color = (229, 34, 147)
-        dark_color = tuple(map(lambda _x: int(_x/1.2), color))
-        member = member or ctx.author
-        await self.bot.db.ensure_xp_entry(member)
-        xp = self.bot.db.global_xp[member.id]
-        l, x = _level(xp)
-        r = self._get_global_rank(member)
         buf = io.BytesIO()
-        img = self.g_xp_img.copy()
-        poly_width = 243 * x / _xp_per_level(l + 1)
-        poly = [(119, 11), (112, 59), (112 + poly_width, 59), (119 + poly_width, 11)]
-        overlay = PIL.Image.new("RGBA", img.size, (0, 0, 0, 0))
-        PIL.ImageDraw.Draw(overlay).polygon(poly, fill=color + (120,))
-        img = PIL.Image.alpha_composite(img, overlay)
-        draw = PIL.ImageDraw.Draw(img)
-        draw.text((8, 75), text=f"#{r}", font=_font(24),
-                  fill=color)
-        draw.text((21, 13), text=str(l), font=self.level_font,
-                  fill=color)
-        name_font = _font(30)
-        name_size, name_height = draw.textsize(member.name, font=self.text_font)
-        sz = 30
-        while name_size > 330 and sz > 4:
-            sz -= 1
-            print(f"try {sz}")
-            name_font = _font(sz)
-            name_size, name_height = draw.textsize(member.name, font=name_font)
-        # y 15 x 190 64
-        draw.text((190 - name_size / 2, 214 - name_height / 2), text=member.name, font=name_font,
-                  fill=color)
-        rem_level_size = draw.textsize(f"{x}/"
-                                       f"{_xp_per_level(l + 1)}", font=self.text_font)[0]
-        # y 10 x 111 364
-        draw.text((230 - rem_level_size / 2, 19), text=f"{x}/"
-                                                       f"{_xp_per_level(l + 1)}", font=self.text_font,
-                  fill=color)
-        img.save(fp=buf, format="png")
+        (await self._xp_template(ctx, member, self._get_global_rank, (0xff, 0x2a, 0x5b), self.g_xp_img)).save(fp=buf, format="PNG")
         buf.seek(0)
         await ctx.send(file=(discord.File(buf, "gxp.png")))
-
 
     @commands.is_owner()
     @commands.command(
@@ -188,16 +156,15 @@ class XP(commands.Cog):
     async def xplb(self, ctx: aoi.AoiContext, page: int = 1):
         r = self._get_ranked(ctx.guild.id)
         _n_per_page = 10
-        top_10 = {k: (n, r[k]) for n, k in enumerate(list(r.keys())[(page-1) * _n_per_page:page * _n_per_page])}
+        top_10 = {k: (n, r[k]) for n, k in enumerate(list(r.keys())[(page - 1) * _n_per_page:page * _n_per_page])}
         await ctx.embed(
             title="Leaderboard",
             fields=[
-                (f"#{v[0] + 1 + (page-1) * _n_per_page} {self.bot.get_user(k)}",
+                (f"#{v[0] + 1 + (page - 1) * _n_per_page} {self.bot.get_user(k)}",
                  f"Level {_level(v[1])[0]} - {v[1]} xp") for k, v in top_10.items()
             ],
             not_inline=list(range(_n_per_page))
         )
-
 
 
 def setup(bot: aoi.AoiBot) -> None:
