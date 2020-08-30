@@ -1,7 +1,9 @@
+from datetime import datetime
+
 import discord
 from discord.ext import commands
 import aoi
-import aiohttp
+from libs.conversions import dhm_notation
 
 class Aoi(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
@@ -22,11 +24,14 @@ class Aoi(commands.Cog):
                 text_channels += 1
             if isinstance(channel, discord.VoiceChannel):
                 voice_channels += 1
-        await ctx.embed(title="Aoi Stats", fields=[
+        await ctx.embed(author="Aoi Bot", fields=[
             ("Ping", f"{round(self.bot.latency*1000)}ms"),
             ("Presence", f"{len(self.bot.guilds)} Guilds\n"
                          f"{text_channels} Text Channels\n"
-                         f"{voice_channels} Voice Channels\n")
+                         f"{voice_channels} Voice Channels\n"),
+            ("Messages", f"{self.bot.messages}"),
+            ("Commands\nExecuted", f"{self.bot.commands_executed}"),
+            ("Uptime", dhm_notation(datetime.now() - self.bot.start_time)),
         ])
 
     @commands.command(brief="Gives a link to invite Aoi to your server")

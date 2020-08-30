@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+from datetime import datetime
 from typing import Dict, Optional, List, Union
 
 import aiohttp.client_exceptions
@@ -34,6 +35,17 @@ class AoiBot(commands.Bot):
         self.pixiv_password: str = ""
         self.pixiv = pixivapi.Client()
         self.imgur: Optional[imgur.Imgur] = None
+        self.messages = 0
+        self.commands_executed = 0
+        self.start_time = datetime.now()
+
+        async def increment_command_count(ctx):
+            self.commands_executed += 1
+
+        self.add_listener(
+            increment_command_count,
+            "on_command_completion"
+        )
 
     async def on_message(self, message: discord.Message):
         ctx: aoi.AoiContext = await self.get_context(message, cls=AoiContext)
@@ -42,6 +54,7 @@ class AoiBot(commands.Bot):
             await self.db.ensure_xp_entry(message)
             await self.db.add_xp(message)
             await self.db.add_global_currency(message)
+            self.messages += 1
 
     async def start(self, *args, **kwargs):
         """|coro|

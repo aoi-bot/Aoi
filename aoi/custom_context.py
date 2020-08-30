@@ -102,6 +102,7 @@ class AoiContext(commands.Context):
         raise ValueError
 
     async def embed(self, *,
+                    author: str = None,
                     description: str = None,
                     title: str = None,
                     title_url: str = None,
@@ -112,7 +113,7 @@ class AoiContext(commands.Context):
                     image: Union[str, io.BufferedIOBase] = None,
                     footer: str = None,
                     not_inline: List[int] = [],
-                    trash_reaction: bool = True):
+                    trash_reaction: bool = False):
         if typ and clr:
             raise ValueError("typ and clr can not be both defined")
         embed = discord.Embed(
@@ -121,6 +122,8 @@ class AoiContext(commands.Context):
             colour=(await self.get_color(typ) if not clr else clr),
             title_url=title_url
         )
+        if author:
+            embed.set_author(name=author)
         if image:
             if isinstance(image, str):
                 embed.set_image(url=image)
