@@ -31,7 +31,8 @@ class Searches(commands.Cog):
                 description=f"[Link to post]({album_link})",
                 title_url=album_link,
                 image=f"https://i.imgur.com/{img_id}.jpg",
-                footer=f"Imgur result for \"{tag}\" searched by {ctx.author}"
+                footer=f"Imgur result for \"{tag}\" searched by {ctx.author}",
+                trash_reaction=False
             )
         except KeyError:
             await ctx.send_error("No results found with that tag")
@@ -68,7 +69,8 @@ class Searches(commands.Cog):
             image=buf,
             description=i.caption + f"\nhttps://www.pixiv.net/en/artworks/{i.id}",
             title=i.title,
-            footer="  ".join([t["name"] for t in i.tags])
+            footer="  ".join([t["name"] for t in i.tags]),
+            trash_reaction=False
         )
 
 
