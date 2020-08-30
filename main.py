@@ -37,7 +37,7 @@ extensions = [
     "cogs.messages",
     "cogs.geolocation",
     "cogs.nasa",
-    "cogs.weather",
+    # "cogs.weather",
     "cogs.searches",
 
     # user/currency cogs
