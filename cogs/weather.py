@@ -1,6 +1,6 @@
-from datetime import datetime
 import io
 import logging
+from datetime import datetime
 from functools import reduce
 from typing import Optional, Dict, Any, Tuple
 
@@ -71,11 +71,11 @@ class Weather(commands.Cog):
         radar = res.radar_station[-3:]
         if radar in self.sat_cache:
             diff = (datetime.now() - self.sat_cache[radar][0]).seconds
-            if diff < 30*60:
+            if diff < 30 * 60:
                 img = self.sat_cache[radar][1]
                 buf = io.BytesIO()
                 img.save(buf, format="png")
-                return await ctx.embed(image=buf, footer=f"Cached from {diff//60}m{diff%60:2} ago")
+                return await ctx.embed(image=buf, footer=f"Cached from {diff // 60}m{diff % 60:2} ago")
             del self.sat_cache[radar]
         urls = [
             f"https://radar.weather.gov/ridge/Overlays/Topo/Short/{radar}_Topo_Short.jpg",

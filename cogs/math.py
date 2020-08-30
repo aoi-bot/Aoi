@@ -1,7 +1,7 @@
 import math
 
-import discord
 from discord.ext import commands
+
 import aoi
 from libs.converters import integer, allowed_strings
 from libs.expressions import evaluate
@@ -99,7 +99,7 @@ class Math(commands.Cog):
     async def bigmultiply(self, ctx: aoi.AoiContext,
                           num1: int,
                           num2: int):
-        await ctx.send_info(f"\n`{num1:,}` * `{num2:,}` = `{num1*num2:,}`")
+        await ctx.send_info(f"\n`{num1:,}` * `{num2:,}` = `{num1 * num2:,}`")
 
 
 def setup(bot: aoi.AoiBot) -> None:

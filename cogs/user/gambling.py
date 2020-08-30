@@ -49,7 +49,7 @@ class Gambling(commands.Cog):
         else:
             win = 0
         await ctx.send_info(f"You got a {r}. {'Better luck next time?' if not win else 'You won ' + str(win) + '!'}")
-        await self.bot.db.award_guild_currency(ctx.author, win-bet)
+        await self.bot.db.award_guild_currency(ctx.author, win - bet)
 
 
 def setup(bot: aoi.AoiBot) -> None:

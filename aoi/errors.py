@@ -18,5 +18,6 @@ class DomainError(MathError):
         self.token = kwargs.pop("token")
         super(DomainError, self).__init__(*args, *kwargs)
 
-class SyntaxError(MathError):
+
+class CalculationSyntaxError(MathError):
     pass

@@ -1,10 +1,10 @@
-import json
 from typing import Union
 
+import aiohttp
 import discord
 from discord.ext import commands
+
 import aoi
-import aiohttp
 
 
 class Guilds(commands.Cog):

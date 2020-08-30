@@ -75,6 +75,7 @@ async def permission_check(ctx: aoi.AoiContext):
         can_use = can
         if not can:
             current_n = _n
+
     if ctx.command.name == 'help':
         return True
 

@@ -4,8 +4,8 @@ from types import coroutine
 from typing import List, Tuple, Union, Any, Callable
 
 import discord
-from discord.ext import commands
 import disputils
+from discord.ext import commands
 
 
 def _wrap_user(user: discord.abc.User):
@@ -101,6 +101,7 @@ class AoiContext(commands.Context):
             return discord.Color((await self.bot.db.guild_setting(self.guild.id)).ok_color)
         raise ValueError
 
+    # noinspection PyDefaultArgument
     async def embed(self, *,
                     author: str = None,
                     description: str = None,
@@ -144,7 +145,8 @@ class AoiContext(commands.Context):
         if trash_reaction:
             await self.trash_reaction(msg)
 
-    def group_list(self, lst: List[Any], n: int) -> List[List[Any]]:
+    @staticmethod
+    def group_list(lst: List[Any], n: int) -> List[List[Any]]:
         """
         Splits a list into sub-lists of n
         :param lst: the list
@@ -189,7 +191,8 @@ class AoiContext(commands.Context):
                 ).set_thumbnail(url=thumbnails[i]) for i, pg in enumerate(pgs)
             ]
 
-    def numbered(self, lst: List[Any]) -> List[str]:
+    @staticmethod
+    def numbered(lst: List[Any]) -> List[str]:
         """
 
         Returns a numbered version of a list

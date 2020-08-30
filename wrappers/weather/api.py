@@ -1,10 +1,11 @@
+from datetime import datetime
 from typing import Dict, Tuple, List
 
 import aiohttp
 
 from wrappers import gmaps
 from .helpers import LatLongLookupResult, WeatherCondition
-from datetime import datetime
+
 
 class WeatherGov:
     def __init__(self, key: str):

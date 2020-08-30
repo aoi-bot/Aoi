@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 from dataclasses import dataclass
 from libs.misc import arrows_from_direction
 
+
 @dataclass(frozen=True)
 class LatLongLookupResult:
     point: gmaps.LocationCoordinates
@@ -35,6 +36,7 @@ class WeatherCondition:
     short_forecast: str
 
     def line(self):
-        return f"{self.start.strftime('%m-%d %H:%M'):>7}{'D' if self.is_day else 'N'} {self.temp:>4}°{self.temp_unit} " \
+        return f"{self.start.strftime('%m-%d %H:%M'):>7}{'Dw' if self.is_day else 'N'} " \
+               f"{self.temp:>4}°{self.temp_unit} " \
                f"{str(self.wind) + self.wind_unit:>10} {self.wind_direction:>3}" \
                f"{arrows_from_direction(self.wind_direction)}"

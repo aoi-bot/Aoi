@@ -68,7 +68,6 @@ class GlobalShop(commands.Cog):
         await self.bot.db.award_global_currency(ctx.author, -amt)
         await self.bot.db.add_title(ctx.author, title)
 
-
     @commands.command(
         brief="Lists your titles"
     )
@@ -92,7 +91,6 @@ class GlobalShop(commands.Cog):
         except IndexError:
             await ctx.send_error(f"You don't own a title with that index. Do `{ctx.prefix}mytitles` to "
                                  f"view your titles")
-
 
 
 def setup(bot: aoi.AoiBot) -> None:

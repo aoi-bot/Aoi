@@ -34,6 +34,7 @@ def _font(size: int) -> PIL.ImageFont.ImageFont:
         "assets/merged.ttf", size=size)
 
 
+# noinspection PyUnresolvedReferences
 class XP(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
@@ -136,7 +137,9 @@ class XP(commands.Cog):
     )
     async def gxp(self, ctx: aoi.AoiContext, member: discord.Member = None):
         buf = io.BytesIO()
-        (await self._xp_template(ctx, member, self._get_global_rank, (0xff, 0x2a, 0x5b), self.g_xp_img)).save(fp=buf, format="PNG")
+        (await self._xp_template(ctx, member,
+                                 self._get_global_rank, (0xff, 0x2a, 0x5b),
+                                 self.g_xp_img)).save(fp=buf, format="PNG")
         buf.seek(0)
         await ctx.send(file=(discord.File(buf, "gxp.png")))
 

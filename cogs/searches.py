@@ -3,10 +3,8 @@ import random
 from typing import List
 
 import aiohttp
-import discord
 from discord.ext import commands
-from pixivapi import Illustration, Size, SearchTarget
-import bs4
+from pixivapi import Illustration, Size
 
 import aoi
 
@@ -72,8 +70,6 @@ class Searches(commands.Cog):
             footer="  ".join([t["name"] for t in i.tags]),
             trash_reaction=False
         )
-
-
 
 
 def setup(bot: aoi.AoiBot) -> None:

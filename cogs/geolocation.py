@@ -1,10 +1,11 @@
+import logging
 from typing import Optional
 
-import discord
 from discord.ext import commands
+
 import aoi
 from wrappers import gmaps
-import logging
+
 
 class GeoLocation(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
@@ -30,13 +31,13 @@ class GeoLocation(commands.Cog):
         await ctx.embed(
             title="Geolocation Lookup",
             fields=[
-                ("Looked up address", address),
-                ("Resolved address", result.formatted_address),
-                ("Location", result.geometry.location)
-            ] + ([
-                ("Bounds", f"{result.geometry.northeast}\n"
-                           f"{result.geometry.southwest}\n")
-            ] if result.geometry.northeast else []),
+                       ("Looked up address", address),
+                       ("Resolved address", result.formatted_address),
+                       ("Location", result.geometry.location)
+                   ] + ([
+                            ("Bounds", f"{result.geometry.northeast}\n"
+                                       f"{result.geometry.southwest}\n")
+                        ] if result.geometry.northeast else []),
             not_inline=[0, 1, 2]
         )
 

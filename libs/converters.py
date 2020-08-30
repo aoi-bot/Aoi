@@ -1,12 +1,10 @@
 import datetime
 import math
 import typing
-import dateparser
 
+import dateparser
 from discord.ext import commands
 
-import aoi
-from wrappers import gmaps
 
 def allowed_strings(*values, preserve_case: bool = False) \
         -> typing.Callable[[str], str]:
@@ -74,6 +72,7 @@ def integer(*, max_digits=10,
             _n = float(n)
         except ValueError:
             pass
+        # noinspection PyUnboundLocalVariable
         if n != _n:
             raise commands.BadArgument(
                 f"`{arg}` is not a valid integer"

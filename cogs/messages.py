@@ -1,8 +1,9 @@
 import json
-from typing import Optional, List
+from typing import List
 
 import discord
 from discord.ext import commands
+
 import aoi
 
 
@@ -53,7 +54,6 @@ class Messages(commands.Cog):
             n=30,
             title="Members who reacted"
         )
-
 
     @commands.has_permissions(manage_channels=True)
     @commands.command(

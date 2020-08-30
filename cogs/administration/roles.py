@@ -19,7 +19,7 @@ class Roles(commands.Cog):
         if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
             raise aoi.RoleError("Role to edit must be lower than your highest")
         if role >= ctx.me.top_role:
-            raise aoi.RoleError("I can't edit a role higher than mine")
+            raise aoi.RoleError("Im can't edit a role higher than mine")
         await role.edit(mentionable=not role.mentionable)
         await ctx.send_info(f"{role.mention} is now {'' if role.mentionable else 'un'}mentionable")
 
@@ -29,7 +29,7 @@ class Roles(commands.Cog):
         if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
             raise aoi.RoleError("Role to edit must be lower than your highest")
         if role >= ctx.me.top_role:
-            raise aoi.RoleError("I can't edit a role higher than mine")
+            raise aoi.RoleError("Im can't edit a role higher than mine")
         await role.edit(hoist=not role.hoist)
         await ctx.send_info(f"{role.mention} is now {'' if role.hoist else 'un'}hoisted")
 
@@ -39,7 +39,7 @@ class Roles(commands.Cog):
         if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
             raise aoi.RoleError("Role to edit must be lower than your highest")
         if role >= ctx.me.top_role:
-            raise aoi.RoleError("I can't edit a role higher than mine")
+            raise aoi.RoleError("Im can't edit a role higher than mine")
         await role.edit(name=name)
         await ctx.send_info(f"Renamed {role.mention}")
 
@@ -49,7 +49,7 @@ class Roles(commands.Cog):
         if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
             raise aoi.RoleError("Role to edit must be lower than your highest")
         if role >= ctx.me.top_role:
-            raise aoi.RoleError("I can't edit a role higher than mine")
+            raise aoi.RoleError("Im can't edit a role higher than mine")
         await role.edit(colour=color)
         await ctx.send_info(f"Changed {role.mention}'s color to "
                             f"#{conversions.color_to_string(role.colour)}")

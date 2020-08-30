@@ -63,7 +63,7 @@ class ErrorHandler(commands.Cog):
         elif isinstance(error, aoi.DomainError):
             await ctx.send_error(f"Domain Error - the value supplied was outside of the "
                                  f"valid input range of `{error.token}`")
-        elif isinstance(error, aoi.SyntaxError):
+        elif isinstance(error, aoi.CalculationSyntaxError):
             await ctx.send_error(f"Syntax Error - An error occured while parsing the expression")
         elif isinstance(error, aoi.MathError):
             await ctx.send_error(f"Math Error - An error occured while evaluating the expression")

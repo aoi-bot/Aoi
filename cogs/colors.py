@@ -1,12 +1,13 @@
+import colorsys
 import io
 import random
 from typing import List, Optional
 
 import discord
-from discord.ext import commands
-import aoi
-import colorsys
 from PIL import Image, ImageDraw
+from discord.ext import commands
+
+import aoi
 
 
 class Colors(commands.Cog):
@@ -88,7 +89,7 @@ class Colors(commands.Cog):
         img.save(buf, format="PNG")
         await ctx.embed(title="Color Palette",
                         description=" ".join(map(str, clrs[:50])) +
-                                             "..." if len(clrs) >= 50 else "",
+                                    "..." if len(clrs) >= 50 else "",
                         image=buf)
 
 

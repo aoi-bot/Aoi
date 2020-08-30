@@ -184,6 +184,7 @@ class Information(commands.Cog):
     async def emojiinfo(self, ctx: aoi.AoiContext, emoji: Union[discord.Emoji, discord.PartialEmoji]):
         def _(typ):
             return f"https://cdn.discordapp.com/emojis/{emoji.id}.{typ}?v=1"
+
         if isinstance(emoji, discord.PartialEmoji) and \
                 (not emoji.is_custom_emoji() or emoji.is_unicode_emoji()):
             return await ctx.send_error("Emoji must be a custom emoji")
