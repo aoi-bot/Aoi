@@ -35,8 +35,8 @@ extensions = [
     "cogs.nsfw",
     "cogs.math",
     "cogs.messages",
-    "cogs.geolocation",
-    "cogs.nasa",
+    # "cogs.geolocation",
+    #" cogs.nasa",
     # "cogs.weather",
     "cogs.searches",
 
