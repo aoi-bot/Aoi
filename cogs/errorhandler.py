@@ -53,6 +53,9 @@ class ErrorHandler(commands.Cog):
                 await ctx.author.send(f'{ctx.command} can not be used in Private Messages.')
             except discord.HTTPException:
                 pass
+        elif isinstance(error, aoi.CurrencyError):
+            await ctx.send_error(f"You must have ${error.amount_needed} ({'global' if error.is_global else 'server'}), "
+                                 f"and you have {error.amount_has}.")
         elif isinstance(error, aoi.RoleError):
             await ctx.send_error(_(str(error)))
         elif isinstance(error, aoi.PermissionFailed):

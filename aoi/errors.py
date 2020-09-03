@@ -21,3 +21,11 @@ class DomainError(MathError):
 
 class CalculationSyntaxError(MathError):
     pass
+
+
+class CurrencyError(commands.CommandError):
+    def __init__(self, *args, **kwargs):
+        self.amount_has: int = kwargs.pop("amount_has")
+        self.amount_needed: int = kwargs.pop("amount_needed")
+        self.is_global: bool = kwargs.pop("is_global")
+        super(CurrencyError, self).__init__(*args, **kwargs)

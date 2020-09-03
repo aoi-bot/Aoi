@@ -5,7 +5,7 @@ from discord.ext import commands
 import aoi
 
 
-class Gambling(commands.Cog):
+class ServerGambling(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
 
@@ -53,4 +53,4 @@ class Gambling(commands.Cog):
 
 
 def setup(bot: aoi.AoiBot) -> None:
-    bot.add_cog(Gambling(bot))
+    bot.add_cog(ServerGambling(bot))
