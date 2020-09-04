@@ -6,7 +6,7 @@ import aiohttp
 from discord.ext import commands
 
 import aoi
-from libs.converters import latlong, dtime
+from libs.converters import dtime
 from wrappers import gmaps
 
 
@@ -41,7 +41,7 @@ class Nasa(commands.Cog):
             image=buf
         )
 
-    #@commands.cooldown(1, 360, type=commands.BucketType.user)
+    # @commands.cooldown(1, 360, type=commands.BucketType.user)
     @commands.command(
         brief="Gets the astronomy picture of the day"
     )

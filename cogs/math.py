@@ -1,7 +1,7 @@
 import math
 
-import discord
 from discord.ext import commands
+
 import aoi
 from libs.converters import integer, allowed_strings
 from libs.expressions import evaluate
@@ -66,8 +66,16 @@ class Math(commands.Cog):
         brief="Evaluates an expression"
     )
     async def calc(self, ctx: aoi.AoiContext, *, expr: str):
-        res = await evaluate(expr)
-        await ctx.send_info(f"Expression Result:\n{res}")
+        try:
+            res = await evaluate(expr)
+        except aoi.CalculationSyntaxError:
+            await ctx.send_error("Syntax error")
+        except aoi.DomainError as e:
+            await ctx.send_error(f"Domain error for {e}")
+        except aoi.MathError:
+            await ctx.send_error("Math error")
+        else:
+            await ctx.send_info(f"Expression Result:\n{res}")
 
     @commands.command(
         brief="Converts between bases",
@@ -99,7 +107,7 @@ class Math(commands.Cog):
     async def bigmultiply(self, ctx: aoi.AoiContext,
                           num1: int,
                           num2: int):
-        await ctx.send_info(f"\n`{num1:,}` * `{num2:,}` = `{num1*num2:,}`")
+        await ctx.send_info(f"\n`{num1:,}` * `{num2:,}` = `{num1 * num2:,}`")
 
 
 def setup(bot: aoi.AoiBot) -> None:

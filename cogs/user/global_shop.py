@@ -1,6 +1,8 @@
+import discord
 from discord.ext import commands
 
 import aoi
+from libs.currency_classes import CurrencyLock
 
 
 class GlobalShop(commands.Cog):
@@ -10,6 +12,14 @@ class GlobalShop(commands.Cog):
     @property
     def description(self):
         return "Commands for managing and using the global shop"
+
+    @commands.command(
+        brief="Pay someone global currency."
+    )
+    async def pay_g(self, ctx: aoi.AoiContext, member: discord.Member, amount: int):
+        async with CurrencyLock(ctx, amount, True, f"Paid ${amount} to {member}"):
+            await self.bot.db.ensure_global_currency_entry(member)
+            await self.bot.db.award_global_currency(member, amount)
 
     @commands.is_owner()
     @commands.command(
@@ -68,7 +78,6 @@ class GlobalShop(commands.Cog):
         await self.bot.db.award_global_currency(ctx.author, -amt)
         await self.bot.db.add_title(ctx.author, title)
 
-
     @commands.command(
         brief="Lists your titles"
     )
@@ -92,7 +101,6 @@ class GlobalShop(commands.Cog):
         except IndexError:
             await ctx.send_error(f"You don't own a title with that index. Do `{ctx.prefix}mytitles` to "
                                  f"view your titles")
-
 
 
 def setup(bot: aoi.AoiBot) -> None:

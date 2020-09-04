@@ -82,7 +82,7 @@ class Information(commands.Cog):
                  " ".join([r.mention for r in normal_roles[-1:-6:-1] if r.id not in
                            [x.id for x in hoisted_roles]]) if len(normal_roles) > 1
                  else "None"),
-                ("Top Role", member.roles[-1].mention),
+                ("Top Role", member.roles[-1].mention if len(member.roles) > 1 else "None"),
                 ("Ansura Profile", f"https://www.ansura.xyz/profile/{member.id}")
             ],
             clr=member.color,
@@ -184,6 +184,7 @@ class Information(commands.Cog):
     async def emojiinfo(self, ctx: aoi.AoiContext, emoji: Union[discord.Emoji, discord.PartialEmoji]):
         def _(typ):
             return f"https://cdn.discordapp.com/emojis/{emoji.id}.{typ}?v=1"
+
         if isinstance(emoji, discord.PartialEmoji) and \
                 (not emoji.is_custom_emoji() or emoji.is_unicode_emoji()):
             return await ctx.send_error("Emoji must be a custom emoji")

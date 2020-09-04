@@ -5,7 +5,7 @@ from discord.ext import commands
 import aoi
 
 
-class Gambling(commands.Cog):
+class ServerGambling(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
 
@@ -49,8 +49,8 @@ class Gambling(commands.Cog):
         else:
             win = 0
         await ctx.send_info(f"You got a {r}. {'Better luck next time?' if not win else 'You won ' + str(win) + '!'}")
-        await self.bot.db.award_guild_currency(ctx.author, win-bet)
+        await self.bot.db.award_guild_currency(ctx.author, win - bet)
 
 
 def setup(bot: aoi.AoiBot) -> None:
-    bot.add_cog(Gambling(bot))
+    bot.add_cog(ServerGambling(bot))

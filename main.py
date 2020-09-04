@@ -35,8 +35,8 @@ extensions = [
     "cogs.nsfw",
     "cogs.math",
     "cogs.messages",
-    "cogs.geolocation",
-    "cogs.nasa",
+    # "cogs.geolocation",
+    #" cogs.nasa",
     # "cogs.weather",
     "cogs.searches",
 
@@ -75,6 +75,7 @@ async def permission_check(ctx: aoi.AoiContext):
         can_use = can
         if not can:
             current_n = _n
+
     if ctx.command.name == 'help':
         return True
 

@@ -1,14 +1,13 @@
 import io
-import io
 import itertools
 import sys
 import traceback
 from typing import Dict, Union
 
 import PIL
-import PIL.Image as I
-import PIL.ImageDraw as D
-import PIL.ImageFont as F
+import PIL.Image as Im
+import PIL.ImageDraw as Dw
+import PIL.ImageFont as Fn
 import aiohttp
 import discord
 from discord.ext import commands
@@ -78,7 +77,7 @@ def _center_and_fit(x, y, x2, y2, text, size, draw, *, w_pad=5, h_pad=5):
 
 
 def _font(size: int) -> PIL.ImageFont.ImageFont:
-    return F.truetype(
+    return Fn.truetype(
         "assets/merged.ttf", size=size)
 
 
@@ -86,6 +85,7 @@ def _16(*args: Union[float, int]) -> [Union[float, int], ...]:
     return tuple(map(lambda x: 16 * x, args))
 
 
+# noinspection PyUnresolvedReferences
 class Profile(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
@@ -101,7 +101,7 @@ class Profile(commands.Cog):
             async with sess.get("https://i.imgur.com/3b42LpU.jpg") as resp:
                 self._buf.write(await resp.content.read())
         self._buf.seek(0)
-        self.default_bg = I.open(self._buf)
+        self.default_bg = Im.open(self._buf)
 
     @property
     def description(self):
@@ -144,7 +144,7 @@ class Profile(commands.Cog):
                         resp.raise_for_status()
                         _buf.write(await resp.content.read())
                 _buf.seek(0)
-                card_bg = I.open(_buf)
+                card_bg = Im.open(_buf)
                 card_bg = crop_max_square(card_bg)
                 card_bg = card_bg.resize((512, 512))
         except Exception as error:  # noqa
@@ -160,9 +160,9 @@ class Profile(commands.Cog):
         await member.avatar_url_as(format="png").save(avatar_buf)
         avatar_buf.seek(0)
         img = self.background.copy()
-        avatar_img = I.open(avatar_buf)
+        avatar_img = Im.open(avatar_buf)
         avatar_img = avatar_img.resize((128, 128))
-        img_draw = D.Draw(img)
+        img_draw = Dw.Draw(img)
         img.paste(avatar_img, (32, 32))
         avatar_buf.close()
 
@@ -178,11 +178,11 @@ class Profile(commands.Cog):
                          (112 + server_width, 256), \
                          (96 + server_width, 304), \
                          (96, 304)
-        overlay = I.new("RGBA", img.size, (0, 0, 0, 0))
-        D.Draw(overlay).polygon(global_xp_poly, fill=(0, 0, 0) + (120,))
-        D.Draw(overlay).polygon(server_xp_poly, fill=(0, 0, 0) + (120,))
+        overlay = Im.new("RGBA", img.size, (0, 0, 0, 0))
+        Dw.Draw(overlay).polygon(global_xp_poly, fill=(0, 0, 0) + (120,))
+        Dw.Draw(overlay).polygon(server_xp_poly, fill=(0, 0, 0) + (120,))
         img = PIL.Image.alpha_composite(img, overlay)
-        img_draw = D.Draw(img)
+        img_draw = Dw.Draw(img)
 
         # draw text
         await self.bot.db.ensure_user_entry(member)
@@ -218,7 +218,7 @@ class Profile(commands.Cog):
         img_draw.text((x, y), f"{_cur_string(await self.bot.db.get_guild_currency(member))}",
                       font=_font(sz))
         card_bg = card_bg.convert("RGBA")
-        img = I.alpha_composite(card_bg, img)
+        img = Im.alpha_composite(card_bg, img)
         buf = io.BytesIO()
         img.save(fp=buf, format="png")
         buf.seek(0)
@@ -240,7 +240,7 @@ class Profile(commands.Cog):
                     resp.raise_for_status()
                     _buf.write(await resp.content.read())
             _buf.seek(0)
-            card_bg = I.open(_buf)
+            card_bg = Im.open(_buf)
             card_bg = crop_max_square(card_bg)
             card_bg = card_bg.resize((512, 512))
             _buf2 = io.BytesIO()
@@ -254,7 +254,7 @@ class Profile(commands.Cog):
                 self.bot.db.backgrounds[ctx.author.id] = url
                 await self.bot.db.cache_flush()
         except Exception as error:  # noqa
-            if cur_removed:
+            if cur_removed:  # noqa
                 await self.bot.db.award_global_currency(ctx.author, 7500)
             await ctx.send_error("An error occured while setting the background - your currency was not "
                                  "affected")

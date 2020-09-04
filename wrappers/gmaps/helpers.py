@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-
 from dataclasses import dataclass
 from typing import List, Optional, TYPE_CHECKING
 
@@ -8,6 +7,7 @@ from discord.ext import commands
 
 if TYPE_CHECKING:
     import aoi
+
 
 def try_convert_coord(arg: str):
     arg = arg.lower().replace("°", "")
@@ -34,7 +34,7 @@ class LocationComponent:
 
 class LocationCoordinates:
 
-    def __init__(self, lat: float, long: float, location: str=None):
+    def __init__(self, lat: float, long: float, location: str = None):
         self.lat = lat
         self.long = long
         self.location = location

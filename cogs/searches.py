@@ -3,10 +3,8 @@ import random
 from typing import List
 
 import aiohttp
-import discord
 from discord.ext import commands
-from pixivapi import Illustration, Size, SearchTarget
-import bs4
+from pixivapi import Illustration, Size
 
 import aoi
 
@@ -55,25 +53,27 @@ class Searches(commands.Cog):
 
         i = random.choice(filtered)
 
-        buf = io.BytesIO()
-        async with aiohttp.ClientSession() as sess:
-            async with sess.get(i.image_urls[Size.ORIGINAL],
-                                headers={
-                                    "Referer": "https://www.pixiv.com/"
-                                }) as resp:
-                buf.write(await resp.read())
+        if i.image_urls[Size.ORIGINAL]:
+            buf = io.BytesIO()
+            async with aiohttp.ClientSession() as sess:
+                async with sess.get(i.image_urls[Size.ORIGINAL],
+                                    headers={
+                                        "Referer": "https://www.pixiv.com/"
+                                    }) as resp:
+                    buf.write(await resp.read())
 
-        buf.seek(0)
+            buf.seek(0)
+        else:
+            buf = None
 
         await ctx.embed(
             image=buf,
-            description=i.caption + f"\nhttps://www.pixiv.net/en/artworks/{i.id}",
+            description=i.caption[:500] + f"\nhttps://www.pixiv.net/en/artworks/{i.id}" +
+                        ("\nError fetching image" if not buf else ""), # noqa
             title=i.title,
             footer="  ".join([t["name"] for t in i.tags]),
             trash_reaction=False
         )
-
-
 
 
 def setup(bot: aoi.AoiBot) -> None:

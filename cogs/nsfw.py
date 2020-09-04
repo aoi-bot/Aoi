@@ -1,17 +1,18 @@
+import logging
+import random
 from typing import List
 
 from discord.ext import commands
+
 import aoi
 from wrappers import gelbooru
-import random
-import logging
+
 
 class NSFW(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
         self.gelbooru = None
         bot.loop.create_task(self._init())
-
 
     @property
     def description(self):

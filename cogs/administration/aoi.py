@@ -1,7 +1,11 @@
+from datetime import datetime
+
 import discord
 from discord.ext import commands
+
 import aoi
-import aiohttp
+from libs.conversions import dhm_notation
+
 
 class Aoi(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
@@ -22,11 +26,14 @@ class Aoi(commands.Cog):
                 text_channels += 1
             if isinstance(channel, discord.VoiceChannel):
                 voice_channels += 1
-        await ctx.embed(title="Aoi Stats", fields=[
-            ("Ping", f"{round(self.bot.latency*1000)}ms"),
+        await ctx.embed(author="Aoi Bot", fields=[
+            ("Ping", f"{round(self.bot.latency * 1000)}ms"),
             ("Presence", f"{len(self.bot.guilds)} Guilds\n"
                          f"{text_channels} Text Channels\n"
-                         f"{voice_channels} Voice Channels\n")
+                         f"{voice_channels} Voice Channels\n"),
+            ("Messages", f"{self.bot.messages}"),
+            ("Commands\nExecuted", f"{self.bot.commands_executed}"),
+            ("Uptime", dhm_notation(datetime.now() - self.bot.start_time)),
         ])
 
     @commands.command(brief="Gives a link to invite Aoi to your server")
@@ -40,7 +47,7 @@ class Aoi(commands.Cog):
         brief="Shows Aoi's latency to discord"
     )
     async def ping(self, ctx: aoi.AoiContext):
-        await ctx.send_info(f":ping_pong: {round(self.bot.latency*1000)}ms")
+        await ctx.send_info(f":ping_pong: {round(self.bot.latency * 1000)}ms")
 
     @commands.is_owner()
     @commands.command(
@@ -76,7 +83,7 @@ class Aoi(commands.Cog):
     async def guildinfo(self, ctx: aoi.AoiContext, guild: int):
         guild: discord.Guild = self.bot.get_guild(guild)
         if not guild:
-            return await ctx.send_error("I'm not in a guild with that ID")
+            return await ctx.send_error("Im'm not in a guild with that ID")
         created = guild.created_at.strftime("%c")
         voice_channels = len(guild.voice_channels)
         text_channels = len(guild.text_channels)
@@ -113,7 +120,6 @@ class Aoi(commands.Cog):
             ],
             thumbnail=guild.icon_url
         )
-
 
 
 def setup(bot: aoi.AoiBot) -> None:

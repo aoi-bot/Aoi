@@ -1,9 +1,11 @@
 import logging
+import math
 import re
 from dataclasses import dataclass
 from typing import List, Union
-import math
+
 import aoi
+
 logging.info("expr:Initializing the expression evaluator")
 
 
@@ -229,12 +231,13 @@ def _infix_to_postfix(infix: List[Union[str, float]]):
         postfix.append(stack.pop())
     return postfix
 
+
 async def evaluate(expression: str):
     try:
         tokenized = _tokenize(expression)
         postfix = _infix_to_postfix(tokenized)
-    except:
-        raise aoi.SyntaxError
+    except:  # noqa
+        raise aoi.CalculationSyntaxError
     stack = []
     for token in postfix:
         try:
@@ -249,6 +252,6 @@ async def evaluate(expression: str):
             if str(err) == "math domain error":
                 raise aoi.DomainError(token)
             raise
-        except:
+        except:  # noqa
             raise aoi.MathError
     return stack[0]

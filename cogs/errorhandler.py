@@ -53,17 +53,22 @@ class ErrorHandler(commands.Cog):
                 await ctx.author.send(f'{ctx.command} can not be used in Private Messages.')
             except discord.HTTPException:
                 pass
+        elif isinstance(error, aoi.CurrencyError):
+            await ctx.send_error(f"You must have ${error.amount_needed} ({'global' if error.is_global else 'server'}), "
+                                 f"and you have {error.amount_has}.")
         elif isinstance(error, aoi.RoleError):
             await ctx.send_error(_(str(error)))
         elif isinstance(error, aoi.PermissionFailed):
             if (await self.bot.db.guild_setting(ctx.guild.id)).perm_errors:
                 await ctx.send_error(str(error))
+        elif isinstance(error, discord.Forbidden):
+            await ctx.send_error("I don't have the permissions for that")
         elif isinstance(error, commands.BadArgument):
             await ctx.send_error(_(str(error)))
         elif isinstance(error, aoi.DomainError):
             await ctx.send_error(f"Domain Error - the value supplied was outside of the "
                                  f"valid input range of `{error.token}`")
-        elif isinstance(error, aoi.SyntaxError):
+        elif isinstance(error, aoi.CalculationSyntaxError):
             await ctx.send_error(f"Syntax Error - An error occured while parsing the expression")
         elif isinstance(error, aoi.MathError):
             await ctx.send_error(f"Math Error - An error occured while evaluating the expression")

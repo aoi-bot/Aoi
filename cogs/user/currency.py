@@ -2,9 +2,9 @@ import io
 from typing import Optional
 
 import PIL
-import PIL.Image as I
-import PIL.ImageDraw as D
-import PIL.ImageFont as F
+import PIL.Image as Im
+import PIL.ImageDraw as Dw
+import PIL.ImageFont as Fn
 import discord
 from discord.ext import commands
 
@@ -45,7 +45,7 @@ def _center_and_fit(x, y, x2, y2, text, size, draw, *, w_pad=5, h_pad=5):
 
 
 def _font(size: int) -> PIL.ImageFont.ImageFont:
-    return F.truetype(
+    return Fn.truetype(
         "assets/merged.ttf", size=size)
 
 
@@ -76,7 +76,7 @@ class Currency(commands.Cog):
     async def wallet(self, ctx: aoi.AoiContext, member: discord.Member = None):
         member = member or ctx.author
         img = self.background.copy()
-        draw = D.Draw(img)
+        draw = Dw.Draw(img)
         await self.bot.db.ensure_global_currency_entry(member)
         for i in range(3):
             x, y, _, _, sz = _center_and_fit(
@@ -110,6 +110,7 @@ class Currency(commands.Cog):
         await self.bot.db.award_guild_currency(member, amount)
         await ctx.send_ok(f"Awarded ${amount} to {member.mention}. Their new total is "
                           f"{await self.bot.db.get_guild_currency(member)}")
+
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Currency(bot))

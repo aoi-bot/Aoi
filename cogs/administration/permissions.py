@@ -1,10 +1,11 @@
+import logging
+from typing import Optional
+
 import discord
 from discord.ext import commands
+
 import aoi
-import asyncio
-import logging
-from typing import Optional, Union, List
-from libs.converters import allowed_strings, disenable
+from libs.converters import disenable
 
 
 class Permissions(commands.Cog):

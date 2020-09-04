@@ -1,8 +1,8 @@
-import asyncio
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import aiohttp
+
 
 @dataclass
 class GelbooruPost:
@@ -12,6 +12,7 @@ class GelbooruPost:
     id: int
 
 
+# noinspection PyDefaultArgument
 class GelbooruBrowser:
     def __init__(self,
                  api_key: str,
@@ -26,7 +27,7 @@ class GelbooruBrowser:
                         tags: List[str],
                         *,
                         limit: int = 100,
-                        page: int = 0) -> Tuple[List[GelbooruPost], bool, bool]:
+                        page: int = 0) -> Tuple[Optional[List[GelbooruPost]], bool, bool]:
         filtered_tags = []
         posts = []
         filtered_tag = False
