@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import datetime
 import logging
+import sqlite3
 from dataclasses import dataclass
 from typing import Dict, Optional, List, TYPE_CHECKING, Union, Tuple
 
@@ -152,6 +153,8 @@ class AoiDatabase:
         for i in self.bot.guilds:
             await self.guild_setting(i.id)
             await self.get_permissions(i.id)
+
+        await self.cache_flush()
 
         cursor = await self.db.execute("SELECT * from xp")
         rows = await cursor.fetchall()
@@ -440,7 +443,10 @@ class AoiDatabase:
 
     async def guild_setting(self, guild: int) -> _GuildSetting:
         if guild not in self.guild_settings:
-            await self.db.execute("INSERT INTO guild_settings (Guild) values (?)", (guild,))
+            try:
+                await self.db.execute("INSERT INTO guild_settings (Guild) values (?)", (guild,))
+            except sqlite3.IntegrityError:
+                pass
             await self.db.commit()
             self.guild_settings[guild] = _GuildSetting(
                 ok_color=0x00aa00,
