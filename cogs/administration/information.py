@@ -82,7 +82,7 @@ class Information(commands.Cog):
                  " ".join([r.mention for r in normal_roles[-1:-6:-1] if r.id not in
                            [x.id for x in hoisted_roles]]) if len(normal_roles) > 1
                  else "None"),
-                ("Top Role", member.roles[-1].mention),
+                ("Top Role", member.roles[-1].mention if len(member.roles) > 1 else "None"),
                 ("Ansura Profile", f"https://www.ansura.xyz/profile/{member.id}")
             ],
             clr=member.color,
