@@ -13,6 +13,7 @@ class Roles(commands.Cog):
     def description(self):
         return "Commands to modify roles"
 
+    @commands.bot_has_permissions(manage_roles=True)
     @commands.has_permissions(manage_roles=True)
     @commands.command(brief="Toggles if a role is mentionable", aliases=["rolem", "mentionable"])
     async def rolementionable(self, ctx: aoi.AoiContext, *, role: discord.Role):
@@ -23,6 +24,7 @@ class Roles(commands.Cog):
         await role.edit(mentionable=not role.mentionable)
         await ctx.send_info(f"{role.mention} is now {'' if role.mentionable else 'un'}mentionable")
 
+    @commands.bot_has_permissions(manage_roles=True)
     @commands.has_permissions(manage_roles=True)
     @commands.command(brief="Toggles if a role is hoisted", aliases=["roleh", "hoist"])
     async def rolehoist(self, ctx: aoi.AoiContext, *, role: discord.Role):
@@ -33,6 +35,7 @@ class Roles(commands.Cog):
         await role.edit(hoist=not role.hoist)
         await ctx.send_info(f"{role.mention} is now {'' if role.hoist else 'un'}hoisted")
 
+    @commands.bot_has_permissions(manage_roles=True)
     @commands.has_permissions(manage_roles=True)
     @commands.command(brief="Changes a roles name", aliases=["rren"])
     async def rolerename(self, ctx: aoi.AoiContext, role: discord.Role, *, name: str):
@@ -43,6 +46,7 @@ class Roles(commands.Cog):
         await role.edit(name=name)
         await ctx.send_info(f"Renamed {role.mention}")
 
+    @commands.bot_has_permissions(manage_roles=True)
     @commands.has_permissions(manage_roles=True)
     @commands.command(brief="Changes a roles color", aliases=["rclr", "roleclr"])
     async def rolecolor(self, ctx: aoi.AoiContext, role: discord.Role, *, color: discord.Colour):

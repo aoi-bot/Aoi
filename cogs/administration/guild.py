@@ -15,6 +15,7 @@ class Guilds(commands.Cog):
     def description(self):
         return "Commands for managing servers"
 
+    @commands.bot_has_permissions(manage_guild=True)
     @commands.has_permissions(manage_guild=True)
     @commands.command(aliases=["guildnm", "servernm"],
                       brief="Renames the server")
@@ -24,6 +25,7 @@ class Guilds(commands.Cog):
                                "Server rename cancelled",
                                ctx.guild.edit(name=name))
 
+    @commands.bot_has_permissions(manage_guild=True)
     @commands.has_permissions(manage_guild=True)
     @commands.command(aliases=["guildav", "serverav", "servericon"],
                       brief="Sets the server's icon")
@@ -37,6 +39,7 @@ class Guilds(commands.Cog):
                                            icon=await resp.content.read()
                                        ))
 
+    @commands.bot_has_permissions(manage_guild=True)
     @commands.has_permissions(manage_guild=True)
     @commands.command(aliases=["guildreg", "serverreg"],
                       brief="Sets the server's voice region")
@@ -56,6 +59,7 @@ class Guilds(commands.Cog):
         await ctx.send_info(" ".join(map(str, discord.VoiceRegion)),
                             title="Voice Regions")
 
+    @commands.bot_has_permissions(manage_emojis=True)
     @commands.has_permissions(manage_emojis=True)
     @commands.command(
         brief="Deletes up to 10 emojis",
