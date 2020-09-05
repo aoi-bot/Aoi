@@ -11,6 +11,10 @@ class ServerShop(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
 
+    @property
+    def description(self):
+        return "Guild role/item shop"
+
     @commands.command(
         brief="Pay someone server currency."
     )
