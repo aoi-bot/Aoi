@@ -2,6 +2,7 @@ from typing import Union
 
 import discord
 from discord.ext import commands
+
 import aoi
 from libs.currency_classes import CurrencyLock
 
@@ -21,7 +22,7 @@ class ServerShop(commands.Cog):
     @commands.has_permissions(manage_guild=True)
     @commands.command(
         brief="Add a role to the shop",
-        aliases=["shopradd","shopra"]
+        aliases=["shopradd", "shopra", "shopaddrole", "shopar"]
     )
     async def shoproleadd(self, ctx: aoi.AoiContext, role: discord.Role, cost: int):
         await self.bot.db.add_guild_shop_role(ctx.guild, role, cost)
@@ -44,7 +45,7 @@ class ServerShop(commands.Cog):
     @commands.has_permissions(manage_guild=True)
     @commands.command(
         brief="Remove a role from the server shop",
-        aliases=["shoprrem", "shoprr"]
+        aliases=["shoprrem", "shoprr", "shopremoverole", "shopremr"]
     )
     async def shoproleremove(self, ctx: aoi.AoiContext, role: Union[discord.Role, int]):
         await self.bot.db.del_guild_shop_item(ctx.guild, "role", str(role if isinstance(role, int) else role.id))
@@ -83,10 +84,6 @@ class ServerShop(commands.Cog):
         await self.bot.db.award_guild_currency(member, amount)
         await ctx.send_ok(f"Awarded ${amount} to {member.mention}. Their new total is "
                           f"{await self.bot.db.get_guild_currency(member)}")
-
-
-
-
 
 
 def setup(bot: aoi.AoiBot) -> None:

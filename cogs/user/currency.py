@@ -71,7 +71,8 @@ class Currency(commands.Cog):
                             f"{await self.bot.db.get_global_currency(member)}.")
 
     @commands.command(
-        brief="Checks your wallet"
+        brief="Checks your wallet",
+        aliases=["$"]
     )
     async def wallet(self, ctx: aoi.AoiContext, member: discord.Member = None):
         member = member or ctx.author
