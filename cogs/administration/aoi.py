@@ -26,15 +26,17 @@ class Aoi(commands.Cog):
                 text_channels += 1
             if isinstance(channel, discord.VoiceChannel):
                 voice_channels += 1
-        await ctx.embed(author="Aoi Bot", fields=[
-            ("Ping", f"{round(self.bot.latency * 1000)}ms"),
-            ("Presence", f"{len(self.bot.guilds)} Guilds\n"
-                         f"{text_channels} Text Channels\n"
-                         f"{voice_channels} Voice Channels\n"),
-            ("Messages", f"{self.bot.messages}"),
-            ("Commands\nExecuted", f"{self.bot.commands_executed}"),
-            ("Uptime", dhm_notation(datetime.now() - self.bot.start_time)),
-        ])
+        await ctx.embed(author=f"Aoi {self.bot.version}",
+                        fields=[
+                            ("Ping", f"{round(self.bot.latency * 1000)}ms"),
+                            ("Messages", f"{self.bot.messages}"),
+                            ("Commands\nExecuted", f"{self.bot.commands_executed}"),
+                            ("Uptime", dhm_notation(datetime.now() - self.bot.start_time)),
+                            ("Presence", f"{len(self.bot.guilds)} Guilds\n"
+                                         f"{text_channels} Text Channels\n"
+                                         f"{voice_channels} Voice Channels\n"),
+                        ],
+                        thumbnail=self.bot.user.avatar_url)
 
     @commands.command(brief="Gives a link to invite Aoi to your server")
     async def invite(self, ctx: aoi.AoiContext):

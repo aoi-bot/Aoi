@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import sys
 
 import discord
 import dotenv
@@ -8,6 +9,7 @@ from discord.ext import commands
 
 import aoi
 
+os.chdir(os.path.dirname(sys.argv[0]))
 logging.basicConfig(level=logging.INFO)
 logging.addLevelName(15, "BDBG")
 dotenv.load_dotenv(".env")

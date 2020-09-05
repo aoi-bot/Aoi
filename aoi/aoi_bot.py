@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import subprocess
 from datetime import datetime
 from typing import Dict, Optional, List, Union
 
@@ -39,6 +40,8 @@ class AoiBot(commands.Bot):
         self.commands_executed = 0
         self.start_time = datetime.now()
         self.cog_groups = {}
+        self.version = "+".join(subprocess.check_output(["git", "describe", "--tags"]).
+                                strip().decode("utf-8").split("-")[:-1])
 
         async def increment_command_count(ctx):
             self.commands_executed += 1
