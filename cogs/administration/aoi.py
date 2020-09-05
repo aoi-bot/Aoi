@@ -109,7 +109,7 @@ class Aoi(commands.Cog):
                 ("ID", guild.id),
                 ("Created at", created),
                 ("Channels", f"{voice_channels} Voice, {text_channels} Text"),
-                ("System Channel", (guild.system_channel.mention if guild.system_channel else "None")),
+                ("Owner", guild.owner),
                 ("Members", guild.member_count),
                 ("Roles", roles),
                 ("Region", guild.region),

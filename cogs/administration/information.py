@@ -114,6 +114,7 @@ class Information(commands.Cog):
             fields=[
                 ("ID", guild.id),
                 ("Created at", created),
+                ("Owner", guild.owner),
                 ("Channels", f"{voice_channels} Voice, {text_channels} Text"),
                 ("System Channel", (guild.system_channel.mention if guild.system_channel else "None")),
                 ("Members", guild.member_count),
