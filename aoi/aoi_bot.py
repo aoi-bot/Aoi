@@ -2,6 +2,7 @@ import asyncio
 import logging
 import os
 import subprocess
+import sys
 from datetime import datetime
 from typing import Dict, Optional, List, Union
 
@@ -104,6 +105,12 @@ class AoiBot(commands.Bot):
         else:
             logging.error("bot: FATAL failed after 6 attempts")
             return
+
+        for cog in self.cogs:
+            cog = self.get_cog(cog)
+            if not cog.description:
+                logging.error(f"bot:cog {cog} has no description")
+                return
 
         await self.connect(reconnect=reconnect)
 
