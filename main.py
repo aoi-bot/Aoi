@@ -9,7 +9,11 @@ from discord.ext import commands
 
 import aoi
 
-os.chdir(os.path.dirname(sys.argv[0]))
+try:
+    os.chdir(os.path.dirname(sys.argv[0]))
+except FileNotFoundError:
+    pass
+
 logging.basicConfig(level=logging.INFO)
 logging.addLevelName(15, "BDBG")
 dotenv.load_dotenv(".env")
