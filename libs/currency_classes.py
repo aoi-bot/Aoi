@@ -44,9 +44,11 @@ class CurrencyLock:
         if exc_type:
             if self.error:
                 await self.ctx.send_error(self.error)
+                return False
             if self.is_global:
                 await self.bot.db.award_global_currency(self.ctx.author, self.amount)
             else:
                 await self.bot.db.award_guild_currency(self.ctx.author, self.amount)
+            return True
         else:
             await self.ctx.send_ok(self.success)
