@@ -108,7 +108,7 @@ class AoiBot(commands.Bot):
 
         for cog in self.cogs:
             cog = self.get_cog(cog)
-            if not cog.description:
+            if not cog.description and cog.qualified_name not in self.cog_groups["Hidden"]:
                 logging.error(f"bot:cog {cog} has no description")
                 return
 

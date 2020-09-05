@@ -16,6 +16,8 @@ class Help(commands.Cog):
     async def modules(self, ctx: aoi.AoiContext):
         s = ""
         for grp_name, cogs in self.bot.cog_groups.items():
+            if grp_name == "Hidden":
+                continue
             s += f"\n**{grp_name}**\n"
             for cog in cogs:
                 c = self.bot.get_cog(cog)

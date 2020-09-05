@@ -34,20 +34,16 @@ extensions = {
         "cogs.administration.permissions": "Permissions"
     },
     "Misc": {
-
-        # misc/fun cogs
         "cogs.colors": "Colors",
         "cogs.nsfw": "NSFW",
         "cogs.math": "Math",
         "cogs.messages": "Messages",
         # "cogs.geolocation",
-        # " cogs.nasa",
+        # "cogs.nasa",
         # "cogs.weather",
         "cogs.searches": "Searches"
     },
     "Profile/Currency": {
-
-        # user/currency cogs
         "cogs.user.xp": "XP",
         "cogs.user.profile": "Profile",
         "cogs.user.currency": "Currency",
@@ -56,11 +52,11 @@ extensions = {
         "cogs.user.guild_gambling": "ServerGambling",
     },
     "Utility/Config": {
-
-        # utility and config cogs
-        "cogs.errorhandler": "ErrorHandler",
         "cogs.settings.guildsettings": "GuildSettings",
         "cogs.help": "Help"
+    },
+    "Hidden": {
+        "cogs.errorhandler": "ErrorHandler",
     }
 }
 
