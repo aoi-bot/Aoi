@@ -75,6 +75,15 @@ class ServerShop(commands.Cog):
         async with CurrencyLock(ctx, found.cost, False, f"Bought {role.mention}"):
             await ctx.author.add_roles(role)
 
+    @commands.has_permissions(administrator=True)
+    @commands.command(
+        brief="Award or take server currency."
+    )
+    async def award(self, ctx: aoi.AoiContext, member: discord.Member, amount: int):
+        await self.bot.db.award_guild_currency(member, amount)
+        await ctx.send_ok(f"Awarded ${amount} to {member.mention}. Their new total is "
+                          f"{await self.bot.db.get_guild_currency(member)}")
+
 
 
 
