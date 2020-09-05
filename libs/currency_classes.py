@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     import aoi
@@ -14,7 +14,7 @@ class CurrencyLock:
                  amount: int,
                  is_global: bool,
                  success: str,
-                 error: str = "An error occured, and your currency was not affected."):
+                 error: Optional[str] = "An error occured, and your currency was not affected."):
         self.ctx = ctx
         self.amount = amount
         self.is_global = is_global
@@ -42,7 +42,8 @@ class CurrencyLock:
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         if exc_type:
-            await self.ctx.send_error(self.error)
+            if self.error:
+                await self.ctx.send_error(self.error)
             if self.is_global:
                 await self.bot.db.award_global_currency(self.ctx.author, self.amount)
             else:
