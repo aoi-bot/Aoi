@@ -35,9 +35,17 @@ class CurrencyLock:
                 raise CurrencyError(amount_has=await self.bot.db.get_guild_currency(self.ctx.author),
                                     amount_needed=self.amount,
                                     is_global=False)
+        if self.is_global:
+            await self.bot.db.award_global_currency(self.ctx.author, -self.amount)
+        else:
+            await self.bot.db.award_guild_currency(self.ctx.author, -self.amount)
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         if exc_type:
             await self.ctx.send_error(self.error)
+            if self.is_global:
+                await self.bot.db.award_global_currency(self.ctx.author, self.amount)
+            else:
+                await self.bot.db.award_guild_currency(self.ctx.author, self.amount)
         else:
             await self.ctx.send_ok(self.success)
