@@ -38,6 +38,7 @@ class AoiBot(commands.Bot):
         self.messages = 0
         self.commands_executed = 0
         self.start_time = datetime.now()
+        self.cog_groups = {}
 
         async def increment_command_count(ctx):
             self.commands_executed += 1
@@ -120,3 +121,9 @@ class AoiBot(commands.Bot):
             raise commands.BadArgument(f"Name {name} can refer to multiple modules: "
                                        f"{', '.join(found)}. Use a more specific name.")
         return found
+
+    def set_cog_group(self, cog: str, group: str):
+        if group not in self.cog_groups:
+            self.cog_groups[group] = [cog]
+        else:
+            self.cog_groups[group].append(cog)

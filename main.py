@@ -22,41 +22,51 @@ def get_prefix(_bot: aoi.AoiBot, message: discord.Message):
 
 bot = aoi.AoiBot(command_prefix=get_prefix, help_command=None)
 
-extensions = [
-    # administration cogs
-    "cogs.administration.aoi",
-    "cogs.administration.information",
-    "cogs.administration.roles",
-    "cogs.administration.guild",
-    "cogs.administration.permissions",
+extensions = {
+    "Administration": {
+        # administration cogs
+        "cogs.administration.aoi": "Aoi",
+        "cogs.administration.information": "Information",
+        "cogs.administration.roles": "Roles",
+        "cogs.administration.guild": "Guilds",
+        "cogs.administration.permissions": "Permissions"
+    },
+    "Misc": {
 
-    # misc/fun cogs
-    "cogs.colors",
-    "cogs.nsfw",
-    "cogs.math",
-    "cogs.messages",
-    # "cogs.geolocation",
-    #" cogs.nasa",
-    # "cogs.weather",
-    "cogs.searches",
+        # misc/fun cogs
+        "cogs.colors": "Colors",
+        "cogs.nsfw": "NSFW",
+        "cogs.math": "Math",
+        "cogs.messages": "Messages",
+        # "cogs.geolocation",
+        # " cogs.nasa",
+        # "cogs.weather",
+        "cogs.searches": "Searches"
+    },
+    "Profile/Currency": {
 
-    # user/currency cogs
-    "cogs.user.xp",
-    "cogs.user.profile",
-    "cogs.user.currency",
-    "cogs.user.global_shop",
-    "cogs.user.guild_shop",
-    "cogs.user.guild_gambling",
+        # user/currency cogs
+        "cogs.user.xp": "XP",
+        "cogs.user.profile": "Profile",
+        "cogs.user.currency": "Currency",
+        "cogs.user.global_shop": "GlobalShop",
+        "cogs.user.guild_shop": "ServerShop",
+        "cogs.user.guild_gambling": "ServerGambling",
+    },
+    "Utility/Config": {
 
-    # utility and config cogs
-    "cogs.errorhandler",
-    "cogs.settings.guildsettings",
-    "cogs.help"
-]
+        # utility and config cogs
+        "cogs.errorhandler": "ErrorHandler",
+        "cogs.settings.guildsettings": "GuildSettings",
+        "cogs.help": "Help"
+    }
+}
 
-for ext in extensions:
-    logging.info(f"cog:loading {ext}")
-    bot.load_extension(ext)
+for grp_name, ext_set in extensions.items():
+    for path, cog_name in ext_set.items():
+        logging.info(f"cog:Loading {grp_name}:{cog_name} from {path}")
+        bot.load_extension(path)
+        bot.set_cog_group(cog_name, grp_name)
 
 
 @bot.event
