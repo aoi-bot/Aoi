@@ -11,7 +11,30 @@ class ServerGambling(commands.Cog):
 
     @property
     def description(self):
-        return "Gambling :)"
+        return "Gambling and games :)"
+
+    @commands.command(
+        brief="Rolls dice. Number of dice and sides are optional; number must be supplied if number of sides is."
+    )
+    async def roll(self, ctx: aoi.AoiContext, num: int = 5, sides: int = 6):
+        if num <= 0 or num > 50:
+            return await ctx.send_error("Number of dice must be from 1 to 50")
+        if sides < 6 or sides > 100:
+            return await ctx.send_error("Number of sides must be between 6 and 100")
+        counted = {}
+        dice = []
+        for _ in range(num):
+            die = random.randint(1, sides + 1)
+            counted[die] = counted.get(die, 0) + 1
+            dice.append(die)
+        await ctx.send_info(
+            f"**Average:** {round(sum(dice)/len(dice),1):0.1f} - "
+            f"**Total:** {sum(dice)} - "
+            f"**Number Rolled:** {len(dice)}\n" +
+            "-".join(map(str, dice)) + "\n"
+        )
+
+
 
     @commands.command(
         brief="Flip a coin, with an optional bet",
