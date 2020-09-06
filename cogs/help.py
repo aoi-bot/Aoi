@@ -1,7 +1,24 @@
+import inspect
+
 import discord
 from discord.ext import commands
 
 import aoi
+
+
+async def _can_run(_c: commands.Command, ctx: aoi.AoiContext):
+    for check in _c.checks:
+        try:
+            if inspect.iscoroutinefunction(check):
+                x = await check(ctx)
+            else:
+                x = check(ctx)
+            if not x:
+                return False
+        except discord.DiscordException:
+            return False
+    else:
+        return True
 
 
 class Help(commands.Cog):
@@ -30,48 +47,18 @@ class Help(commands.Cog):
     @commands.command(brief="Lists commands within a module", name="commands",
                       aliases=["cmds"])
     async def cmds(self, ctx: aoi.AoiContext, module: str):
-        async def _can_run(_c: commands.Command):
-            for check in _c.checks:
-                try:
-                    x = check(ctx)
-                    try:
-                        x = await x
-                    except TypeError:
-                        pass
-                    if not x:
-                        return False
-                except discord.DiscordException:
-                    return False
-            else:
-                return True
-
         cog: commands.Cog = self.bot.get_cog(self.bot.find_cog(module, check_description=True)[0])
         c: commands.Command
         await ctx.embed(
             title=f"Commands for {cog.qualified_name} module",
             description=cog.description + "\n\n" + "\n".join(
-                [f"**{c.name}** - {c.brief}" for c in cog.get_commands() if await _can_run(c)]
+                [f"**{c.name}** - {c.brief}" for c in cog.get_commands() if await _can_run(c, ctx)]
             ),
             footer=f"Do {ctx.prefix}help command_name for help on a command"
         )
 
     @commands.command(brief="Shows help for a command", aliases=["h"])
     async def help(self, ctx: aoi.AoiContext, command: str = None):
-        async def _can_run(_c: commands.Command):
-            for check in _c.checks:
-                try:
-                    x = check(ctx)
-                    try:
-                        x = await x
-                    except TypeError:
-                        pass
-                    if not x:
-                        return False
-                except discord.DiscordException:
-                    return False
-            else:
-                return True
-
         if not command:
             return await ctx.embed(title="Aoi Help",
                                    fields=[("Module List", f"`{ctx.prefix}modules` to view "
@@ -94,11 +81,11 @@ class Help(commands.Cog):
                        ("Usage", f"`{cmd.name} {cmd.signature or ''}`"),
                        ("Description", cmd.brief),
                        ("Aliases", ", ".join([f"`{a}`" for a in cmd.aliases]) if cmd.aliases
-                           else None),
+                       else None),
                        ("Module", cmd.cog.qualified_name)
                    ] + (
                        [("Missing Permissions", "You are missing the permissions to run this command")]
-                       if not await _can_run(cmd) else []
+                       if not await _can_run(cmd, ctx) else []
                    ),
             footer="<> indicate required parameters, [] indicate optional parameters",
             not_inline=[0, 1, 2, 3]
