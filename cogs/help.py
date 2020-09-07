@@ -69,6 +69,8 @@ class Help(commands.Cog):
                                                            f"permission guide"),
                                            ("Command Help", f"`{ctx.prefix}help command_name` to "
                                                             f"view help for a command"),
+                                           ("Other Guides", f"`{ctx.prefix}cmds guides` to "
+                                                            f"view other guides"),
                                            ("Support Server", f"Still need help? Join our [support "
                                                               f"server](https://discord.gg/pCgEj8t)")],
                                    not_inline=[0, 1, 2, 3, 4])
