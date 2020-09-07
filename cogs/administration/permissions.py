@@ -81,18 +81,6 @@ class Permissions(commands.Cog):
         await self.db.add_permission(ctx.guild.id, f"sm {module} {enabled}")
         await ctx.send_ok(f"**sm {module} {enabled}** added.", trash=False)
 
-    @commands.command(brief="Shows a permission guide")
-    async def permguide(self, ctx: aoi.AoiContext):
-        await ctx.embed(
-            title="Aoi Permission guide",
-            description=
-            f"Aoi's permissions are based off of a permission chain that "
-            f"anyone can view with `{ctx.prefix}lp`. The chain is evaluated "
-            f"from 0 to the top. The permission chain can be modified by anyone with "
-            f"administrator permission in a server. `{ctx.prefix}cmds permissions` can "
-            f"be used to view view a list of the permission commands\n"
-            f"The chain can be reset to the default with {ctx.prefix}rp"
-        )
 
 
 def setup(bot: aoi.AoiBot) -> None:

@@ -87,10 +87,9 @@ class XP(commands.Cog):
 
     async def _xp_template(self, ctx: aoi.AoiContext, member: discord.Member,
                            rank_func: callable, color: Tuple[int, int, int],
-                           template):
+                           template, xp):
         member = member or ctx.author
         await self.bot.db.ensure_xp_entry(member)
-        xp = self.bot.db.xp[ctx.guild.id][member.id]
         l, x = _level(xp)
         r = rank_func(member)
         img = template.copy()
@@ -128,7 +127,8 @@ class XP(commands.Cog):
     )
     async def xp(self, ctx: aoi.AoiContext, member: discord.Member = None):
         buf = io.BytesIO()
-        (await self._xp_template(ctx, member, self._get_rank, (130, 36, 252), self.xp_img)).save(fp=buf, format="PNG")
+        (await self._xp_template(ctx, member, self._get_rank, (130, 36, 252), self.xp_img,
+                                 self.bot.db.xp[ctx.guild.id][member.id])).save(fp=buf, format="PNG")
         buf.seek(0)
         await ctx.send(file=(discord.File(buf, "xp.png")))
 
@@ -139,7 +139,7 @@ class XP(commands.Cog):
         buf = io.BytesIO()
         (await self._xp_template(ctx, member,
                                  self._get_global_rank, (0xff, 0x2a, 0x5b),
-                                 self.g_xp_img)).save(fp=buf, format="PNG")
+                                 self.g_xp_img, self.bot.db.global_xp[member.id])).save(fp=buf, format="PNG")
         buf.seek(0)
         await ctx.send(file=(discord.File(buf, "gxp.png")))
 

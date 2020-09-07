@@ -57,7 +57,8 @@ extensions = {
     },
     "Utility/Config": {
         "cogs.settings.guildsettings": "GuildSettings",
-        "cogs.help": "Help"
+        "cogs.help": "Help",
+        "cogs.guides": "Guides"
     },
     "Hidden": {
         "cogs.errorhandler": "ErrorHandler",

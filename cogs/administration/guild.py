@@ -1,10 +1,14 @@
+from datetime import timedelta
 from typing import Union
 
 import aiohttp
 import discord
+from dateutil.relativedelta import relativedelta
 from discord.ext import commands
 
 import aoi
+from libs.conversions import hms_notation
+from libs.converters import t_delta
 
 
 class Guilds(commands.Cog):
@@ -87,6 +91,19 @@ class Guilds(commands.Cog):
             "Emoji deletion cancelled",
             _del()
         )
+
+    # @commands.cooldown(rate=1, per=60, type=commands.BucketType.member)
+    @commands.has_permissions(manage_channels=True)
+    @commands.command(
+        brief="Change slowmode on a channel",
+        aliases=["slmd"]
+    )
+    async def slowmode(self, ctx: aoi.AoiContext, time: t_delta()):
+        time: timedelta = time
+        if time.days or time.seconds > 21600 or time.seconds < 0:
+            return await ctx.send_error("Invalid slowmode time")
+        await ctx.channel.edit(slowmode_delay=time.seconds)
+        await ctx.send_ok(f"Slowmode set to {hms_notation(time.seconds)}" if time.seconds else "Slowmode turned off.")
 
 
 def setup(bot: aoi.AoiBot) -> None:

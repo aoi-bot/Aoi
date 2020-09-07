@@ -17,3 +17,11 @@ def dhm_notation(td: timedelta, sep="", full=False):
     return sep.join([f"{td.days}{'days' if full else 'd'}",
                      f"{hours}{'hours' if full else 'h'}",
                      f"{minutes}{'minutes' if full else 'm'}"])
+
+
+def hms_notation(seconds: int):
+    seconds = int(seconds)
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    seconds = seconds % 60
+    return f"{hours}h{minutes}m{seconds}s"

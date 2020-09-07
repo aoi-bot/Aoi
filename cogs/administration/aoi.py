@@ -40,7 +40,7 @@ class Aoi(commands.Cog):
 
     @commands.command(brief="Gives a link to invite Aoi to your server")
     async def invite(self, ctx: aoi.AoiContext):
-        permissions_int = 84992
+        permissions_int = 268659776
         invite_url = f"https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=" \
                      f"{permissions_int}&scope=bot"
         await ctx.send_info(f"Invite me to your server [here]({invite_url})")
