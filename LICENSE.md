@@ -1,6 +1,7 @@
 MIT License
 
 Copyright (c) 2020 Daniel Nash
+
 Copyright (c) 2018 Python Discord
 
 Portions of code in this project have been taken from [PyDis discord bot](https://github.com/python-discord/bot) 
