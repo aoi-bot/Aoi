@@ -1,19 +1,15 @@
 import datetime
 import math
+import re
 import typing
 
 import dateparser
+from dateutil.relativedelta import relativedelta
 from discord.ext import commands
+from discord.ext.commands import BadArgument
 
 
-def allowed_strings(*values, preserve_case: bool = False) \
-        -> typing.Callable[[str], str]:
-    """
-    Return a converter which only allows arguments equal to one of the given values.
-    Unless preserve_case is True, the argument is converted to lowercase. All values are then
-    expected to have already been given in lowercase too.
-    """
-
+def allowed_strings(*values, preserve_case: bool = False) -> typing.Callable[[str], str]:
     def converter(arg: str) -> str:
         if not preserve_case:
             arg = arg.lower()
@@ -28,14 +24,7 @@ def allowed_strings(*values, preserve_case: bool = False) \
     return converter
 
 
-def disenable() \
-        -> typing.Callable[[str], str]:
-    """
-    Return a converter which only allows arguments equal to one of the given values.
-    Unless preserve_case is True, the argument is converted to lowercase. All values are then
-    expected to have already been given in lowercase too.
-    """
-
+def disenable() -> typing.Callable[[str], str]:
     def converter(arg: str) -> str:
 
         if arg.lower() not in ("enable", "disable"):
@@ -48,9 +37,7 @@ def disenable() \
     return converter
 
 
-def integer(*, max_digits=10,
-            force_positive=False) \
-        -> typing.Callable[[str], int]:
+def integer(*, max_digits=10, force_positive=False) -> typing.Callable[[str], int]:
     def converter(arg: str) -> int:
         arg = arg.replace(",", "")
 
@@ -114,3 +101,40 @@ def dtime() -> typing.Callable[[str], datetime.datetime]:
         return n
 
     return converter
+
+
+duration_parser = re.compile(
+    r"((?P<days>\d+?) ?(days|day|D|d) ?)?"
+    r"((?P<hours>\d+?) ?(hours|hour|H|h) ?)?"
+    r"((?P<minutes>\d+?) ?(minutes|minute|M) ?)?"
+    r"((?P<seconds>\d+?) ?(seconds|second|S|s))?"
+)
+
+
+def t_delta() -> typing.Callable[[str], datetime.timedelta]:
+    """Convert duration strings into timedelta objects."""
+
+    def convert(arg: str) -> datetime.timedelta:
+        """
+        Converts a `duration` string to a timedelta object.
+        The converter supports the following symbols for each unit of time:
+        - days: `d`, `D`, `day`, `days`
+        - hours: `H`, `h`, `hour`, `hours`
+        - minutes: `M`, `minute`, `minutes`
+        - seconds: `S`, `s`, `second`, `seconds`
+        The units need to be provided in descending order of magnitude.
+        """
+        try:
+            seconds = int(arg)
+            delta = datetime.timedelta(seconds=seconds)
+        except ValueError:
+            match = duration_parser.fullmatch(arg)
+            if not match:
+                raise BadArgument(f"`{arg}` is not a valid duration string.")
+
+            duration_dict = {unit: int(amount) for unit, amount in match.groupdict(default=0).items()}
+            delta = datetime.timedelta(**duration_dict)
+
+        return delta
+
+    return convert
