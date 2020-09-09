@@ -259,6 +259,8 @@ class AoiContext(commands.Context):
             embed = None
         else:
             embed = msg
+        content = self.bot.placeholders.replace(self, content) if content else None
+        embed = self.bot.placeholders.replace(self, embed) if embed else None
         await self.send(
             content=content,
             embed=discord.Embed.from_dict(embed) if embed else None

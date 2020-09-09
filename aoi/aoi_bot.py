@@ -1,10 +1,15 @@
+from __future__ import annotations
+
 import asyncio
 import logging
 import os
+import re
 import subprocess
-import sys
 from datetime import datetime
-from typing import Dict, Optional, List, Union
+from typing import Dict, Optional, List, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from aoi import AoiContext
 
 import aiohttp.client_exceptions
 import discord
@@ -17,7 +22,39 @@ from .custom_context import AoiContext
 from .database import AoiDatabase
 
 
+class PlaceholderManager:
+    def user_name(self, ctx: AoiContext) -> str:  # noqa
+        return ctx.author.name
+
+    def user_discrim(self, ctx: AoiContext) -> str:  # noqa
+        return ctx.author.discriminator
+
+    def user_mention(self, ctx: AoiContext) -> str:  # noqa
+        return ctx.author.mention
+
+    def user_avatar(self, ctx: AoiContext) -> str:  # noqa
+        return str(ctx.author.avatar_url)
+
+    def guild_name(self, ctx: AoiContext) -> str:  # noqa
+        return ctx.guild.name
+
+    def guild_icon(self, ctx: AoiContext) -> str:  # noqa
+        return str(ctx.guild.icon_url)
+
+    @property
+    def supported(self) -> List[str]:
+        return list(filter(lambda x: not x.startswith("_")
+                                     and x not in ["supported", "replace", "dict"], self.__class__.__dict__.keys()))
+
+    def replace(self, ctx: aoi.AoiContext, msg: str) -> str:
+        repl = {f"&{k};": self.__class__.__dict__[k](self, ctx) for k in self.supported}
+        f = lambda match: repl[match.group(0)]
+        pattern = re.compile("|".join([re.escape(k) for k in repl.keys()]), re.M)
+        return pattern.sub(f, msg)
+
+
 class AoiBot(commands.Bot):
+
     def __init__(self, *args, **kwargs):
         super(AoiBot, self).__init__(*args, **kwargs)
         self.db: Optional[AoiDatabase] = None
@@ -43,6 +80,7 @@ class AoiBot(commands.Bot):
         self.cog_groups = {}
         self.version = "+".join(subprocess.check_output(["git", "describe", "--tags"]).
                                 strip().decode("utf-8").split("-")[:-1])
+        self.placeholders = PlaceholderManager()
 
         async def increment_command_count(ctx):
             self.commands_executed += 1
