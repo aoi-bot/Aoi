@@ -1,5 +1,6 @@
 import asyncio
 import io
+import json
 from types import coroutine
 from typing import List, Tuple, Union, Any, Callable
 
@@ -238,3 +239,27 @@ class AoiContext(commands.Context):
             except asyncio.TimeoutError:
                 await self.send("You took too long to respond ): Try to start over", delete_after=del_error)
                 return (None, None) if return_author else None
+
+    async def send_json(self, msg: str):
+        try:
+            msg = json.loads(msg)
+        except json.JSONDecodeError:
+            msg = {
+                "plainText": msg
+            }
+        if isinstance(msg, str):
+            msg = {
+                "plainText": msg
+            }
+        if "plainText" in msg:
+            content = msg.pop("plainText")
+        else:
+            content = None
+        if len(msg.keys()) < 2:  # no embed here:
+            embed = None
+        else:
+            embed = msg
+        await self.send(
+            content=content,
+            embed=discord.Embed.from_dict(embed) if embed else None
+        )

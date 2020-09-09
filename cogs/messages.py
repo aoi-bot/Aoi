@@ -60,28 +60,7 @@ class Messages(commands.Cog):
         brief="Send a message with Aoi. Use [this site](https://eb.nadeko.bot/) to make the embed."
     )
     async def say(self, ctx: aoi.AoiContext, *, msg: str):
-        try:
-            msg = json.loads(msg)
-        except json.JSONDecodeError:
-            msg = {
-                "plainText": msg
-            }
-        if isinstance(msg, str):
-            msg = {
-                "plainText": msg
-            }
-        if "plainText" in msg:
-            content = msg.pop("plainText")
-        else:
-            content = None
-        if len(msg.keys()) < 2:  # no embed here:
-            embed = None
-        else:
-            embed = msg
-        await ctx.send(
-            content=content,
-            embed=discord.Embed.from_dict(embed) if embed else None
-        )
+        await ctx.send_json(msg)
 
 
 def setup(bot: aoi.AoiBot) -> None:
