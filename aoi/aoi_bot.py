@@ -232,6 +232,8 @@ class AoiBot(commands.Bot):
             embed = None
         else:
             embed = msg
+        if embed:
+            _ = embed.pop("thumbnail", None)
         await self.get_channel(channel).send(
             content=content,
             embed=discord.Embed.from_dict(embed) if embed else None,
