@@ -291,6 +291,7 @@ class AoiDatabase:
                                        self.messages[guild][1].channel or 0,
                                        self.messages[guild][1].delete or 0,
                                        ))
+            self.changed_messages = []
 
     # endregion
 
@@ -603,11 +604,11 @@ class AoiDatabase:
                                   channel: discord.TextChannel = None,
                                   delete: int = None):
         async with self.messages_lock:
-            if message:
+            if message is not None:
                 self.messages[guild][0].message = message
-            if channel:
+            if channel is not None:
                 self.messages[guild][0].channel = channel.id
-            if delete:
+            if delete is not None:
                 self.messages[guild][0].delete = delete
             if guild not in self.changed_messages:
                 self.changed_messages.append(guild)
@@ -617,11 +618,11 @@ class AoiDatabase:
                                   channel: discord.TextChannel = None,
                                   delete: int = None):
         async with self.messages_lock:
-            if message:
+            if message is not None:
                 self.messages[guild][1].message = message
-            if channel:
-                self.messages[guild][1].channel = channel
-            if delete:
+            if channel is not None:
+                self.messages[guild][1].channel = channel.id
+            if delete is not None:
                 self.messages[guild][1].delete = delete
             if guild not in self.changed_messages:
                 self.changed_messages.append(guild)

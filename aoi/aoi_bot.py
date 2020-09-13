@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import os
 import re
@@ -186,3 +187,53 @@ class AoiBot(commands.Bot):
             self.cog_groups[group] = [cog]
         else:
             self.cog_groups[group].append(cog)
+
+    def convert_json(self, msg: str):  # does not convert placeholders
+        try:
+            msg = json.loads(msg)
+        except json.JSONDecodeError:
+            msg = {
+                "plainText": msg
+            }
+        if isinstance(msg, str):
+            msg = {
+                "plainText": msg
+            }
+        if "plainText" in msg:
+            content = msg.pop("plainText")
+        else:
+            content = None
+        if len(msg.keys()) < 2:  # no embed here:
+            embed = None
+        else:
+            embed = msg
+        return content, embed
+
+    async def send_json_to_channel(self, channel: int, msg: str, *, member: discord.Member = None, delete_after=None):
+        if member:
+            msg = self.placeholders.replace(member, msg)
+            if not member.guild.get_channel(channel):
+                raise commands.CommandError("Channel not in server")
+        try:
+            msg = json.loads(msg)
+        except json.JSONDecodeError:
+            msg = {
+                "plainText": msg
+            }
+        if isinstance(msg, str):
+            msg = {
+                "plainText": msg
+            }
+        if "plainText" in msg:
+            content = msg.pop("plainText")
+        else:
+            content = None
+        if len(msg.keys()) < 2:  # no embed here:
+            embed = None
+        else:
+            embed = msg
+        await self.get_channel(channel).send(
+            content=content,
+            embed=discord.Embed.from_dict(embed) if embed else None,
+            delete_after=delete_after
+        )

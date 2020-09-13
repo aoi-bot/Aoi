@@ -241,6 +241,7 @@ class AoiContext(commands.Context):
                 return (None, None) if return_author else None
 
     async def send_json(self, msg: str):
+        msg = self.bot.placeholders.replace(self, msg)
         try:
             msg = json.loads(msg)
         except json.JSONDecodeError:
