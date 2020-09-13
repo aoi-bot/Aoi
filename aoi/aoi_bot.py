@@ -150,6 +150,17 @@ class AoiBot(commands.Bot):
                 logging.error(f"bot:cog {cog} has no description")
                 return
 
+        missing_brief = []
+        for command in self.commands:
+            if not command.brief:
+                missing_brief.append(command)
+
+        if missing_brief:
+            logging.error("bot:the following commands are missing help text")
+            for i in missing_brief:
+                logging.error(f"bot: - {i.cog.qualified_name}.{i.name}")
+            return
+
         await self.connect(reconnect=reconnect)
 
     def find_cog(self, name: str, *,
