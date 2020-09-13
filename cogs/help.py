@@ -82,12 +82,13 @@ class Help(commands.Cog):
             fields=[
                        ("Usage", f"`{cmd.name} {cmd.signature or ''}`"),
                        ("Description", cmd.brief),
-                       ("Aliases", ", ".join([f"`{a}`" for a in cmd.aliases]) if cmd.aliases
-                       else None),
                        ("Module", cmd.cog.qualified_name)
                    ] + (
                        [("Missing Permissions", "You are missing the permissions to run this command")]
                        if not await _can_run(cmd, ctx) else []
+                   ) + (
+                       [("Aliases", ", ".join([f"`{a}`" for a in cmd.aliases]))]
+                       if cmd.aliases else []
                    ),
             footer="<> indicate required parameters, [] indicate optional parameters",
             not_inline=[0, 1, 2, 3]
