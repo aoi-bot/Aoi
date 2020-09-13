@@ -72,6 +72,8 @@ class ErrorHandler(commands.Cog):
             await ctx.send_error(f"Syntax Error - An error occured while parsing the expression")
         elif isinstance(error, aoi.MathError):
             await ctx.send_error(f"Math Error - An error occured while evaluating the expression")
+        elif isinstance(error, commands.CommandOnCooldown):
+            await ctx.send_error(f"You are on cooldown. Try again in {round(error.retry_after)}s")
         else:
             print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
             traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
