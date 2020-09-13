@@ -93,7 +93,7 @@ class Guilds(commands.Cog):
             _del()
         )
 
-    @commands.cooldown(rate=1, per=60, type=commands.BucketType.member)
+    @commands.cooldown(rate=1, per=15, type=commands.BucketType.member)
     @commands.has_permissions(manage_channels=True)
     @commands.command(
         brief="Toggles if a channel is NSFW"
@@ -103,7 +103,7 @@ class Guilds(commands.Cog):
         await channel.edit(nsfw=not channel.nsfw)
         await ctx.send_ok(f"{channel.mention} has been marked as {'' if channel.nsfw else 'not '} NSFW.")
 
-    @commands.cooldown(rate=1, per=60, type=commands.BucketType.member)
+    @commands.cooldown(rate=1, per=15, type=commands.BucketType.member)
     @commands.has_permissions(manage_channels=True)
     @commands.command(
         brief="Change slowmode on a channel",
@@ -116,7 +116,7 @@ class Guilds(commands.Cog):
         await ctx.channel.edit(slowmode_delay=time.seconds)
         await ctx.send_ok(f"Slowmode set to {hms_notation(time.seconds)}" if time.seconds else "Slowmode turned off.")
 
-    #@commands.cooldown(rate=1, per=60, type=commands.BucketType.member)
+    @commands.cooldown(rate=1, per=15, type=commands.BucketType.member)
     @commands.has_permissions(
         manage_channels=True,
         manage_permissions=True
@@ -129,7 +129,7 @@ class Guilds(commands.Cog):
         await channel.set_permissions(member, read_messages=False)
         await ctx.send_ok(f"{member.mention} locked out of {channel.mention}")
 
-    #@commands.cooldown(rate=1, per=60, type=commands.BucketType.member)
+    @commands.cooldown(rate=1, per=15, type=commands.BucketType.member)
     @commands.has_permissions(
         manage_channels=True,
         manage_permissions=True
@@ -151,7 +151,7 @@ class Guilds(commands.Cog):
                            (not channel.permissions_for(member).read_messages and not previous)
                            else ""))
 
-    #@commands.cooldown(rate=1, per=60, type=commands.BucketType.member)
+    @commands.cooldown(rate=1, per=15, type=commands.BucketType.member)
     @commands.has_permissions(
         manage_channels=True,
         manage_permissions=True
