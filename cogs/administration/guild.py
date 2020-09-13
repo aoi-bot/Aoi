@@ -58,7 +58,9 @@ class Guilds(commands.Cog):
                                "Server region change cancelled",
                                ctx.guild.edit(region=reg))
 
-    @commands.command()
+    @commands.command(
+        brief="List of regions the server can use"
+    )
     async def regions(self, ctx: aoi.AoiContext):
         await ctx.send_info(" ".join(map(str, discord.VoiceRegion)),
                             title="Voice Regions")
