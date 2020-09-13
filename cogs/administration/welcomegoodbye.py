@@ -1,0 +1,75 @@
+from typing import Optional, Union
+
+import discord
+from discord.ext import commands
+
+import aoi
+
+
+class WelcomeGoodbye(commands.Cog):
+    def __init__(self, bot: aoi.AoiBot):
+        self.bot = bot
+
+    @property
+    def description(self):
+        return "Set and view the welcome and goodbye messages of a server"
+
+    @commands.command(
+        brief="Shows the welcome message for a server"
+    )
+    async def showjoin(self, ctx: aoi.AoiContext):
+        message = await self.bot.db.get_welcome_message(ctx.guild.id)
+        await ctx.embed(
+            description=discord.utils.escape_markdown(message.message),
+            fields=[
+                ("Channel", f"<#{message.channel}>" if message.channel else "Not enabled"),
+                ("Delete after", f"{message.delete}s" if message.delete else "Never")
+            ]
+        )
+
+    @commands.has_permissions(manage_guild=True)
+    @commands.command(
+        brief="Set the welcome message for a server"
+    )
+    async def joinmsg(self, ctx: aoi.AoiContext, *, message: str):
+        await self.bot.db.set_welcome_message(ctx.guild.id, message=message)
+        await ctx.send_ok("Join message set")
+
+    @commands.has_permissions(manage_guild=True)
+    @commands.command(
+        brief="Set the channel the welcome message displays in"
+    )
+    async def joinmsgchnl(self, ctx: aoi.AoiContext, channel: Optional[Union[discord.TextChannel, str]]):
+        if isinstance(channel, str):
+            if channel.lower() == "off":
+                await self.bot.db.set_welcome_message(ctx.guild.id, channel=None)
+                return await ctx.send_ok("Join message turned off")
+            raise commands.BadArgument(f"Usage: `{ctx.prefix}joinmsgchnl #channel` | "
+                                       f"`{ctx.prefix}joinmsgchnl off` | `{ctx.prefix}joinmsgchnl")
+        if not channel:
+            message = await self.bot.db.get_welcome_message(ctx.guild.id)
+            return await ctx.send_ok(f"Join message is enabled on <#{message.channel}>")
+        await self.bot.db.set_welcome_message(ctx.guild.id, channel=channel)
+        return await ctx.send_ok(f"Join message is enabled on {channel.mention}")
+
+    @commands.has_permissions(manage_guild=True)
+    @commands.command(
+        brief="Set the deletion delay for the welcome message, 0 to disable"
+    )
+    async def joinmsgdel(self, ctx: aoi.AoiContext, secs: int):
+        await self.bot.db.set_welcome_message(ctx.guild.id, delete=secs)
+        await ctx.send_ok(f"Join messages will {'never ' if not secs else ''}delete" +
+                          (f" after {secs}s" if secs else ""))
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member: discord.Member):
+        message = await self.bot.db.get_welcome_message(member.guild.id)
+        if not message.channel:
+            return
+        await self.bot.get_channel(message.channel).send(
+            self.bot.placeholders.replace(member, message.message)
+        )
+
+
+def setup(bot: aoi.AoiBot) -> None:
+    bot.add_cog(WelcomeGoodbye(bot))

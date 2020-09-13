@@ -35,7 +35,8 @@ extensions = {
         "cogs.administration.information": "Information",
         "cogs.administration.roles": "Roles",
         "cogs.administration.guild": "Guilds",
-        "cogs.administration.permissions": "Permissions"
+        "cogs.administration.permissions": "Permissions",
+        "cogs.administration.welcomegoodbye": "WelcomeGoodbye"
     },
     "Misc": {
         "cogs.colors": "Colors",

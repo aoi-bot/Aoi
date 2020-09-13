@@ -23,22 +23,22 @@ from .database import AoiDatabase
 
 
 class PlaceholderManager:
-    def user_name(self, ctx: AoiContext) -> str:  # noqa
-        return ctx.author.name
+    def user_name(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
+        return ctx.author.name if isinstance(ctx, aoi.AoiContext) else ctx.name
 
-    def user_discrim(self, ctx: AoiContext) -> str:  # noqa
-        return ctx.author.discriminator
+    def user_discrim(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
+        return ctx.author.discriminator if isinstance(ctx, aoi.AoiContext) else ctx.discriminator
 
-    def user_mention(self, ctx: AoiContext) -> str:  # noqa
-        return ctx.author.mention
+    def user_mention(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
+        return ctx.author.mention if isinstance(ctx, aoi.AoiContext) else ctx.mention
 
-    def user_avatar(self, ctx: AoiContext) -> str:  # noqa
-        return str(ctx.author.avatar_url)
+    def user_avatar(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
+        return str(ctx.author.avatar_url if isinstance(ctx, aoi.AoiContext) else ctx.avatar_url)
 
     def guild_name(self, ctx: AoiContext) -> str:  # noqa
         return ctx.guild.name
 
-    def guild_icon(self, ctx: AoiContext) -> str:  # noqa
+    def guild_icon(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
         return str(ctx.guild.icon_url)
 
     @property
@@ -46,7 +46,7 @@ class PlaceholderManager:
         return list(filter(lambda x: not x.startswith("_")
                                      and x not in ["supported", "replace", "dict"], self.__class__.__dict__.keys()))
 
-    def replace(self, ctx: aoi.AoiContext, msg: str) -> str:
+    def replace(self, ctx: Union[aoi.AoiContext, discord.Member], msg: str) -> str:
         repl = {f"&{k};": self.__class__.__dict__[k](self, ctx) for k in self.supported}
         f = lambda match: repl[match.group(0)]
         pattern = re.compile("|".join([re.escape(k) for k in repl.keys()]), re.M)
