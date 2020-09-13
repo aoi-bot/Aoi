@@ -94,7 +94,17 @@ class Guilds(commands.Cog):
             _del()
         )
 
-    # @commands.cooldown(rate=1, per=60, type=commands.BucketType.member)
+    @commands.cooldown(rate=1, per=60, type=commands.BucketType.member)
+    @commands.has_permissions(manage_channels=True)
+    @commands.command(
+        brief="Toggles if a channel is NSFW"
+    )
+    async def nsfw(self, ctx: aoi.AoiContext, channel: discord.TextChannel = None):
+        channel = channel or ctx.channel
+        await channel.edit(nsfw=not channel.nsfw)
+        await ctx.send_ok(f"{channel.mention} has been marked as {'' if channel.nsfw else 'not '} NSFW.")
+
+    @commands.cooldown(rate=1, per=60, type=commands.BucketType.member)
     @commands.has_permissions(manage_channels=True)
     @commands.command(
         brief="Change slowmode on a channel",
