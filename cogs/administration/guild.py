@@ -3,7 +3,6 @@ from typing import Union
 
 import aiohttp
 import discord
-from dateutil.relativedelta import relativedelta
 from discord.ext import commands
 
 import aoi
@@ -116,6 +115,55 @@ class Guilds(commands.Cog):
             return await ctx.send_error("Invalid slowmode time")
         await ctx.channel.edit(slowmode_delay=time.seconds)
         await ctx.send_ok(f"Slowmode set to {hms_notation(time.seconds)}" if time.seconds else "Slowmode turned off.")
+
+    #@commands.cooldown(rate=1, per=60, type=commands.BucketType.member)
+    @commands.has_permissions(
+        manage_channels=True,
+        manage_permissions=True
+    )
+    @commands.command(
+        brief="Attempts to lock a user out of a channel"
+    )
+    async def lockout(self, ctx: aoi.AoiContext, member: discord.Member, channel: discord.TextChannel = None):
+        channel = channel or ctx.channel
+        await channel.set_permissions(member, read_messages=False)
+        await ctx.send_ok(f"{member.mention} locked out of {channel.mention}")
+
+    #@commands.cooldown(rate=1, per=60, type=commands.BucketType.member)
+    @commands.has_permissions(
+        manage_channels=True,
+        manage_permissions=True
+    )
+    @commands.command(
+        brief="Attempts to reverse a member-level lockout/lockin",
+        aliases=["unlockout","unlockin","lockrem"]
+    )
+    async def remlock(self, ctx: aoi.AoiContext, member: discord.Member, channel: discord.TextChannel = None):
+        channel = channel or ctx.channel
+        previous = channel.permissions_for(member).read_messages
+        await channel.set_permissions(member, read_messages=None)
+        await ctx.send_ok(f"Lockout for {member.mention} in {channel.mention} removed." +
+                          (f"They still cannot see this channel, due to another permission overwrite not set by Aoi. "
+                           f"If you were trying to allow them to view a "
+                           f"channel, either change the offending overwrite, or use "
+                           f"`{ctx.prefix}lockin @{member.name} #{channel.name}` "
+                           f"to force a user to be able to see this channel." if
+                           (not channel.permissions_for(member).read_messages and not previous)
+                           else ""))
+
+    #@commands.cooldown(rate=1, per=60, type=commands.BucketType.member)
+    @commands.has_permissions(
+        manage_channels=True,
+        manage_permissions=True
+    )
+    @commands.command(
+        brief="Attempts to force to let a user see a channel"
+    )
+    async def lockin(self, ctx: aoi.AoiContext, member: discord.Member, channel: discord.TextChannel = None):
+        channel = channel or ctx.channel
+        await channel.set_permissions(member, read_messages=True)
+        await ctx.send_ok(f"{member.mention} forcefully allowed into {channel.mention}. You can reverse this with "
+                          f"`{ctx.prefix}unlockout @{member.name} #{channel.name}`.")
 
 
 def setup(bot: aoi.AoiBot) -> None:
