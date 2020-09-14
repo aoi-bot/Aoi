@@ -1,10 +1,16 @@
+from __future__ import annotations
+
 import asyncio
+import json
 import logging
 import os
+import re
 import subprocess
-import sys
 from datetime import datetime
-from typing import Dict, Optional, List, Union
+from typing import Dict, Optional, List, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from aoi import AoiContext
 
 import aiohttp.client_exceptions
 import discord
@@ -17,7 +23,39 @@ from .custom_context import AoiContext
 from .database import AoiDatabase
 
 
+class PlaceholderManager:
+    def user_name(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
+        return ctx.author.name if isinstance(ctx, aoi.AoiContext) else ctx.name
+
+    def user_discrim(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
+        return ctx.author.discriminator if isinstance(ctx, aoi.AoiContext) else ctx.discriminator
+
+    def user_mention(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
+        return ctx.author.mention if isinstance(ctx, aoi.AoiContext) else ctx.mention
+
+    def user_avatar(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
+        return str(ctx.author.avatar_url if isinstance(ctx, aoi.AoiContext) else ctx.avatar_url)
+
+    def guild_name(self, ctx: AoiContext) -> str:  # noqa
+        return ctx.guild.name
+
+    def guild_icon(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
+        return str(ctx.guild.icon_url)
+
+    @property
+    def supported(self) -> List[str]:
+        return list(filter(lambda x: not x.startswith("_")
+                                     and x not in ["supported", "replace", "dict"], self.__class__.__dict__.keys()))
+
+    def replace(self, ctx: Union[aoi.AoiContext, discord.Member], msg: str) -> str:
+        repl = {f"&{k};": self.__class__.__dict__[k](self, ctx) for k in self.supported}
+        f = lambda match: repl[match.group(0)]
+        pattern = re.compile("|".join([re.escape(k) for k in repl.keys()]), re.M)
+        return pattern.sub(f, msg)
+
+
 class AoiBot(commands.Bot):
+
     def __init__(self, *args, **kwargs):
         super(AoiBot, self).__init__(*args, **kwargs)
         self.db: Optional[AoiDatabase] = None
@@ -43,6 +81,7 @@ class AoiBot(commands.Bot):
         self.cog_groups = {}
         self.version = "+".join(subprocess.check_output(["git", "describe", "--tags"]).
                                 strip().decode("utf-8").split("-")[:-1])
+        self.placeholders = PlaceholderManager()
 
         async def increment_command_count(ctx):
             self.commands_executed += 1
@@ -112,6 +151,17 @@ class AoiBot(commands.Bot):
                 logging.error(f"bot:cog {cog} has no description")
                 return
 
+        missing_brief = []
+        for command in self.commands:
+            if not command.brief:
+                missing_brief.append(command)
+
+        if missing_brief:
+            logging.error("bot:the following commands are missing help text")
+            for i in missing_brief:
+                logging.error(f"bot: - {i.cog.qualified_name}.{i.name}")
+            return
+
         await self.connect(reconnect=reconnect)
 
     def find_cog(self, name: str, *,
@@ -137,3 +187,55 @@ class AoiBot(commands.Bot):
             self.cog_groups[group] = [cog]
         else:
             self.cog_groups[group].append(cog)
+
+    def convert_json(self, msg: str):  # does not convert placeholders
+        try:
+            msg = json.loads(msg)
+        except json.JSONDecodeError:
+            msg = {
+                "plainText": msg
+            }
+        if isinstance(msg, str):
+            msg = {
+                "plainText": msg
+            }
+        if "plainText" in msg:
+            content = msg.pop("plainText")
+        else:
+            content = None
+        if len(msg.keys()) < 2:  # no embed here:
+            embed = None
+        else:
+            embed = msg
+        return content, embed
+
+    async def send_json_to_channel(self, channel: int, msg: str, *, member: discord.Member = None, delete_after=None):
+        if member:
+            msg = self.placeholders.replace(member, msg)
+            if not member.guild.get_channel(channel):
+                raise commands.CommandError("Channel not in server")
+        try:
+            msg = json.loads(msg)
+        except json.JSONDecodeError:
+            msg = {
+                "plainText": msg
+            }
+        if isinstance(msg, str):
+            msg = {
+                "plainText": msg
+            }
+        if "plainText" in msg:
+            content = msg.pop("plainText")
+        else:
+            content = None
+        if len(msg.keys()) < 2:  # no embed here:
+            embed = None
+        else:
+            embed = msg
+        if embed:
+            _ = embed.pop("thumbnail", None)
+        await self.get_channel(channel).send(
+            content=content,
+            embed=discord.Embed.from_dict(embed) if embed else None,
+            delete_after=delete_after
+        )

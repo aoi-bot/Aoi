@@ -48,6 +48,13 @@ class PunishmentType:
     WARN = 3
 
 
+@dataclass()
+class _Message:
+    message: str
+    channel: int
+    delete: int
+
+
 class AoiDatabase:
     # region # Database core
     def __init__(self, bot: aoi.AoiBot):
@@ -64,17 +71,20 @@ class AoiDatabase:
         self.guild_currency_lock = asyncio.Lock()
         self.currency_gain_lock = asyncio.Lock()
         self.guild_shop_lock = asyncio.Lock()
+        self.messages_lock = asyncio.Lock()
 
         self.xp: Dict[int, Dict[int, int]] = {}
         self.changed_xp: Dict[int, List[int]] = {}
         self.global_currency: Dict[int, int] = {}
         self.changed_global_currency: List[int] = []
+        self.messages: Dict[int, Tuple[_Message, _Message]] = {}
         self.global_xp: Dict[int, int] = {}
         self.guild_currency: Dict[int, Dict[int, int]] = {}
         self.changed_guild_currency: Dict[int, List[int]] = {}
         self.currency_gains: Dict[int, int] = {}
         self.changed_currency_gains: List[int] = []
         self.changed_guild_shop: List[int] = []
+        self.changed_messages: List[int] = []
 
         self.titles: Dict[int, str] = {}
         self.owned_titles: Dict[int, List[str]] = {}
@@ -107,6 +117,15 @@ class AoiDatabase:
         for r in rows:
             self.perm_chains[r[0]] = r[1].split(";")
         logging.info("database:Database loaded")
+
+        cursor = await self.db.execute("SELECT * from messages")
+        rows = await cursor.fetchall()
+        await cursor.close()
+        for r in rows:
+            self.messages[r[0]] = (
+                _Message(*r[1:4]),
+                _Message(*r[4:7])
+            )
 
         # load guilds that dont exist in the database
         for i in self.bot.guilds:
@@ -259,6 +278,20 @@ class AoiDatabase:
                     await self.db.execute("INSERT INTO guild_shop (guild, type, data, cost) values (?,?,?,?)",
                                           (guild, shop_item.type, shop_item.data, shop_item.cost))
             await self.db.commit()
+
+        async with self.messages_lock:
+            for guild in self.changed_messages:
+                await self.db.execute("delete from messages where guild=?", (guild,))
+                await self.db.execute("INSERT INTO messages values (?,?,?,?,?,?,?)",
+                                      (guild,
+                                       self.messages[guild][0].message,
+                                       self.messages[guild][0].channel or 0,
+                                       self.messages[guild][0].delete or 0,
+                                       self.messages[guild][1].message,
+                                       self.messages[guild][1].channel or 0,
+                                       self.messages[guild][1].delete or 0,
+                                       ))
+            self.changed_messages = []
 
     # endregion
 
@@ -537,6 +570,63 @@ class AoiDatabase:
     # endregion
 
     # region # Config
+
+    async def _auto_messages(self, guild: int) -> Tuple[_Message, _Message]:
+        if guild not in self.messages:
+            async with self.messages_lock:
+                try:
+                    await self.db.execute("INSERT INTO messages values (?,?,?,?,?,?,?)",
+                                          (guild,
+                                           "&user_name; has joined the server",
+                                           0,
+                                           0,
+                                           "&user_name; has left the server",
+                                           0,
+                                           0
+                                           ))
+                except sqlite3.IntegrityError:
+                    pass
+                await self.db.commit()
+                self.messages[guild] = (
+                    _Message("&user_name; has joined the server", 0, 0),
+                    _Message("&user_name; has left the server", 0, 0)
+                )
+        return self.messages[guild]
+
+    async def get_welcome_message(self, guild: int) -> _Message:
+        return (await self._auto_messages(guild))[0]
+
+    async def get_goodbye_message(self, guild: int) -> _Message:
+        return (await self._auto_messages(guild))[1]
+
+    async def set_welcome_message(self, guild: int, *,
+                                  message: str = None,
+                                  channel: discord.TextChannel = None,
+                                  delete: int = None):
+        async with self.messages_lock:
+            if message is not None:
+                self.messages[guild][0].message = message
+            if channel is not None:
+                self.messages[guild][0].channel = channel.id
+            if delete is not None:
+                self.messages[guild][0].delete = delete
+            if guild not in self.changed_messages:
+                self.changed_messages.append(guild)
+
+    async def set_goodbye_message(self, guild: int, *,
+                                  message: str = None,
+                                  channel: discord.TextChannel = None,
+                                  delete: int = None):
+        async with self.messages_lock:
+            if message is not None:
+                self.messages[guild][1].message = message
+            if channel is not None:
+                self.messages[guild][1].channel = channel.id
+            if delete is not None:
+                self.messages[guild][1].delete = delete
+            if guild not in self.changed_messages:
+                self.changed_messages.append(guild)
+
     async def guild_setting(self, guild: int) -> _GuildSetting:
         if guild not in self.guild_settings:
             try:
