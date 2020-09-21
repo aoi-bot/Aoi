@@ -155,6 +155,16 @@ class XP(commands.Cog):
         self.bot.db.xp[member.guild.id][member.id] = xp
         await self.bot.db.cache_flush()
 
+    @commands.is_owner()
+    @commands.command(
+        brief="Add to a user's xp"
+    )
+    async def addxp(self, ctx: aoi.AoiContext, xp: int, member: discord.Member = None):
+        member = member or ctx.author
+        await self.bot.db.ensure_xp_entry(member)
+        self.bot.db.xp[member.guild.id][member.id] += xp
+        await self.bot.db.cache_flush()
+
     @commands.command(
         brief="Checks server xp leaderboard"
     )
