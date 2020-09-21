@@ -126,6 +126,7 @@ class XP(commands.Cog):
         brief="Gets the XP of a user"
     )
     async def xp(self, ctx: aoi.AoiContext, member: discord.Member = None):
+        member = member or ctx.author
         buf = io.BytesIO()
         (await self._xp_template(ctx, member, self._get_rank, (130, 36, 252), self.xp_img,
                                  self.bot.db.xp[ctx.guild.id][member.id])).save(fp=buf, format="PNG")
@@ -136,6 +137,7 @@ class XP(commands.Cog):
         brief="Gets the global XP of a user"
     )
     async def gxp(self, ctx: aoi.AoiContext, member: discord.Member = None):
+        member = member or ctx.author
         buf = io.BytesIO()
         (await self._xp_template(ctx, member,
                                  self._get_global_rank, (0xff, 0x2a, 0x5b),
