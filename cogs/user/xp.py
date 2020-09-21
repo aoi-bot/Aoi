@@ -154,6 +154,7 @@ class XP(commands.Cog):
         await self.bot.db.ensure_xp_entry(member)
         self.bot.db.xp[member.guild.id][member.id] = xp
         await self.bot.db.cache_flush()
+        await ctx.send_ok(f"{member.mention}'s xp set to {xp}")
 
     @commands.is_owner()
     @commands.command(
@@ -163,7 +164,10 @@ class XP(commands.Cog):
         member = member or ctx.author
         await self.bot.db.ensure_xp_entry(member)
         self.bot.db.xp[member.guild.id][member.id] += xp
+        if self.bot.db.xp[member.guild.id][member.id] < 0:
+            self.bot.db.xp[member.guild.id][member.id] = 0
         await self.bot.db.cache_flush()
+        await ctx.send_ok(f"{abs(xp)} xp {'added to' if xp >= 0 else 'taken from'} {member.mention}")
 
     @commands.command(
         brief="Checks server xp leaderboard"
