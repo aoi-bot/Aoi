@@ -34,6 +34,7 @@ extensions = {
         "cogs.administration.aoi": "Aoi",
         "cogs.administration.information": "Information",
         "cogs.administration.roles": "Roles",
+        "cogs.administration.channels": "Channels",
         "cogs.administration.guild": "Guilds",
         "cogs.administration.permissions": "Permissions",
         "cogs.administration.welcomegoodbye": "WelcomeGoodbye"
