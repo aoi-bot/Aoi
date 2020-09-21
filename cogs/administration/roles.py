@@ -59,7 +59,7 @@ class Roles(commands.Cog):
         if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
             raise aoi.RoleError("Role to edit must be lower than your highest")
         if role >= ctx.me.top_role:
-            raise aoi.RoleError("Im can't edit a role higher than mine")
+            raise aoi.RoleError("I can't edit a role higher than mine")
         await role.edit(colour=color)
         await ctx.send_info(f"Changed {role.mention}'s color to "
                             f"#{conversions.color_to_string(role.colour)}")
@@ -83,6 +83,11 @@ class Roles(commands.Cog):
     @commands.command(brief="Deletes one or more roles",
                       aliases=["dr"])
     async def deleterole(self, ctx: aoi.AoiContext, roles: Greedy[discord.Role]):
+        for role in roles:
+            if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
+                raise aoi.RoleError(f"{role.mention} must be below your highest role in order for you to delete it.")
+            if role >= ctx.me.top_role:
+                raise aoi.RoleError(f"{role.mention} must be above my highest role for me to delete it.")
         if len(roles) > 3:
             conf = await ctx.confirm(f"Delete {' '.join(r.name for r in roles)}?",
                                      "Deleting roles...",
