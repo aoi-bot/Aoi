@@ -142,13 +142,12 @@ class Guilds(commands.Cog):
         channel = channel or ctx.channel
         previous = channel.permissions_for(member).read_messages
         await channel.set_permissions(member, read_messages=None)
-        await ctx.send_ok(f"Lockout for {member.mention} in {channel.mention} removed." +
-                          (f"They still cannot see this channel, due to another permission overwrite not set by Aoi. "
-                           f"If you were trying to allow them to view a "
-                           f"channel, either change the offending overwrite, or use "
-                           f"`{ctx.prefix}lockin @{member.name} #{channel.name}` "
-                           f"to force a user to be able to see this channel." if
-                           (not channel.permissions_for(member).read_messages and not previous)
+        now = channel.permissions_for(member).read_messages
+        await ctx.send_ok(f"Lock for {member.mention} in {channel.mention} removed. " +
+                          (f"The user still can{'' if now else 'not'} see this channel. You can force the user to "
+                           f"{'not ' if now else ''}see this channel with `{ctx.prefix}lock{'out' if now else 'in'}"
+                           f" @{member.name} #{channel.name}.`" if
+                           (now == previous)
                            else ""))
 
     @commands.cooldown(rate=1, per=15, type=commands.BucketType.member)
