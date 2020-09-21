@@ -89,7 +89,7 @@ class Colors(commands.Cog):
         img.save(buf, format="PNG")
         await ctx.embed(title="Color Palette",
                         description=" ".join(map(str, clrs[:50])) +
-                                    "..." if len(clrs) >= 50 else "",
+                                    ("..." if len(clrs) >= 50 else ""),
                         image=buf)
 
 
