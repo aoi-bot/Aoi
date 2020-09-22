@@ -98,7 +98,36 @@ class Channels(commands.Cog):
 
         await ctx.send(f"{ctx.author.mention} Done!")
 
+    @commands.cooldown(rate=1, per=180, type=commands.BucketType.guild)
+    @commands.has_permissions(
+        manage_guild=True,
+        manage_channels=True
+    )
+    @commands.command(
+        brief="Remove text from the beginning or end of a channel. Separate multiple things to remove with a semicolon"
+    )
+    async def stripchannel(self, ctx: aoi.AoiContext, text: str):
+        lst = text.split(";")
 
+        async def strip_ends(s: str):
+            for r in lst:
+                while s.startswith(r) or s.endswith(r):
+                    if s.startswith(r):
+                        s = s[len(r):]
+                    if s.endswith(r):
+                        s = s[:-len(r)]
+                    s = s.strip()
+            return s
+
+        async def do_op():
+            for channel in ctx.guild.channels:
+                await channel.edit(name=await strip_ends(channel.name))
+                await asyncio.sleep(1)
+
+        await ctx.send_info(f"Removing text from both ends of {len(ctx.guild.channels)} channel names. This will "
+                            f"take at least {len(ctx.guild.channels)}s")
+        await self.bot.create_task(ctx, do_op())
+        await ctx.send_ok("Done!", ping=True)
 
     @commands.cooldown(rate=1, per=15, type=commands.BucketType.member)
     @commands.has_permissions(manage_channels=True)
