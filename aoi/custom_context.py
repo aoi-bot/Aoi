@@ -57,6 +57,9 @@ class AoiContext(commands.Context):
             await conf.update(text=denied, color=await self.get_color(self.ERROR))
         return conf.confirmed
 
+    async def done_ping(self):
+        return await self.send(f"{self.author.mention}, done! {self.message.jump_url}")
+
     async def send_info(self, message: str, *, user: discord.abc.User = None,
                         title: str = None, trash: bool = False):
         if not user:

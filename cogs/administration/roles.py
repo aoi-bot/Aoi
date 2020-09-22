@@ -83,6 +83,8 @@ class Roles(commands.Cog):
     @commands.command(brief="Deletes one or more roles",
                       aliases=["dr"])
     async def deleterole(self, ctx: aoi.AoiContext, roles: Greedy[discord.Role]):
+        if not roles:
+            raise commands.BadArgument("I need to know what role(s) to delete!")
         for role in roles:
             if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
                 raise aoi.RoleError(f"{role.mention} must be below your highest role in order for you to delete it.")
@@ -94,6 +96,8 @@ class Roles(commands.Cog):
                                      "Role deletion cancelled")
             if not conf:
                 return
+        for r in roles:
+            await r.delete()
         await ctx.send_ok(f"Deleted {' '.join('`' + r.name + '`' for r in roles)}")
 
     @commands.bot_has_permissions(manage_roles=True)
@@ -122,6 +126,36 @@ class Roles(commands.Cog):
         await ctx.embed(title="Roles colored according to gradient",
                         description=" ".join("#" + "".join(hex(x)[2:] for x in c) for c in colors),
                         image=buf)
+
+    @commands.bot_has_permissions(manage_roles=True)
+    @commands.has_permissions(
+        manage_roles=True,
+        manage_guild=True
+    )
+    @commands.command(
+        brief="Adds a role to everyone - shows up in `mytasks` and may take a while."
+    )
+    async def roleall(self, ctx: aoi.AoiContext, role: discord.Role):
+        if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
+            raise aoi.RoleError(f"{role.mention} must be below your highest role in order for you to delete it.")
+        if role >= ctx.me.top_role:
+            raise aoi.RoleError(f"{role.mention} must be above my highest role for me to delete it.")
+        members: List[discord.Member] = list(filter(lambda x: role.id not in [r.id for r in x.roles],
+                                                    ctx.guild.members))
+        await ctx.send_ok(f"Adding {role.mention} to {len(members)} that don't have it. This will take at "
+                          f"least {len(members)//2}s")
+        n = 0
+
+        async def do_op():
+            nonlocal n
+            for m in members:
+                await m.add_roles(role, reason=f"roleall by {ctx.author} | {ctx.author.id}")
+                n += 1
+                await aoi.asyncio.sleep(1)
+
+        await self.bot.create_task(ctx, do_op(), lambda: f"{n}/{len(members)}")
+
+        await ctx.done_ping()
 
 
 def setup(bot: aoi.AoiBot) -> None:

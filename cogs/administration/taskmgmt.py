@@ -43,7 +43,12 @@ class TaskManagement(commands.Cog):
         if num < -1 or num >= len(self.bot.tasks[ctx.author]):
             return await ctx.send_error(f"Invalid task, do `{ctx.prefix}mytasks` to see your tasks.")
         task = self.bot.tasks[ctx.author][num]
+        await ctx.send_ok("Cancel task?\n" + str(task) + "\n`yes` or `cancel`")
+        conf = await ctx.input(str, ch=lambda m: m.lower() in ["yes"])
+        if not conf:
+            return await ctx.send_ok("Cancellation stopped")
         task.task.cancel()
+        await ctx.send_ok("Task stopped")
 
 
 def setup(bot: aoi.AoiBot) -> None:
