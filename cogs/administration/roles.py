@@ -1,3 +1,4 @@
+import asyncio
 import io
 from typing import List
 
@@ -69,14 +70,30 @@ class Roles(commands.Cog):
     @commands.command(brief="Creates one or more roles - rolenames must be separated by semicolons.",
                       aliases=["cr"])
     async def createrole(self, ctx: aoi.AoiContext, *, names: str):
-        roles = [await ctx.guild.create_role(name=name) for name in names.split(";")]
-        if len(roles) > 3:
-            conf = await ctx.confirm("Create roles: " + (" ".join(f"`{n}`" for n in roles) + "?"),
+        async def _(name):
+            await ctx.guild.create_role(name=name)
+            await asyncio.sleep(10)
+        if len(names) > 3:
+            conf = await ctx.confirm("Create roles: " + (" ".join(f"`{n}`" for n in names) + "?"),
                                      "Creating roles...",
                                      "Role creation cancelled")
             if not conf:
                 return
-        await ctx.send_ok(f"Created {' '.join(r.mention for r in roles)}")
+        n = 0
+        roles = []
+        num = len(names.split(";"))
+
+        async def do_op():
+            nonlocal n
+            for r in names.split(";"):
+                roles.append(await ctx.guild.create_role(name=r))
+                await asyncio.sleep(1)
+                n += 1
+
+        await ctx.send_info(f"Creating {num} roles. Will take at least {num}s")
+        await self.bot.create_task(ctx, do_op(), lambda: f"{n}/{num}")
+
+        await ctx.send_ok(f"Created {' '.join(r.mention for r in roles)}", ping=True)
 
     @commands.bot_has_permissions(manage_roles=True)
     @commands.has_permissions(manage_roles=True)
@@ -85,6 +102,7 @@ class Roles(commands.Cog):
     async def deleterole(self, ctx: aoi.AoiContext, roles: Greedy[discord.Role]):
         if not roles:
             raise commands.BadArgument("I need to know what role(s) to delete!")
+        roles: List[discord.Role] = list(roles)
         for role in roles:
             if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
                 raise aoi.RoleError(f"{role.mention} must be below your highest role in order for you to delete it.")
@@ -96,9 +114,19 @@ class Roles(commands.Cog):
                                      "Role deletion cancelled")
             if not conf:
                 return
-        for r in roles:
-            await r.delete()
-        await ctx.send_ok(f"Deleted {' '.join('`' + r.name + '`' for r in roles)}")
+        n = 0
+
+        async def do_op():
+            nonlocal n
+            for r in roles:
+                await r.delete()
+                await asyncio.sleep(1)
+                n += 1
+
+        if len(roles) > 3:
+            await ctx.send_info(f"Deleting {len(roles)} roles. Will take at least {len(roles)}s")
+        await self.bot.create_task(ctx, do_op(), lambda: f"{n}/{(len(roles))}")
+        await ctx.send_ok(f"Deleted {' '.join('`' + r.name + '`' for r in roles)}", ping=True)
 
     @commands.bot_has_permissions(manage_roles=True)
     @commands.has_permissions(manage_roles=True)
@@ -116,6 +144,7 @@ class Roles(commands.Cog):
         img = Image.new("RGB", (240, 48))
         img_draw = ImageDraw.Draw(img)
         for n, clr in enumerate(colors):
+            await asyncio.sleep(0.5)
             await roles[n].edit(color=int("".join(hex(x)[2:] for x in clr), 16))
             img_draw.rectangle([
                 (n * 240 / num, 0),
