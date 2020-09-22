@@ -68,6 +68,8 @@ class AoiContext(commands.Context):
         ))
         if trash:
             await self.trash_reaction(msg)
+        else:
+            return msg
 
     async def send_ok(self, message: str, *, user: discord.abc.User = None,
                       title: str = None, trash: bool = False):
@@ -80,6 +82,8 @@ class AoiContext(commands.Context):
         ))
         if trash:
             await self.trash_reaction(msg)
+        else:
+            return msg
 
     async def send_error(self, message: str, *, user: discord.abc.User = None,
                          title: str = None, trash: bool = False):
@@ -92,6 +96,19 @@ class AoiContext(commands.Context):
         ))
         if trash:
             await self.trash_reaction(msg)
+        else:
+            return msg
+
+    async def edit_message(self, message: discord.Message, content: str, *, user: discord.abc.User = None,
+                           title: str = None, color: int = 0):
+        if not user:
+            user = self.author
+        await message.edit(embed=discord.Embed(
+            title=title,
+            description=f"{_wrap_user(user) if user else ''}{message}",
+            colour=await self.get_color(color)
+        ))
+        return message
 
     async def get_color(self, typ: int):
         if typ == 0:
