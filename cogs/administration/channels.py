@@ -93,7 +93,7 @@ class Channels(commands.Cog):
                     await channel.edit(name=channel_alone_pattern.replace("text", channel.name))
                     await asyncio.sleep(0.5)
 
-        task = asyncio.create_task(do_op())
+        task = self.bot.create_task(ctx, do_op())
         await task
 
         await ctx.send(f"{ctx.author.mention} Done!")
