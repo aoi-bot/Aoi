@@ -25,6 +25,7 @@ class Channels(commands.Cog):
     @commands.max_concurrency(number=1, per=commands.BucketType.guild)
     @commands.command(brief="Names channels according to a pattern")
     async def namechannels(self, ctx: aoi.AoiContext):
+        raise commands.DisabledCommand()
         await ctx.send_info("Input the format you want to use for categories, where `text` is the channel name, "
                             "or `cancel` to stop")
         cat_pattern = await ctx.input(typ=str, ch=lambda s: "text" in s, timeout=120.0)
@@ -107,6 +108,7 @@ class Channels(commands.Cog):
         brief="Remove text from the beginning or end of a channel. Separate multiple things to remove with a semicolon"
     )
     async def stripchannels(self, ctx: aoi.AoiContext, text: str):
+        raise commands.DisabledCommand()
         lst = text.split(";")
 
         async def strip_ends(s: str):
