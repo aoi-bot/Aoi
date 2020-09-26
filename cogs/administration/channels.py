@@ -17,7 +17,7 @@ class Channels(commands.Cog):
     def description(self):
         return "Commands dealing with channels"
 
-    @commands.cooldown(rate=1, per=180, type=commands.BucketType.guild)
+    @commands.cooldown(rate=1, per=300, type=commands.BucketType.guild)
     @commands.has_permissions(
         manage_guild=True,
         manage_channels=True
@@ -98,7 +98,7 @@ class Channels(commands.Cog):
 
         await ctx.send(f"{ctx.author.mention} Done!")
 
-    @commands.cooldown(rate=1, per=180, type=commands.BucketType.guild)
+    @commands.cooldown(rate=1, per=300, type=commands.BucketType.guild)
     @commands.has_permissions(
         manage_guild=True,
         manage_channels=True
@@ -106,7 +106,7 @@ class Channels(commands.Cog):
     @commands.command(
         brief="Remove text from the beginning or end of a channel. Separate multiple things to remove with a semicolon"
     )
-    async def stripchannel(self, ctx: aoi.AoiContext, text: str):
+    async def stripchannels(self, ctx: aoi.AoiContext, text: str):
         lst = text.split(";")
 
         async def strip_ends(s: str):
@@ -129,7 +129,7 @@ class Channels(commands.Cog):
         await self.bot.create_task(ctx, do_op())
         await ctx.send_ok("Done!", ping=True)
 
-    @commands.cooldown(rate=1, per=15, type=commands.BucketType.member)
+    @commands.cooldown(rate=1, per=30, type=commands.BucketType.member)
     @commands.has_permissions(manage_channels=True)
     @commands.command(
         brief="Toggles if a channel is NSFW"
@@ -139,7 +139,7 @@ class Channels(commands.Cog):
         await channel.edit(nsfw=not channel.nsfw)
         await ctx.send_ok(f"{channel.mention} has been marked as {'' if channel.nsfw else 'not '} NSFW.")
 
-    @commands.cooldown(rate=1, per=15, type=commands.BucketType.member)
+    @commands.cooldown(rate=1, per=30, type=commands.BucketType.member)
     @commands.has_permissions(manage_channels=True)
     @commands.command(
         brief="Change slowmode on a channel",
@@ -152,7 +152,7 @@ class Channels(commands.Cog):
         await ctx.channel.edit(slowmode_delay=time.seconds)
         await ctx.send_ok(f"Slowmode set to {hms_notation(time.seconds)}" if time.seconds else "Slowmode turned off.")
 
-    @commands.cooldown(rate=1, per=15, type=commands.BucketType.member)
+    @commands.cooldown(rate=1, per=30, type=commands.BucketType.member)
     @commands.has_permissions(
         manage_channels=True,
         manage_permissions=True
@@ -165,7 +165,7 @@ class Channels(commands.Cog):
         await channel.set_permissions(member, read_messages=False)
         await ctx.send_ok(f"{member.mention} locked out of {channel.mention}")
 
-    @commands.cooldown(rate=1, per=15, type=commands.BucketType.member)
+    @commands.cooldown(rate=1, per=30, type=commands.BucketType.member)
     @commands.has_permissions(
         manage_channels=True,
         manage_permissions=True
@@ -186,7 +186,7 @@ class Channels(commands.Cog):
                            (now == previous)
                            else ""))
 
-    @commands.cooldown(rate=1, per=15, type=commands.BucketType.member)
+    @commands.cooldown(rate=1, per=30, type=commands.BucketType.member)
     @commands.has_permissions(
         manage_channels=True,
         manage_permissions=True
