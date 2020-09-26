@@ -7,7 +7,7 @@ import os
 import re
 import subprocess
 from datetime import datetime
-from typing import Dict, Optional, List, Union, TYPE_CHECKING
+from typing import Dict, Optional, List, Union, TYPE_CHECKING, Awaitable, Any, Callable
 
 if TYPE_CHECKING:
     from aoi import AoiContext
@@ -82,6 +82,7 @@ class AoiBot(commands.Bot):
         self.version = "+".join(subprocess.check_output(["git", "describe", "--tags"]).
                                 strip().decode("utf-8").split("-")[:-1])
         self.placeholders = PlaceholderManager()
+        self.tasks: Dict[discord.Member, List[aoi.AoiTask]] = {}
 
         async def increment_command_count(ctx):
             self.commands_executed += 1
@@ -90,6 +91,18 @@ class AoiBot(commands.Bot):
             increment_command_count,
             "on_command_completion"
         )
+
+    def create_task(self,
+                    ctx: commands.Context,
+                    coro: Awaitable[Any],  # noqa
+                    status: Optional[Callable[[], str]] = None):
+        task: asyncio.Task = asyncio.create_task(coro)
+        if ctx.author not in self.tasks:
+            self.tasks[ctx.author] = []
+        aoi_task = aoi.AoiTask(task, ctx, status=status or (lambda: ""))
+        self.tasks[ctx.author].append(aoi_task)
+        task.add_done_callback(lambda x: self.tasks[ctx.author].remove(aoi_task))
+        return task
 
     async def on_message(self, message: discord.Message):
         ctx: aoi.AoiContext = await self.get_context(message, cls=AoiContext)

@@ -126,6 +126,7 @@ class XP(commands.Cog):
         brief="Gets the XP of a user"
     )
     async def xp(self, ctx: aoi.AoiContext, member: discord.Member = None):
+        member = member or ctx.author
         buf = io.BytesIO()
         (await self._xp_template(ctx, member, self._get_rank, (130, 36, 252), self.xp_img,
                                  self.bot.db.xp[ctx.guild.id][member.id])).save(fp=buf, format="PNG")
@@ -136,6 +137,7 @@ class XP(commands.Cog):
         brief="Gets the global XP of a user"
     )
     async def gxp(self, ctx: aoi.AoiContext, member: discord.Member = None):
+        member = member or ctx.author
         buf = io.BytesIO()
         (await self._xp_template(ctx, member,
                                  self._get_global_rank, (0xff, 0x2a, 0x5b),
@@ -152,6 +154,20 @@ class XP(commands.Cog):
         await self.bot.db.ensure_xp_entry(member)
         self.bot.db.xp[member.guild.id][member.id] = xp
         await self.bot.db.cache_flush()
+        await ctx.send_ok(f"{member.mention}'s xp set to {xp}")
+
+    @commands.is_owner()
+    @commands.command(
+        brief="Add to a user's xp"
+    )
+    async def addxp(self, ctx: aoi.AoiContext, xp: int, member: discord.Member = None):
+        member = member or ctx.author
+        await self.bot.db.ensure_xp_entry(member)
+        self.bot.db.xp[member.guild.id][member.id] += xp
+        if self.bot.db.xp[member.guild.id][member.id] < 0:
+            self.bot.db.xp[member.guild.id][member.id] = 0
+        await self.bot.db.cache_flush()
+        await ctx.send_ok(f"{abs(xp)} xp {'added to' if xp >= 0 else 'taken from'} {member.mention}")
 
     @commands.command(
         brief="Checks server xp leaderboard"

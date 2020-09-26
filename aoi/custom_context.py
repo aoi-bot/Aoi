@@ -57,41 +57,67 @@ class AoiContext(commands.Context):
             await conf.update(text=denied, color=await self.get_color(self.ERROR))
         return conf.confirmed
 
+    async def done_ping(self):
+        return await self.send(f"{self.author.mention}, done! {self.message.jump_url}")
+
     async def send_info(self, message: str, *, user: discord.abc.User = None,
-                        title: str = None, trash: bool = False):
+                        title: str = None, trash: bool = False, ping: bool = False):
         if not user:
             user = self.author
-        msg = await self.send(embed=discord.Embed(
-            title=title,
-            description=f"{_wrap_user(user) if user else ''}{message}",
-            colour=await self.get_color(self.INFO)
-        ))
+        msg = await self.send(
+            user.mention if ping else None,
+            embed=discord.Embed(
+                title=title,
+                description=f"{_wrap_user(user) if user else ''}{message}",
+                colour=await self.get_color(self.INFO)
+            ))
         if trash:
             await self.trash_reaction(msg)
+        else:
+            return msg
 
     async def send_ok(self, message: str, *, user: discord.abc.User = None,
-                      title: str = None, trash: bool = False):
+                      title: str = None, trash: bool = False, ping: bool = False):
         if not user:
             user = self.author
-        msg = await self.send(embed=discord.Embed(
-            title=title,
-            description=f"{_wrap_user(user) if user else ''}{message}",
-            colour=await self.get_color(self.OK)
-        ))
+        msg = await self.send(
+            user.mention if ping else None,
+            embed=discord.Embed(
+                title=title,
+                description=f"{_wrap_user(user) if user else ''}{message}",
+                colour=await self.get_color(self.OK)
+            ))
         if trash:
             await self.trash_reaction(msg)
+        else:
+            return msg
 
     async def send_error(self, message: str, *, user: discord.abc.User = None,
-                         title: str = None, trash: bool = False):
+                         title: str = None, trash: bool = False, ping: bool = False):
         if not user:
             user = self.author
-        msg = await self.send(embed=discord.Embed(
-            title=title,
-            description=f"{_wrap_user(user) if user else ''}{message}",
-            colour=await self.get_color(self.ERROR)
-        ))
+        msg = await self.send(
+            user.mention if ping else None,
+            embed=discord.Embed(
+                title=title,
+                description=f"{_wrap_user(user) if user else ''}{message}",
+                colour=await self.get_color(self.ERROR)
+            ))
         if trash:
             await self.trash_reaction(msg)
+        else:
+            return msg
+
+    async def edit_message(self, message: discord.Message, content: str, *, user: discord.abc.User = None,
+                           title: str = None, color: int = 0):
+        if not user:
+            user = self.author
+        await message.edit(embed=discord.Embed(
+            title=title,
+            description=f"{_wrap_user(user) if user else ''}{message}",
+            colour=await self.get_color(color)
+        ))
+        return message
 
     async def get_color(self, typ: int):
         if typ == 0:

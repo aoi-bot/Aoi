@@ -34,9 +34,11 @@ extensions = {
         "cogs.administration.aoi": "Aoi",
         "cogs.administration.information": "Information",
         "cogs.administration.roles": "Roles",
+        "cogs.administration.channels": "Channels",
         "cogs.administration.guild": "Guilds",
+        "cogs.administration.taskmgmt": "TaskManagement", # noqa
         "cogs.administration.permissions": "Permissions",
-        "cogs.administration.welcomegoodbye": "WelcomeGoodbye"
+        "cogs.administration.welcomegoodbye": "WelcomeGoodbye" # noqa
     },
     "Misc": {
         "cogs.colors": "Colors",
@@ -57,12 +59,12 @@ extensions = {
         "cogs.user.guild_gambling": "ServerGambling",
     },
     "Utility/Config": {
-        "cogs.settings.guildsettings": "GuildSettings",
+        "cogs.settings.guildsettings": "GuildSettings", # noqa
         "cogs.help": "Help",
         "cogs.guides": "Guides"
     },
     "Hidden": {
-        "cogs.errorhandler": "ErrorHandler",
+        "cogs.errorhandler": "ErrorHandler", # noqa
     }
 }
 

@@ -67,8 +67,8 @@ class Information(commands.Cog):
         joined_at = member.joined_at.strftime("%c")
         created_at = member.created_at.strftime("%c")
         r: discord.Role
-        hoisted_roles = [r for r in member.roles if r.hoist]
-        normal_roles = member.roles
+        hoisted_roles = [r for r in member.roles if r.hoist and r.id != ctx.guild.id]
+        normal_roles = [r for r in member.roles if not r.hoist and r.id != ctx.guild.id]
         await ctx.embed(
             title=f"Info for {member}",
             fields=[
@@ -76,10 +76,10 @@ class Information(commands.Cog):
                 ("Joined Server", joined_at),
                 ("Joined Discord", created_at),
                 (f"Hoisted Roles ({len(hoisted_roles)}) ",
-                 " ".join([r.mention for r in hoisted_roles[-1:-6:-1]]) if hoisted_roles
+                 " ".join([r.mention for r in hoisted_roles[:-6:-1]]) if hoisted_roles
                  else "None"),
-                (f"Normal Roles ({len(normal_roles) - 1})",
-                 " ".join([r.mention for r in normal_roles[-1:-6:-1] if r.id not in
+                (f"Normal Roles ({len(normal_roles)})",
+                 " ".join([r.mention for r in normal_roles[:-6:-1] if r.id not in
                            [x.id for x in hoisted_roles]]) if len(normal_roles) > 1
                  else "None"),
                 ("Top Role", member.roles[-1].mention if len(member.roles) > 1 else "None"),
