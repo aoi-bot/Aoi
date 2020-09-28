@@ -1,6 +1,7 @@
 import io
 import logging
 import os
+from typing import Union
 
 import discord
 from PIL import Image, ImageDraw
@@ -29,7 +30,7 @@ class Frames(commands.Cog):
         brief="Shows the list of frames"
     )
     async def frames(self, ctx: aoi.AoiContext):
-        await ctx.send_info(" ".join(self._frames))
+        await ctx.paginate(self._frames, 20, "Frames list", numbered=True, num_start=1)
 
     @commands.is_owner()
     @commands.command(
@@ -48,11 +49,14 @@ class Frames(commands.Cog):
     @commands.command(
         brief="Apply a frame around your avatar"
     )
-    async def frame(self, ctx: aoi.AoiContext, frame_name: str, member: discord.Member = None):
+    async def frame(self, ctx: aoi.AoiContext, frame_name: Union[int, str], member: discord.Member = None):
         member = member or ctx.author
-        if frame_name not in self._frames:
+        if (isinstance(frame_name, str) and frame_name not in self._frames) or \
+                (isinstance(frame_name, int) and frame_name < 1 or frame_name > len(self._frames)):
             return await ctx.send_error(f"{frame_name} not a valid frame. Do `{ctx.prefix}frames` to see "
                                         f"the list of frames.")
+        if isinstance(frame_name, int):
+            frame_name = self._frames[frame_name-1]
         frame_img = Image.open(f"assets/frames/{frame_name}.png").convert("RGBA")
         avatar_img_asset: discord.Asset = member.avatar_url_as(format="png", size=512)
         avatar_buf = io.BytesIO()
