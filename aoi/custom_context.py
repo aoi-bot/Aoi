@@ -219,18 +219,19 @@ class AoiContext(commands.Context):
             ]
 
     @staticmethod
-    def numbered(lst: List[Any]) -> List[str]:
+    def numbered(lst: List[Any], num_start=0) -> List[str]:
         """
 
         Returns a numbered version of a list
         """
-        return [f"**{i}.** {a}" for i, a in enumerate(lst)]
+        return [f"**{i + num_start}.** {a}" for i, a in enumerate(lst)]
 
     async def paginate(self, lst: List[Any], n: int,
                        title: str, *, fmt: str = "%s", sep: str = "\n",
-                       numbered: bool = False, thumbnails: List[str] = None):
+                       numbered: bool = False, thumbnails: List[str] = None,
+                       num_start: int = 0):
         if numbered:
-            lst = self.numbered(lst)
+            lst = self.numbered(lst, num_start)
         paginator = disputils.BotEmbedPaginator(self,
                                                 await self.pages(lst, n, title,
                                                                  fmt=fmt, sep=sep,

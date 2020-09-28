@@ -48,7 +48,8 @@ extensions = {
         # "cogs.geolocation",
         # "cogs.nasa",
         # "cogs.weather",
-        "cogs.searches": "Searches"
+        "cogs.searches": "Searches",
+        "cogs.frames": "Frames"
     },
     "Profile/Currency": {
         "cogs.user.xp": "XP",
