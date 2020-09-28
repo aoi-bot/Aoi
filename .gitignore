@@ -1,4 +1,4 @@
-
+assets/filters/*
 venv/
 
 .env
@@ -12,3 +12,5 @@ venv/
 *.db-journal
 
 scratch/
+
+assets/frames/
