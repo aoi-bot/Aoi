@@ -23,7 +23,7 @@ class Frames(commands.Cog):
     def _reload_frames(self):
         logging.info("frames:Loading frames")
         self._frames = [image.split(".")[0] for image in os.listdir("assets/frames/") if image.endswith(".png")]
-        print(self._frames)
+        logging.info(", ".join(self._frames))
         logging.info("frames:Loaded frames")
 
     @commands.command(

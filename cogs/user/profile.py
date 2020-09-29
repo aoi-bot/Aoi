@@ -17,10 +17,6 @@ import aoi
 lvl_list = [0] + [8 * lvl + 40 for lvl in range(100000)]
 ttl_lvl_list = list(itertools.accumulate(lvl_list))
 
-print(lvl_list[:6])
-print(ttl_lvl_list[:6])
-
-
 def crop_center(pil_img, crop_width, crop_height):
     img_width, img_height = pil_img.size
     return pil_img.crop(((img_width - crop_width) // 2,
