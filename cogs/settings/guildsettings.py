@@ -59,7 +59,7 @@ class GuildSettings(commands.Cog):
     @commands.has_guild_permissions(manage_guild=True)
     @commands.command(brief="Lists current configs for the server.")
     async def configs(self, ctx: aoi.AoiContext):
-        colors = self.bot.db.guild_settings[ctx.guild.id]
+        colors = await self.bot.db.guild_setting(ctx.guild.id)
         gain = await self.bot.db.get_currency_gain(ctx.guild)
         await ctx.embed(
             title="Aoi Configs",
