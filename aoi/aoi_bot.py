@@ -9,9 +9,6 @@ import subprocess
 from datetime import datetime
 from typing import Dict, Optional, List, Union, TYPE_CHECKING, Awaitable, Any, Callable
 
-if TYPE_CHECKING:
-    from aoi import AoiContext
-
 import aiohttp.client_exceptions
 import discord
 import pixivapi
@@ -19,8 +16,10 @@ from discord.ext import commands
 
 import aoi
 from wrappers import gmaps as gmaps, imgur
-from .custom_context import AoiContext
 from .database import AoiDatabase
+
+if TYPE_CHECKING:
+    from aoi import AoiContext
 
 
 class PlaceholderManager:
@@ -49,9 +48,8 @@ class PlaceholderManager:
 
     def replace(self, ctx: Union[aoi.AoiContext, discord.Member], msg: str) -> str:
         repl = {f"&{k};": self.__class__.__dict__[k](self, ctx) for k in self.supported}
-        f = lambda match: repl[match.group(0)]
         pattern = re.compile("|".join([re.escape(k) for k in repl.keys()]), re.M)
-        return pattern.sub(f, msg)
+        return pattern.sub(lambda match: repl[match.group(0)], msg)
 
 
 class AoiBot(commands.Bot):
@@ -117,7 +115,7 @@ class AoiBot(commands.Bot):
             await self.db.add_global_currency(message)
             self.messages += 1
 
-    async def start(self, *args, **kwargs):
+    async def start(self, *args, **kwargs):  # noqa: C901
         """|coro|
         A shorthand coroutine for :meth:`login` + :meth:`connect`.
         Raises

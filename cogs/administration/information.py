@@ -17,15 +17,17 @@ class Information(commands.Cog):
 
     @commands.guild_only()
     @commands.command(brief="Shows info on a channel, role, member, emoji, or message")
-    async def info(self, ctx: aoi.AoiContext, obj: Union[
-        discord.Role,
-        discord.TextChannel,
-        discord.Message,
-        discord.VoiceChannel,
-        discord.Member,
-        discord.Emoji,
-        discord.PartialEmoji
-    ]):
+    async def info(self, ctx: aoi.AoiContext,  # noqa: C901
+                   obj: Union[
+                       discord.Role,
+                       discord.TextChannel,
+                       discord.Message,
+                       discord.VoiceChannel,
+                       discord.Member,
+                       discord.Emoji,
+                       discord.PartialEmoji
+                   ]
+                   ):
         if isinstance(obj, discord.Role):
             if obj.id in [r.id for r in ctx.guild.roles]:
                 return await self.roleinfo(ctx, obj)

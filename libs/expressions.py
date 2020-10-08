@@ -195,7 +195,7 @@ def _tokenize(expression: str):
     return tokens
 
 
-def _infix_to_postfix(infix: List[Union[str, float]]):
+def _infix_to_postfix(infix: List[Union[str, float]]):  # noqa: C901
     stack = []
     postfix = []
     for current in infix:

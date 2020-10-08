@@ -83,7 +83,7 @@ async def on_ready():
 
 
 @bot.check
-async def permission_check(ctx: aoi.AoiContext):
+async def permission_check(ctx: aoi.AoiContext):  # noqa: C901
     can_use = True
     current_n = 0
 

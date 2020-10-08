@@ -40,7 +40,7 @@ class Frames(commands.Cog):
         _frames = [f for f in self._frames]
         try:
             self._reload_frames()
-        except:
+        except:  # noqa: E722
             await ctx.send_error("An error occurred while reloading the filers.")
             self._frames = [f for f in _frames]
             raise

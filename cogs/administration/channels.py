@@ -24,7 +24,7 @@ class Channels(commands.Cog):
     )
     @commands.max_concurrency(number=1, per=commands.BucketType.guild)
     @commands.command(brief="Names channels according to a pattern")
-    async def namechannels(self, ctx: aoi.AoiContext):
+    async def namechannels(self, ctx: aoi.AoiContext):  # noqa: C901
         raise commands.DisabledCommand()
         await ctx.send_info("Input the format you want to use for categories, where `text` is the channel name, "
                             "or `cancel` to stop")

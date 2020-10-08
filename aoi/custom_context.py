@@ -257,7 +257,8 @@ class AoiContext(commands.Context):
                     return (None, None) if return_author else None
                 res = typ(inp.content.lower())
                 if ch:
-                    if not ch(res): raise ValueError
+                    if not ch(res):
+                        raise ValueError
                 return (res, inp.author) if return_author else res
             except ValueError:
                 await self.send(err or "That's not a valid response, try again" +
