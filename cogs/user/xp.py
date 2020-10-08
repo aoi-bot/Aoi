@@ -15,9 +15,6 @@ import aoi
 lvl_list = [0] + [8 * lvl + 40 for lvl in range(100000)]
 ttl_lvl_list = list(itertools.accumulate(lvl_list))
 
-print(lvl_list[:6])
-print(ttl_lvl_list[:6])
-
 
 def _xp_per_level(lvl: int):
     return lvl_list[lvl]

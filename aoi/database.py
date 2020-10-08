@@ -15,6 +15,100 @@ from discord.ext import tasks, commands
 if TYPE_CHECKING:
     import aoi
 
+SQL_STRING = """
+CREATE TABLE IF NOT EXISTS "permissions" (
+  "guild"  INTEGER NOT NULL,
+  "permissions"  TEXT NOT NULL DEFAULT 'asm enable'
+);;
+CREATE TABLE IF NOT EXISTS "moderation" (
+  "Guild"  TEXT NOT NULL,
+  "MessageBurst"  TEXT DEFAULT '10 10;off',
+  "MessageBurstPunishment"  TEXT DEFAULT 'mute 10',
+  "FIlteredWords"  TEXT DEFAULT ';off',
+  "FilteredWordsPunishment"  TEXT DEFAULT 'mute 10',
+  "Characters"  TEXT DEFAULT '3000 10;off',
+  "CharactersPunishment"  TEXT DEFAULT 'mute 10',
+  "MuteRole"  INTEGER DEFAULT 0,
+  "AutoModExemptChannels"  TEXT DEFAULT '',
+  "AutoModExemptRole"  TEXT DEFAULT ''
+);;
+CREATE TABLE IF NOT EXISTS "punishments" (
+  "user"  INTEGER NOT NULL,
+  "guild"  INTEGER NOT NULL,
+  "staff"  INTEGER NOT NULL,
+  "type"  INTEGER NOT NULL,
+  "reason"  TEXT,
+  "timestamp"  INTEGER NOT NULL
+);;
+CREATE TABLE IF NOT EXISTS "xp" (
+  "user"  INTEGER NOT NULL,
+  "guild"  INTEGER NOT NULL,
+  "xp"  INTEGER NOT NULL
+);;
+CREATE TABLE IF NOT EXISTS "guild_currency" (
+  "guild"  INTEGER,
+  "user"  INTEGER,
+  "amount"  INTEGER
+);;
+CREATE TABLE IF NOT EXISTS "global_currency" (
+  "user"  INTEGER,
+  "amount"  INTEGER
+);;
+CREATE TABLE IF NOT EXISTS "user_global" (
+  "user"  INTEGER,
+  "title"  TEXT,
+  "badges"  TEXT,
+  "owned_titles"  TEXT,
+  "owned_badges"  TEXT,
+  "background"  TEXT
+);;
+CREATE TABLE IF NOT EXISTS "title_shop" (
+  "id"  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+  "title"  TEXT,
+  "cost"  INTEGER
+);;
+CREATE TABLE IF NOT EXISTS "guild_settings" (
+  "Guild"  INTEGER NOT NULL,
+  "OkColor"  TEXT NOT NULL DEFAULT '00aa00',
+  "ErrorColor"  TEXT NOT NULL DEFAULT 'aa0000',
+  "InfoColor"  TEXT NOT NULL DEFAULT '0000aa',
+  "Prefix"  TEXT NOT NULL DEFAULT ',',
+  "PermissionErrors"  INTEGER NOT NULL DEFAULT 1,
+  PRIMARY KEY("Guild")
+);;
+CREATE TABLE IF NOT EXISTS "currency_gains" (
+  "guild"  INTEGER,
+  "gain"  INTEGER
+);;
+CREATE TABLE IF NOT EXISTS "guild_shop" (
+  "guild"  INTEGER,
+  "type"  TEXT,
+  "data"  TEXT,
+  "cost"  NUMERIC
+);;
+CREATE TABLE IF NOT EXISTS "badges" (
+  "id"  INTEGER NOT NULL,
+  "user"  INTEGER NOT NULL,
+  "image"  BLOB NOT NULL,
+  "price"  INTEGER NOT NULL,
+  PRIMARY KEY("id")
+);;
+CREATE TABLE IF NOT EXISTS "messages" (
+  "guild"  INTEGER NOT NULL,
+  "welcome"  TEXT NOT NULL,
+  "welcome_channel"  INTEGER NOT NULL,
+  "welcome_delete"  INTEGER NOT NULL,
+  "goodbye"  TEXT NOT NULL,
+  "goodbye_channel"  INTEGER NOT NULL,
+  "goodbye_delete"  INTEGER NOT NULL,
+  PRIMARY KEY("guild")
+);;
+CREATE TABLE IF NOT EXISTS "autorole" (
+  "guild"  INTEGER NOT NULL,
+  "roles"  TEXT
+)
+"""
+
 
 @dataclass
 class _GuildSetting:
@@ -85,6 +179,7 @@ class AoiDatabase:
         self.changed_currency_gains: List[int] = []
         self.changed_guild_shop: List[int] = []
         self.changed_messages: List[int] = []
+        self.auto_roles: Dict[int, List[int]] = {}
 
         self.titles: Dict[int, str] = {}
         self.owned_titles: Dict[int, List[str]] = {}
@@ -103,6 +198,8 @@ class AoiDatabase:
     async def load(self):
         logging.info("database:Connecting to database")
         self.db = await aiosqlite.connect("database.db")
+        [await self.db.execute(_) for _ in SQL_STRING.split(";;")]
+        await self.db.commit()
         logging.info("database:Loading database into memory")
         cursor = await self.db.execute("SELECT * from guild_settings")
         rows = await cursor.fetchall()
@@ -149,6 +246,13 @@ class AoiDatabase:
         await cursor.close()
         for r in rows:
             self.global_currency[r[0]] = r[1]
+
+        # load auto roles
+        cursor = await self.db.execute("SELECT * from autorole")
+        rows = await cursor.fetchall()
+        await cursor.close()
+        for r in rows:
+            self.auto_roles[r[0]] = [int(x) for x in r[1].split(",")]
 
         cursor = await self.db.execute("SELECT * from guild_shop")
         rows = await cursor.fetchall()
@@ -292,6 +396,38 @@ class AoiDatabase:
                                        self.messages[guild][1].delete or 0,
                                        ))
             self.changed_messages = []
+
+    # endregion
+
+    # region # Auto roles
+
+    async def add_auto_role(self, guild: discord.Guild, role: discord.Role):
+        if guild.id not in self.auto_roles:
+            self.auto_roles[guild.id] = [role.id]
+        elif role.id not in self.auto_roles[guild.id]:
+            self.auto_roles[guild.id].append(role.id)
+        # immediately write to database
+        a = await self.db.execute("select * from autorole where guild=?", (guild.id,))
+        if not await a.fetchall():
+            await self.db.execute("insert into autorole (guild, roles) values (?,?)",
+                                  (guild.id, ",".join(map(str, self.auto_roles[guild.id]))))
+        else:
+            await self.db.execute("update autorole set roles=? where guild=?",
+                                  (",".join(map(str, self.auto_roles[guild.id])), guild.id))
+        await self.db.commit()
+
+    async def del_auto_role(self, guild: discord.Guild, role: int):
+        if guild.id in self.auto_roles and role in self.auto_roles[guild.id]:
+            self.auto_roles[guild.id].remove(role)
+        # immediately write to database
+        a = await self.db.execute("select * from autorole where guild=?", (guild.id,))
+        if not await a.fetchall():
+            await self.db.execute("insert into autorole (guild, roles) values (?,?)",
+                                  (guild.id, ",".join(map(str, self.auto_roles[guild.id]))))
+        else:
+            await self.db.execute("update autorole set roles=? where guild=?",
+                                  (",".join(map(str, self.auto_roles[guild.id])), guild.id))
+        await self.db.commit()
 
     # endregion
 
@@ -632,6 +768,7 @@ class AoiDatabase:
             try:
                 await self.db.execute("INSERT INTO guild_settings (Guild) values (?)", (guild,))
             except sqlite3.IntegrityError:
+                logging.warning(f"Passing IntegrityError for guild {guild}")
                 pass
             await self.db.commit()
             self.guild_settings[guild] = _GuildSetting(

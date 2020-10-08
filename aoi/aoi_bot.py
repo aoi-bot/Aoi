@@ -58,6 +58,7 @@ class AoiBot(commands.Bot):
 
     def __init__(self, *args, **kwargs):
         super(AoiBot, self).__init__(*args, **kwargs)
+        self.config = {}
         self.db: Optional[AoiDatabase] = None
         self.prefixes: Dict[int, str] = {}
         self.banned_tags: List[str] = []
@@ -91,6 +92,9 @@ class AoiBot(commands.Bot):
             increment_command_count,
             "on_command_completion"
         )
+
+    def load_configs(self):
+        self.config["max_auto_role"] = 10
 
     def create_task(self,
                     ctx: commands.Context,
@@ -140,6 +144,7 @@ class AoiBot(commands.Bot):
         self.pixiv_password = os.getenv("PIXIV_PASSWORD")
         self.pixiv.login(self.pixiv_user, self.pixiv_password)
         await self.db.load()
+        self.load_configs()
 
         if kwargs:
             raise TypeError("unexpected keyword argument(s) %s" % list(kwargs.keys()))
