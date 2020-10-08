@@ -69,7 +69,7 @@ class Searches(commands.Cog):
         await ctx.embed(
             image=buf,
             description=i.caption[:500] + f"\nhttps://www.pixiv.net/en/artworks/{i.id}" +
-                        ("\nError fetching image" if not buf else ""), # noqa
+                        ("\nError fetching image" if not buf else ""),  # noqa
             title=i.title,
             footer="  ".join([t["name"] for t in i.tags]),
             trash_reaction=False

@@ -1,4 +1,3 @@
-from datetime import timedelta
 from typing import Union
 
 import aiohttp
@@ -6,8 +5,6 @@ import discord
 from discord.ext import commands
 
 import aoi
-from libs.conversions import hms_notation
-from libs.converters import t_delta
 
 
 class Guilds(commands.Cog):

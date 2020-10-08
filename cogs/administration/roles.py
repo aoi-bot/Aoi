@@ -73,6 +73,7 @@ class Roles(commands.Cog):
         async def _(name):
             await ctx.guild.create_role(name=name)
             await asyncio.sleep(10)
+
         if len(names) > 3:
             conf = await ctx.confirm("Create roles: " + (" ".join(f"`{n}`" for n in names) + "?"),
                                      "Creating roles...",
@@ -172,7 +173,7 @@ class Roles(commands.Cog):
         members: List[discord.Member] = list(filter(lambda x: role.id not in [r.id for r in x.roles],
                                                     ctx.guild.members))
         await ctx.send_ok(f"Adding {role.mention} to {len(members)} that don't have it. This will take at "
-                          f"least {len(members)//2}s")
+                          f"least {len(members) // 2}s")
         n = 0
 
         async def do_op():
@@ -197,10 +198,12 @@ class Roles(commands.Cog):
         aliases=["aarole"]
     )
     async def addautorole(self, ctx: aoi.AoiContext, role: discord.Role):
-        if ctx.guild.id in self.bot.db.auto_roles and len(self.bot.db.auto_roles[ctx.guild.id]) >= self.bot.config["max_auto_role"]: # noqa
-            await ctx.send_error(f"You are only allowed to have {self.bot.config['max_auto_role']} autoroles per server. " # noqa
-                                 f"You can list the current autoroles with `{ctx.prefix}larole` and delete one with "
-                                 f"`{ctx.prefix}darole`")
+        if ctx.guild.id in self.bot.db.auto_roles and len(self.bot.db.auto_roles[ctx.guild.id]) >= self.bot.config[
+            "max_auto_role"]:  # noqa
+            await ctx.send_error(
+                f"You are only allowed to have {self.bot.config['max_auto_role']} autoroles per server. "  # noqa
+                f"You can list the current autoroles with `{ctx.prefix}larole` and delete one with "
+                f"`{ctx.prefix}darole`")
         await self.bot.db.add_auto_role(ctx.guild, role)
         await ctx.send_ok(f"{role.mention} added to the list of automatically assigned roles on this server. You can "
                           f"view the list with `{ctx.prefix}larole`")
@@ -254,8 +257,6 @@ class Roles(commands.Cog):
                             "\n".join(
                                 f"<@&{i}>" for i in self.bot.db.auto_roles[ctx.guild.id]
                             ))
-
-
 
 
 def setup(bot: aoi.AoiBot) -> None:

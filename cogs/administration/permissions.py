@@ -82,6 +82,5 @@ class Permissions(commands.Cog):
         await ctx.send_ok(f"**sm {module} {enabled}** added.", trash=False)
 
 
-
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Permissions(bot))

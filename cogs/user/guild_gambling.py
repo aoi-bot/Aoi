@@ -28,13 +28,11 @@ class ServerGambling(commands.Cog):
             counted[die] = counted.get(die, 0) + 1
             dice.append(die)
         await ctx.send_info(
-            f"**Average:** {round(sum(dice)/len(dice),1):0.1f} - "
+            f"**Average:** {round(sum(dice) / len(dice), 1):0.1f} - "
             f"**Total:** {sum(dice)} - "
             f"**Number Rolled:** {len(dice)}\n" +
             "-".join(map(str, dice)) + "\n"
         )
-
-
 
     @commands.command(
         brief="Flip a coin, with an optional bet",

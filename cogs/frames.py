@@ -56,7 +56,7 @@ class Frames(commands.Cog):
             return await ctx.send_error(f"{frame_name} not a valid frame. Do `{ctx.prefix}frames` to see "
                                         f"the list of frames.")
         if isinstance(frame_name, int):
-            frame_name = self._frames[frame_name-1]
+            frame_name = self._frames[frame_name - 1]
         frame_img = Image.open(f"assets/frames/{frame_name}.png").convert("RGBA")
         avatar_img_asset: discord.Asset = member.avatar_url_as(format="png", size=512)
         avatar_buf = io.BytesIO()

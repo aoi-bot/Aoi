@@ -104,6 +104,5 @@ class Currency(commands.Cog):
         await ctx.send(file=(discord.File(buf, "profile.png")))
 
 
-
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Currency(bot))

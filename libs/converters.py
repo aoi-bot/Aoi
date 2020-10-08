@@ -4,7 +4,6 @@ import re
 import typing
 
 import dateparser
-from dateutil.relativedelta import relativedelta
 from discord.ext import commands
 from discord.ext.commands import BadArgument
 
