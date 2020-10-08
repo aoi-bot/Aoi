@@ -197,8 +197,8 @@ class Roles(commands.Cog):
         aliases=["aarole"]
     )
     async def addautorole(self, ctx: aoi.AoiContext, role: discord.Role):
-        if ctx.guild.id in self.bot.db.auto_roles and len(self.bot.db.auto_roles[ctx.guild.id]) >= self.bot.config.max_auto_role: # noqa
-            await ctx.send_error(f"You are only allowed to have {self.bot.config.max_auto_role} autoroles per server. "
+        if ctx.guild.id in self.bot.db.auto_roles and len(self.bot.db.auto_roles[ctx.guild.id]) >= self.bot.config["max_auto_role"]: # noqa
+            await ctx.send_error(f"You are only allowed to have {self.bot.config['max_auto_role']} autoroles per server. " # noqa
                                  f"You can list the current autoroles with `{ctx.prefix}larole` and delete one with "
                                  f"`{ctx.prefix}darole`")
         await self.bot.db.add_auto_role(ctx.guild, role)
