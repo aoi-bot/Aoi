@@ -102,6 +102,10 @@ CREATE TABLE IF NOT EXISTS "messages" (
   "goodbye_channel"  INTEGER NOT NULL,
   "goodbye_delete"  INTEGER NOT NULL,
   PRIMARY KEY("guild")
+);;
+CREATE TABLE IF NOT EXISTS "autorole" (
+  "guild"  INTEGER NOT NULL,
+  "roles"  TEXT
 )
 """
 
@@ -175,6 +179,7 @@ class AoiDatabase:
         self.changed_currency_gains: List[int] = []
         self.changed_guild_shop: List[int] = []
         self.changed_messages: List[int] = []
+        self.auto_roles: Dict[int, List[int]] = {}
 
         self.titles: Dict[int, str] = {}
         self.owned_titles: Dict[int, List[str]] = {}
@@ -241,6 +246,13 @@ class AoiDatabase:
         await cursor.close()
         for r in rows:
             self.global_currency[r[0]] = r[1]
+
+        # load auto roles
+        cursor = await self.db.execute("SELECT * from autorole")
+        rows = await cursor.fetchall()
+        await cursor.close()
+        for r in rows:
+            self.auto_roles[r[0]] = [int(x) for x in r[1].split(",")]
 
         cursor = await self.db.execute("SELECT * from guild_shop")
         rows = await cursor.fetchall()
@@ -384,6 +396,38 @@ class AoiDatabase:
                                        self.messages[guild][1].delete or 0,
                                        ))
             self.changed_messages = []
+
+    # endregion
+
+    # region # Auto roles
+
+    async def add_auto_role(self, guild: discord.Guild, role: discord.Role):
+        if guild.id not in self.auto_roles:
+            self.auto_roles[guild.id] = [role.id]
+        elif role.id not in self.auto_roles[guild.id]:
+            self.auto_roles[guild.id].append(role.id)
+        # immediately write to database
+        a = await self.db.execute("select * from autorole where guild=?", (guild.id,))
+        if not await a.fetchall():
+            await self.db.execute("insert into autorole (guild, roles) values (?,?)",
+                                  (guild.id, ",".join(map(str, self.auto_roles[guild.id]))))
+        else:
+            await self.db.execute("update autorole set roles=? where guild=?",
+                                  (",".join(map(str, self.auto_roles[guild.id])), guild.id))
+        await self.db.commit()
+
+    async def del_auto_role(self, guild: discord.Guild, role: int):
+        if guild.id in self.auto_roles and role in self.auto_roles[guild.id]:
+            self.auto_roles[guild.id].remove(role)
+        # immediately write to database
+        a = await self.db.execute("select * from autorole where guild=?", (guild.id,))
+        if not await a.fetchall():
+            await self.db.execute("insert into autorole (guild, roles) values (?,?)",
+                                  (guild.id, ",".join(map(str, self.auto_roles[guild.id]))))
+        else:
+            await self.db.execute("update autorole set roles=? where guild=?",
+                                  (",".join(map(str, self.auto_roles[guild.id])), guild.id))
+        await self.db.commit()
 
     # endregion
 

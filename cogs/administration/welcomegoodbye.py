@@ -39,7 +39,7 @@ class WelcomeGoodbye(commands.Cog):
                 ("Delete after", f"{message.delete}s" if message.delete else "Never")
             ]
         )
-        
+
     @commands.has_permissions(manage_guild=True)
     @commands.command(
         brief="Set the goodbye message for a server"
@@ -73,7 +73,6 @@ class WelcomeGoodbye(commands.Cog):
         await self.bot.db.set_goodbye_message(ctx.guild.id, delete=secs)
         await ctx.send_ok(f"Leave messages will {'never ' if not secs else ''}delete" +
                           (f" after {secs}s" if secs else ""))
-
 
     @commands.has_permissions(manage_guild=True)
     @commands.command(
@@ -112,10 +111,25 @@ class WelcomeGoodbye(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
         message = await self.bot.db.get_welcome_message(member.guild.id)
-        if not message.channel:
-            return
-        await self.bot.send_json_to_channel(message.channel, message.message, member=member,
-                                            delete_after=message.delete if message.delete else None)
+        if message.channel:
+            await self.bot.send_json_to_channel(message.channel, message.message, member=member,
+                                                delete_after=message.delete if message.delete else None)
+        if member.guild.id in self.bot.db.auto_roles:
+            # remove invalid roles from the auto role list
+            lost_roles = []
+            for r in self.bot.db.auto_roles[member.guild.id]:
+                if not member.guild.get_role(r):
+                    lost_roles.append(r)
+            if lost_roles:
+                await member.trigger_typing()
+            for r in lost_roles:
+                await self.bot.db.del_auto_role(member.guild, r)
+
+            if self.bot.db.auto_roles[member.guild.id]:
+                await member.add_roles(*[
+                    member.guild.get_role(r)
+                    for r in self.bot.db.auto_roles[member.guild.id]
+                ])
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):
