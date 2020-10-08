@@ -23,7 +23,7 @@ class ErrorHandler(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx: aoi.AoiContext, error):
+    async def on_command_error(self, ctx: aoi.AoiContext, error):  # noqa: C901
         if hasattr(ctx.command, 'on_error'):
             return
         cog: commands.Cog = ctx.cog

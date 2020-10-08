@@ -1,5 +1,5 @@
-import discord
 from discord.ext import commands
+
 import aoi
 
 
@@ -15,7 +15,7 @@ class Guides(commands.Cog):
     async def permguide(self, ctx: aoi.AoiContext):
         await ctx.embed(
             title="Aoi Permission guide",
-            description=
+            description=  # noqa: E251
             f"Aoi's permissions are based off of a permission chain that "
             f"anyone can view with `{ctx.prefix}lp`. The chain is evaluated "
             f"from 0 to the top. The permission chain can be modified by anyone with "

@@ -195,7 +195,7 @@ class AoiDatabase:
         self.global_currency_cooldown = commands.CooldownMapping.from_cooldown(
             1.0, 60.0, commands.BucketType.user)
 
-    async def load(self):
+    async def load(self):  # noqa: C901
         logging.info("database:Connecting to database")
         self.db = await aiosqlite.connect("database.db")
         [await self.db.execute(_) for _ in SQL_STRING.split(";;")]
@@ -303,7 +303,7 @@ class AoiDatabase:
     async def _cache_flush_loop(self):
         await self.cache_flush()
 
-    async def cache_flush(self):
+    async def cache_flush(self):  # noqa: C901
         logging.log(15, "xp:flush:waiting for lock")
         async with self.xp_lock:
             logging.log(15, "xp:flush:-got lock")

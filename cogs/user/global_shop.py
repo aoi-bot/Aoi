@@ -67,7 +67,7 @@ class GlobalShop(commands.Cog):
             if title.lower() == r.lower():
                 return await ctx.send_error("You already own that title")
 
-        c = await ctx.confirm(
+        _ = await ctx.confirm(
             f"Buy `{title}` for ${amt:,}?",
             f"Bought `{title}` for ${amt:,}. Do `{ctx.prefix}mytitles` to see your titles.",
             f"Cancelled purchase")

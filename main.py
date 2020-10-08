@@ -36,9 +36,9 @@ extensions = {
         "cogs.administration.roles": "Roles",
         "cogs.administration.channels": "Channels",
         "cogs.administration.guild": "Guilds",
-        "cogs.administration.taskmgmt": "TaskManagement", # noqa
+        "cogs.administration.taskmgmt": "TaskManagement",  # noqa
         "cogs.administration.permissions": "Permissions",
-        "cogs.administration.welcomegoodbye": "WelcomeGoodbye" # noqa
+        "cogs.administration.welcomegoodbye": "WelcomeGoodbye"  # noqa
     },
     "Misc": {
         "cogs.colors": "Colors",
@@ -60,12 +60,12 @@ extensions = {
         "cogs.user.guild_gambling": "ServerGambling",
     },
     "Utility/Config": {
-        "cogs.settings.guildsettings": "GuildSettings", # noqa
+        "cogs.settings.guildsettings": "GuildSettings",  # noqa
         "cogs.help": "Help",
         "cogs.guides": "Guides"
     },
     "Hidden": {
-        "cogs.errorhandler": "ErrorHandler", # noqa
+        "cogs.errorhandler": "ErrorHandler",  # noqa
     }
 }
 
@@ -83,7 +83,7 @@ async def on_ready():
 
 
 @bot.check
-async def permission_check(ctx: aoi.AoiContext):
+async def permission_check(ctx: aoi.AoiContext):  # noqa: C901
     can_use = True
     current_n = 0
 
