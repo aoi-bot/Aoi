@@ -220,7 +220,7 @@ class Colors(commands.Cog):
 
         for i in range(256):
             for j in range(3):
-                rgb_draws[j].rectangle((i+12, 140, i+12, 140-rgb[j][i]), 0xff)
+                rgb_draws[j].rectangle((i + 12, 140, i + 12, 140 - rgb[j][i]), 0xff)
 
         histogram = Image.merge("RGB", rgb_images)
         hist_draw = ImageDraw.Draw(histogram)
@@ -237,7 +237,6 @@ class Colors(commands.Cog):
         await ctx.embed(
             image=buf
         )
-
 
     def _is_image(self, name: str) -> bool:
         return any(name.endswith(f".{x}") for x in "jpg,jpeg,png".split(","))
