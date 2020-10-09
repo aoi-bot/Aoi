@@ -16,6 +16,7 @@ except FileNotFoundError:
 
 logging.basicConfig(level=logging.INFO)
 logging.addLevelName(15, "BDBG")
+logging.getLogger("aoi").setLevel(logging.INFO)
 dotenv.load_dotenv(".env")
 
 
@@ -71,14 +72,14 @@ extensions = {
 
 for grp_name, ext_set in extensions.items():
     for path, cog_name in ext_set.items():
-        logging.info(f"cog:Loading {grp_name}:{cog_name} from {path}")
+        bot.logger.info(f"cog:Loading {grp_name}:{cog_name} from {path}")
         bot.load_extension(path)
         bot.set_cog_group(cog_name, grp_name)
 
 
 @bot.event
 async def on_ready():
-    logging.info("Bot online!")
+    bot.logger.info("Bot online!")
     await bot.change_presence(activity=discord.Game("Hello :)"))
 
 

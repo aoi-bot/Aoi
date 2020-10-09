@@ -21,10 +21,10 @@ class Frames(commands.Cog):
         return "Put cute frames around your avatar"
 
     def _reload_frames(self):
-        logging.info("frames:Loading frames")
+        self.bot.logger.info("frames:Loading frames")
         self._frames = [image.split(".")[0] for image in os.listdir("assets/frames/") if image.endswith(".png")]
-        logging.info(", ".join(self._frames))
-        logging.info("frames:Loaded frames")
+        self.bot.logger.info(", ".join(self._frames))
+        self.bot.logger.info("frames:Loaded frames")
 
     @commands.command(
         brief="Shows the list of frames"

@@ -196,11 +196,11 @@ class AoiDatabase:
             1.0, 60.0, commands.BucketType.user)
 
     async def load(self):  # noqa: C901
-        logging.info("database:Connecting to database")
+        self.bot.logger.info("database:Connecting to database")
         self.db = await aiosqlite.connect("database.db")
         [await self.db.execute(_) for _ in SQL_STRING.split(";;")]
         await self.db.commit()
-        logging.info("database:Loading database into memory")
+        self.bot.logger.info("database:Loading database into memory")
         cursor = await self.db.execute("SELECT * from guild_settings")
         rows = await cursor.fetchall()
         await cursor.close()
@@ -213,7 +213,7 @@ class AoiDatabase:
         await cursor.close()
         for r in rows:
             self.perm_chains[r[0]] = r[1].split(";")
-        logging.info("database:Database loaded")
+        self.bot.logger.info("database:Database loaded")
 
         cursor = await self.db.execute("SELECT * from messages")
         rows = await cursor.fetchall()
@@ -304,22 +304,22 @@ class AoiDatabase:
         await self.cache_flush()
 
     async def cache_flush(self):  # noqa: C901
-        logging.log(15, "xp:flush:waiting for lock")
+        self.bot.logger.log(15, "xp:flush:waiting for lock")
         async with self.xp_lock:
-            logging.log(15, "xp:flush:-got lock")
+            self.bot.logger.log(15, "xp:flush:-got lock")
             for guild, users in self.changed_xp.items():
                 for u in users:
                     xp = self.xp[guild][u]
-                    logging.log(15, f"xp:flush:-checking user {self.bot.get_user(u)}")
+                    self.bot.logger.log(15, f"xp:flush:-checking user {self.bot.get_user(u)}")
                     a = await self.db.execute("SELECT * from xp where guild = ? and user=?", (guild, u))
                     if not await a.fetchall():
-                        logging.log(15, f"xp:flush:-adding user {self.bot.get_user(u)}")
+                        self.bot.logger.log(15, f"xp:flush:-adding user {self.bot.get_user(u)}")
                         await self.db.execute("INSERT INTO xp (user, guild, xp) values (?,?,?)", (u, guild, 0))
-                    logging.log(15, f"xp:flush:-updating user {self.bot.get_user(u)}")
+                    self.bot.logger.log(15, f"xp:flush:-updating user {self.bot.get_user(u)}")
                     await self.db.execute("UPDATE xp set xp=? where user=? and guild=?", (xp, u, guild))
             await self.db.commit()
             self.changed_xp = {}
-        logging.log(15, "xp:flush:released")
+        self.bot.logger.log(15, "xp:flush:released")
         async with self.global_currency_lock:
             for u in self.changed_global_currency:
                 a = await self.db.execute("SELECT * from global_currency where user=?",
@@ -348,18 +348,18 @@ class AoiDatabase:
                                        u))
             await self.db.commit()
         async with self.guild_currency_lock:
-            logging.log(15, "guild_cur:flush:-got lock")
+            self.bot.logger.log(15, "guild_cur:flush:-got lock")
             for guild, users in self.changed_guild_currency.items():
                 for u in users:
                     currency = self.guild_currency[guild][u]
-                    logging.log(15, f"guild_cur:flush:-checking user {self.bot.get_user(u)}")
+                    self.bot.logger.log(15, f"guild_cur:flush:-checking user {self.bot.get_user(u)}")
                     a = await self.db.execute("SELECT * from guild_currency where guild = ? and user=?",
                                               (guild, u))
                     if not await a.fetchall():
-                        logging.log(15, f"guild_cur:flush:-adding user {self.bot.get_user(u)}")
+                        self.bot.logger.log(15, f"guild_cur:flush:-adding user {self.bot.get_user(u)}")
                         await self.db.execute("INSERT INTO guild_currency (user, guild, amount) values (?,?,?)",
                                               (u, guild, 0))
-                    logging.log(15, f"guild_cur:flush:-updating user {self.bot.get_user(u)}")
+                    self.bot.logger.log(15, f"guild_cur:flush:-updating user {self.bot.get_user(u)}")
                     await self.db.execute("UPDATE guild_currency set amount=? where user=? and guild=?",
                                           (currency, u, guild))
             await self.db.commit()
@@ -551,9 +551,9 @@ class AoiDatabase:
     # region # Guild currency
 
     async def ensure_guild_currency_entry(self, member: discord.Member):
-        logging.log(15, "guild_cur:ensure:waiting for lock")
+        self.bot.logger.log(15, "guild_cur:ensure:waiting for lock")
         async with self.guild_currency_lock:
-            logging.log(15, "guild_cur:ensure:-got lock")
+            self.bot.logger.log(15, "guild_cur:ensure:-got lock")
             if member.guild.id not in self.guild_currency:
                 self.guild_currency[member.guild.id] = {}
             if member.id not in self.guild_currency[member.guild.id]:
@@ -562,7 +562,7 @@ class AoiDatabase:
                 self.changed_guild_currency[member.guild.id] = []
             if member.id not in self.changed_guild_currency[member.guild.id]:
                 self.changed_guild_currency[member.guild.id].append(member.id)
-        logging.log(15, f"guild_cur:ensure:-releasing lock")
+        self.bot.logger.log(15, f"guild_cur:ensure:-releasing lock")
 
     async def get_guild_currency(self, member: discord.Member) -> int:
         await self.ensure_guild_currency_entry(member)
@@ -617,9 +617,9 @@ class AoiDatabase:
         else:
             guild_id = msg.guild.id
             user_id = msg.id
-        logging.log(15, "xp:ensure:waiting for lock")
+        self.bot.logger.log(15, "xp:ensure:waiting for lock")
         async with self.xp_lock:
-            logging.log(15, "xp:ensure:-got lock")
+            self.bot.logger.log(15, "xp:ensure:-got lock")
             if user_id not in self.global_xp:
                 self.global_xp[user_id] = 0
                 for _, v in self.xp.items():
@@ -632,14 +632,14 @@ class AoiDatabase:
                 self.changed_xp[guild_id] = []
             if user_id not in self.changed_xp[guild_id]:
                 self.changed_xp[guild_id].append(user_id)
-        logging.log(15, f"xp:ensure:-releasing lock")
+        self.bot.logger.log(15, f"xp:ensure:-releasing lock")
 
     async def add_xp(self, msg: discord.Message):
         if msg.author.bot:
             return
         if self.xp_cooldown.get_bucket(msg).update_rate_limit():
             return
-        logging.log(15, f"xp:add:ensure xp entry for {msg.author}")
+        self.bot.logger.log(15, f"xp:add:ensure xp entry for {msg.author}")
         await self.ensure_xp_entry(msg)
         c = 0
         for i in msg.guild.members:
@@ -649,15 +649,15 @@ class AoiDatabase:
                 break
         if c < 3:
             return
-        logging.log(15, f"xp:add:waiting for lock")
+        self.bot.logger.log(15, f"xp:add:waiting for lock")
         async with self.xp_lock:
-            logging.log(15, f"xp:add:-got lock")
+            self.bot.logger.log(15, f"xp:add:-got lock")
             self.xp[msg.guild.id][msg.author.id] += 3
             self.global_xp[msg.author.id] += 3
             if msg.author.id not in self.changed_xp[msg.guild.id]:
-                logging.log(15, f"xp:add:-adding user change for {msg.author}")
+                self.bot.logger.log(15, f"xp:add:-adding user change for {msg.author}")
                 self.changed_xp[msg.guild.id].append(msg.author.id)
-        logging.log(15, f"xp:add:-releasing lock")
+        self.bot.logger.log(15, f"xp:add:-releasing lock")
         await self.ensure_currency_gain(msg.guild)
         await self.ensure_guild_currency_entry(msg.author)
         async with self.guild_currency_lock:
@@ -768,7 +768,7 @@ class AoiDatabase:
             try:
                 await self.db.execute("INSERT INTO guild_settings (Guild) values (?)", (guild,))
             except sqlite3.IntegrityError:
-                logging.warning(f"Passing IntegrityError for guild {guild}")
+                self.bot.logger.warning(f"Passing IntegrityError for guild {guild}")
                 pass
             await self.db.commit()
             self.guild_settings[guild] = _GuildSetting(
@@ -813,7 +813,7 @@ class AoiDatabase:
                               (";".join(perms), guild))
 
     async def add_permission(self, guild: int, perm: str):
-        logging.info(f"db:adding permission {guild}:{perm}")
+        self.bot.logger.info(f"db:adding permission {guild}:{perm}")
         self.perm_chains[guild].append(perm)
         await self.db.execute("UPDATE permissions SET permissions=? WHERE guild=?",
                               (";".join(self.perm_chains[guild]), guild))

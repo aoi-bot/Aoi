@@ -13,10 +13,10 @@ class AoiTask:
         self.ctx = ctx
         self._status = status
         self.time = datetime.now()
-        logging.info(f"Creating task for {ctx.author.id} {ctx.message.content}")
+        self.bot.logger.info(f"Creating task for {ctx.author.id} {ctx.message.content}")
 
     def __del__(self):
-        logging.info(f"Deleting task for {self.ctx.author.id} {self.ctx.message.content}")
+        self.bot.logger.info(f"Deleting task for {self.ctx.author.id} {self.ctx.message.content}")
 
     def __str__(self) -> str:
         return f"{self.member.mention} {self.time.strftime('%x %X')} [Jump]({self.message.jump_url})\n" \

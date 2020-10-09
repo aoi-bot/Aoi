@@ -6,7 +6,7 @@ from typing import List, Union
 
 import aoi
 
-logging.info("expr:Initializing the expression evaluator")
+logging.getLogger("aoi").info("expr:Initializing the expression evaluator")
 
 
 @dataclass

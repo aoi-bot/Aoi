@@ -19,14 +19,14 @@ class NSFW(commands.Cog):
         return ":smirk:"
 
     async def _init(self):
-        logging.info("gelb:Waiting for bot")
+        self.bot.logger.info("gelb:Waiting for bot")
         await self.bot.wait_until_ready()
         self.gelbooru = gelbooru.GelbooruBrowser(
             api_key=self.bot.gelbooru_key,
             user_id=self.bot.gelbooru_user,
             banned_tags=self.bot.banned_tags
         )
-        logging.info("gelb:Ready!")
+        self.bot.logger.info("gelb:Ready!")
 
     @commands.is_nsfw()
     @commands.command(brief="Find a random gelbooru post by tag")

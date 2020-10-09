@@ -56,6 +56,7 @@ class AoiBot(commands.Bot):
 
     def __init__(self, *args, **kwargs):
         super(AoiBot, self).__init__(*args, **kwargs)
+        self.logger = logging.getLogger("aoi")
         self.config = {}
         self.db: Optional[AoiDatabase] = None
         self.prefixes: Dict[int, str] = {}
@@ -152,19 +153,19 @@ class AoiBot(commands.Bot):
                 await self.login(*args, bot=bot)
                 break
             except aiohttp.client_exceptions.ClientConnectionError as e:
-                logging.warning(f"bot:Connection {i}/6 failed")
-                logging.warning(f"bot:  {e}")
-                logging.warning(f"bot: waiting {2 ** (i + 1)} seconds")
+                self.logger.warning(f"bot:Connection {i}/6 failed")
+                self.logger.warning(f"bot:  {e}")
+                self.logger.warning(f"bot: waiting {2 ** (i + 1)} seconds")
                 await asyncio.sleep(2 ** (i + 1))
-                logging.info("bot:attempting to reconnect")
+                self.logger.info("bot:attempting to reconnect")
         else:
-            logging.error("bot: FATAL failed after 6 attempts")
+            self.logger.error("bot: FATAL failed after 6 attempts")
             return
 
         for cog in self.cogs:
             cog = self.get_cog(cog)
             if not cog.description and cog.qualified_name not in self.cog_groups["Hidden"]:
-                logging.error(f"bot:cog {cog} has no description")
+                self.logger.error(f"bot:cog {cog} has no description")
                 return
 
         missing_brief = []
@@ -173,9 +174,9 @@ class AoiBot(commands.Bot):
                 missing_brief.append(command)
 
         if missing_brief:
-            logging.error("bot:the following commands are missing help text")
+            self.logger.error("bot:the following commands are missing help text")
             for i in missing_brief:
-                logging.error(f"bot: - {i.cog.qualified_name}.{i.name}")
+                self.logger.error(f"bot: - {i.cog.qualified_name}.{i.name}")
             return
 
         await self.connect(reconnect=reconnect)
