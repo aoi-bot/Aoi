@@ -115,12 +115,59 @@ class Colors(commands.Cog):
                         description=" ".join("#" + "".join(hex(x)[2:] for x in c) for c in colors[1:]),
                         image=buf)
 
+    @commands.max_concurrency(1, commands.BucketType.user)
     @commands.command(
-        brief="Shows the adaptive color palette for an image. 2-12 colors, defaults to 6."
+        brief="Shows the adaptive color palette for an image. 2-10 colors, defaults to 6."
     )
-    async def adaptive(self, ctx: aoi.AoiContext, colors: int = 6):
-        pass
+    async def adaptive(self, ctx: aoi.AoiContext, num_colors: int = 6):
+        if not ctx.message.attachments or len(ctx.message.attachments) == 0:
+            return await ctx.send_error("I need an image! Attach it with your command as a file.")
+        attachment: discord.Attachment = ctx.message.attachments[0]
+        if not self._is_image(attachment.filename):
+            return await ctx.send_error("Invalid image type. Give me a jpg, jpeg, or png")
+        if not (2 <= num_colors <= 12):
+            return await ctx.send_error("Number of colors must be between 2 and 10, inclusive")
+        buf = io.BytesIO()
+        buf.seek(0)
+        await ctx.trigger_typing()
+        await attachment.save(buf)
+        im: Image = Image.open(buf).convert("RGB")
+        paletted: Image = im.convert("P", palette=Image.ADAPTIVE, colors=num_colors)
+        palette = paletted.getpalette()
+        color_counts = sorted(paletted.getcolors(), reverse=True)
+        colors = list()
+        for i in range(num_colors):
+            palette_index = color_counts[i][1]
+            dominant_color = palette[palette_index * 3:palette_index * 3 + 3]
+            colors.append(tuple(dominant_color))
+        colors.sort(key=lambda x: colorsys.rgb_to_hsv(*x)[0])
+        im = im.resize((60 * num_colors, int(60 * num_colors * im.size[1] / im.size[0])), Image.ANTIALIAS)
 
+        palette = Image.new('RGB', (60 * num_colors, 60 + im.size[1]))
+        palette.paste(im, (0, 60))
+        draw = ImageDraw.Draw(palette)
+
+
+        pos_x = 0
+        for color in colors:
+            draw.rectangle([pos_x, 0, pos_x + 60, 60], fill=color)
+            pos_x += 60
+
+        buf.close()
+        buf = io.BytesIO()
+        palette.save(buf, "PNG")
+
+        await ctx.embed(
+            description=" ".join("#" + "".join(hex(x)[2:] for x in c) for c in colors),
+            image=buf
+        )
+
+
+
+
+
+    def _is_image(self, name: str) -> bool:
+        return any(name.endswith(f".{x}") for x in "jpg,jpeg,png".split(","))
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Colors(bot))
