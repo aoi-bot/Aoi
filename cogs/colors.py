@@ -195,6 +195,50 @@ class Colors(commands.Cog):
             image=buf
         )
 
+    @commands.max_concurrency(1, commands.BucketType.user)
+    @commands.command(
+        brief="Shows an image histogram"
+    )
+    async def histogram(self, ctx: aoi.AoiContext):
+        if not ctx.message.attachments or len(ctx.message.attachments) == 0:
+            return await ctx.send_error("I need an image! Attach it with your command as a file.")
+        attachment: discord.Attachment = ctx.message.attachments[0]
+        if not self._is_image(attachment.filename):
+            return await ctx.send_error("Invalid image type. Give me a jpg, jpeg, or png")
+        buf = io.BytesIO()
+        buf.seek(0)
+        await ctx.trigger_typing()
+        await attachment.save(buf)
+        im: Image = Image.open(buf).convert("RGB")
+        hist: List[int] = im.histogram()
+        max_rgb = max(hist)
+        hist = [int(x / max_rgb * 128) for x in hist]
+        rgb = hist[:256], hist[256:512], hist[512:]
+
+        rgb_images = [Image.new("L", (280, 152), 0) for _ in rgb]
+        rgb_draws = [ImageDraw.Draw(im) for im in rgb_images]
+
+        for i in range(256):
+            for j in range(3):
+                rgb_draws[j].rectangle((i+12, 140, i+12, 140-rgb[j][i]), 0xff)
+
+        histogram = Image.merge("RGB", rgb_images)
+        hist_draw = ImageDraw.Draw(histogram)
+
+        hist_draw.line([12, 12, 12, 140, 268, 140], 0xffffff)
+        for r in range(12, 141, 16):
+            hist_draw.line([8, r, 12, r], 0xffffff)
+        for r in range(12, 269, 32):
+            hist_draw.line([r, 140, r, 144], 0xffffff)
+
+        buf.close()
+        buf = io.BytesIO()
+        histogram.save(buf, "PNG")
+        await ctx.embed(
+            image=buf
+        )
+
+
     def _is_image(self, name: str) -> bool:
         return any(name.endswith(f".{x}") for x in "jpg,jpeg,png".split(","))
 
