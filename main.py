@@ -14,9 +14,8 @@ try:
 except FileNotFoundError:
     pass
 
-logging.basicConfig(level=logging.INFO)
 logging.addLevelName(15, "BDBG")
-logging.getLogger("aoi").setLevel(logging.INFO)
+
 dotenv.load_dotenv(".env")
 
 

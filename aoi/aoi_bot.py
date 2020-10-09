@@ -21,7 +21,6 @@ from .database import AoiDatabase
 if TYPE_CHECKING:
     from aoi import AoiContext
 
-
 class PlaceholderManager:
     def user_name(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
         return ctx.author.name if isinstance(ctx, aoi.AoiContext) else ctx.name
@@ -56,6 +55,13 @@ class AoiBot(commands.Bot):
 
     def __init__(self, *args, **kwargs):
         super(AoiBot, self).__init__(*args, **kwargs)
+        for logger in [
+            "aoi",
+            "discord.client",
+            "discord.gateway"
+        ]:
+            logging.getLogger(logger).setLevel(logging.INFO)
+            logging.getLogger(logger).addHandler(aoi.LoggingHandler())
         self.logger = logging.getLogger("aoi")
         self.config = {}
         self.db: Optional[AoiDatabase] = None
