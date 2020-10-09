@@ -1,10 +1,11 @@
 import colorsys
 import io
 import random
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import discord
 from PIL import Image, ImageDraw
+from PIL.ImageOps import grayscale, colorize
 from discord.ext import commands
 
 import aoi
@@ -147,7 +148,6 @@ class Colors(commands.Cog):
         palette.paste(im, (0, 60))
         draw = ImageDraw.Draw(palette)
 
-
         pos_x = 0
         for color in colors:
             draw.rectangle([pos_x, 0, pos_x + 60, 60], fill=color)
@@ -162,12 +162,42 @@ class Colors(commands.Cog):
             image=buf
         )
 
-
-
-
+    @commands.max_concurrency(1, commands.BucketType.user)
+    @commands.command(
+        brief="Split-tones an image"
+    )
+    async def duotone(self, ctx: aoi.AoiContext, black: discord.Colour, white: discord.Colour,
+                      mid: Union[discord.Colour, str] = None, black_point: int = 0, white_point: int = 255,
+                      mid_point: int = 127):
+        if isinstance(mid, str):
+            if mid.lower() == "none":
+                mid = None
+            else:
+                raise commands.BadArgument("mid must be a color or None")
+        if not ctx.message.attachments or len(ctx.message.attachments) == 0:
+            return await ctx.send_error("I need an image! Attach it with your command as a file.")
+        attachment: discord.Attachment = ctx.message.attachments[0]
+        if not self._is_image(attachment.filename):
+            return await ctx.send_error("Invalid image type. Give me a jpg, jpeg, or png")
+        buf = io.BytesIO()
+        buf.seek(0)
+        await ctx.trigger_typing()
+        await attachment.save(buf)
+        im: Image = Image.open(buf).convert("RGB")
+        gs = grayscale(im)
+        duo = colorize(gs, black.to_rgb(), white.to_rgb(), mid.to_rgb() if mid else None,
+                       black_point, white_point, mid_point)
+        duo = Image.composite(duo, Image.new("RGB", duo.size, (0x00, 0x00, 0x00)), gs)
+        buf.close()
+        buf = io.BytesIO()
+        duo.save(buf, "PNG")
+        await ctx.embed(
+            image=buf
+        )
 
     def _is_image(self, name: str) -> bool:
         return any(name.endswith(f".{x}") for x in "jpg,jpeg,png".split(","))
+
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Colors(bot))
