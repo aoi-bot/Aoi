@@ -107,7 +107,7 @@ class AoiBot(commands.Bot):
         return task
 
     async def on_message(self, message: discord.Message):
-        ctx: aoi.AoiContext = await self.get_context(message, cls=AoiContext)
+        ctx: aoi.AoiContext = await self.get_context(message, cls=aoi.AoiContext)
         await self.invoke(ctx)
         if not ctx.command and not message.author.bot:
             await self.db.ensure_xp_entry(message)

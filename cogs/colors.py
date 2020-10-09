@@ -112,8 +112,14 @@ class Colors(commands.Cog):
         buf = io.BytesIO()
         img.save(buf, format="PNG")
         await ctx.embed(title="Gradient",
-                        description=" ".join("#" + "".join(hex(x)[2:] for x in c) for c in colors),
+                        description=" ".join("#" + "".join(hex(x)[2:] for x in c) for c in colors[1:]),
                         image=buf)
+
+    @commands.command(
+        brief="Shows the adaptive color palette for an image. 2-12 colors, defaults to 6."
+    )
+    async def adaptive(self, ctx: aoi.AoiContext, colors: int = 6):
+        pass
 
 
 def setup(bot: aoi.AoiBot) -> None:
