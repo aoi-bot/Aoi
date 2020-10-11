@@ -3,6 +3,8 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 
+import os
+import psutil
 import aoi
 from libs.conversions import dhm_notation
 
@@ -26,6 +28,7 @@ class Aoi(commands.Cog):
                 text_channels += 1
             if isinstance(channel, discord.VoiceChannel):
                 voice_channels += 1
+        memory = psutil.Process(os.getpid()).memory_info().rss // 1000000
         await ctx.embed(author=f"Aoi {self.bot.version}",
                         fields=[
                             ("Ping", f"{round(self.bot.latency * 1000)}ms"),
@@ -35,6 +38,7 @@ class Aoi(commands.Cog):
                             ("Presence", f"{len(self.bot.guilds)} Guilds\n"
                                          f"{text_channels} Text Channels\n"
                                          f"{voice_channels} Voice Channels\n"),
+                            ("Memory", f"{memory}MB"),
                         ],
                         thumbnail=self.bot.user.avatar_url)
 
