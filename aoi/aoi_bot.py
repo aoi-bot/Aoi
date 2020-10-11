@@ -62,7 +62,7 @@ class AoiBot(commands.Bot):
             "discord.client",
             "discord.gateway"
         ]:
-            logging.getLogger(logger).setLevel(self.TRACE if logger == "aoi" else logging.INFO)
+            logging.getLogger(logger).setLevel(logging.DEBUG if logger == "aoi" else logging.INFO)
             logging.getLogger(logger).addHandler(aoi.LoggingHandler())
         self.logger = logging.getLogger("aoi")
         self.config = {}
@@ -147,10 +147,11 @@ class AoiBot(commands.Bot):
         self.imgur_user = os.getenv("IMGUR")
         self.imgur_secret = os.getenv("IMGUR_SECRET")
         self.gmap = gmaps.GeoLocation(self.google)
-        self.imgur = imgur.Imgur(self.imgur_user)
         self.pixiv_user = os.getenv("PIXIV")
         self.pixiv_password = os.getenv("PIXIV_PASSWORD")
+
         self.pixiv.login(self.pixiv_user, self.pixiv_password)
+        self.imgur = imgur.Imgur(self.imgur_user)
         await self.db.load()
         self.load_configs()
 
@@ -159,22 +160,23 @@ class AoiBot(commands.Bot):
 
         for i in range(0, 6):
             try:
+                self.logger.debug(f"bot:Connecting, try {i+1}/6")
                 await self.login(*args, bot=bot)
                 break
             except aiohttp.client_exceptions.ClientConnectionError as e:
-                self.logger.warning(f"bot:Connection {i}/6 failed")
+                self.logger.warning(f"bot:Connection {i+1}/6 failed")
                 self.logger.warning(f"bot:  {e}")
                 self.logger.warning(f"bot: waiting {2 ** (i + 1)} seconds")
                 await asyncio.sleep(2 ** (i + 1))
                 self.logger.info("bot:attempting to reconnect")
         else:
-            self.logger.error("bot: FATAL failed after 6 attempts")
+            self.logger.critical("bot: failed after 6 attempts")
             return
 
         for cog in self.cogs:
             cog = self.get_cog(cog)
             if not cog.description and cog.qualified_name not in self.cog_groups["Hidden"]:
-                self.logger.error(f"bot:cog {cog} has no description")
+                self.logger.critical(f"bot:cog {cog} has no description")
                 return
 
         missing_brief = []
