@@ -1,5 +1,8 @@
 import math
+from io import BytesIO
 
+import sympy
+from PIL import Image, ImageOps
 from discord.ext import commands
 
 import aoi
@@ -108,6 +111,22 @@ class Math(commands.Cog):
                           num1: int,
                           num2: int):
         await ctx.send_info(f"\n`{num1:,}` * `{num2:,}` = `{num1 * num2:,}`")
+
+    @commands.command(
+        brief="Render LaTeX",
+    )
+    async def latex(self, ctx: aoi.AoiContext, *, formula: str):
+        await ctx.trigger_typing()
+        buffer = BytesIO()
+        try:
+            sympy.preview(f"\\[{formula.strip('`')}\\]", viewer="BytesIO", outputbuffer=buffer)
+        except RuntimeError as e:
+            return await ctx.send_error("An error occured")
+        result = BytesIO()
+        buffer.seek(0)
+        old = Image.open(buffer)
+        ImageOps.expand(old, border=20, fill=(0xff, 0xff, 0xff)).save(result, format="png")
+        await ctx.embed(image=result)
 
 
 def setup(bot: aoi.AoiBot) -> None:
