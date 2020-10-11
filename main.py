@@ -14,7 +14,7 @@ try:
 except FileNotFoundError:
     pass
 
-logging.addLevelName(15, "BDBG")
+logging.addLevelName(7, "TRACE")
 
 dotenv.load_dotenv(".env")
 
@@ -78,7 +78,7 @@ for grp_name, ext_set in extensions.items():
 
 @bot.event
 async def on_ready():
-    bot.logger.info("Bot online!")
+    bot.logger.info(f"Aoi {bot.version} online!")
     await bot.change_presence(activity=discord.Game("Hello :)"))
 
 

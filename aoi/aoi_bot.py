@@ -21,6 +21,7 @@ from .database import AoiDatabase
 if TYPE_CHECKING:
     from aoi import AoiContext
 
+
 class PlaceholderManager:
     def user_name(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
         return ctx.author.name if isinstance(ctx, aoi.AoiContext) else ctx.name
@@ -55,12 +56,13 @@ class AoiBot(commands.Bot):
 
     def __init__(self, *args, **kwargs):
         super(AoiBot, self).__init__(*args, **kwargs)
+        self.TRACE = 7
         for logger in [
             "aoi",
             "discord.client",
             "discord.gateway"
         ]:
-            logging.getLogger(logger).setLevel(logging.INFO)
+            logging.getLogger(logger).setLevel(self.TRACE if logger == "aoi" else logging.INFO)
             logging.getLogger(logger).addHandler(aoi.LoggingHandler())
         self.logger = logging.getLogger("aoi")
         self.config = {}
@@ -85,8 +87,9 @@ class AoiBot(commands.Bot):
         self.commands_executed = 0
         self.start_time = datetime.now()
         self.cog_groups = {}
-        self.version = "+".join(subprocess.check_output(["git", "describe", "--tags"]).
-                                strip().decode("utf-8").split("-")[:-1])
+        version = subprocess.check_output(["git", "describe", "--tags"]).strip().decode("utf-8").split("-")
+        self.version = "+".join(version[:-1]) if len(version) > 2 else version[0]
+        self.logger.debug(f"Found version string {version}")
         self.placeholders = PlaceholderManager()
         self.tasks: Dict[discord.Member, List[aoi.AoiTask]] = {}
 

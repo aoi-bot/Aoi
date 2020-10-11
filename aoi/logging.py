@@ -1,25 +1,28 @@
 import logging
 
-from colorama import init, Fore, Style, Back
+from colorama import init, Fore, Style
 
 init()
 
 colors = {
-    "DEBUG": "",
+    "TRACE": f"{Fore.WHITE}{Style.DIM}",
+    "DEBUG": f"{Fore.LIGHTWHITE_EX}",
     "INFO": "",
     "WARNING": f"{Fore.YELLOW}{Style.BRIGHT}",
     "ERROR": f"{Fore.LIGHTRED_EX}{Style.BRIGHT}",
     "CRITICAL": f"{Fore.RED}{Style.BRIGHT}",
 }
 colors2 = {
-    "DEBUG": Fore.WHITE,
+    "TRACE": f"{Fore.WHITE}{Style.DIM}",
+    "DEBUG": Fore.LIGHTWHITE_EX,
     "INFO": Fore.BLUE,
     "WARNING": Fore.YELLOW,
     "ERROR": Fore.LIGHTRED_EX,
     "CRITICAL": Fore.RED,
 }
 styles = {
-    "DEBUG": "",
+    "TRACE": f"{Fore.WHITE}{Style.DIM}",
+    "DEBUG": f"{Fore.LIGHTWHITE_EX}",
     "INFO": "",
     "WARNING": "",
     "ERROR": "",
