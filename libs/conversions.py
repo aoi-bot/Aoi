@@ -25,3 +25,7 @@ def hms_notation(seconds: int):
     minutes = (seconds % 3600) // 60
     seconds = seconds % 60
     return f"{hours}h{minutes}m{seconds}s"
+
+
+def camel_to_title(camel: str):
+    return camel.replace("_", " ").title()
