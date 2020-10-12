@@ -36,6 +36,12 @@ class PlaceholderManager:
     def user_avatar(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
         return str(ctx.author.avatar_url if isinstance(ctx, aoi.AoiContext) else ctx.avatar_url)
 
+    def user_tag(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
+        return str(ctx.author if isinstance(ctx, aoi.AoiContext) else ctx)
+
+    def user_id(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
+        return str(ctx.author.id if isinstance(ctx, aoi.AoiContext) else ctx.id)
+
     def guild_name(self, ctx: AoiContext) -> str:  # noqa
         return ctx.guild.name
 
