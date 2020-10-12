@@ -39,7 +39,7 @@ class LoggingHandler(logging.StreamHandler):
 
     def emit(self, record: logging.LogRecord) -> None:
         name = record.name
-        level = record.levelno
+        level = record.levelno  # noqa F841
         level_name = record.levelname
         if name == "aoi":
             split = record.msg.split(":")

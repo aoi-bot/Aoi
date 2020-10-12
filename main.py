@@ -1,5 +1,4 @@
 import asyncio
-import atexit
 import logging
 import os
 import sys
@@ -30,6 +29,7 @@ def get_prefix(_bot: aoi.AoiBot, message: discord.Message):
 bot = aoi.AoiBot(command_prefix=get_prefix, help_command=None)
 
 bot.load_extensions()
+
 
 @bot.event
 async def on_ready():

@@ -120,8 +120,8 @@ class Math(commands.Cog):
         buffer = BytesIO()
         try:
             sympy.preview(f"\\[{formula.strip('`')}\\]", viewer="BytesIO", outputbuffer=buffer)
-        except RuntimeError as e:
-            return await ctx.send_error("An error occured")
+        except RuntimeError:
+            return await ctx.send_error("An error occurred while rendering.")
         result = BytesIO()
         buffer.seek(0)
         old = Image.open(buffer)

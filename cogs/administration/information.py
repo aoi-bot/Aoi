@@ -233,14 +233,12 @@ class Information(commands.Cog):
         await ctx.embed(
             title=f"Permissions for {member} in {channel}",
             thumbnail=member.avatar_url,
-            description=
-            "```diff\n" +
-            "\n".join(
-                f"{'+' if perm[1] or perms.administrator else '-'} "
-                f"{conversions.camel_to_title(perm[0])}"
-                for perm in perms
-            ) +
-            "```"
+            description="```diff\n" +
+                        "\n".join(
+                            f"{'+' if perm[1] or perms.administrator else '-'} "
+                            f"{conversions.camel_to_title(perm[0])}"
+                            for perm in perms
+                        ) + "```"
         )
 
 
