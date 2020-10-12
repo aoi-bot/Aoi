@@ -215,6 +215,18 @@ class AoiBot(commands.Bot):
             self.cog_groups[group] = [cog]
         else:
             self.cog_groups[group].append(cog)
+            
+    def load_extension(self, name):
+        try:
+            super(AoiBot, self).load_extension(name)
+        except discord.ClientException as e:
+            self.logger.critical(f"Error occurred while loading {name}")
+            self.logger.critical(e.__str__().split(":")[-1].strip())
+            exit(1)
+        except commands.ExtensionFailed as e:
+            self.logger.critical(f"Error occurred while loading {name}")
+            self.logger.critical(e.__str__().split(":")[-1].strip())
+            exit(1)
 
     def convert_json(self, msg: str):  # does not convert placeholders
         try:

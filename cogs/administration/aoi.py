@@ -109,7 +109,7 @@ class Aoi(commands.Cog):
 
     @commands.is_owner()
     @commands.command(
-        brief="Basic information about a server the bot is on"
+        brief="Basic information about a server the bot is on",
     )
     async def guildinfo(self, ctx: aoi.AoiContext, guild: int):
         guild: discord.Guild = self.bot.get_guild(guild)
