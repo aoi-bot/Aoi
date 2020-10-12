@@ -1,0 +1,29 @@
+"Administration":
+    "cogs.administration.aoi": "Aoi"
+    "cogs.administration.information": "Information"
+    "cogs.administration.roles": "Roles"
+    "cogs.administration.channels": "Channels"
+    "cogs.administration.guild": "Guilds"
+    "cogs.administration.taskmgmt": "TaskManagement"
+    "cogs.administration.permissions": "Permissions"
+    "cogs.administration.welcomegoodbye": "WelcomeGoodbye"
+"Misc":
+    "cogs.colors": "Colors"
+    "cogs.nsfw": "NSFW"
+    "cogs.math": "Math"
+    "cogs.messages": "Messages"
+    "cogs.searches": "Searches"
+    "cogs.frames": "Frames"
+"Profile/Currency":
+    "cogs.user.xp": "XP"
+    "cogs.user.profile": "Profile"
+    "cogs.user.currency": "Currency"
+    "cogs.user.global_shop": "GlobalShop"
+    "cogs.user.guild_shop": "ServerShop"
+    "cogs.user.guild_gambling": "ServerGambling"
+"Utility/Config":
+    "cogs.settings.guildsettings": "GuildSettings"
+    "cogs.help": "Help"
+    "cogs.guides": "Guides"
+"Hidden":
+    "cogs.errorhandler": "ErrorHandler"

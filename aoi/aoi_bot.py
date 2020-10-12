@@ -13,6 +13,7 @@ import aiohttp.client_exceptions
 import discord
 import pixivapi
 from discord.ext import commands
+from ruamel.yaml import YAML
 
 import aoi
 from wrappers import gmaps as gmaps, imgur
@@ -160,11 +161,11 @@ class AoiBot(commands.Bot):
 
         for i in range(0, 6):
             try:
-                self.logger.debug(f"bot:Connecting, try {i+1}/6")
+                self.logger.debug(f"bot:Connecting, try {i + 1}/6")
                 await self.login(*args, bot=bot)
                 break
             except aiohttp.client_exceptions.ClientConnectionError as e:
-                self.logger.warning(f"bot:Connection {i+1}/6 failed")
+                self.logger.warning(f"bot:Connection {i + 1}/6 failed")
                 self.logger.warning(f"bot:  {e}")
                 self.logger.warning(f"bot: waiting {2 ** (i + 1)} seconds")
                 await asyncio.sleep(2 ** (i + 1))
@@ -215,18 +216,24 @@ class AoiBot(commands.Bot):
             self.cog_groups[group] = [cog]
         else:
             self.cog_groups[group].append(cog)
-            
-    def load_extension(self, name):
-        try:
-            super(AoiBot, self).load_extension(name)
-        except discord.ClientException as e:
-            self.logger.critical(f"Error occurred while loading {name}")
-            self.logger.critical(e.__str__().split(":")[-1].strip())
-            exit(1)
-        except commands.ExtensionFailed as e:
-            self.logger.critical(f"Error occurred while loading {name}")
-            self.logger.critical(e.__str__().split(":")[-1].strip())
-            exit(1)
+
+    def load_extensions(self):
+        with open("extensions.yaml") as fp:
+            extensions = YAML().load(stream=fp)
+        for grp_name in extensions:
+            for path, cog_name in extensions[grp_name].items():
+                try:
+                    self.logger.info(f"cog:Loading {grp_name}:{cog_name} from {path}")
+                    super(AoiBot, self).load_extension(path)
+                except discord.ClientException as e:
+                    self.logger.critical(f"An error occurred while loading {path}")
+                    self.logger.critical(e.__str__().split(":")[-1].strip())
+                    exit(1)
+                except commands.ExtensionFailed as e:
+                    self.logger.critical(f"An error occurred while loading {path}")
+                    self.logger.critical(e.__str__().split(":")[-1].strip())
+                    exit(1)
+                self.set_cog_group(cog_name, grp_name)
 
     def convert_json(self, msg: str):  # does not convert placeholders
         try:
