@@ -74,6 +74,8 @@ class Roles(commands.Cog):
             await ctx.guild.create_role(name=name)
             await asyncio.sleep(10)
 
+        names = names.split(";")
+
         if len(names) > 3:
             conf = await ctx.confirm("Create roles: " + (" ".join(f"`{n}`" for n in names) + "?"),
                                      "Creating roles...",
@@ -82,11 +84,11 @@ class Roles(commands.Cog):
                 return
         n = 0
         roles = []
-        num = len(names.split(";"))
+        num = len(names)
 
         async def do_op():
             nonlocal n
-            for r in names.split(";"):
+            for r in names:
                 roles.append(await ctx.guild.create_role(name=r))
                 await asyncio.sleep(1)
                 n += 1
