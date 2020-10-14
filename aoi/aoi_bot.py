@@ -67,7 +67,8 @@ class AoiBot(commands.Bot):
         for logger in [
             "aoi",
             "discord.client",
-            "discord.gateway"
+            "discord.gateway",
+            "discord.http"
         ]:
             logging.getLogger(logger).setLevel(logging.DEBUG if logger == "aoi" else logging.INFO)
             logging.getLogger(logger).addHandler(aoi.LoggingHandler())
