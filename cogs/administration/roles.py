@@ -260,6 +260,12 @@ class Roles(commands.Cog):
                                 f"<@&{i}>" for i in self.bot.db.auto_roles[ctx.guild.id]
                             ))
 
+    @commands.command(
+        brief="Lists the server's roles"
+    )
+    async def roles(self, ctx: aoi.AoiContext):
+        await ctx.paginate([f"{r.position} - {discord.utils.escape_markdown(r.name)}"
+                           for r in ctx.guild.roles[::-1]], 20, "Role list")
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Roles(bot))
