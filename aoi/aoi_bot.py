@@ -184,7 +184,7 @@ class AoiBot(commands.Bot):
         for cog in self.cogs:
             cog = self.get_cog(cog)
             if not cog.description and cog.qualified_name not in self.cog_groups["Hidden"]:
-                self.logger.critical(f"bot:cog {cog} has no description")
+                self.logger.critical(f"bot:cog {cog.qualified_name} has no description")
                 return
 
         missing_brief = []
