@@ -95,7 +95,7 @@ class Roles(commands.Cog):
         await ctx.send_info(f"Creating {num} roles. Will take at least {num}s")
         await self.bot.create_task(ctx, do_op(), lambda: f"{n}/{num}")
 
-        await ctx.send_ok(f"Created {' '.join(r.mention for r in roles)}", ping=True)
+        await ctx.send_ok(f"Created {' '.join(r.mention for r in roles)}", ping=len(roles) > 10)
 
     @commands.bot_has_permissions(manage_roles=True)
     @commands.has_permissions(manage_roles=True)
@@ -125,7 +125,7 @@ class Roles(commands.Cog):
 
         await ctx.send_info(f"Moving {len(roles)} roles. Will take at least {len(roles)}s")
         await self.bot.create_task(ctx, do_op(), lambda: f"{n}/{(len(roles))}")
-        await ctx.send_ok(f"Moved {' '.join('`' + r.name + '`' for r in roles)}", ping=True)
+        await ctx.send_ok(f"Moved {' '.join('`' + r.name + '`' for r in roles)}", ping=len(roles) > 10)
 
     @commands.bot_has_permissions(manage_roles=True)
     @commands.has_permissions(manage_roles=True)
@@ -155,7 +155,7 @@ class Roles(commands.Cog):
         if len(roles) > 3:
             await ctx.send_info(f"Deleting {len(roles)} roles. Will take at least {len(roles)}s")
         await self.bot.create_task(ctx, do_op(), lambda: f"{n}/{(len(roles))}")
-        await ctx.send_ok(f"Deleted {' '.join('`' + r.name + '`' for r in roles)}", ping=True)
+        await ctx.send_ok(f"Deleted {' '.join('`' + r.name + '`' for r in roles)}", ping=len(roles) > 10)
 
     @commands.bot_has_permissions(manage_roles=True)
     @commands.has_permissions(manage_roles=True)
@@ -396,7 +396,6 @@ class Roles(commands.Cog):
 
         await ctx.author.remove_roles(role)
         await ctx.send_ok("Role removed!")
-
 
 
 def setup(bot: aoi.AoiBot) -> None:
