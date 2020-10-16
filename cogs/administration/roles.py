@@ -21,14 +21,21 @@ class Roles(commands.Cog):
     def description(self):
         return "Commands to modify roles"
 
+    def _check_role(self, ctx: aoi.AoiContext, role: discord.Role, action: str = "edit"):
+        if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
+            raise aoi.RoleError(f"Role to {action} must be lower than your highest")
+        if role >= ctx.me.top_role:
+            raise aoi.RoleError(f"I can't {action} a role higher than mine")
+
+    def _soft_check_role(self, ctx: aoi.AoiContext, role: discord.Role, action: str = "edit"):
+        if role >= ctx.me.top_role:
+            raise aoi.RoleError(f"I can't {action} a role higher than mine")
+
     @commands.bot_has_permissions(manage_roles=True)
     @commands.has_permissions(manage_roles=True)
     @commands.command(brief="Toggles if a role is mentionable", aliases=["rolem", "mentionable"])
     async def rolementionable(self, ctx: aoi.AoiContext, *, role: discord.Role):
-        if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
-            raise aoi.RoleError("Role to edit must be lower than your highest")
-        if role >= ctx.me.top_role:
-            raise aoi.RoleError("Im can't edit a role higher than mine")
+        self._check_role(ctx, role)
         await role.edit(mentionable=not role.mentionable)
         await ctx.send_info(f"{role.mention} is now {'' if role.mentionable else 'un'}mentionable")
 
@@ -36,10 +43,7 @@ class Roles(commands.Cog):
     @commands.has_permissions(manage_roles=True)
     @commands.command(brief="Toggles if a role is hoisted", aliases=["roleh", "hoist"])
     async def rolehoist(self, ctx: aoi.AoiContext, *, role: discord.Role):
-        if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
-            raise aoi.RoleError("Role to edit must be lower than your highest")
-        if role >= ctx.me.top_role:
-            raise aoi.RoleError("Im can't edit a role higher than mine")
+        self._check_role(ctx, role)
         await role.edit(hoist=not role.hoist)
         await ctx.send_info(f"{role.mention} is now {'' if role.hoist else 'un'}hoisted")
 
@@ -47,10 +51,7 @@ class Roles(commands.Cog):
     @commands.has_permissions(manage_roles=True)
     @commands.command(brief="Changes a roles name", aliases=["rren"])
     async def rolerename(self, ctx: aoi.AoiContext, role: discord.Role, *, name: str):
-        if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
-            raise aoi.RoleError("Role to edit must be lower than your highest")
-        if role >= ctx.me.top_role:
-            raise aoi.RoleError("Im can't edit a role higher than mine")
+        self._check_role(ctx, role)
         await role.edit(name=name)
         await ctx.send_info(f"Renamed {role.mention}")
 
@@ -58,10 +59,7 @@ class Roles(commands.Cog):
     @commands.has_permissions(manage_roles=True)
     @commands.command(brief="Changes a roles color", aliases=["rclr", "roleclr"])
     async def rolecolor(self, ctx: aoi.AoiContext, role: discord.Role, *, color: discord.Colour):
-        if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
-            raise aoi.RoleError("Role to edit must be lower than your highest")
-        if role >= ctx.me.top_role:
-            raise aoi.RoleError("I can't edit a role higher than mine")
+        self._check_role(ctx, role)
         await role.edit(colour=color)
         await ctx.send_info(f"Changed {role.mention}'s color to "
                             f"#{conversions.color_to_string(role.colour)}")
@@ -138,10 +136,7 @@ class Roles(commands.Cog):
             raise commands.BadArgument("I need to know what role(s) to delete!")
         roles: List[discord.Role] = list(roles)
         for role in roles:
-            if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
-                raise aoi.RoleError(f"{role.mention} must be below your highest role in order for you to delete it.")
-            if role >= ctx.me.top_role:
-                raise aoi.RoleError(f"{role.mention} must be above my highest role for me to delete it.")
+            self._check_role(ctx, role)
         if len(roles) > 3:
             conf = await ctx.confirm(f"Delete {' '.join(r.name for r in roles)}?",
                                      "Deleting roles...",
@@ -171,6 +166,8 @@ class Roles(commands.Cog):
     async def rolegradient(self, ctx: aoi.AoiContext, color1: discord.Colour, color2: discord.Colour,
                            roles: Greedy[discord.Role]):
         roles: List[discord.Role] = list(roles)
+        for role in roles:
+            self._check_role(ctx, role)
         num = len(roles)
         rgb, rgb2 = color1.to_rgb(), color2.to_rgb()
         steps = [(rgb[x] - rgb2[x]) / (num - 1) for x in range(3)]
@@ -305,6 +302,101 @@ class Roles(commands.Cog):
                                "M-Mentionable  —  "
                                "H-Hoisted  —  "
                                "C-Colored")
+
+    @commands.command(
+        brief="List the server's self-assignable roles",
+        aliases=["lsr"]
+    )
+    async def listselfroles(self, ctx: aoi.AoiContext):
+        if ctx.guild.id not in self.bot.db.self_roles or not self.bot.db.self_roles[ctx.guild.id]:
+            return await ctx.send_error(f"{ctx.guild} has no self-assignable roles")
+
+        # remove invalid self-roles
+        lost_roles = []
+        for r in self.bot.db.self_roles[ctx.guild.id]:
+            if not ctx.guild.get_role(r):
+                lost_roles.append(r)
+        if lost_roles:
+            await ctx.trigger_typing()
+        for r in lost_roles:
+            await self.bot.db.remove_self_role(ctx.guild, r)
+
+        await ctx.send_info("Self-assignable roles on this server\n" +
+                            "\n".join(
+                                f"<@&{i}>" for i in self.bot.db.self_roles[ctx.guild.id]
+                            ))
+
+    @commands.has_permissions(manage_roles=True)
+    @commands.command(
+        brief="Adds a self-assignable to the server",
+        aliases=["asr", "asrole"]
+    )
+    async def addselfrole(self, ctx: aoi.AoiContext, *, role: discord.Role):
+        self._soft_check_role(ctx, role, "add")
+        await self.bot.db.add_self_role(ctx.guild, role)
+        await ctx.send_ok(f"{role.mention} added to self-assignable roles")
+
+    @commands.has_permissions(manage_roles=True)
+    @commands.command(
+        brief="Adds a self-assignable to the server",
+        aliases=["rsr", "rsrole"]
+    )
+    async def removeselfrole(self, ctx: aoi.AoiContext, *, role: discord.Role):
+        await self.bot.db.remove_self_role(ctx.guild, role)
+        await ctx.send_ok(f"{role.mention} removed from self-assignable roles")
+
+    @commands.command(
+        brief="Adds a self-assignable role to you"
+    )
+    async def addrole(self, ctx: aoi.AoiContext, *, role: discord.Role):
+        if ctx.guild.id not in self.bot.db.self_roles or not self.bot.db.self_roles[ctx.guild.id]:
+            return await ctx.send_error(f"{ctx.guild} has no self-assignable roles")
+        self._soft_check_role(ctx, role, "add")
+        # remove invalid self-roles
+        lost_roles = []
+        for r in self.bot.db.self_roles[ctx.guild.id]:
+            if not ctx.guild.get_role(r):
+                lost_roles.append(r)
+        if lost_roles:
+            await ctx.trigger_typing()
+        for r in lost_roles:
+            await self.bot.db.remove_self_role(ctx.guild, r)
+
+        if role.id not in self.bot.db.self_roles[ctx.guild.id]:
+            return await ctx.send_error(f"{role.mention} is not self-assignable")
+
+        if role.id in [r.id for r in ctx.author.roles]:
+            return await ctx.send_error(f"You already have {role.mention}")
+
+        await ctx.author.add_roles(role)
+        await ctx.send_ok("Role added!")
+
+    @commands.command(
+        brief="Removes a self-assignable role from you"
+    )
+    async def removerole(self, ctx: aoi.AoiContext, *, role: discord.Role):
+        if ctx.guild.id not in self.bot.db.self_roles or not self.bot.db.self_roles[ctx.guild.id]:
+            return await ctx.send_error(f"{ctx.guild} has no self-assignable roles")
+        self._soft_check_role(ctx, role, "remove")
+        # remove invalid self-roles
+        lost_roles = []
+        for r in self.bot.db.self_roles[ctx.guild.id]:
+            if not ctx.guild.get_role(r):
+                lost_roles.append(r)
+        if lost_roles:
+            await ctx.trigger_typing()
+        for r in lost_roles:
+            await self.bot.db.remove_self_role(ctx.guild, r)
+
+        if role.id not in self.bot.db.self_roles[ctx.guild.id]:
+            return await ctx.send_error(f"{role.mention} is not self-assignable")
+
+        if role.id not in [r.id for r in ctx.author.roles]:
+            return await ctx.send_error(f"You don't have {role.mention}")
+
+        await ctx.author.remove_roles(role)
+        await ctx.send_ok("Role removed!")
+
 
 
 def setup(bot: aoi.AoiBot) -> None:

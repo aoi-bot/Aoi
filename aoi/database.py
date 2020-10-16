@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import datetime
-import logging
 import sqlite3
 from dataclasses import dataclass
 from typing import Dict, Optional, List, TYPE_CHECKING, Union, Tuple
@@ -106,6 +105,19 @@ CREATE TABLE IF NOT EXISTS "messages" (
 CREATE TABLE IF NOT EXISTS "autorole" (
   "guild"  INTEGER NOT NULL,
   "roles"  TEXT
+);;
+CREATE TABLE IF NOT EXISTS "rero" (
+  "guild" INTEGER NOT NULL,
+  "channel" INTEGER NOT NULL,
+  "message" INTEGER NOT NULL,
+  "emoji" TEXT NOT NULL,
+  "role" INTEGER NOT NULL,
+  "time" INTEGER NOT NULL,
+  "onetime" INTEGER NOT NULL
+);;
+CREATE TABLE IF NOT EXISTS "selfrole" (
+  "guild" INTEGER NOT NULL,
+  "role" INTEGER NOT NULL
 )
 """
 
@@ -166,6 +178,7 @@ class AoiDatabase:
         self.currency_gain_lock = asyncio.Lock()
         self.guild_shop_lock = asyncio.Lock()
         self.messages_lock = asyncio.Lock()
+        self.self_role_lock = asyncio.Lock()
 
         self.xp: Dict[int, Dict[int, int]] = {}
         self.changed_xp: Dict[int, List[int]] = {}
@@ -180,6 +193,7 @@ class AoiDatabase:
         self.changed_guild_shop: List[int] = []
         self.changed_messages: List[int] = []
         self.auto_roles: Dict[int, List[int]] = {}
+        self.self_roles: Dict[int, List[int]] = {}
 
         self.titles: Dict[int, str] = {}
         self.owned_titles: Dict[int, List[str]] = {}
@@ -187,6 +201,8 @@ class AoiDatabase:
         self.owned_badges: Dict[int, List[str]] = {}
         self.backgrounds: Dict[int, str] = {}
         self.changed_global_users: List[int] = []
+        self.added_self_roles: Dict[int, List[int]] = {}
+        self.removed_self_roles: Dict[int, List[int]] = {}
 
         self.guild_shop: Dict[int, List[_RoleShopItem]] = {}
 
@@ -293,6 +309,14 @@ class AoiDatabase:
             for m in i.members:
                 await self.ensure_user_entry(m)
 
+        cursor = await self.db.execute("select * from selfrole")
+        rows = await cursor.fetchall()
+        await cursor.close()
+        for r in rows:
+            if r[0] not in self.self_roles:
+                self.self_roles[r[0]] = []
+            self.self_roles[r[0]].append(r[1])
+
         self._cache_flush_loop.start()
 
     async def close(self):
@@ -375,6 +399,7 @@ class AoiDatabase:
                                       (self.currency_gains[g], g))
             await self.db.commit()
             self.changed_currency_gains = []
+
         async with self.guild_shop_lock:
             for guild in self.changed_guild_shop:
                 await self.db.execute("DELETE FROM guild_shop WHERE guild=?", (guild,))
@@ -396,6 +421,18 @@ class AoiDatabase:
                                        self.messages[guild][1].delete or 0,
                                        ))
             self.changed_messages = []
+            await self.db.commit()
+
+        async with self.self_role_lock:
+            for guild, rows in self.added_self_roles.items():
+                for role in rows:
+                    await self.db.execute("insert into selfrole values (?,?)", (guild, role))
+            for guild, rows in self.removed_self_roles.items():
+                for role in rows:
+                    await self.db.execute("delete from selfrole where guild=? and role=?", (guild, role))
+            await self.db.commit()
+            self.added_self_roles = {}
+            self.removed_self_roles = {}
 
     # endregion
 
@@ -428,6 +465,38 @@ class AoiDatabase:
             await self.db.execute("update autorole set roles=? where guild=?",
                                   (",".join(map(str, self.auto_roles[guild.id])), guild.id))
         await self.db.commit()
+
+    # endregion
+
+    # region # Self roles
+
+    async def add_self_role(self, guild: discord.Guild, role: discord.Role) -> None:
+        async with self.self_role_lock:
+            if guild.id not in self.self_roles:
+                self.self_roles[guild.id] = []
+            if role.id in self.removed_self_roles.get(guild.id, []):
+                self.removed_self_roles[guild.id].remove(role.id)
+            if role.id not in self.self_roles[guild.id]:
+                self.self_roles[guild.id].append(role.id)
+            if guild.id not in self.added_self_roles:
+                self.added_self_roles[guild.id] = []
+            if role.id not in self.added_self_roles[guild.id]:
+                self.added_self_roles[guild.id].append(role.id)
+
+    async def remove_self_role(self, guild: discord.Guild, role: Union[discord.Role, int]) -> None:
+        if isinstance(role, discord.Role):
+            role = role.id
+        async with self.self_role_lock:
+            if guild.id not in self.self_roles:
+                self.self_roles[guild.id] = []
+            if role in self.added_self_roles.get(guild.id, []):
+                self.added_self_roles[guild.id].remove(role)
+            if role in self.self_roles[guild.id]:
+                self.self_roles[guild.id].remove(role)
+            if guild.id not in self.removed_self_roles:
+                self.removed_self_roles[guild.id] = []
+            if role not in self.removed_self_roles[guild.id]:
+                self.removed_self_roles[guild.id].append(role)
 
     # endregion
 
