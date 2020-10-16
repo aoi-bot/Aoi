@@ -1,7 +1,7 @@
 import asyncio
 import io
-from typing import List, Union
 import shlex
+from typing import List, Union
 
 import discord
 from PIL import Image
@@ -297,14 +297,15 @@ class Roles(commands.Cog):
     async def roles(self, ctx: aoi.AoiContext):
         await ctx.paginate([f"{r.position:>3} "
                             f"{'M' if r.mentionable else '·'}"
-                            f"{'C' if r.color.to_rgb() != (0,0,0) else '·'}"
+                            f"{'C' if r.color.to_rgb() != (0, 0, 0) else '·'}"
                             f"{'H' if r.hoist else '·'} "
                             f"{discord.utils.escape_markdown(r.name)}"
-                           for r in ctx.guild.roles[::-1]], 20, "Role list",
+                            for r in ctx.guild.roles[::-1]], 20, "Role list",
                            fmt="```Pos     Name\n%s```\n"
                                "M-Mentionable  —  "
                                "H-Hoisted  —  "
                                "C-Colored")
+
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Roles(bot))

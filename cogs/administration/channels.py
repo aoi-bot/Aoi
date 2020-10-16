@@ -160,6 +160,38 @@ class Channels(commands.Cog):
         manage_permissions=True
     )
     @commands.command(
+        brief="Mutes a user in a channel"
+    )
+    async def chanmute(self, ctx: aoi.AoiContext, member: discord.Member, channel: discord.TextChannel = None):
+        channel = channel or ctx.channel
+        await channel.set_permissions(member, send_messages=False)
+        await ctx.send_ok(f"{member.mention} muted in {channel.mention}")
+
+    @commands.cooldown(rate=1, per=30, type=commands.BucketType.member)
+    @commands.has_permissions(
+        manage_channels=True,
+        manage_permissions=True
+    )
+    @commands.command(
+        brief="Attempts to unmute a user in a channel",
+        aliases=["unchanmute"]
+    )
+    async def remchanmute(self, ctx: aoi.AoiContext, member: discord.Member, channel: discord.TextChannel = None):
+        channel = channel or ctx.channel
+        previous = channel.permissions_for(member).send_messages
+        await channel.set_permissions(member, send_messages=None)
+        now = channel.permissions_for(member).send_messages
+        await ctx.send_ok(f"Lock for {member.mention} in {channel.mention} removed. " +
+                          (f"Nothing has changed. The user still can{'' if now else 'not'} talk in this channel." if
+                           (now == previous)
+                           else ""))
+
+    @commands.cooldown(rate=1, per=30, type=commands.BucketType.member)
+    @commands.has_permissions(
+        manage_channels=True,
+        manage_permissions=True
+    )
+    @commands.command(
         brief="Attempts to lock a user out of a channel"
     )
     async def lockout(self, ctx: aoi.AoiContext, member: discord.Member, channel: discord.TextChannel = None):
