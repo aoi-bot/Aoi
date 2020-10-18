@@ -268,7 +268,7 @@ class AoiDatabase:
         rows = await cursor.fetchall()
         await cursor.close()
         for r in rows:
-            self.auto_roles[r[0]] = [int(x) for x in r[1].split(",")]
+            self.auto_roles[r[0]] = [int(x) for x in r[1].split(",") if x]
 
         cursor = await self.db.execute("SELECT * from guild_shop")
         rows = await cursor.fetchall()
