@@ -397,6 +397,33 @@ class Roles(commands.Cog):
         await ctx.author.remove_roles(role)
         await ctx.send_ok("Role removed!")
 
+    @commands.has_permissions(manage_roles=True)
+    @commands.bot_has_permissions(manage_roles=True)
+    @commands.command(
+        brief="Creates color roles"
+    )
+    async def colorroles(self, ctx: aoi.AoiContext):
+        colors = {
+            "Red": 0xe74c3c,
+            "Orange": 0xe67e22,
+            "Yellow": 0xf1c40f,
+            "Green": 0x2ecc71,
+            "Blue": 0x3498db,
+            "Purple": 0x9b59b6,
+            "Brown": 0x8b4513,
+            "Tan": 0xbb8553,
+            "Gray": 0x888888
+        }
+        created = []
+
+        await ctx.trigger_typing()
+
+        for color, value in colors.items():
+            created.append(await ctx.guild.create_role(name=color, color=discord.Colour(value)))
+            await asyncio.sleep(0.5)
+
+        await ctx.send_info(f"Created " + " ".join(r.mention for r in created))
+
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Roles(bot))
