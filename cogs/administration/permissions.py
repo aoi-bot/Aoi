@@ -19,10 +19,10 @@ class Permissions(commands.Cog):
         return "Commands to change command permissions"
 
     async def _init(self):
-        logging.info("perms:Waiting for bot")
+        self.bot.logger.info("perms:Waiting for bot")
         await self.bot.wait_until_ready()
         self.db = self.bot.db
-        logging.info("perms:Ready!")
+        self.bot.logger.info("perms:Ready!")
 
     @commands.command(brief="View the entire permission chain", aliases=["lp"])
     async def listperms(self, ctx: aoi.AoiContext):

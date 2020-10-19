@@ -21,10 +21,10 @@ class Weather(commands.Cog):
         self.sat_cache: Dict[str, Tuple[datetime, Any]] = {}
 
     async def _init(self):
-        logging.info("wx:Waiting for bot")
+        self.bot.logger.info("wx:Waiting for bot")
         await self.bot.wait_until_ready()
         self.wx = wx.WeatherGov(self.bot.weather_gov)
-        logging.info("Ready!")
+        self.bot.logger.info("Ready!")
 
     @property
     def description(self):

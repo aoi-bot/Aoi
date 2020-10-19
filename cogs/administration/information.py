@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Optional
 
 import discord
 from discord.ext import commands
@@ -218,6 +218,27 @@ class Information(commands.Cog):
             n=20,
             title=f"{ctx.guild}'s emojis",
             numbered=False
+        )
+
+    @commands.command(
+        brief="Shows your or a member's permissions in a channel",
+        aliases=["perms"]
+    )
+    async def permissions(self, ctx: aoi.AoiContext,
+                          member: Optional[discord.Member] = None,
+                          channel: Optional[Union[discord.TextChannel, discord.VoiceChannel]] = None):
+        channel = channel or ctx.channel
+        member = member or ctx.author
+        perms = member.permissions_in(channel)
+        await ctx.embed(
+            title=f"Permissions for {member} in {channel}",
+            thumbnail=member.avatar_url,
+            description="```diff\n" +
+                        "\n".join(
+                            f"{'+' if perm[1] or perms.administrator else '-'} "
+                            f"{conversions.camel_to_title(perm[0])}"
+                            for perm in perms
+                        ) + "```"
         )
 
 

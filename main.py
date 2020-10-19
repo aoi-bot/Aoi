@@ -14,8 +14,8 @@ try:
 except FileNotFoundError:
     pass
 
-logging.basicConfig(level=logging.INFO)
-logging.addLevelName(15, "BDBG")
+logging.addLevelName(7, "TRACE")
+
 dotenv.load_dotenv(".env")
 
 
@@ -28,57 +28,12 @@ def get_prefix(_bot: aoi.AoiBot, message: discord.Message):
 
 bot = aoi.AoiBot(command_prefix=get_prefix, help_command=None)
 
-extensions = {
-    "Administration": {
-        # administration cogs
-        "cogs.administration.aoi": "Aoi",
-        "cogs.administration.information": "Information",
-        "cogs.administration.roles": "Roles",
-        "cogs.administration.channels": "Channels",
-        "cogs.administration.guild": "Guilds",
-        "cogs.administration.taskmgmt": "TaskManagement",  # noqa
-        "cogs.administration.permissions": "Permissions",
-        "cogs.administration.welcomegoodbye": "WelcomeGoodbye"  # noqa
-    },
-    "Misc": {
-        "cogs.colors": "Colors",
-        "cogs.nsfw": "NSFW",
-        "cogs.math": "Math",
-        "cogs.messages": "Messages",
-        # "cogs.geolocation",
-        # "cogs.nasa",
-        # "cogs.weather",
-        "cogs.searches": "Searches",
-        "cogs.frames": "Frames"
-    },
-    "Profile/Currency": {
-        "cogs.user.xp": "XP",
-        "cogs.user.profile": "Profile",
-        "cogs.user.currency": "Currency",
-        "cogs.user.global_shop": "GlobalShop",
-        "cogs.user.guild_shop": "ServerShop",
-        "cogs.user.guild_gambling": "ServerGambling",
-    },
-    "Utility/Config": {
-        "cogs.settings.guildsettings": "GuildSettings",  # noqa
-        "cogs.help": "Help",
-        "cogs.guides": "Guides"
-    },
-    "Hidden": {
-        "cogs.errorhandler": "ErrorHandler",  # noqa
-    }
-}
-
-for grp_name, ext_set in extensions.items():
-    for path, cog_name in ext_set.items():
-        logging.info(f"cog:Loading {grp_name}:{cog_name} from {path}")
-        bot.load_extension(path)
-        bot.set_cog_group(cog_name, grp_name)
+bot.load_extensions()
 
 
 @bot.event
 async def on_ready():
-    logging.info("Bot online!")
+    bot.logger.info(f"Aoi {bot.version} online!")
     await bot.change_presence(activity=discord.Game("Hello :)"))
 
 

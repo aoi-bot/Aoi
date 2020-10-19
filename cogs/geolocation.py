@@ -14,10 +14,10 @@ class GeoLocation(commands.Cog):
         bot.loop.create_task(self._init())
 
     async def _init(self):
-        logging.info("geo:waiting for bot")
+        self.bot.logger.info("geo:waiting for bot")
         await self.bot.wait_until_ready()
         self.gmap = self.bot.gmap
-        logging.info("geo:ready!")
+        self.bot.logger.info("geo:ready!")
 
     @property
     def description(self):

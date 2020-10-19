@@ -1,7 +1,10 @@
+import os
 from datetime import datetime
+from typing import List
 
 import discord
-from discord.ext import commands
+import psutil
+from discord.ext import commands, tasks
 
 import aoi
 from libs.conversions import dhm_notation
@@ -10,10 +13,32 @@ from libs.conversions import dhm_notation
 class Aoi(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
+        self.mem: int = 0
+        self.max_mem: int = 0
+        self.resource_loop.start()
+        self.ping: int = 0
+        self.ping_run: List[int] = []
+        self.avg_ping: int = 0
 
     @property
     def description(self):
         return "Commands having to do with the bot herself"
+
+    @tasks.loop(minutes=2)
+    async def resource_loop(self):
+        self.mem = psutil.Process(os.getpid()).memory_info().rss // 1000000
+        self.max_mem = max(self.mem, self.max_mem)
+        self.ping = round(self.bot.latency * 1000)
+        self.ping_run.append(self.ping)
+        if len(self.ping_run) > 30:
+            del self.ping_run[0]
+        self.avg_ping = round(sum(self.ping_run) / len(self.ping_run))
+
+    @resource_loop.before_loop
+    async def _before_mem_loop(self):
+        self.bot.logger.info("aoi:Waiting for bot")
+        await self.bot.wait_until_ready()
+        self.bot.logger.info("aoi:Ready!")
 
     @commands.command(
         brief="Shows bot stats"
@@ -28,13 +53,17 @@ class Aoi(commands.Cog):
                 voice_channels += 1
         await ctx.embed(author=f"Aoi {self.bot.version}",
                         fields=[
-                            ("Ping", f"{round(self.bot.latency * 1000)}ms"),
+                            ("Ping", f"{self.ping} ms\n"
+                                     f"{self.avg_ping} ms (1h average)"),
                             ("Messages", f"{self.bot.messages}"),
                             ("Commands\nExecuted", f"{self.bot.commands_executed}"),
                             ("Uptime", dhm_notation(datetime.now() - self.bot.start_time)),
+                            ("Memory", f"{self.mem} MB\n"
+                                       f"{self.max_mem} MB max"),
                             ("Presence", f"{len(self.bot.guilds)} Guilds\n"
                                          f"{text_channels} Text Channels\n"
-                                         f"{voice_channels} Voice Channels\n"),
+                                         f"{voice_channels} Voice Channels\n"
+                                         f"{len(self.bot.users)} Users Cached"),
                         ],
                         thumbnail=self.bot.user.avatar_url)
 
@@ -80,7 +109,7 @@ class Aoi(commands.Cog):
 
     @commands.is_owner()
     @commands.command(
-        brief="Basic information about a server the bot is on"
+        brief="Basic information about a server the bot is on",
     )
     async def guildinfo(self, ctx: aoi.AoiContext, guild: int):
         guild: discord.Guild = self.bot.get_guild(guild)

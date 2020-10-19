@@ -13,6 +13,7 @@ import aiohttp.client_exceptions
 import discord
 import pixivapi
 from discord.ext import commands
+from ruamel.yaml import YAML
 
 import aoi
 from wrappers import gmaps as gmaps, imgur
@@ -35,6 +36,12 @@ class PlaceholderManager:
     def user_avatar(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
         return str(ctx.author.avatar_url if isinstance(ctx, aoi.AoiContext) else ctx.avatar_url)
 
+    def user_tag(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
+        return str(ctx.author if isinstance(ctx, aoi.AoiContext) else ctx)
+
+    def user_id(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
+        return str(ctx.author.id if isinstance(ctx, aoi.AoiContext) else ctx.id)
+
     def guild_name(self, ctx: AoiContext) -> str:  # noqa
         return ctx.guild.name
 
@@ -56,6 +63,16 @@ class AoiBot(commands.Bot):
 
     def __init__(self, *args, **kwargs):
         super(AoiBot, self).__init__(*args, **kwargs)
+        self.TRACE = 7
+        for logger in [
+            "aoi",
+            "discord.client",
+            "discord.gateway",
+            "discord.http"
+        ]:
+            logging.getLogger(logger).setLevel(logging.DEBUG if logger == "aoi" else logging.INFO)
+            logging.getLogger(logger).addHandler(aoi.LoggingHandler())
+        self.logger = logging.getLogger("aoi")
         self.config = {}
         self.db: Optional[AoiDatabase] = None
         self.prefixes: Dict[int, str] = {}
@@ -78,8 +95,9 @@ class AoiBot(commands.Bot):
         self.commands_executed = 0
         self.start_time = datetime.now()
         self.cog_groups = {}
-        self.version = "+".join(subprocess.check_output(["git", "describe", "--tags"]).
-                                strip().decode("utf-8").split("-")[:-1])
+        version = subprocess.check_output(["git", "describe", "--tags"]).strip().decode("utf-8").split("-")
+        self.version = "+".join(version[:-1]) if len(version) > 2 else version[0]
+        self.logger.debug(f"Found version string {version}")
         self.placeholders = PlaceholderManager()
         self.tasks: Dict[discord.Member, List[aoi.AoiTask]] = {}
 
@@ -107,7 +125,7 @@ class AoiBot(commands.Bot):
         return task
 
     async def on_message(self, message: discord.Message):
-        ctx: aoi.AoiContext = await self.get_context(message, cls=AoiContext)
+        ctx: aoi.AoiContext = await self.get_context(message, cls=aoi.AoiContext)
         await self.invoke(ctx)
         if not ctx.command and not message.author.bot:
             await self.db.ensure_xp_entry(message)
@@ -137,10 +155,11 @@ class AoiBot(commands.Bot):
         self.imgur_user = os.getenv("IMGUR")
         self.imgur_secret = os.getenv("IMGUR_SECRET")
         self.gmap = gmaps.GeoLocation(self.google)
-        self.imgur = imgur.Imgur(self.imgur_user)
         self.pixiv_user = os.getenv("PIXIV")
         self.pixiv_password = os.getenv("PIXIV_PASSWORD")
+
         self.pixiv.login(self.pixiv_user, self.pixiv_password)
+        self.imgur = imgur.Imgur(self.imgur_user)
         await self.db.load()
         self.load_configs()
 
@@ -149,22 +168,23 @@ class AoiBot(commands.Bot):
 
         for i in range(0, 6):
             try:
+                self.logger.debug(f"bot:Connecting, try {i + 1}/6")
                 await self.login(*args, bot=bot)
                 break
             except aiohttp.client_exceptions.ClientConnectionError as e:
-                logging.warning(f"bot:Connection {i}/6 failed")
-                logging.warning(f"bot:  {e}")
-                logging.warning(f"bot: waiting {2 ** (i + 1)} seconds")
+                self.logger.warning(f"bot:Connection {i + 1}/6 failed")
+                self.logger.warning(f"bot:  {e}")
+                self.logger.warning(f"bot: waiting {2 ** (i + 1)} seconds")
                 await asyncio.sleep(2 ** (i + 1))
-                logging.info("bot:attempting to reconnect")
+                self.logger.info("bot:attempting to reconnect")
         else:
-            logging.error("bot: FATAL failed after 6 attempts")
+            self.logger.critical("bot: failed after 6 attempts")
             return
 
         for cog in self.cogs:
             cog = self.get_cog(cog)
             if not cog.description and cog.qualified_name not in self.cog_groups["Hidden"]:
-                logging.error(f"bot:cog {cog} has no description")
+                self.logger.critical(f"bot:cog {cog.qualified_name} has no description")
                 return
 
         missing_brief = []
@@ -173,9 +193,9 @@ class AoiBot(commands.Bot):
                 missing_brief.append(command)
 
         if missing_brief:
-            logging.error("bot:the following commands are missing help text")
+            self.logger.error("bot:the following commands are missing help text")
             for i in missing_brief:
-                logging.error(f"bot: - {i.cog.qualified_name}.{i.name}")
+                self.logger.error(f"bot: - {i.cog.qualified_name}.{i.name}")
             return
 
         await self.connect(reconnect=reconnect)
@@ -203,6 +223,24 @@ class AoiBot(commands.Bot):
             self.cog_groups[group] = [cog]
         else:
             self.cog_groups[group].append(cog)
+
+    def load_extensions(self):
+        with open("extensions.yaml") as fp:
+            extensions = YAML().load(stream=fp)
+        for grp_name in extensions:
+            for path, cog_name in extensions[grp_name].items():
+                try:
+                    self.logger.info(f"cog:Loading {grp_name}:{cog_name} from {path}")
+                    super(AoiBot, self).load_extension(path)
+                except discord.ClientException as e:
+                    self.logger.critical(f"An error occurred while loading {path}")
+                    self.logger.critical(e.__str__().split(":")[-1].strip())
+                    exit(1)
+                except commands.ExtensionFailed as e:
+                    self.logger.critical(f"An error occurred while loading {path}")
+                    self.logger.critical(e.__str__().split(":")[-1].strip())
+                    exit(1)
+                self.set_cog_group(cog_name, grp_name)
 
     def convert_json(self, msg: str):  # does not convert placeholders
         try:
