@@ -15,6 +15,8 @@
     "cogs.messages": "Messages"
     "cogs.searches": "Searches"
     "cogs.frames": "Frames"
+    "cogs.nasa": "NASA"
+    "cogs.geolocation": "Geolocation"
 "Profile/Currency":
     "cogs.user.xp": "XP"
     "cogs.user.profile": "Profile"
