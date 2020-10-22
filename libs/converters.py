@@ -180,6 +180,5 @@ class AoiColor:
     def to_rgb(self):
         return self.r, self.g, self.b
 
-
-
-
+    def to_discord_color(self):
+        return discord.Colour.from_rgb(self.r, self.g, self.b)

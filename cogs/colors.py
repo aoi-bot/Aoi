@@ -7,6 +7,7 @@ import discord
 from PIL import Image, ImageDraw
 from PIL.ImageOps import grayscale, colorize
 from discord.ext import commands
+from discord.ext.commands import Greedy
 
 import aoi
 from libs.converters import AoiColor
@@ -29,23 +30,12 @@ class Colors(commands.Cog):
                         image=buf)
 
     @commands.command(brief="Shows a color palette")
-    async def colors(self, ctx: aoi.AoiContext, *, colors: str):
+    async def colors(self, ctx: aoi.AoiContext, clrs: Greedy[AoiColor]):
         replacements = {
             "yellow": "gold",
             "black": "000000"
         }
         mods = ""
-        clrs: List[discord.Colour] = []
-        colors = colors.split()
-        conv = commands.ColourConverter()
-        for i in colors:
-            if i in ("darker", "dark", "light", "lighter"):
-                mods = i
-                continue
-            if i in replacements:
-                i = replacements[i]
-            clrs.append(await conv.convert(ctx, f"{mods} {i}".strip()))
-            mods = ""
         img = Image.new("RGB", (120 * len(clrs), 120))
         img_draw = ImageDraw.Draw(img)
         for n, color in enumerate(clrs):
@@ -98,7 +88,7 @@ class Colors(commands.Cog):
         brief="Makes an RGB gradient between colors. Number of colors is optional, defaults to 4 and must be "
               "between 3 and 10."
     )
-    async def gradient(self, ctx: aoi.AoiContext, color1: discord.Colour, color2: discord.Colour, num: int = 4):
+    async def gradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor, num: int = 4):
         if num < 3 or num > 10:
             return await ctx.send_error("Number of colors must be between 2 and 10")
         rgb, rgb2 = color1.to_rgb(), color2.to_rgb()
@@ -167,8 +157,8 @@ class Colors(commands.Cog):
     @commands.command(
         brief="Split-tones an image"
     )
-    async def duotone(self, ctx: aoi.AoiContext, black: discord.Colour, white: discord.Colour,
-                      mid: Union[discord.Colour, str] = None, black_point: int = 0, white_point: int = 255,
+    async def duotone(self, ctx: aoi.AoiContext, black: AoiColor, white: AoiColor,
+                      mid: Union[AoiColor, str] = None, black_point: int = 0, white_point: int = 255,
                       mid_point: int = 127):
         if isinstance(mid, str):
             if mid.lower() == "none":

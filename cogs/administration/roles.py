@@ -11,6 +11,7 @@ from discord.ext.commands import Greedy
 
 import aoi
 from libs import conversions
+from libs.converters import AoiColor
 
 
 class Roles(commands.Cog):
@@ -58,9 +59,9 @@ class Roles(commands.Cog):
     @commands.bot_has_permissions(manage_roles=True)
     @commands.has_permissions(manage_roles=True)
     @commands.command(brief="Changes a roles color", aliases=["rclr", "roleclr"])
-    async def rolecolor(self, ctx: aoi.AoiContext, role: discord.Role, *, color: discord.Colour):
+    async def rolecolor(self, ctx: aoi.AoiContext, role: discord.Role, *, color: AoiColor):
         self._check_role(ctx, role)
-        await role.edit(colour=color)
+        await role.edit(colour=color.to_discord_color())
         await ctx.send_info(f"Changed {role.mention}'s color to "
                             f"#{conversions.color_to_string(role.colour)}")
 
@@ -163,7 +164,7 @@ class Roles(commands.Cog):
         brief="Colors roles as an RGB gradient between colors",
         aliases=["rolegrad"]
     )
-    async def rolegradient(self, ctx: aoi.AoiContext, color1: discord.Colour, color2: discord.Colour,
+    async def rolegradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor,
                            roles: Greedy[discord.Role]):
         roles: List[discord.Role] = list(roles)
         for role in roles:
