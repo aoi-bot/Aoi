@@ -4,8 +4,12 @@ import re
 import typing
 
 import dateparser
+import discord
 from discord.ext import commands
 from discord.ext.commands import BadArgument
+import webcolors
+
+import aoi
 
 
 def allowed_strings(*values, preserve_case: bool = False) -> typing.Callable[[str], str]:
@@ -137,3 +141,45 @@ def t_delta() -> typing.Callable[[str], datetime.timedelta]:
         return delta
 
     return convert
+
+
+class AoiColor:
+    def __init__(self, r: int, g: int, b: int):
+        self.r = r
+        self.g = g
+        self.b = b
+
+    @classmethod
+    async def convert(cls, ctx: aoi.AoiContext, arg: str) -> "AoiColor":
+        orig = arg
+        arg = arg.lower().strip("#x")
+        if arg.startswith("0x"):
+            arg = arg 
+        try:
+            clr = webcolors.html5_parse_simple_color(webcolors.name_to_hex(arg))
+            return cls(clr.red, clr.green, clr.blue)
+        except ValueError:
+            pass
+        if len(arg) == 6:
+            try:
+                clr = webcolors.html5_parse_simple_color(f"#{arg}")
+                return cls(clr.red, clr.green, clr.blue)
+            except ValueError:
+                raise commands.BadColourArgument(orig)
+        elif len(arg) == 3:
+            try:
+                clr = webcolors.html5_parse_simple_color("#" + ''.join(f"{c}{c}" for c in arg))
+                return cls(clr.red, clr.green, clr.blue)
+            except ValueError:
+                raise commands.BadColourArgument(orig)
+        raise commands.BadColourArgument(orig)
+
+    def __str__(self):
+        return f"{self.r:02x}{self.g:02x}{self.b:02x}"
+
+    def to_rgb(self):
+        return self.r, self.g, self.b
+
+
+
+

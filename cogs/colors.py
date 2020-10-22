@@ -9,6 +9,7 @@ from PIL.ImageOps import grayscale, colorize
 from discord.ext import commands
 
 import aoi
+from libs.converters import AoiColor
 
 
 class Colors(commands.Cog):
@@ -20,7 +21,7 @@ class Colors(commands.Cog):
         return "Commands to do with color"
 
     @commands.command(brief="Shows a color")
-    async def color(self, ctx: aoi.AoiContext, *, color: discord.Colour):
+    async def color(self, ctx: aoi.AoiContext, *, color: AoiColor):
         img = Image.new("RGB", (120, 120), color.to_rgb())
         buf = io.BytesIO()
         img.save(buf, format="PNG")
