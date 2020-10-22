@@ -288,13 +288,17 @@ class AoiBot(commands.Bot):
         else:
             content = None
         if len(msg.keys()) < 2:  # no embed here:
-            embed = None
-        else:
-            embed = msg
-        if embed:
-            _ = embed.pop("thumbnail", None)
+            return await self.get_channel(channel).send(
+                content=content,
+                delete_after=delete_after
+            )
+        thumbnail = msg.pop("thumbnail", None) if msg else None
+        msg["description"] = msg.get("description", "_ _")
+        embed = discord.Embed.from_dict(msg)
+        if thumbnail:
+            embed.set_thumbnail(url=thumbnail)
         await self.get_channel(channel).send(
             content=content,
-            embed=discord.Embed.from_dict(embed) if embed else None,
+            embed=embed,
             delete_after=delete_after
         )
