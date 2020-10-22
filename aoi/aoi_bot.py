@@ -100,12 +100,17 @@ class AoiBot(commands.Bot):
         self.logger.debug(f"Found version string {version}")
         self.placeholders = PlaceholderManager()
         self.tasks: Dict[discord.Member, List[aoi.AoiTask]] = {}
+        self.commands_ran = {}
 
-        async def increment_command_count(ctx):
+        async def command_ran(ctx: aoi.AoiContext):
             self.commands_executed += 1
+            if ctx.command.qualified_name not in self.commands_ran:
+                self.commands_ran[ctx.command.qualified_name] = 1
+            else:
+                self.commands_ran[ctx.command.qualified_name] += 1
 
         self.add_listener(
-            increment_command_count,
+            command_ran,
             "on_command_completion"
         )
 
