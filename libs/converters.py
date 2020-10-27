@@ -186,3 +186,34 @@ class AoiColor:
 
     def to_hls(self):
         return colorsys.rgb_to_hls(*(x/256 for x in self.to_rgb()))
+
+
+class FuzzyAoiColor(AoiColor):
+    def __init__(self, r: int, g: int, b: int, *, attempt: str = None):
+        super(FuzzyAoiColor, self).__init__(r, g, b)
+        self.attempt = attempt
+
+    @classmethod
+    async def convert(cls, ctx: aoi.AoiContext, arg: str) -> "AoiColor":
+        orig = arg
+        arg = arg.lower().strip("#x")
+        if arg.startswith("0x"):
+            arg = arg
+        try:
+            clr = webcolors.html5_parse_simple_color(webcolors.name_to_hex(arg))
+            return cls(clr.red, clr.green, clr.blue)
+        except ValueError:
+            pass
+        if len(arg) == 6:
+            try:
+                clr = webcolors.html5_parse_simple_color(f"#{arg}")
+                return cls(clr.red, clr.green, clr.blue)
+            except ValueError:
+                return cls(0, 0, 0, attempt=orig)
+        elif len(arg) == 3:
+            try:
+                clr = webcolors.html5_parse_simple_color("#" + ''.join(f"{c}{c}" for c in arg))
+                return cls(clr.red, clr.green, clr.blue)
+            except ValueError:
+                return cls(0, 0, 0, attempt=orig)
+        return cls(0, 0, 0, attempt=orig)

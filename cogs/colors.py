@@ -11,7 +11,7 @@ from discord.ext.commands import Greedy
 
 import aoi
 from libs.colors import rgb_gradient, hls_gradient
-from libs.converters import AoiColor
+from libs.converters import AoiColor, FuzzyAoiColor
 
 
 class Colors(commands.Cog):
@@ -31,12 +31,15 @@ class Colors(commands.Cog):
                         image=buf)
 
     @commands.command(brief="Shows a color palette")
-    async def colors(self, ctx: aoi.AoiContext, clrs: Greedy[AoiColor]):
-        replacements = {
-            "yellow": "gold",
-            "black": "000000"
-        }
-        mods = ""
+    async def colors(self, ctx: aoi.AoiContext, clrs: Greedy[FuzzyAoiColor]):
+        valid_colors = [color for color in clrs if not color.attempt]
+        invalid_colors = [color.attempt for color in clrs if color.attempt]
+        if not valid_colors and invalid_colors:
+            return await ctx.embed(title="Color Palette",
+                                   description="Unknown Colors: " + ", ".join(invalid_colors))
+        clrs = valid_colors
+        if not valid_colors:
+            return
         img = Image.new("RGB", (120 * len(clrs), 120))
         img_draw = ImageDraw.Draw(img)
         for n, color in enumerate(clrs):
@@ -47,7 +50,10 @@ class Colors(commands.Cog):
         buf = io.BytesIO()
         img.save(buf, format="PNG")
         await ctx.embed(title="Color Palette",
-                        image=buf)
+                        image=buf,
+                        description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c.to_rgb()) for c in clrs) +
+                                    ("\nUnknown Colors: " + ", ".join(invalid_colors) if invalid_colors else "")
+                        )
 
     @commands.command(brief="Shows a random color palette, sort by hue, random, or brightness",
                       aliases=["rancolor", "ranclr"])
