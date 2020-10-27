@@ -198,6 +198,12 @@ class AoiBot(commands.Bot):
                 self.logger.critical(f"bot:cog {cog.qualified_name} has no description")
                 return
 
+        for row in self.cog_groups.values():
+            for cog_name in row:
+                if not self.get_cog(cog_name):
+                    self.logger.critical(f"bot:cog {cog_name} has no matching cog")
+                    return
+
         missing_brief = []
         for command in self.commands:
             if not command.brief:
