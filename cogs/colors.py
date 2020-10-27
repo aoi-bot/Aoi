@@ -10,6 +10,7 @@ from discord.ext import commands
 from discord.ext.commands import Greedy
 
 import aoi
+from libs.colors import rgb_gradient, hls_gradient
 from libs.converters import AoiColor
 
 
@@ -92,11 +93,7 @@ class Colors(commands.Cog):
     async def gradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor, num: int = 4):
         if num < 3 or num > 10:
             return await ctx.send_error("Number of colors must be between 3 and 10")
-        rgb, rgb2 = color1.to_rgb(), color2.to_rgb()
-        steps = [(rgb[x] - rgb2[x]) / (num - 1) for x in range(3)]
-        colors = list(reversed([
-            tuple(map(int, (rgb2[x] + steps[x] * n for x in range(3)))) for n in range(num + 1)
-        ]))[1:]
+        colors = rgb_gradient(color1, color2, num)
         img = Image.new("RGB", (240, 48))
         img_draw = ImageDraw.Draw(img)
         for n, clr in enumerate(colors):
@@ -118,15 +115,10 @@ class Colors(commands.Cog):
     async def hgradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor, num: int = 4):
         if num < 3 or num > 10:
             return await ctx.send_error("Number of colors must be between 3 and 10")
-        hls, hls2 = color1.to_hls(), color2.to_hls()
-        steps = [(hls[x] - hls2[x]) / (num - 1) for x in range(3)]
-        colors = list(reversed([
-            tuple(hls2[x] + steps[x] * n for x in range(3)) for n in range(num + 1)
-        ]))[1:]
-        rgbs = [tuple(int(channel*256) for channel in colorsys.hls_to_rgb(*color)) for color in colors]
+        colors = hls_gradient(color1, color2, num)
         img = Image.new("RGB", (240, 48))
         img_draw = ImageDraw.Draw(img)
-        for n, clr in enumerate(rgbs):
+        for n, clr in enumerate(colors):
             img_draw.rectangle([
                 (n * 240 / num, 0),
                 ((n + 1) * 240 / num, 48)
@@ -134,7 +126,7 @@ class Colors(commands.Cog):
         buf = io.BytesIO()
         img.save(buf, format="PNG")
         await ctx.embed(title="Gradient",
-                        description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in rgbs),
+                        description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in colors),
                         image=buf)
 
     @commands.max_concurrency(1, commands.BucketType.user)
