@@ -86,7 +86,8 @@ class Colors(commands.Cog):
 
     @commands.command(
         brief="Makes an RGB gradient between colors. Number of colors is optional, defaults to 4 and must be "
-              "between 3 and 10."
+              "between 3 and 10.",
+        aliases=["grad"]
     )
     async def gradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor, num: int = 4):
         if num < 3 or num > 10:
@@ -107,6 +108,33 @@ class Colors(commands.Cog):
         img.save(buf, format="PNG")
         await ctx.embed(title="Gradient",
                         description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in colors),
+                        image=buf)
+
+    @commands.command(
+        brief="Makes an HLS gradient between RGB colors. Number of colors is optional, defaults to 4 and must be "
+              "between 3 and 10.",
+        aliases=["hgrad"]
+    )
+    async def hgradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor, num: int = 4):
+        if num < 3 or num > 10:
+            return await ctx.send_error("Number of colors must be between 3 and 10")
+        hls, hls2 = color1.to_hls(), color2.to_hls()
+        steps = [(hls[x] - hls2[x]) / (num - 1) for x in range(3)]
+        colors = list(reversed([
+            tuple(hls2[x] + steps[x] * n for x in range(3)) for n in range(num + 1)
+        ]))[1:]
+        rgbs = [tuple(int(channel*256) for channel in colorsys.hls_to_rgb(*color)) for color in colors]
+        img = Image.new("RGB", (240, 48))
+        img_draw = ImageDraw.Draw(img)
+        for n, clr in enumerate(rgbs):
+            img_draw.rectangle([
+                (n * 240 / num, 0),
+                ((n + 1) * 240 / num, 48)
+            ], fill=tuple(map(int, clr)))
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        await ctx.embed(title="Gradient",
+                        description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in rgbs),
                         image=buf)
 
     @commands.max_concurrency(1, commands.BucketType.user)

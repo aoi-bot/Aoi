@@ -1,3 +1,4 @@
+import colorsys
 import datetime
 import math
 import re
@@ -182,3 +183,6 @@ class AoiColor:
 
     def to_discord_color(self):
         return discord.Colour.from_rgb(self.r, self.g, self.b)
+
+    def to_hls(self):
+        return colorsys.rgb_to_hls(*(x/256 for x in self.to_rgb()))
