@@ -109,10 +109,16 @@ class AoiBot(commands.Bot):
             else:
                 self.commands_ran[ctx.command.qualified_name] += 1
 
+        async def on_ready():
+            self.logger.info(f"Aoi {self.version} online!")
+            await self.change_presence(activity=discord.Game(f",help | {len(self.guilds)} servers"))
+
         self.add_listener(
             command_ran,
             "on_command_completion"
         )
+
+        self.add_listener(on_ready, "on_ready")
 
     def load_configs(self):
         self.config["max_auto_role"] = 10

@@ -31,12 +31,6 @@ bot = aoi.AoiBot(command_prefix=get_prefix, help_command=None)
 bot.load_extensions()
 
 
-@bot.event
-async def on_ready():
-    bot.logger.info(f"Aoi {bot.version} online!")
-    await bot.change_presence(activity=discord.Game("Hello :)"))
-
-
 @bot.check
 async def permission_check(ctx: aoi.AoiContext):  # noqa: C901
     can_use = True
