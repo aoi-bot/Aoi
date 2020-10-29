@@ -30,6 +30,9 @@ class AoiContext(commands.Context):
             return []
         valid_flags = []
         for flag in flags.split(" "):
+            if not flag.startswith("--"):
+                raise commands.BadArgument("Flags must begin with `--`")
+            flag = flag[2:]
             if flag.lower() in supported:
                 valid_flags.append(flag)
             else:
