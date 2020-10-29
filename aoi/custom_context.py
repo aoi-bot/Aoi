@@ -26,6 +26,8 @@ class AoiContext(commands.Context):
         return escape(self.prefix, self)
 
     def parse_flags(self, flags: str, supported: List[str]) -> List[str]:
+        if not flags:
+            return []
         valid_flags = []
         for flag in flags.split(" "):
             if flag.lower() in supported:

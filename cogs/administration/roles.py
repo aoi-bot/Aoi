@@ -11,7 +11,8 @@ from discord.ext.commands import Greedy
 
 import aoi
 from libs import conversions
-from libs.converters import AoiColor
+from libs.colors import rgb_gradient, hls_gradient
+from libs.converters import AoiColor, rolename
 
 
 class Roles(commands.Cog):
@@ -69,8 +70,7 @@ class Roles(commands.Cog):
     @commands.has_permissions(manage_roles=True)
     @commands.command(brief="Creates one or more roles - multiword role names must be quoted.",
                       aliases=["cr"])
-    async def createrole(self, ctx: aoi.AoiContext, names: str):
-        names: List[str] = shlex.split(names)
+    async def createrole(self, ctx: aoi.AoiContext, names: Greedy[rolename()]):
 
         async def _(name):
             await ctx.guild.create_role(name=name)
@@ -168,26 +168,31 @@ class Roles(commands.Cog):
         aliases=["rolegrad"]
     )
     async def rolegradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor,
-                           roles: Greedy[discord.Role]):
+                           roles: Greedy[discord.Role], *, flags: str = ""):
+        hls = "hls" in ctx.parse_flags(flags, ["hls"])
         roles: List[discord.Role] = list(roles)
         for role in roles:
             self._check_role(ctx, role)
         num = len(roles)
-        rgb, rgb2 = color1.to_rgb(), color2.to_rgb()
-        steps = [(rgb[x] - rgb2[x]) / (num - 1) for x in range(3)]
-        colors = list(reversed([tuple(map(int, (rgb2[x] + steps[x] * n for x in range(3)))) for n in range(num)]))
+        colors = hls_gradient(color1, color2, num) if hls else rgb_gradient(color1, color2, num)
         img = Image.new("RGB", (240, 48))
         await ctx.trigger_typing()
         img_draw = ImageDraw.Draw(img)
-        for n, clr in enumerate(colors):
-            await asyncio.sleep(0.5)
-            await roles[n].edit(color=int("".join(hex(x)[2:] for x in clr), 16))
-            img_draw.rectangle([
-                (n * 240 / num, 0),
-                ((n + 1) * 240 / num, 48)
-            ], fill=tuple(map(int, clr)))
+        n = 0
         buf = io.BytesIO()
-        img.save(buf, format="PNG")
+
+        async def do_op():
+            nonlocal n
+            for idx, clr in enumerate(colors):
+                await asyncio.sleep(0.5)
+                await roles[idx].edit(color=AoiColor(*clr).to_discord_color())
+                img_draw.rectangle([
+                    (idx * 240 / num, 0),
+                    ((idx + 1) * 240 / num, 48)
+                ], fill=tuple(map(int, clr)))
+            img.save(buf, format="PNG")
+
+        await self.bot.create_task(ctx, do_op(), lambda: f"{n}/{num}")
         await ctx.embed(title="Roles colored according to gradient",
                         description=" ".join("#" + "".join(hex(x)[2:] for x in c) for c in colors),
                         image=buf)

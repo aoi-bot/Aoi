@@ -107,6 +107,15 @@ def dtime() -> typing.Callable[[str], datetime.datetime]:
     return converter
 
 
+def rolename() -> typing.Callable[[str], str]:
+    def converter(arg: str) -> str:
+        if len(arg) > 32:
+            raise commands.BadArgument("Role name too long")
+        return arg
+
+    return converter
+
+
 duration_parser = re.compile(
     r"((?P<days>\d+?) ?(days|day|D|d) ?)?"
     r"((?P<hours>\d+?) ?(hours|hour|H|h) ?)?"
