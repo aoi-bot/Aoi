@@ -100,14 +100,25 @@ class AoiBot(commands.Bot):
         self.logger.debug(f"Found version string {version}")
         self.placeholders = PlaceholderManager()
         self.tasks: Dict[discord.Member, List[aoi.AoiTask]] = {}
+        self.commands_ran = {}
 
-        async def increment_command_count(ctx):
+        async def command_ran(ctx: aoi.AoiContext):
             self.commands_executed += 1
+            if ctx.command.qualified_name not in self.commands_ran:
+                self.commands_ran[ctx.command.qualified_name] = 1
+            else:
+                self.commands_ran[ctx.command.qualified_name] += 1
+
+        async def on_ready():
+            self.logger.info(f"Aoi {self.version} online!")
+            await self.change_presence(activity=discord.Game(f",help | {len(self.guilds)} servers"))
 
         self.add_listener(
-            increment_command_count,
+            command_ran,
             "on_command_completion"
         )
+
+        self.add_listener(on_ready, "on_ready")
 
     def load_configs(self):
         self.config["max_auto_role"] = 10
@@ -186,6 +197,12 @@ class AoiBot(commands.Bot):
             if not cog.description and cog.qualified_name not in self.cog_groups["Hidden"]:
                 self.logger.critical(f"bot:cog {cog.qualified_name} has no description")
                 return
+
+        for row in self.cog_groups.values():
+            for cog_name in row:
+                if not self.get_cog(cog_name):
+                    self.logger.critical(f"bot:cog {cog_name} has no matching cog")
+                    return
 
         missing_brief = []
         for command in self.commands:
@@ -283,13 +300,17 @@ class AoiBot(commands.Bot):
         else:
             content = None
         if len(msg.keys()) < 2:  # no embed here:
-            embed = None
-        else:
-            embed = msg
-        if embed:
-            _ = embed.pop("thumbnail", None)
+            return await self.get_channel(channel).send(
+                content=content,
+                delete_after=delete_after
+            )
+        thumbnail = msg.pop("thumbnail", None) if msg else None
+        msg["description"] = msg.get("description", "_ _")
+        embed = discord.Embed.from_dict(msg)
+        if thumbnail:
+            embed.set_thumbnail(url=thumbnail)
         await self.get_channel(channel).send(
             content=content,
-            embed=discord.Embed.from_dict(embed) if embed else None,
+            embed=embed,
             delete_after=delete_after
         )

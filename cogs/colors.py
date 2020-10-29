@@ -7,8 +7,11 @@ import discord
 from PIL import Image, ImageDraw
 from PIL.ImageOps import grayscale, colorize
 from discord.ext import commands
+from discord.ext.commands import Greedy
 
 import aoi
+from libs.colors import rgb_gradient, hls_gradient
+from libs.converters import AoiColor, FuzzyAoiColor
 
 
 class Colors(commands.Cog):
@@ -20,7 +23,7 @@ class Colors(commands.Cog):
         return "Commands to do with color"
 
     @commands.command(brief="Shows a color")
-    async def color(self, ctx: aoi.AoiContext, *, color: discord.Colour):
+    async def color(self, ctx: aoi.AoiContext, *, color: AoiColor):
         img = Image.new("RGB", (120, 120), color.to_rgb())
         buf = io.BytesIO()
         img.save(buf, format="PNG")
@@ -28,23 +31,15 @@ class Colors(commands.Cog):
                         image=buf)
 
     @commands.command(brief="Shows a color palette")
-    async def colors(self, ctx: aoi.AoiContext, *, colors: str):
-        replacements = {
-            "yellow": "gold",
-            "black": "000000"
-        }
-        mods = ""
-        clrs: List[discord.Colour] = []
-        colors = colors.split()
-        conv = commands.ColourConverter()
-        for i in colors:
-            if i in ("darker", "dark", "light", "lighter"):
-                mods = i
-                continue
-            if i in replacements:
-                i = replacements[i]
-            clrs.append(await conv.convert(ctx, f"{mods} {i}".strip()))
-            mods = ""
+    async def colors(self, ctx: aoi.AoiContext, clrs: Greedy[FuzzyAoiColor]):
+        valid_colors = [color for color in clrs if not color.attempt]
+        invalid_colors = [color.attempt for color in clrs if color.attempt]
+        if not valid_colors and invalid_colors:
+            return await ctx.embed(title="Color Palette",
+                                   description="Unknown Colors: " + ", ".join(invalid_colors))
+        clrs = valid_colors
+        if not valid_colors:
+            return
         img = Image.new("RGB", (120 * len(clrs), 120))
         img_draw = ImageDraw.Draw(img)
         for n, color in enumerate(clrs):
@@ -55,7 +50,10 @@ class Colors(commands.Cog):
         buf = io.BytesIO()
         img.save(buf, format="PNG")
         await ctx.embed(title="Color Palette",
-                        image=buf)
+                        image=buf,
+                        description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c.to_rgb()) for c in clrs) + # noqa
+                                    ("\nUnknown Colors: " + ", ".join(invalid_colors) if invalid_colors else "")
+                        )
 
     @commands.command(brief="Shows a random color palette, sort by hue, random, or brightness",
                       aliases=["rancolor", "ranclr"])
@@ -95,14 +93,13 @@ class Colors(commands.Cog):
 
     @commands.command(
         brief="Makes an RGB gradient between colors. Number of colors is optional, defaults to 4 and must be "
-              "between 3 and 10."
+              "between 3 and 10.",
+        aliases=["grad"]
     )
-    async def gradient(self, ctx: aoi.AoiContext, color1: discord.Colour, color2: discord.Colour, num: int = 4):
+    async def gradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor, num: int = 4):
         if num < 3 or num > 10:
-            return await ctx.send_error("Number of colors must be between 2 and 10")
-        rgb, rgb2 = color1.to_rgb(), color2.to_rgb()
-        steps = [(rgb[x] - rgb2[x]) / (num - 1) for x in range(3)]
-        colors = list(reversed([tuple(map(int, (rgb2[x] + steps[x] * n for x in range(3)))) for n in range(num + 1)]))
+            return await ctx.send_error("Number of colors must be between 3 and 10")
+        colors = rgb_gradient(color1, color2, num)
         img = Image.new("RGB", (240, 48))
         img_draw = ImageDraw.Draw(img)
         for n, clr in enumerate(colors):
@@ -113,7 +110,29 @@ class Colors(commands.Cog):
         buf = io.BytesIO()
         img.save(buf, format="PNG")
         await ctx.embed(title="Gradient",
-                        description=" ".join("#" + "".join(hex(x)[2:] for x in c) for c in colors[1:]),
+                        description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in colors),
+                        image=buf)
+
+    @commands.command(
+        brief="Makes an HLS gradient between RGB colors. Number of colors is optional, defaults to 4 and must be "
+              "between 3 and 10.",
+        aliases=["hgrad"]
+    )
+    async def hgradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor, num: int = 4):
+        if num < 3 or num > 10:
+            return await ctx.send_error("Number of colors must be between 3 and 10")
+        colors = hls_gradient(color1, color2, num)
+        img = Image.new("RGB", (240, 48))
+        img_draw = ImageDraw.Draw(img)
+        for n, clr in enumerate(colors):
+            img_draw.rectangle([
+                (n * 240 / num, 0),
+                ((n + 1) * 240 / num, 48)
+            ], fill=tuple(map(int, clr)))
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        await ctx.embed(title="Gradient",
+                        description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in colors),
                         image=buf)
 
     @commands.max_concurrency(1, commands.BucketType.user)
@@ -166,8 +185,8 @@ class Colors(commands.Cog):
     @commands.command(
         brief="Split-tones an image"
     )
-    async def duotone(self, ctx: aoi.AoiContext, black: discord.Colour, white: discord.Colour,
-                      mid: Union[discord.Colour, str] = None, black_point: int = 0, white_point: int = 255,
+    async def duotone(self, ctx: aoi.AoiContext, black: AoiColor, white: AoiColor,
+                      mid: Union[AoiColor, str] = None, black_point: int = 0, white_point: int = 255,
                       mid_point: int = 127):
         if isinstance(mid, str):
             if mid.lower() == "none":

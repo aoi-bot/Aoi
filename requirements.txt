@@ -8,3 +8,4 @@ python-dotenv~=0.14.0
 colorama~=0.4.4
 sympy~=1.6.2
 psutil~=5.7.2
+webcolors~=1.11.1

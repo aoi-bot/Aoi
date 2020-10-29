@@ -72,6 +72,9 @@ class ErrorHandler(commands.Cog):
             await ctx.send_error(f"Syntax Error - An error occured while parsing the expression")
         elif isinstance(error, aoi.MathError):
             await ctx.send_error(f"Math Error - An error occured while evaluating the expression")
+        elif isinstance(error, aoi.FlagError):
+            await ctx.send_error(f"Flag `{error.attempted}` is an invalid flag and must be one of " +
+                                 " ".join(f"`{flag}`" for flag in error.supported))
         elif isinstance(error, commands.CommandOnCooldown):
             await ctx.send_error(f"You are on cooldown. Try again in {round(error.retry_after)}s")
         else:

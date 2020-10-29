@@ -8,6 +8,9 @@ import discord
 import disputils
 from discord.ext import commands
 
+from .errors import FlagError
+from libs.conversions import escape
+
 
 def _wrap_user(user: discord.abc.User):
     return f"**{user}** "
@@ -17,6 +20,24 @@ class AoiContext(commands.Context):
     INFO = 0
     ERROR = 1
     OK = 2
+
+    @property
+    def clean_prefix(self):
+        return escape(self.prefix, self)
+
+    def parse_flags(self, flags: str, supported: List[str]) -> List[str]:
+        if not flags:
+            return []
+        valid_flags = []
+        for flag in flags.split(" "):
+            if not flag.startswith("--"):
+                raise commands.BadArgument("Flags must begin with `--`")
+            flag = flag[2:]
+            if flag.lower() in supported:
+                valid_flags.append(flag)
+            else:
+                raise FlagError(attempted=flag, supported=supported)
+        return valid_flags
 
     async def trash_reaction(self, message: discord.Message):
         if len(message.embeds) == 0:
@@ -285,12 +306,13 @@ class AoiContext(commands.Context):
         else:
             content = None
         if len(msg.keys()) < 2:  # no embed here:
-            embed = None
-        else:
-            embed = msg
-        if embed:
-            _ = embed.pop("thumbnail", None)
+            return await self.send(content)
+        thumbnail = msg.pop("thumbnail", None) if msg else None
+        msg["description"] = msg.get("description", "_ _")
+        embed = discord.Embed.from_dict(msg)
+        if thumbnail:
+            embed.set_thumbnail(url=thumbnail)
         await self.send(
             content=content,
-            embed=discord.Embed.from_dict(embed) if embed else None
+            embed=embed if embed else None
         )

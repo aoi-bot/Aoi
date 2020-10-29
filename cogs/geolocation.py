@@ -7,14 +7,14 @@ import aoi
 from wrappers import gmaps
 
 
-class GeoLocation(commands.Cog):
+class Geolocation(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
         self.gmap: Optional[gmaps.GeoLocation] = None
         bot.loop.create_task(self._init())
 
     async def _init(self):
-        self.bot.logger.info("geo:waiting for bot")
+        self.bot.logger.info("geo:Waiting for bot")
         await self.bot.wait_until_ready()
         self.gmap = self.bot.gmap
         self.bot.logger.info("geo:ready!")
@@ -43,4 +43,4 @@ class GeoLocation(commands.Cog):
 
 
 def setup(bot: aoi.AoiBot) -> None:
-    bot.add_cog(GeoLocation(bot))
+    bot.add_cog(Geolocation(bot))

@@ -1,11 +1,16 @@
+import colorsys
 import datetime
 import math
 import re
 import typing
 
 import dateparser
+import discord
+import webcolors
 from discord.ext import commands
 from discord.ext.commands import BadArgument
+
+import aoi
 
 
 def allowed_strings(*values, preserve_case: bool = False) -> typing.Callable[[str], str]:
@@ -102,6 +107,15 @@ def dtime() -> typing.Callable[[str], datetime.datetime]:
     return converter
 
 
+def rolename() -> typing.Callable[[str], str]:
+    def converter(arg: str) -> str:
+        if len(arg) > 32:
+            raise commands.BadArgument("Role name too long")
+        return arg
+
+    return converter
+
+
 duration_parser = re.compile(
     r"((?P<days>\d+?) ?(days|day|D|d) ?)?"
     r"((?P<hours>\d+?) ?(hours|hour|H|h) ?)?"
@@ -137,3 +151,78 @@ def t_delta() -> typing.Callable[[str], datetime.timedelta]:
         return delta
 
     return convert
+
+
+class AoiColor:
+    def __init__(self, r: int, g: int, b: int):
+        self.r = r
+        self.g = g
+        self.b = b
+
+    @classmethod
+    async def convert(cls, ctx: aoi.AoiContext, arg: str) -> "AoiColor":
+        orig = arg
+        arg = arg.lower().strip("#x")
+        if arg.startswith("0x"):
+            arg = arg
+        try:
+            clr = webcolors.html5_parse_simple_color(webcolors.name_to_hex(arg))
+            return cls(clr.red, clr.green, clr.blue)
+        except ValueError:
+            pass
+        if len(arg) == 6:
+            try:
+                clr = webcolors.html5_parse_simple_color(f"#{arg}")
+                return cls(clr.red, clr.green, clr.blue)
+            except ValueError:
+                raise commands.BadColourArgument(orig)
+        elif len(arg) == 3:
+            try:
+                clr = webcolors.html5_parse_simple_color("#" + ''.join(f"{c}{c}" for c in arg))
+                return cls(clr.red, clr.green, clr.blue)
+            except ValueError:
+                raise commands.BadColourArgument(orig)
+        raise commands.BadColourArgument(orig)
+
+    def __str__(self):
+        return f"{self.r:02x}{self.g:02x}{self.b:02x}"
+
+    def to_rgb(self):
+        return self.r, self.g, self.b
+
+    def to_discord_color(self):
+        return discord.Colour.from_rgb(self.r, self.g, self.b)
+
+    def to_hls(self):
+        return colorsys.rgb_to_hls(*(x / 256 for x in self.to_rgb()))
+
+
+class FuzzyAoiColor(AoiColor):
+    def __init__(self, r: int, g: int, b: int, *, attempt: str = None):
+        super(FuzzyAoiColor, self).__init__(r, g, b)
+        self.attempt = attempt
+
+    @classmethod
+    async def convert(cls, ctx: aoi.AoiContext, arg: str) -> "AoiColor":
+        orig = arg
+        arg = arg.lower().strip("#x")
+        if arg.startswith("0x"):
+            arg = arg
+        try:
+            clr = webcolors.html5_parse_simple_color(webcolors.name_to_hex(arg))
+            return cls(clr.red, clr.green, clr.blue)
+        except ValueError:
+            pass
+        if len(arg) == 6:
+            try:
+                clr = webcolors.html5_parse_simple_color(f"#{arg}")
+                return cls(clr.red, clr.green, clr.blue)
+            except ValueError:
+                return cls(0, 0, 0, attempt=orig)
+        elif len(arg) == 3:
+            try:
+                clr = webcolors.html5_parse_simple_color("#" + ''.join(f"{c}{c}" for c in arg))
+                return cls(clr.red, clr.green, clr.blue)
+            except ValueError:
+                return cls(0, 0, 0, attempt=orig)
+        return cls(0, 0, 0, attempt=orig)

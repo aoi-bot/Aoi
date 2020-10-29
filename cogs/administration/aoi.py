@@ -152,6 +152,16 @@ class Aoi(commands.Cog):
             thumbnail=guild.icon_url
         )
 
+    @commands.is_owner()
+    @commands.command(brief="Show most used commands")
+    async def commandstats(self, ctx: aoi.AoiContext):
+        await ctx.embed(
+            description="\n".join(
+                [f"**{a[0]}**: {a[1]} usages" for a in sorted(self.bot.commands_ran.items(), key=lambda x: -x[1])[:10]]
+            ),
+            not_inline=list(range(10))
+        )
+
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Aoi(bot))

@@ -53,6 +53,8 @@ class LoggingHandler(logging.StreamHandler):
             message = record.msg
             sub = None
 
+        message %= record.args
+
         print(f"{colors2[level_name]}{styles[level_name]}{level_name:>8}{Style.RESET_ALL}"
               f" "
               f"{Style.BRIGHT}{names[name]}{name}{Style.RESET_ALL} " +

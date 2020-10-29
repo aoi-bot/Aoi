@@ -139,17 +139,52 @@ _PRECEDENCE_DICT = {
     ),
     "AND": _Operator(
         precedence=11,
-        func=lambda x, y: x & y,
+        func=lambda x, y: int(x) & int(y),
         arguments=2
     ),
     "OR": _Operator(
         precedence=10,
-        func=lambda x, y: x | y,
+        func=lambda x, y: int(x) | int(y),
         arguments=2
     ),
     "XOR": _Operator(
         precedence=9,
-        func=lambda x, y: x ^ y,
+        func=lambda x, y: int(x) ^ int(y),
+        arguments=2
+    ),
+    "LAND": _Operator(
+        precedence=8,
+        func=lambda x, y: 1 if x and y else 0,
+        arguments=2
+    ),
+    "LOR": _Operator(
+        precedence=8,
+        func=lambda x, y: 1 if x or y else 0,
+        arguments=2
+    ),
+    "LXOR": _Operator(
+        precedence=8,
+        func=lambda x, y: 1 if (x or y) and not (x and y) else 0,
+        arguments=2
+    ),
+    ">=": _Operator(
+        precedence=7,
+        func=lambda x, y: 1 if x >= y else 0,
+        arguments=2
+    ),
+    "<=": _Operator(
+        precedence=7,
+        func=lambda x, y: 1 if x <= y else 0,
+        arguments=2
+    ),
+    ">": _Operator(
+        precedence=7,
+        func=lambda x, y: 1 if x > y else 0,
+        arguments=2
+    ),
+    "<": _Operator(
+        precedence=7,
+        func=lambda x, y: 1 if x < y else 0,
         arguments=2
     )
 }

@@ -11,6 +11,8 @@ from discord.ext.commands import Greedy
 
 import aoi
 from libs import conversions
+from libs.colors import rgb_gradient, hls_gradient
+from libs.converters import AoiColor, rolename
 
 
 class Roles(commands.Cog):
@@ -58,9 +60,9 @@ class Roles(commands.Cog):
     @commands.bot_has_permissions(manage_roles=True)
     @commands.has_permissions(manage_roles=True)
     @commands.command(brief="Changes a roles color", aliases=["rclr", "roleclr"])
-    async def rolecolor(self, ctx: aoi.AoiContext, role: discord.Role, *, color: discord.Colour):
+    async def rolecolor(self, ctx: aoi.AoiContext, role: discord.Role, *, color: AoiColor):
         self._check_role(ctx, role)
-        await role.edit(colour=color)
+        await role.edit(colour=color.to_discord_color())
         await ctx.send_info(f"Changed {role.mention}'s color to "
                             f"#{conversions.color_to_string(role.colour)}")
 
@@ -68,8 +70,7 @@ class Roles(commands.Cog):
     @commands.has_permissions(manage_roles=True)
     @commands.command(brief="Creates one or more roles - multiword role names must be quoted.",
                       aliases=["cr"])
-    async def createrole(self, ctx: aoi.AoiContext, names: str):
-        names: List[str] = shlex.split(names)
+    async def createrole(self, ctx: aoi.AoiContext, names: Greedy[rolename()]):
 
         async def _(name):
             await ctx.guild.create_role(name=name)
@@ -123,7 +124,9 @@ class Roles(commands.Cog):
             for r in roles:
                 await r.edit(position=position)
 
-        await ctx.send_info(f"Moving {len(roles)} roles. Will take at least {len(roles)}s")
+        await ctx.trigger_typing()
+        if len(roles) > 3:
+            await ctx.send_info(f"Moving {len(roles)} roles. Will take at least {len(roles)}s")
         await self.bot.create_task(ctx, do_op(), lambda: f"{n}/{(len(roles))}")
         await ctx.send_ok(f"Moved {' '.join('`' + r.name + '`' for r in roles)}", ping=len(roles) > 10)
 
@@ -152,6 +155,7 @@ class Roles(commands.Cog):
                 await asyncio.sleep(1)
                 n += 1
 
+        await ctx.trigger_typing()
         if len(roles) > 3:
             await ctx.send_info(f"Deleting {len(roles)} roles. Will take at least {len(roles)}s")
         await self.bot.create_task(ctx, do_op(), lambda: f"{n}/{(len(roles))}")
@@ -163,26 +167,32 @@ class Roles(commands.Cog):
         brief="Colors roles as an RGB gradient between colors",
         aliases=["rolegrad"]
     )
-    async def rolegradient(self, ctx: aoi.AoiContext, color1: discord.Colour, color2: discord.Colour,
-                           roles: Greedy[discord.Role]):
+    async def rolegradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor,
+                           roles: Greedy[discord.Role], *, flags: str = ""):
+        hls = "hls" in ctx.parse_flags(flags, ["hls"])
         roles: List[discord.Role] = list(roles)
         for role in roles:
             self._check_role(ctx, role)
         num = len(roles)
-        rgb, rgb2 = color1.to_rgb(), color2.to_rgb()
-        steps = [(rgb[x] - rgb2[x]) / (num - 1) for x in range(3)]
-        colors = list(reversed([tuple(map(int, (rgb2[x] + steps[x] * n for x in range(3)))) for n in range(num)]))
+        colors = hls_gradient(color1, color2, num) if hls else rgb_gradient(color1, color2, num)
         img = Image.new("RGB", (240, 48))
+        await ctx.trigger_typing()
         img_draw = ImageDraw.Draw(img)
-        for n, clr in enumerate(colors):
-            await asyncio.sleep(0.5)
-            await roles[n].edit(color=int("".join(hex(x)[2:] for x in clr), 16))
-            img_draw.rectangle([
-                (n * 240 / num, 0),
-                ((n + 1) * 240 / num, 48)
-            ], fill=tuple(map(int, clr)))
+        n = 0
         buf = io.BytesIO()
-        img.save(buf, format="PNG")
+
+        async def do_op():
+            nonlocal n
+            for idx, clr in enumerate(colors):
+                await asyncio.sleep(0.5)
+                await roles[idx].edit(color=AoiColor(*clr).to_discord_color())
+                img_draw.rectangle([
+                    (idx * 240 / num, 0),
+                    ((idx + 1) * 240 / num, 48)
+                ], fill=tuple(map(int, clr)))
+            img.save(buf, format="PNG")
+
+        await self.bot.create_task(ctx, do_op(), lambda: f"{n}/{num}")
         await ctx.embed(title="Roles colored according to gradient",
                         description=" ".join("#" + "".join(hex(x)[2:] for x in c) for c in colors),
                         image=buf)
@@ -195,24 +205,30 @@ class Roles(commands.Cog):
     @commands.command(
         brief="Adds a role to everyone - shows up in `mytasks` and may take a while."
     )
-    async def roleall(self, ctx: aoi.AoiContext, role: discord.Role):
+    async def roleall(self, ctx: aoi.AoiContext, role: discord.Role, *, flags: str):
+        ignore_bots = "ignorebots" in ctx.parse_flags(flags, ["ignorebots"])
         if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
             raise aoi.RoleError(f"{role.mention} must be below your highest role in order for you to delete it.")
         if role >= ctx.me.top_role:
             raise aoi.RoleError(f"{role.mention} must be above my highest role for me to delete it.")
         members: List[discord.Member] = list(filter(lambda x: role.id not in [r.id for r in x.roles],
                                                     ctx.guild.members))
-        await ctx.send_ok(f"Adding {role.mention} to {len(members)} that don't have it. This will take at "
+        await ctx.send_ok(f"Adding {role.mention} to {len(members)} that don't have it" +
+                          (", while ignoring bots" if ignore_bots else "") +
+                          ". This will take at " +
                           f"least {len(members) // 2}s")
         n = 0
 
         async def do_op():
             nonlocal n
             for m in members:
+                if m.bot and ignore_bots:
+                    continue
                 await m.add_roles(role, reason=f"roleall by {ctx.author} | {ctx.author.id}")
                 n += 1
                 await aoi.asyncio.sleep(1)
 
+        await ctx.trigger_typing()
         await self.bot.create_task(ctx, do_op(), lambda: f"{n}/{len(members)}")
 
         await ctx.done_ping()
