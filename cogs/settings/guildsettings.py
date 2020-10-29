@@ -28,13 +28,13 @@ class GuildSettings(commands.Cog):
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.command(brief="Set Aoi's prefix")
-    async def prefix(self, ctx: aoi.AoiContext, value: str):
-        await self.bot.db.set_prefix(ctx.guild.id, value)
-        return await ctx.send_ok(f"Prefix set to `{escape(value, ctx)}`")
+    async def prefix(self, ctx: aoi.AoiContext, *, prefix: str):
+        await self.bot.db.set_prefix(ctx.guild.id, prefix)
+        return await ctx.send_ok(f"Prefix set to `{escape(prefix, ctx)}`")
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.command(brief="Set server config")
-    async def config(self, ctx: aoi.AoiContext, setting: str, value: str):
+    async def config(self, ctx: aoi.AoiContext, setting: str, *, value: str):
         setting = setting.lower()
         color_funcs = {
             "okcolor": self.okcolor,
