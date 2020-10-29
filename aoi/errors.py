@@ -3,7 +3,7 @@ from typing import List
 from discord.ext import commands
 
 
-class RoleError(commands.CommandError):
+class RoleHierarchyError(commands.CommandError):
     pass
 
 
