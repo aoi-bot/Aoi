@@ -3,6 +3,7 @@ from discord.ext import commands
 
 import aoi
 from libs import conversions
+from libs.conversions import escape
 
 
 class GuildSettings(commands.Cog):
@@ -26,6 +27,12 @@ class GuildSettings(commands.Cog):
         await ctx.send_ok("Color changed!")
 
     @commands.has_guild_permissions(manage_guild=True)
+    @commands.command(brief="Set Aoi's prefix")
+    async def prefix(self, ctx: aoi.AoiContext, value: str):
+        await self.bot.db.set_prefix(ctx.guild.id, value)
+        return await ctx.send_ok(f"Prefix set to `{escape(value, ctx)}`")
+
+    @commands.has_guild_permissions(manage_guild=True)
     @commands.command(brief="Set server config")
     async def config(self, ctx: aoi.AoiContext, setting: str, value: str):
         setting = setting.lower()
@@ -44,7 +51,7 @@ class GuildSettings(commands.Cog):
             return await color_funcs[setting](ctx, color)
         if setting == "prefix":
             await self.bot.db.set_prefix(ctx.guild.id, value)
-            return await ctx.send_ok(f"Prefix set to `{value}`")
+            return await ctx.send_ok(f"Prefix set to `{escape(value, ctx)}`")
         if setting == "currencygain":
             try:
                 v = int(value)
@@ -67,7 +74,7 @@ class GuildSettings(commands.Cog):
                 ("Embed Colors", f"ErrorColor: `{conversions.hex_color_to_string(colors.error_color)}`\n"
                                  f"InfoColor: `{conversions.hex_color_to_string(colors.info_color)}`\n"
                                  f"OKColor: `{conversions.hex_color_to_string(colors.ok_color)}`"),
-                ("Prefix", self.bot.db.prefixes[ctx.guild.id]),
+                ("Prefix", f"`{escape(self.bot.db.prefixes[ctx.guild.id], ctx)}`"),
                 ("Currency Gain", "Off" if not gain else f"{gain}/3m")
             ]
         )
