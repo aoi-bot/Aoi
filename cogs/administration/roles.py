@@ -196,20 +196,25 @@ class Roles(commands.Cog):
     @commands.command(
         brief="Adds a role to everyone - shows up in `mytasks` and may take a while."
     )
-    async def roleall(self, ctx: aoi.AoiContext, role: discord.Role):
+    async def roleall(self, ctx: aoi.AoiContext, role: discord.Role, *, flags: str):
+        ignore_bots = "ignorebots" in ctx.parse_flags(flags, ["ignorebots"])
         if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
             raise aoi.RoleError(f"{role.mention} must be below your highest role in order for you to delete it.")
         if role >= ctx.me.top_role:
             raise aoi.RoleError(f"{role.mention} must be above my highest role for me to delete it.")
         members: List[discord.Member] = list(filter(lambda x: role.id not in [r.id for r in x.roles],
                                                     ctx.guild.members))
-        await ctx.send_ok(f"Adding {role.mention} to {len(members)} that don't have it. This will take at "
+        await ctx.send_ok(f"Adding {role.mention} to {len(members)} that don't have it" +
+                          (", while ignoring bots" if ignore_bots else "") +
+                          ". This will take at " +
                           f"least {len(members) // 2}s")
         n = 0
 
         async def do_op():
             nonlocal n
             for m in members:
+                if m.bot and ignore_bots:
+                    continue
                 await m.add_roles(role, reason=f"roleall by {ctx.author} | {ctx.author.id}")
                 n += 1
                 await aoi.asyncio.sleep(1)

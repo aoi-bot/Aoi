@@ -8,6 +8,7 @@ import discord
 import disputils
 from discord.ext import commands
 
+from .errors import FlagError
 from libs.conversions import escape
 
 
@@ -23,6 +24,15 @@ class AoiContext(commands.Context):
     @property
     def clean_prefix(self):
         return escape(self.prefix, self)
+
+    def parse_flags(self, flags: str, supported: List[str]) -> List[str]:
+        valid_flags = []
+        for flag in flags.split(" "):
+            if flag.lower() in supported:
+                valid_flags.append(flag)
+            else:
+                raise FlagError(attempted=flag, supported=supported)
+        return valid_flags
 
     async def trash_reaction(self, message: discord.Message):
         if len(message.embeds) == 0:
