@@ -1,6 +1,13 @@
+from __future__ import annotations
+
+import re
 from datetime import timedelta
+from typing import TYPE_CHECKING
 
 import discord
+
+if TYPE_CHECKING:
+    from aoi import AoiContext
 
 
 def color_to_string(color: discord.Color) -> str:
@@ -29,3 +36,20 @@ def hms_notation(seconds: int):
 
 def camel_to_title(camel: str):
     return camel.replace("_", " ").title()
+
+
+def escape(text: str, ctx: AoiContext):
+    role_mentions = re.findall(r"<@&\d{17,21}>", text)
+    for mention in role_mentions:
+        role = ctx.guild.get_role(int(mention[3:-1]))
+        text = text.replace(mention, f"@{role.name}" if role else mention)
+    user_mentions = re.findall(r"<@!?\d{17,21}>", text)
+    for mention in user_mentions:
+        user = ctx.guild.get_member(int(mention.replace('!', '')[2:-1]))
+        text = text.replace(mention, f"@{user.name}" if user else mention)
+    channel_mentions = re.findall(r"<#\d{17,21}>", text)
+    for mention in channel_mentions:
+        print(mention)
+        channel = ctx.guild.get_channel(int(mention[2:-1]))
+        text = text.replace(mention, f"#{channel.name}" if channel else mention)
+    return text

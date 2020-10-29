@@ -8,6 +8,8 @@ import discord
 import disputils
 from discord.ext import commands
 
+from libs.conversions import escape
+
 
 def _wrap_user(user: discord.abc.User):
     return f"**{user}** "
@@ -17,6 +19,10 @@ class AoiContext(commands.Context):
     INFO = 0
     ERROR = 1
     OK = 2
+
+    @property
+    def clean_prefix(self):
+        return escape(self.prefix, self)
 
     async def trash_reaction(self, message: discord.Message):
         if len(message.embeds) == 0:

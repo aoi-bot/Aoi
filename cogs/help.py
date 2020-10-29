@@ -41,7 +41,7 @@ class Help(commands.Cog):
                 if c.description:
                     s += f"◆ **{c.qualified_name}** - {c.description}\n"
         await ctx.embed(title="Modules", description=s.strip(),
-                        footer=f"Do {ctx.prefix}commands module_name to view commands in a module",
+                        footer=f"Do {ctx.clean_prefix}commands module_name to view commands in a module",
                         thumbnail=self.bot.user.avatar_url)
 
     @commands.command(brief="Lists commands within a module", name="commands",
@@ -54,22 +54,22 @@ class Help(commands.Cog):
             description=cog.description + "\n\n" + "\n".join(
                 [f"**{c.name}** - {c.brief}" for c in cog.get_commands() if await _can_run(c, ctx)]
             ),
-            footer=f"Do {ctx.prefix}help command_name for help on a command"
+            footer=f"Do {ctx.clean_prefix}help command_name for help on a command"
         )
 
     @commands.command(brief="Shows help for a command", aliases=["h"])
     async def help(self, ctx: aoi.AoiContext, command: str = None):
         if not command:
             return await ctx.embed(title="Aoi Help",
-                                   fields=[("Module List", f"`{ctx.prefix}modules` to view "
+                                   fields=[("Module List", f"`{ctx.clean_prefix}modules` to view "
                                                            f"the list of Aoi's modules"),
-                                           ("Module Commands", f"`{ctx.prefix}commands module_name` "
+                                           ("Module Commands", f"`{ctx.clean_prefix}commands module_name` "
                                                                f"to view commands in a module"),
-                                           ("Permissions", f"`{ctx.prefix}permguide` to view the "
+                                           ("Permissions", f"`{ctx.clean_prefix}permguide` to view the "
                                                            f"permission guide"),
-                                           ("Command Help", f"`{ctx.prefix}help command_name` to "
+                                           ("Command Help", f"`{ctx.clean_prefix}help command_name` to "
                                                             f"view help for a command"),
-                                           ("Other Guides", f"`{ctx.prefix}cmds guides` to "
+                                           ("Other Guides", f"`{ctx.clean_prefix}cmds guides` to "
                                                             f"view other guides"),
                                            ("Support Server", f"Still need help? Join our [support "
                                                               f"server](https://discord.gg/pCgEj8t)")],
