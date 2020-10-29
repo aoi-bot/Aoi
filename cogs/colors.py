@@ -51,7 +51,7 @@ class Colors(commands.Cog):
         img.save(buf, format="PNG")
         await ctx.embed(title="Color Palette",
                         image=buf,
-                        description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c.to_rgb()) for c in clrs) +
+                        description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c.to_rgb()) for c in clrs) + # noqa
                                     ("\nUnknown Colors: " + ", ".join(invalid_colors) if invalid_colors else "")
                         )
 

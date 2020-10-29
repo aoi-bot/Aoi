@@ -124,7 +124,9 @@ class Roles(commands.Cog):
             for r in roles:
                 await r.edit(position=position)
 
-        await ctx.send_info(f"Moving {len(roles)} roles. Will take at least {len(roles)}s")
+        await ctx.trigger_typing()
+        if len(roles) > 3:
+            await ctx.send_info(f"Moving {len(roles)} roles. Will take at least {len(roles)}s")
         await self.bot.create_task(ctx, do_op(), lambda: f"{n}/{(len(roles))}")
         await ctx.send_ok(f"Moved {' '.join('`' + r.name + '`' for r in roles)}", ping=len(roles) > 10)
 
@@ -153,6 +155,7 @@ class Roles(commands.Cog):
                 await asyncio.sleep(1)
                 n += 1
 
+        await ctx.trigger_typing()
         if len(roles) > 3:
             await ctx.send_info(f"Deleting {len(roles)} roles. Will take at least {len(roles)}s")
         await self.bot.create_task(ctx, do_op(), lambda: f"{n}/{(len(roles))}")
@@ -174,6 +177,7 @@ class Roles(commands.Cog):
         steps = [(rgb[x] - rgb2[x]) / (num - 1) for x in range(3)]
         colors = list(reversed([tuple(map(int, (rgb2[x] + steps[x] * n for x in range(3)))) for n in range(num)]))
         img = Image.new("RGB", (240, 48))
+        await ctx.trigger_typing()
         img_draw = ImageDraw.Draw(img)
         for n, clr in enumerate(colors):
             await asyncio.sleep(0.5)
@@ -219,6 +223,7 @@ class Roles(commands.Cog):
                 n += 1
                 await aoi.asyncio.sleep(1)
 
+        await ctx.trigger_typing()
         await self.bot.create_task(ctx, do_op(), lambda: f"{n}/{len(members)}")
 
         await ctx.done_ping()

@@ -6,9 +6,9 @@ import typing
 
 import dateparser
 import discord
+import webcolors
 from discord.ext import commands
 from discord.ext.commands import BadArgument
-import webcolors
 
 import aoi
 
@@ -155,7 +155,7 @@ class AoiColor:
         orig = arg
         arg = arg.lower().strip("#x")
         if arg.startswith("0x"):
-            arg = arg 
+            arg = arg
         try:
             clr = webcolors.html5_parse_simple_color(webcolors.name_to_hex(arg))
             return cls(clr.red, clr.green, clr.blue)
@@ -185,7 +185,7 @@ class AoiColor:
         return discord.Colour.from_rgb(self.r, self.g, self.b)
 
     def to_hls(self):
-        return colorsys.rgb_to_hls(*(x/256 for x in self.to_rgb()))
+        return colorsys.rgb_to_hls(*(x / 256 for x in self.to_rgb()))
 
 
 class FuzzyAoiColor(AoiColor):
