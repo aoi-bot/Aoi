@@ -169,7 +169,7 @@ class Roles(commands.Cog):
     )
     async def rolegradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor,
                            roles: Greedy[discord.Role], *, flags: str = ""):
-        hls = "hls" in ctx.parse_flags(flags, ["hls"])
+        hls = "hls" in ctx.parse_flags(flags, {"hls": None})
         roles: List[discord.Role] = list(roles)
         for role in roles:
             self._check_role(ctx, role)
@@ -206,13 +206,19 @@ class Roles(commands.Cog):
         brief="Adds a role to everyone - shows up in `mytasks` and may take a while."
     )
     async def roleall(self, ctx: aoi.AoiContext, role: discord.Role, *, flags: str):
-        ignore_bots = "ignorebots" in ctx.parse_flags(flags, ["ignorebots"])
+        flags = await ctx.parse_flags(flags, {"ignorebots": None, "withrole": discord.Role})
+        ignore_bots = "ignorebots" in flags
+        with_role = flags.get("withrole", None)
         if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
             raise aoi.RoleHierarchyError(f"{role.mention} must be below your highest role in order for you to delete it.")
         if role >= ctx.me.top_role:
             raise aoi.RoleHierarchyError(f"{role.mention} must be above my highest role for me to delete it.")
-        members: List[discord.Member] = list(filter(lambda x: role.id not in [r.id for r in x.roles],
+        members: List[discord.Member] = list(filter(lambda x: role.id not in [r.id for r in x.roles], # noqa
                                                     ctx.guild.members))
+        if ignore_bots:
+            members = [member for member in members if not member.bot]
+        if with_role:
+            members = [member for member in members if with_role.id in [r.id for r in member.roles]]
         await ctx.send_ok(f"Adding {role.mention} to {len(members)} that don't have it" +
                           (", while ignoring bots" if ignore_bots else "") +
                           ". This will take at " +
@@ -223,6 +229,8 @@ class Roles(commands.Cog):
             nonlocal n
             for m in members:
                 if m.bot and ignore_bots:
+                    continue
+                if with_role and with_role.id not in [r.id for r in m.roles]:
                     continue
                 await m.add_roles(role, reason=f"roleall by {ctx.author} | {ctx.author.id}")
                 n += 1

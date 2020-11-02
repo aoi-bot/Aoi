@@ -2,7 +2,7 @@ import asyncio
 import io
 import json
 from types import coroutine
-from typing import List, Tuple, Union, Any, Callable
+from typing import List, Tuple, Union, Any, Callable, Dict
 
 import discord
 import disputils
@@ -25,18 +25,30 @@ class AoiContext(commands.Context):
     def clean_prefix(self):
         return escape(self.prefix, self)
 
-    def parse_flags(self, flags: str, supported: List[str]) -> List[str]:
+    async def parse_flags(self, flags: str, supported: Dict[str, Union[type, None]]) -> Dict[str, Any]:
         if not flags:
-            return []
-        valid_flags = []
-        for flag in flags.split(" "):
-            if not flag.startswith("--"):
-                raise commands.BadArgument("Flags must begin with `--`")
-            flag = flag[2:]
-            if flag.lower() in supported:
-                valid_flags.append(flag)
+            return {}
+        valid_flags = {}
+        split = flags.split(" ")
+        while split:
+            current_flag = split.pop(0)
+            if not current_flag.startswith("--"):
+                raise commands.BadArgument(f"Flags must begin with `--`")
+            current_flag = current_flag[2:]
+            if current_flag not in supported:
+                raise FlagError(attempted=current_flag, supported=supported.keys())
+            if supported[current_flag] is None:
+                valid_flags[current_flag] = None
+                continue
+            value = split.pop(0)
+            if supported[current_flag] is discord.Role:
+                try:
+                    converted = await commands.RoleConverter().convert(self, value)
+                except commands.RoleNotFound:
+                    raise commands.CommandError(f"Role `{value}` not found from flag `{current_flag}`")
+                valid_flags[current_flag] = converted
             else:
-                raise FlagError(attempted=flag, supported=supported)
+                raise NotImplementedError(f"Type {supported[current_flag].__name__} not implemented")
         return valid_flags
 
     async def trash_reaction(self, message: discord.Message):
