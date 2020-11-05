@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 import json
 import logging
 import os
@@ -17,6 +18,7 @@ from ruamel.yaml import YAML
 
 import aoi
 from wrappers import gmaps as gmaps, imgur
+from .cmds_gen import generate
 from .database import AoiDatabase
 
 if TYPE_CHECKING:
@@ -215,6 +217,8 @@ class AoiBot(commands.Bot):
                 self.logger.error(f"bot: - {i.cog.qualified_name}.{i.name}")
             return
 
+        generate(self)
+
         await self.connect(reconnect=reconnect)
 
     def find_cog(self, name: str, *,
@@ -314,3 +318,16 @@ class AoiBot(commands.Bot):
             embed=embed,
             delete_after=delete_after
         )
+
+    def get_signature_data(self, command: commands.Command):
+        signature_string = []
+        defaults = {}
+        signature: inspect.Signature = inspect.signature(command.callback)
+        param: inspect.Parameter
+        for param in signature.parameters.values():
+            if param.name in ("self", "ctx"):
+                continue
+            signature_string.append(f"&lt;{param.name}&gt;" if param.default is not inspect.Parameter.empty else param.name) # noqa
+            if param.default is not inspect.Parameter.empty:
+                defaults[param.name] = param.default
+        return " ".join(signature_string), defaults
