@@ -56,7 +56,7 @@ class ErrorHandler(commands.Cog):
         elif isinstance(error, aoi.CurrencyError):
             await ctx.send_error(f"You must have ${error.amount_needed} ({'global' if error.is_global else 'server'}), "
                                  f"and you have {error.amount_has}.")
-        elif isinstance(error, aoi.RoleError):
+        elif isinstance(error, aoi.RoleHierarchyError):
             await ctx.send_error(_(str(error)))
         elif isinstance(error, aoi.PermissionFailed):
             if (await self.bot.db.guild_setting(ctx.guild.id)).perm_errors:

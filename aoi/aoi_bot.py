@@ -13,7 +13,7 @@ from typing import Dict, Optional, List, Union, TYPE_CHECKING, Awaitable, Any, C
 import aiohttp.client_exceptions
 import discord
 import pixivapi
-from discord.ext import commands
+from discord.ext import commands, tasks
 from ruamel.yaml import YAML
 
 import aoi
@@ -114,6 +114,7 @@ class AoiBot(commands.Bot):
         async def on_ready():
             self.logger.info(f"Aoi {self.version} online!")
             await self.change_presence(activity=discord.Game(f",help | {len(self.guilds)} servers"))
+            self.status_loop.start()
 
         self.add_listener(
             command_ran,
@@ -121,6 +122,10 @@ class AoiBot(commands.Bot):
         )
 
         self.add_listener(on_ready, "on_ready")
+
+    @tasks.loop(minutes=20)
+    async def status_loop(self):
+        await self.change_presence(activity=discord.Game(f",help | {len(self.guilds)} servers"))
 
     def load_configs(self):
         self.config["max_auto_role"] = 10

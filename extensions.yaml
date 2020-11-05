@@ -8,6 +8,7 @@
     "cogs.administration.permissions": "Permissions"
     "cogs.administration.welcomegoodbye": "WelcomeGoodbye"
     "cogs.administration.reactionroles": "ReactionRoles"
+    "cogs.administration.users": "Users"
 "Misc":
     "cogs.colors": "Colors"
     "cogs.nsfw": "NSFW"
@@ -17,6 +18,7 @@
     "cogs.frames": "Frames"
     "cogs.nasa": "Nasa"
     "cogs.geolocation": "Geolocation"
+    "cogs.fun": "Fun"
 "Profile/Currency":
     "cogs.user.xp": "XP"
     "cogs.user.profile": "Profile"
