@@ -1,4 +1,5 @@
 import io
+from typing import Optional
 
 import PIL.Image
 import PIL.ImageDraw
@@ -8,6 +9,7 @@ import discord
 from discord.ext import commands
 
 import aoi
+from libs.minesweeper import Minesweeper, MinesweeperError
 
 
 def _font(size: int) -> PIL.ImageFont.ImageFont:
@@ -23,11 +25,22 @@ class Fun(commands.Cog):
         self.font = _font(33)
         self.av_mask = PIL.Image.new("L", self.simp_img.size, 0)
         self.av_mask_draw = PIL.ImageDraw.Draw(self.av_mask)
-        self.av_mask_draw.ellipse((430, 384, 430+83, 384+83), fill=255)
+        self.av_mask_draw.ellipse((430, 384, 430 + 83, 384 + 83), fill=255)
 
     @property
     def description(self) -> str:
         return "Fun! :D"
+
+    @commands.command(brief="Makes a discord minesweeper game")
+    async def minesweeper(self, ctx: aoi.AoiContext, height: Optional[int] = 10,
+                          width: Optional[int] = 10, bombs: Optional[int] = 10, *,
+                          flags=None):
+        flags = await ctx.parse_flags(flags, {"raw": None, "no-spoiler": None})
+        fmt = "```%s```" if "raw" in flags else "%s"
+        try:
+            await ctx.send(fmt % Minesweeper(height, width, bombs).discord_str("no-spoiler" not in flags))
+        except MinesweeperError as e:
+            await ctx.send_error(str(e))
 
     @commands.command(brief="Hehe simp")
     async def simp(self, ctx: aoi.AoiContext, member: discord.Member = None):
