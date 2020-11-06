@@ -71,30 +71,13 @@ def generate(bot: AoiBot):
                             f"<span class='card-title'>{command.name}</span>" \
                             f"<p>{command.brief}{aliases}<br>{usage}{default}</p>" \
                             f"</div></div>"
-            cog_html += "</ul></div>"
+            cog_html += "</div>"
             list_tabs[group] += cog_html
         list_tabs[group] += "</div>"
 
     with open("commands.html", "w") as fp:
         fp.write(f"""
-        <html>
-            <head>
-                <title>Aoi Commands</title>
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-                <style>{STYLE}</style>
-            </head>
-            <body onload="M.AutoInit();" class="{DEFAULT_TEXT} {BODY_BACKGROUND}">
-                <nav class="{NAV_BACKGROUND}">
-                    <div class="nav-wrapper">
-                        <img src="/assets/favicon.png" height="100%">
-                        <a href="#" class="brand-logo left">Aoi</a>
-                        <ul id="nav-mobile" class="hide-on-med-and-low right">
-                            <li><a href="/">Home</a></li>
-                            <li><a href="/commands">Commands</a></li>
-                        </ul>
-                    </div>
-                </nav>
+
                 </br>
                 <div class="container">
                     <div class="row">
@@ -103,9 +86,7 @@ def generate(bot: AoiBot):
                         </div>
                         <div class="col s12">
                             {"".join(list_tabs.values())}
-                        </div>
+                        </div></div></div>
                     <div>
                 </div>
-            </body>
-        </html>
         """)
