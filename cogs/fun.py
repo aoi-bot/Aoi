@@ -9,7 +9,7 @@ import discord
 from discord.ext import commands
 
 import aoi
-from libs.minesweeper import Minesweeper, MinesweeperError
+from libs.minesweeper import SpoilerMinesweeper, MinesweeperError
 
 
 def _font(size: int) -> PIL.ImageFont.ImageFont:
@@ -35,10 +35,10 @@ class Fun(commands.Cog):
     async def minesweeper(self, ctx: aoi.AoiContext, height: Optional[int] = 10,
                           width: Optional[int] = 10, bombs: Optional[int] = 10, *,
                           flags=None):
-        flags = await ctx.parse_flags(flags, {"raw": None, "no-spoiler": None})
+        flags = await ctx.parse_flags(flags, {"raw": None, "no-spoiler": None, "interactive": None})
         fmt = "```%s```" if "raw" in flags else "%s"
         try:
-            await ctx.send(fmt % Minesweeper(height, width, bombs).discord_str("no-spoiler" not in flags))
+            await ctx.send(fmt % SpoilerMinesweeper(height, width, bombs).discord_str("no-spoiler" not in flags))
         except MinesweeperError as e:
             await ctx.send_error(str(e))
 
