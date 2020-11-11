@@ -147,12 +147,13 @@ class Channels(commands.Cog):
         brief="Change slowmode on a channel",
         aliases=["slmd"]
     )
-    async def slowmode(self, ctx: aoi.AoiContext, time: t_delta()):
+    async def slowmode(self, ctx: aoi.AoiContext, time: t_delta(), channel: discord.TextChannel = None):
+        channel = channel or ctx.channel
         time: timedelta = time
         if time.days or time.seconds > 21600 or time.seconds < 0:
             return await ctx.send_error("Invalid slowmode time")
-        await ctx.channel.edit(slowmode_delay=time.seconds)
-        await ctx.send_ok(f"Slowmode set to {hms_notation(time.seconds)}" if time.seconds else "Slowmode turned off.")
+        await channel.edit(slowmode_delay=time.seconds)
+        await ctx.send_ok(f"Slowmode on {channel.mention} set to {hms_notation(time.seconds)}" if time.seconds else "Slowmode turned off.") # noqa
 
     @commands.cooldown(rate=1, per=30, type=commands.BucketType.member)
     @commands.has_permissions(

@@ -169,7 +169,7 @@ class Roles(commands.Cog):
     )
     async def rolegradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor,
                            roles: Greedy[discord.Role], *, flags: str = ""):
-        hls = "hls" in ctx.parse_flags(flags, {"hls": None})
+        hls = "hls" in await ctx.parse_flags(flags, {"hls": None})
         roles: List[discord.Role] = list(roles)
         for role in roles:
             self._check_role(ctx, role)
