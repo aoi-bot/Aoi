@@ -8,13 +8,24 @@ if TYPE_CHECKING:
     from .aoi_bot import AoiBot
 
 STYLE = """
+div.fill {width: 100% !important;}
+span.card-title {font-weight: bold;}
 """
 
+TAB_BACKGROUND = "deep-purple darken-4"
+TAB_TEXT = "white-text"
+NAV_BACKGROUND = "deep-purple darken-4"
+CARD_TEXT = "white-text"
+CARD_BACKGROUND = "purple darken-2"
+DESCRIPTION_TEXT = "white-text"
+DESCRIPTION_BACKGROUND = "purple darken-4"
+DEFAULT_TEXT = "white-text"
+BODY_BACKGROUND = "blue lighten-3"
 
 def get_tab_list(names: Iterable[str]):
-    return '<ul class="tabs blue darken-3 black-text center-align tabs-fixed-width">' + \
+    return f'<ul class="tabs {TAB_BACKGROUND} {TAB_TEXT} center-align fill">' + \
            "".join(
-               [f"""<li class="tab black-text"><a href="#{name.replace('/', "_")}" class="black-text">{name}</a></li>"""
+               [f"""<li class="tab {TAB_TEXT} fill"><a href="#{name.replace('/', "_")}" class="{TAB_TEXT}">{name}</a></li>"""
                 # noqa
                 for name in names]) + \
            '</ul>'
@@ -33,12 +44,12 @@ def generate(bot: AoiBot):
         if group == "Hidden":
             continue
         group2 = group.replace("/", "_")
-        list_tabs[group] = f"""<div id="{group2}">""" + get_tab_list(cogs)
+        list_tabs[group] = f"""<div id="{group2}" class='fill'>""" + get_tab_list(cogs)
         for cog_name in sorted(cogs):
             cog = bot.get_cog(cog_name)
-            cog_html = f"<div id={cog_name}>" \
-                       f"<div class='card blue darken-4'>" \
-                       f"<div class='card-content white-text'>" \
+            cog_html = f"<div id={cog_name} class='fill'>" \
+                       f"<div class='card {DESCRIPTION_BACKGROUND}'>" \
+                       f"<div class='card-content {DESCRIPTION_TEXT}'>" \
                        f"<span class='card-title'>{cog_name}</span>" \
                        f"<p>{cog.description}</p>" \
                        f"</div></div><hr/>\n"
@@ -55,25 +66,27 @@ def generate(bot: AoiBot):
                                       for name, value in defaults.items()) + "</ul>"
                 else:
                     default = ""
-                cog_html += f"<div class='card blue darken-3'>" \
-                            f"<div class='card-content white-text'>" \
+                cog_html += f"<div class='card {CARD_BACKGROUND}'>" \
+                            f"<div class='card-content {CARD_TEXT}'>" \
                             f"<span class='card-title'>{command.name}</span>" \
                             f"<p>{command.brief}{aliases}<br>{usage}{default}</p>" \
                             f"</div></div>"
-            cog_html += "</ul></div>"
+            cog_html += "</div>"
             list_tabs[group] += cog_html
         list_tabs[group] += "</div>"
 
     with open("commands.html", "w") as fp:
         fp.write(f"""
+
+                </br>
                 <div class="container">
                     <div class="row">
                         <div class="col s12">
                             {groups}
                         </div>
-                        <div class="col">
+                        <div class="col s12">
                             {"".join(list_tabs.values())}
-                        </div>
+                        </div></div></div>
                     <div>
                 </div>
         """)
