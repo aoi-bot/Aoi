@@ -1,14 +1,15 @@
+"Server Management":
+    "cogs.administration.roles": "Roles"
+    "cogs.administration.channels": "Channels"
+    "cogs.administration.permissions": "Permissions"
+    "cogs.administration.welcomegoodbye": "WelcomeGoodbye"
 "Administration":
     "cogs.administration.aoi": "Aoi"
     "cogs.administration.information": "Information"
-    "cogs.administration.roles": "Roles"
-    "cogs.administration.channels": "Channels"
     "cogs.administration.guild": "Guilds"
     "cogs.administration.taskmgmt": "TaskManagement"
-    "cogs.administration.permissions": "Permissions"
-    "cogs.administration.welcomegoodbye": "WelcomeGoodbye"
-    "cogs.administration.reactionroles": "ReactionRoles"
     "cogs.administration.users": "Users"
+    "cogs.settings.guildsettings": "GuildSettings"
 "Misc":
     "cogs.colors": "Colors"
     "cogs.nsfw": "NSFW"
@@ -27,8 +28,8 @@
     "cogs.user.guild_shop": "ServerShop"
     "cogs.user.guild_gambling": "ServerGambling"
 "Utility/Config":
-    "cogs.settings.guildsettings": "GuildSettings"
     "cogs.help": "Help"
     "cogs.guides": "Guides"
 "Hidden":
     "cogs.errorhandler": "ErrorHandler"
+    "cogs.administration.reactionroles": "ReactionRoles"

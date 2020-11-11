@@ -66,25 +66,6 @@ def generate(bot: AoiBot):
 
     with open("commands.html", "w") as fp:
         fp.write(f"""
-        <html>
-            <head>
-                <title>Aoi Commands</title>
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-                <style>{STYLE}</style>
-            </head>
-            <body onload="M.AutoInit();" class="black-text blue lighten-4">
-                <nav class="blue darken-4">
-                    <div class="nav-wrapper">
-                        <img src="/assets/favicon.png" height="100%">
-                        <a href="#" class="brand-logo left">Aoi</a>
-                        <ul id="nav-mobile" class="hide-on-med-and-low right">
-                            <li><a href="/">Home</a></li>
-                            <li><a href="/commands">Commands</a></li>
-                        </ul>
-                    </div>
-                </nav>
-                </br>
                 <div class="container">
                     <div class="row">
                         <div class="col s12">
@@ -95,6 +76,4 @@ def generate(bot: AoiBot):
                         </div>
                     <div>
                 </div>
-            </body>
-        </html>
         """)
