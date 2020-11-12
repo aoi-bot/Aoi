@@ -56,7 +56,7 @@ class Messages(commands.Cog):
 
     @commands.has_permissions(manage_channels=True)
     @commands.command(
-        brief="Send a message with Aoi. Use [this site](https://eb.nadeko.bot/) to make the embed."
+        brief="Send a message with Aoi. Use [this site](https://embed.aoibot.xyz/) to make the embed."
     )
     async def say(self, ctx: aoi.AoiContext, *, msg: str):
         await ctx.send_json(msg)
