@@ -14,7 +14,7 @@ class Minigames(commands.Cog):
     def description(self) -> str:
         return "Minigames to play with Aoi or others"
 
-    @commands.command(brief="Tic Tac Toe")
+    @commands.command(brief="Tic Tac Toe", aliases=["ttt"])
     async def tictactoe(self, ctx: aoi.AoiContext):
         await TicTacToe(ctx).play()
 
