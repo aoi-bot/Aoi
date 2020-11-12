@@ -65,15 +65,18 @@ class Help(commands.Cog):
                                                            f"the list of Aoi's modules"),
                                            ("Module Commands", f"`{ctx.clean_prefix}commands module_name` "
                                                                f"to view commands in a module"),
-                                           ("Permissions", f"`{ctx.clean_prefix}permguide` to view the "
-                                                           f"permission guide"),
                                            ("Command Help", f"`{ctx.clean_prefix}help command_name` to "
                                                             f"view help for a command"),
                                            ("Other Guides", f"`{ctx.clean_prefix}cmds guides` to "
-                                                            f"view other guides"),
+                                                            f"view the guides"),
                                            ("Support Server", f"Still need help? Join our [support "
-                                                              f"server](https://discord.gg/pCgEj8t)")],
-                                   not_inline=[0, 1, 2, 3, 4])
+                                                              f"server](https://discord.gg/pCgEj8t)"),
+                                           ("Command List", f"View Aoi's [command list]"
+                                                            f"(https://www.aoibot.xyz/commands.html)"),
+                                           ("Voting", f"Vote for Aoi [here]"
+                                                            f"(https://top.gg/bot/738856230994313228)")
+                                           ],
+                                   not_inline=[2, 3, 4])
         cmd: commands.Command = self.bot.get_command(command.lower())
         if not cmd:
             return await ctx.send_error(f"Command `{command}` not found.")

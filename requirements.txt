@@ -1,4 +1,4 @@
-discord~=1.0.1
+git+git://github.com/aoi-bot/discord.py
 aiohttp~=3.6.3
 aiosqlite~=0.15.0
 disputils~=0.1.3
