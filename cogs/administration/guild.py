@@ -1,10 +1,10 @@
 from typing import Union
 
 import aiohttp
-import discord
-from discord.ext import commands
 
 import aoi
+import discord
+from discord.ext import commands
 
 
 class Guilds(commands.Cog):
@@ -48,6 +48,8 @@ class Guilds(commands.Cog):
         if region not in map(str, discord.VoiceRegion):
             raise commands.BadArgument(f"Region `{region}` invalid. Do `{ctx.prefix}regions` "
                                        f"to view a list of supported regions")
+        if "vip" in region and "VIP_REGIONS" not in ctx.guild.features:
+            return await ctx.send_error(f"Region `{region}` is a VIP region and cannot be used for this server")
         reg = discord.VoiceRegion.try_value(region)
         await ctx.confirm_coro(f"Set server region to `{reg}`?",
                                f"Set to `{reg}`",
@@ -58,7 +60,11 @@ class Guilds(commands.Cog):
         brief="List of regions the server can use"
     )
     async def regions(self, ctx: aoi.AoiContext):
-        await ctx.send_info(" ".join(map(str, discord.VoiceRegion)),
+        await ctx.send_info("Server regions:\n" +
+                            "\n".join(f"◆ {x}" for x in filter(
+                                lambda x: "vip" not in x or "VIP_REGIONS" in ctx.guild.features,
+                                map(str, discord.VoiceRegion)
+                            )),
                             title="Voice Regions")
 
     @commands.bot_has_permissions(manage_emojis=True)
