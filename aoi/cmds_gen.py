@@ -25,7 +25,8 @@ BODY_BACKGROUND = "blue lighten-3"
 def get_tab_list(names: Iterable[str]):
     return f'<ul class="tabs {TAB_BACKGROUND} {TAB_TEXT} center-align fill">' + \
            "".join(
-               [f"""<li class="tab {TAB_TEXT} fill"><a href="#{name.replace('/', "_")}" class="{TAB_TEXT}">{name}</a></li>"""
+               [f"""<li class="tab {TAB_TEXT} fill"><a href="#{name.replace('/', "_").replace(" ", "_")
+               }" class="{TAB_TEXT}">{name}</a></li>"""
                 # noqa
                 for name in names]) + \
            '</ul>'
@@ -43,7 +44,7 @@ def generate(bot: AoiBot):
     for group, cogs in bot.cog_groups.items():
         if group == "Hidden":
             continue
-        group2 = group.replace("/", "_")
+        group2 = group.replace("/", "_").replace(" ", "_")
         list_tabs[group] = f"""<div id="{group2}" class='fill'>""" + get_tab_list(cogs)
         for cog_name in sorted(cogs):
             cog = bot.get_cog(cog_name)

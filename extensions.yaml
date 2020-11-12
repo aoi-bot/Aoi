@@ -1,4 +1,4 @@
-"Server Management":
+"ServerManagement":
     "cogs.administration.roles": "Roles"
     "cogs.administration.channels": "Channels"
     "cogs.administration.permissions": "Permissions"
