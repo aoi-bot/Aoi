@@ -1,10 +1,8 @@
-from typing import List, Dict
-
-import discord
-from discord.ext import commands
 import aoi
-from games import Game, TicTacToe
+from discord.ext import commands
+from games import TicTacToe
 from games.rps import RPS
+
 
 class Minigames(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
@@ -23,8 +21,6 @@ class Minigames(commands.Cog):
         if turns < 1 or turns > 10:
             await ctx.send_error("Number of turns must be between 1 and 10")
         await RPS(ctx, turns).play()
-
-
 
 
 def setup(bot: aoi.AoiBot) -> None:
