@@ -204,6 +204,8 @@ class AoiContext(commands.Context):
         msg = await self.send(embed=embed, file=f)
         if trash_reaction:
             await self.trash_reaction(msg)
+        else:
+            return msg
 
     @staticmethod
     def group_list(lst: List[Any], n: int) -> List[List[Any]]:

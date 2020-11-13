@@ -1,10 +1,13 @@
 import io
-from typing import Optional
+import os
+from typing import Optional, Union
 
 import PIL.Image
 import PIL.ImageDraw
 import PIL.ImageFont
 import PIL.ImageOps
+from PIL import Image, ImageDraw
+
 import discord
 from discord.ext import commands
 
@@ -26,6 +29,8 @@ class Fun(commands.Cog):
         self.av_mask = PIL.Image.new("L", self.simp_img.size, 0)
         self.av_mask_draw = PIL.ImageDraw.Draw(self.av_mask)
         self.av_mask_draw.ellipse((430, 384, 430 + 83, 384 + 83), fill=255)
+        self._frames = []
+        self._reload_frames()
 
     @property
     def description(self) -> str:
@@ -79,6 +84,59 @@ class Fun(commands.Cog):
         buf = io.BytesIO()
         img_copy.save(buf, "png")
         await ctx.embed(image=buf)
+
+    @commands.command(
+        brief="Shows the list of frames"
+    )
+    async def frames(self, ctx: aoi.AoiContext):
+        await ctx.paginate(self._frames, 20, "Frames list", numbered=True, num_start=1)
+
+    @commands.is_owner()
+    @commands.command(
+        brief="Reload frames"
+    )
+    async def reloadframes(self, ctx: aoi.AoiContext):
+        _frames = [f for f in self._frames]
+        try:
+            self._reload_frames()
+        except:  # noqa: E722
+            await ctx.send_error("An error occurred while reloading the filers.")
+            self._frames = [f for f in _frames]
+            raise
+        await ctx.send_ok("Frames reloaded")
+
+    @commands.command(
+        brief="Apply a frame around your avatar"
+    )
+    async def frame(self, ctx: aoi.AoiContext, frame_name: Union[int, str], member: discord.Member = None):
+        member = member or ctx.author
+        if (isinstance(frame_name, str) and frame_name not in self._frames) or \
+                (isinstance(frame_name, int) and frame_name < 1 or frame_name > len(self._frames)):
+            return await ctx.send_error(f"{frame_name} not a valid frame. Do `{ctx.prefix}frames` to see "
+                                        f"the list of frames.")
+        if isinstance(frame_name, int):
+            frame_name = self._frames[frame_name - 1]
+        frame_img = Image.open(f"assets/frames/{frame_name}.png").convert("RGBA")
+        avatar_img_asset: discord.Asset = member.avatar_url_as(format="png", size=512)
+        avatar_buf = io.BytesIO()
+        await avatar_img_asset.save(avatar_buf)
+        avatar_buf.seek(0)
+        avatar_img = Image.open(avatar_buf).convert("RGBA").resize((512, 512))
+        result_img = Image.alpha_composite(avatar_img, frame_img)
+        mask = Image.new("L", (512, 512), 0)
+        mask_draw = ImageDraw.Draw(mask)
+        mask_draw.ellipse((0, 0, 512, 512), fill=255)
+        result_img.putalpha(mask)
+        result_buf = io.BytesIO()
+        result_img.save(result_buf, "png")
+        result_buf.seek(0)
+        await ctx.embed(image=result_buf)
+
+    def _reload_frames(self):
+        self.bot.logger.info("frames:Loading frames")
+        self._frames = [image.split(".")[0] for image in os.listdir("assets/frames/") if image.endswith(".png")]
+        self.bot.logger.info(", ".join(self._frames))
+        self.bot.logger.info("frames:Loaded frames")
 
 
 def setup(bot: aoi.AoiBot) -> None:

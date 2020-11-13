@@ -1,10 +1,9 @@
 import sys
 import traceback
 
+import aoi
 import discord
 from discord.ext import commands
-
-import aoi
 
 
 def _(s: str):
@@ -63,7 +62,10 @@ class ErrorHandler(commands.Cog):
                 await ctx.send_error(str(error))
         elif isinstance(error, discord.Forbidden):
             await ctx.send_error("I don't have the permissions for that")
-        elif isinstance(error, commands.BadArgument):
+        elif isinstance(error, (
+                commands.BadArgument,
+                commands.MissingRequiredArgument
+        )):
             await ctx.send_error(_(str(error)))
         elif isinstance(error, aoi.DomainError):
             await ctx.send_error(f"Domain Error - the value supplied was outside of the "

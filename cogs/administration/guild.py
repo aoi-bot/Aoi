@@ -1,10 +1,11 @@
+import io
 from typing import Union
 
 import aiohttp
-import discord
-from discord.ext import commands
 
 import aoi
+import discord
+from discord.ext import commands
 
 
 class Guilds(commands.Cog):
@@ -48,6 +49,8 @@ class Guilds(commands.Cog):
         if region not in map(str, discord.VoiceRegion):
             raise commands.BadArgument(f"Region `{region}` invalid. Do `{ctx.prefix}regions` "
                                        f"to view a list of supported regions")
+        if "vip" in region and "VIP_REGIONS" not in ctx.guild.features:
+            return await ctx.send_error(f"Region `{region}` is a VIP region and cannot be used for this server")
         reg = discord.VoiceRegion.try_value(region)
         await ctx.confirm_coro(f"Set server region to `{reg}`?",
                                f"Set to `{reg}`",
@@ -58,7 +61,11 @@ class Guilds(commands.Cog):
         brief="List of regions the server can use"
     )
     async def regions(self, ctx: aoi.AoiContext):
-        await ctx.send_info(" ".join(map(str, discord.VoiceRegion)),
+        await ctx.send_info("Server regions:\n" +
+                            "\n".join(f"◆ {x}" for x in filter(
+                                lambda x: "vip" not in x or "VIP_REGIONS" in ctx.guild.features,
+                                map(str, discord.VoiceRegion)
+                            )),
                             title="Voice Regions")
 
     @commands.bot_has_permissions(manage_emojis=True)
@@ -89,6 +96,35 @@ class Guilds(commands.Cog):
             "Emoji deletion cancelled",
             _del()
         )
+
+    @commands.bot_has_permissions(manage_emojis=True)
+    @commands.has_permissions(manage_emojis=True)
+    @commands.command(
+        brief="Adds an emoji",
+        aliases=["ae"]
+    )
+    async def addemoji(self, ctx: aoi.AoiContext, name: str, src: Union[discord.PartialEmoji, str]):
+        if len(name) > 32 or len(name) < 2:
+            raise commands.BadArgument("Emoji name must be 2-32 characters")
+        if isinstance(src, discord.PartialEmoji):
+            if src.is_unicode_emoji():
+                return await ctx.send_error("Must be a custom emoji")
+            src = str(src.url)
+        buf = io.BytesIO()
+        async with aiohttp.ClientSession() as sess:
+            async with sess.get(src) as resp:
+                if resp.status != 200:
+                    return await ctx.send_error(f"Server responded with a {resp.status}")
+                if "Content-Type" not in resp.headers or resp.headers["Content-Type"] not in \
+                        ("image/gif", "image/jpeg", "image/png"):
+                    return await ctx.send_error(f"That doesn't seem to be an image")
+                buf.write(await resp.content.read())
+        buf.seek(0)
+        try:
+            emoji = await ctx.guild.create_custom_emoji(name=name, image=buf.read())
+        except discord.HTTPException as e:
+            return await ctx.send_error(str(e))
+        await ctx.send_ok(f"Added {emoji} {emoji.name}")
 
 
 def setup(bot: aoi.AoiBot) -> None:

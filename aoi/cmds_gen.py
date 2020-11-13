@@ -67,10 +67,14 @@ def generate(bot: AoiBot):
                                       for name, value in defaults.items()) + "</ul>"
                 else:
                     default = ""
+                p = bot.permissions_needed_for(command.name)
+                permissions = ("<br>User Permissions Needed: " +
+                               ", ".join(" ".join(map(lambda x: x.title(), x.split("_"))) for x in p)) \
+                    if p else ""
                 cog_html += f"<div class='card {CARD_BACKGROUND}'>" \
                             f"<div class='card-content {CARD_TEXT}'>" \
                             f"<span class='card-title'>{command.name}</span>" \
-                            f"<p>{command.brief}{aliases}<br>{usage}{default}</p>" \
+                            f"<p>{command.brief}{aliases}<br>{usage}{default}{permissions}</p>" \
                             f"</div></div>"
             cog_html += "</div>"
             list_tabs[group] += cog_html
