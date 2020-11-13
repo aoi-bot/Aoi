@@ -89,6 +89,7 @@ class Help(commands.Cog):
         cmd: commands.Command = self.bot.get_command(command.lower())
         if not cmd:
             return await ctx.send_error(f"Command `{command}` not found.")
+        p = self.bot.permissions_needed_for(cmd.name)
         await ctx.embed(
             title=cmd.name,
             fields=[
@@ -96,6 +97,12 @@ class Help(commands.Cog):
                        ("Description", cmd.brief),
                        ("Module", cmd.cog.qualified_name)
                    ] + (
+                       [("User permissions needed",
+                         ", ".join(
+                             " ".join(map(lambda x: x.title(), x.split("_"))) for x in p
+                         ))] if p else []
+                       if not await _can_run(cmd, ctx) else []
+                   ) + (
                        [("Missing Permissions", "You are missing the permissions to run this command")]
                        if not await _can_run(cmd, ctx) else []
                    ) + (
