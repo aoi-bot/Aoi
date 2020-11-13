@@ -12,11 +12,11 @@ class Minigames(commands.Cog):
     def description(self) -> str:
         return "Minigames to play with Aoi or others"
 
-    @commands.command(brief="Tic Tac Toe", aliases=["ttt"])
+    @commands.command(brief="Play tic tac toe", aliases=["ttt"])
     async def tictactoe(self, ctx: aoi.AoiContext):
         await TicTacToe(ctx).play()
 
-    @commands.command(brief="Tic Tac Toe")
+    @commands.command(brief="Play rock paper scissors, with an optional amount of turns")
     async def rps(self, ctx: aoi.AoiContext, turns: int = 3):
         if turns < 1 or turns > 10:
             await ctx.send_error("Number of turns must be between 1 and 10")
