@@ -54,7 +54,7 @@ class Messages(commands.Cog):
             title="Members who reacted"
         )
 
-    @commands.has_permissions(manage_channels=True)
+    @commands.has_permissions(manage_messages=True)
     @commands.command(
         brief="Send a message with Aoi. Use [this site](https://embed.aoibot.xyz/) to make the embed."
     )
