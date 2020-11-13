@@ -1,9 +1,8 @@
 import inspect
 
+import aoi
 import discord
 from discord.ext import commands
-
-import aoi
 
 
 async def _can_run(_c: commands.Command, ctx: aoi.AoiContext):
@@ -46,15 +45,25 @@ class Help(commands.Cog):
 
     @commands.command(brief="Lists commands within a module", name="commands",
                       aliases=["cmds"])
-    async def cmds(self, ctx: aoi.AoiContext, module: str):
+    async def cmds(self, ctx: aoi.AoiContext, module: str, *, flags: str = None):
+        flags = await ctx.parse_flags(flags, {"all": None})
         cog: commands.Cog = self.bot.get_cog(self.bot.find_cog(module, check_description=True)[0])
         c: commands.Command
+        yes = ":white_check_mark:"
+        no = ":x:"
+        if "all" in flags:
+            built = "\n".join(
+                [f"{yes if await _can_run(c, ctx) else no} **{c.name}** - {c.brief}" for c in cog.get_commands()]
+            )
+        else:
+            built = "\n".join(
+                [f"**{c.name}** - {c.brief}" for c in cog.get_commands() if await _can_run(c, ctx)]
+            )
         await ctx.embed(
             title=f"Commands for {cog.qualified_name} module",
-            description=cog.description + "\n\n" + "\n".join(
-                [f"**{c.name}** - {c.brief}" for c in cog.get_commands() if await _can_run(c, ctx)]
-            ),
-            footer=f"Do {ctx.clean_prefix}help command_name for help on a command"
+            description=cog.description + "\n\n" + built,
+            footer=f"Do {ctx.clean_prefix}help command_name for help on a command, "
+                   f"and {ctx.clean_prefix}cmds {module} --all to view all commands for the module"
         )
 
     @commands.command(brief="Shows help for a command", aliases=["h"])
@@ -74,7 +83,7 @@ class Help(commands.Cog):
                                            ("Command List", f"View Aoi's [command list]"
                                                             f"(https://www.aoibot.xyz/commands.html)"),
                                            ("Voting", f"Vote for Aoi [here]"
-                                                            f"(https://top.gg/bot/738856230994313228)")
+                                                      f"(https://top.gg/bot/738856230994313228)")
                                            ],
                                    not_inline=[2, 3, 4])
         cmd: commands.Command = self.bot.get_command(command.lower())

@@ -116,7 +116,7 @@ class Guilds(commands.Cog):
                 if resp.status != 200:
                     return await ctx.send_error(f"Server responded with a {resp.status}")
                 if "Content-Type" not in resp.headers or resp.headers["Content-Type"] not in \
-                    ("image/gif", "image/jpeg", "image/png"):
+                        ("image/gif", "image/jpeg", "image/png"):
                     return await ctx.send_error(f"That doesn't seem to be an image")
                 buf.write(await resp.content.read())
         buf.seek(0)
