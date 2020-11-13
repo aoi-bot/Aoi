@@ -70,7 +70,8 @@ class AoiBot(commands.Bot):
             "aoi",
             "discord.client",
             "discord.gateway",
-            "discord.http"
+            "discord.http",
+            "discord.ext.commands.core"
         ]:
             logging.getLogger(logger).setLevel(logging.DEBUG if logger == "aoi" else logging.INFO)
             logging.getLogger(logger).addHandler(aoi.LoggingHandler())
@@ -261,11 +262,11 @@ class AoiBot(commands.Bot):
                 except discord.ClientException as e:
                     self.logger.critical(f"An error occurred while loading {path}")
                     self.logger.critical(e.__str__().split(":")[-1].strip())
-                    exit(1)
+                    raise
                 except commands.ExtensionFailed as e:
                     self.logger.critical(f"An error occurred while loading {path}")
                     self.logger.critical(e.__str__().split(":")[-1].strip())
-                    exit(1)
+                    raise
                 self.set_cog_group(cog_name, grp_name)
 
     def convert_json(self, msg: str):  # does not convert placeholders

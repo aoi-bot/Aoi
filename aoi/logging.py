@@ -31,7 +31,8 @@ styles = {
 names = {
     "aoi": Fore.BLUE,
     "discord.client": Fore.GREEN,
-    "discord.gateway": Fore.MAGENTA
+    "discord.gateway": Fore.MAGENTA,
+    "discord.ext.commands.core": Fore.YELLOW
 }
 
 
