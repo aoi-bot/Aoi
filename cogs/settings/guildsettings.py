@@ -63,7 +63,6 @@ class GuildSettings(commands.Cog):
                 return await ctx.send_error("Gain value must be a number between 0 and 50")
         await ctx.send_error("Invalid config")
 
-    @commands.has_permissions(manage_guild=True)
     @commands.command(brief="Lists current configs for the server.")
     async def configs(self, ctx: aoi.AoiContext):
         colors = await self.bot.db.guild_setting(ctx.guild.id)
