@@ -44,9 +44,10 @@ class Help(commands.Cog):
                         thumbnail=self.bot.user.avatar_url)
 
     @commands.command(brief="Lists commands within a module", name="commands",
-                      aliases=["cmds"])
-    async def cmds(self, ctx: aoi.AoiContext, module: str, *, flags: str = None):
-        flags = await ctx.parse_flags(flags, {"all": None})
+                      aliases=["cmds"],
+                      flags={"all": (None, "Include the commands you can't use")})
+    async def cmds(self, ctx: aoi.AoiContext, module: str):
+        flags = ctx.flags
         cog: commands.Cog = self.bot.get_cog(self.bot.find_cog(module, check_description=True)[0])
         c: commands.Command
         yes = ":white_check_mark:"

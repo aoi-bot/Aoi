@@ -36,11 +36,12 @@ class Fun(commands.Cog):
     def description(self) -> str:
         return "Fun! :D"
 
-    @commands.command(brief="Makes a discord minesweeper game")
+    @commands.command(brief="Makes a discord minesweeper game",
+                      flags={"raw": (None, "Show raw text"),
+                             "no-spoiler": (None, "Don't include spoilers")})
     async def minesweeper(self, ctx: aoi.AoiContext, height: Optional[int] = 10,
-                          width: Optional[int] = 10, bombs: Optional[int] = 10, *,
-                          flags=None):
-        flags = await ctx.parse_flags(flags, {"raw": None, "no-spoiler": None, "interactive": None})
+                          width: Optional[int] = 10, bombs: Optional[int] = 10):
+        flags = ctx.flags
         fmt = "```%s```" if "raw" in flags else "%s"
         try:
             await ctx.send(fmt % SpoilerMinesweeper(height, width, bombs).discord_str("no-spoiler" not in flags))
