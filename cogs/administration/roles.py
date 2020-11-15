@@ -205,7 +205,7 @@ class Roles(commands.Cog):
     )
     @commands.command(
         brief="Adds a role to everyone - shows up in `mytasks` and may take a while.",
-        flags={"ignorebots": (None, "Ignore bots"), 
+        flags={"ignorebots": (None, "Ignore bots"),
                "withrole": (discord.Role, "Only adds a role to people with the supplied role")}
     )
     async def roleall(self, ctx: aoi.AoiContext, role: discord.Role):

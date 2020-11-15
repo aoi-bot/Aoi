@@ -1,4 +1,5 @@
 import inspect
+from typing import Optional, Tuple
 
 import aoi
 import discord
@@ -91,10 +92,18 @@ class Help(commands.Cog):
         if not cmd:
             return await ctx.send_error(f"Command `{command}` not found.")
         p = self.bot.permissions_needed_for(cmd.name)
+        flags = cmd.flags
+
+        def format_flag(flag_tup: Tuple[str, Tuple[Optional[type], str]]):
+            if flag_tup[1][0]:
+                return f"◆`--{flag_tup[0]} <{flag_tup[1][0].__name__}>` - {flag_tup[1][1]}"
+            else:
+                return f"◆`--{flag_tup[0]}` - {flag_tup[1][1]}"
+
         await ctx.embed(
             title=cmd.name,
             fields=[
-                       ("Usage", f"`{cmd.name} {cmd.signature or ''}`"),
+                       ("Usage", f"`{cmd.name} {cmd.signature or ''}" + (" [flags]`" if flags else "`")),
                        ("Description", cmd.brief),
                        ("Module", cmd.cog.qualified_name)
                    ] + (
@@ -106,6 +115,9 @@ class Help(commands.Cog):
                    ) + (
                        [("Missing Permissions", "You are missing the permissions to run this command")]
                        if not await _can_run(cmd, ctx) else []
+                   ) + (
+                       [("Flags", "\n".join(map(str, map(format_flag, flags.items()))))]
+                       if flags else []
                    ) + (
                        [("Aliases", ", ".join([f"`{a}`" for a in cmd.aliases]))]
                        if cmd.aliases else []
