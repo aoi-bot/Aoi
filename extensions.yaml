@@ -20,6 +20,7 @@
     "cogs.games": "Minigames"
     "cogs.geolocation": "Geolocation"
     "cogs.fun": "Fun"
+    "cogs.weather": "Weather"
 "Profile/Currency":
     "cogs.user.xp": "XP"
     "cogs.user.profile": "Profile"
