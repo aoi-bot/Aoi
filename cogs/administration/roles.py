@@ -165,11 +165,12 @@ class Roles(commands.Cog):
     @commands.has_permissions(manage_roles=True)
     @commands.command(
         brief="Colors roles as an RGB gradient between colors",
-        aliases=["rolegrad"]
+        aliases=["rolegrad"],
+        flags={"hls": (None, "Use HLS")}
     )
     async def rolegradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor,
-                           roles: Greedy[discord.Role], *, flags: str = ""):
-        hls = "hls" in await ctx.parse_flags(flags, {"hls": None})
+                           roles: Greedy[discord.Role]):
+        hls = "hls" in ctx.flags
         roles: List[discord.Role] = list(roles)
         for role in roles:
             self._check_role(ctx, role)
@@ -203,10 +204,12 @@ class Roles(commands.Cog):
         manage_guild=True
     )
     @commands.command(
-        brief="Adds a role to everyone - shows up in `mytasks` and may take a while."
+        brief="Adds a role to everyone - shows up in `mytasks` and may take a while.",
+        flags={"ignorebots": (None, "Ignore bots"),
+               "withrole": (discord.Role, "Only adds a role to people with the supplied role")}
     )
-    async def roleall(self, ctx: aoi.AoiContext, role: discord.Role, *, flags: str):
-        flags = await ctx.parse_flags(flags, {"ignorebots": None, "withrole": discord.Role})
+    async def roleall(self, ctx: aoi.AoiContext, role: discord.Role):
+        flags = ctx.flags
         ignore_bots = "ignorebots" in flags
         with_role = flags.get("withrole", None)
         if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:

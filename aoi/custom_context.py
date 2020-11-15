@@ -8,7 +8,6 @@ import discord
 import disputils
 from discord.ext import commands
 
-from .errors import FlagError
 from libs.conversions import escape
 
 
@@ -24,32 +23,6 @@ class AoiContext(commands.Context):
     @property
     def clean_prefix(self):
         return escape(self.prefix, self)
-
-    async def parse_flags(self, flags: str, supported: Dict[str, Union[type, None]]) -> Dict[str, Any]:
-        if not flags:
-            return {}
-        valid_flags = {}
-        split = flags.split(" ")
-        while split:
-            current_flag = split.pop(0)
-            if not current_flag.startswith("--"):
-                raise commands.BadArgument(f"Flags must begin with `--`")
-            current_flag = current_flag[2:]
-            if current_flag not in supported:
-                raise FlagError(attempted=current_flag, supported=supported.keys())
-            if supported[current_flag] is None:
-                valid_flags[current_flag] = None
-                continue
-            value = split.pop(0)
-            if supported[current_flag] is discord.Role:
-                try:
-                    converted = await commands.RoleConverter().convert(self, value)
-                except commands.RoleNotFound:
-                    raise commands.CommandError(f"Role `{value}` not found from flag `{current_flag}`")
-                valid_flags[current_flag] = converted
-            else:
-                raise NotImplementedError(f"Type {supported[current_flag].__name__} not implemented")
-        return valid_flags
 
     async def trash_reaction(self, message: discord.Message):
         if len(message.embeds) == 0:

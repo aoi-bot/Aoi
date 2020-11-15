@@ -31,10 +31,3 @@ class CurrencyError(commands.CommandError):
         self.amount_needed: int = kwargs.pop("amount_needed")
         self.is_global: bool = kwargs.pop("is_global")
         super(CurrencyError, self).__init__(*args, **kwargs)
-
-
-class FlagError(commands.CommandError):
-    def __init__(self, *args, **kwargs):
-        self.attempted: str = kwargs.pop("attempted")
-        self.supported: List[str] = kwargs.pop("supported")
-        super(FlagError, self).__init__(*args, **kwargs)
