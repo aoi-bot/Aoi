@@ -20,6 +20,7 @@ import aoi
 from wrappers import gmaps as gmaps, imgur
 from .cmds_gen import generate
 from .database import AoiDatabase
+import ksoftapi
 
 if TYPE_CHECKING:
     from aoi import AoiContext
@@ -86,6 +87,7 @@ class AoiBot(commands.Bot):
         self.weather_gov: str = ""
         self.google: str = ""
         self.nasa: str = ""
+        self.ksoft_api: str = ""
         self.accuweather: str = ""
         self.gmap: Optional[gmaps.GeoLocation] = None
         self.imgur_user: str = ""
@@ -175,7 +177,9 @@ class AoiBot(commands.Bot):
         self.imgur_secret = os.getenv("IMGUR_SECRET")
         self.gmap = gmaps.GeoLocation(self.google)
         self.pixiv_user = os.getenv("PIXIV")
+        self.ksoft_api = os.getenv("KSOFT")
         self.pixiv_password = os.getenv("PIXIV_PASSWORD")
+        self.ksoft: Optional[ksoftapi.Client] = None
 
         self.pixiv.login(self.pixiv_user, self.pixiv_password)
         self.imgur = imgur.Imgur(self.imgur_user)
@@ -224,6 +228,8 @@ class AoiBot(commands.Bot):
             return
 
         generate(self)
+
+        self.ksoft = ksoftapi.Client(self.ksoft_api, loop=self.loop)
 
         await self.connect(reconnect=reconnect)
 
