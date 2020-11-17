@@ -32,7 +32,8 @@ names = {
     "aoi": Fore.BLUE,
     "discord.client": Fore.GREEN,
     "discord.gateway": Fore.MAGENTA,
-    "discord.ext.commands.core": Fore.YELLOW
+    "discord.ext.commands.core": Fore.YELLOW,
+    "discord.http": Fore.RED
 }
 
 
