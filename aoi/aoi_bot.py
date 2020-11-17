@@ -106,6 +106,7 @@ class AoiBot(commands.Bot):
         self.placeholders = PlaceholderManager()
         self.tasks: Dict[discord.Member, List[aoi.AoiTask]] = {}
         self.commands_ran = {}
+        self.ksoft: Optional[ksoftapi.Client] = None
 
         async def command_ran(ctx: aoi.AoiContext):
             self.commands_executed += 1
@@ -179,7 +180,6 @@ class AoiBot(commands.Bot):
         self.pixiv_user = os.getenv("PIXIV")
         self.ksoft_api = os.getenv("KSOFT")
         self.pixiv_password = os.getenv("PIXIV_PASSWORD")
-        self.ksoft: Optional[ksoftapi.Client] = None
 
         self.pixiv.login(self.pixiv_user, self.pixiv_password)
         self.imgur = imgur.Imgur(self.imgur_user)
