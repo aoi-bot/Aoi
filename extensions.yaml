@@ -21,6 +21,7 @@
     "cogs.geolocation": "Geolocation"
     "cogs.fun": "Fun"
     "cogs.weather": "Weather"
+    "cogs.utility": "Utility"
 "Profile/Currency":
     "cogs.user.xp": "XP"
     "cogs.user.profile": "Profile"
