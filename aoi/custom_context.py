@@ -295,10 +295,13 @@ class AoiContext(commands.Context):
         if len(msg.keys()) < 2:  # no embed here:
             return await self.send(content)
         thumbnail = msg.pop("thumbnail", None) if msg else None
+        image = msg.pop("image", None) if msg else None
         msg["description"] = msg.get("description", "_ _")
         embed = discord.Embed.from_dict(msg)
         if thumbnail:
             embed.set_thumbnail(url=thumbnail)
+        if image:
+            embed.set_image(url=image)
         await self.send(
             content=content,
             embed=embed if embed else None
