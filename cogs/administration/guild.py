@@ -29,8 +29,10 @@ class Guilds(commands.Cog):
     @commands.bot_has_permissions(manage_guild=True)
     @commands.has_permissions(manage_guild=True)
     @commands.command(aliases=["guildav", "serverav", "servericon"],
-                      brief="Sets the server's icon")
-    async def serveravatar(self, ctx: aoi.AoiContext, *, url: str):
+                      brief="Sets the server's icon, or show the current.")
+    async def serveravatar(self, ctx: aoi.AoiContext, *, url: str = None):
+        if not url:
+            return await ctx.send(ctx.guild.icon_url)
         async with aiohttp.ClientSession() as sess:
             async with sess.get(url) as resp:
                 await ctx.confirm_coro("Change guild avatar?",
