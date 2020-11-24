@@ -2,13 +2,11 @@ import random
 
 from .base import Game
 
-from libs.conversions import discord_number_emojis as dne
 
 class RPS(Game):
     def __init__(self, ctx, turns):
         self.turns = turns
         super(RPS, self).__init__(ctx)
-
 
     async def play(self):
         def point(a: str, b: str):
@@ -24,7 +22,6 @@ class RPS(Game):
                 "sr": 1,
                 "rs": -1
             }[a + b]
-
 
         conv = {
             "r": "Rock",
