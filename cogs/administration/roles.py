@@ -109,7 +109,8 @@ class Roles(commands.Cog):
 
         for role in roles:
             if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
-                raise aoi.RoleHierarchyError(f"{role.mention} must be below your highest role in order for you to move it.")
+                raise aoi.RoleHierarchyError(f"{role.mention} must be below your highest role in order for "
+                                             f"you to move it.")
             if role >= ctx.me.top_role:
                 raise aoi.RoleHierarchyError(f"{role.mention} must be above my highest role for me to move it.")
         if not await ctx.confirm(f"Move {' '.join(r.name for r in roles)} to position {position}?",
@@ -213,7 +214,8 @@ class Roles(commands.Cog):
         ignore_bots = "ignorebots" in flags
         with_role = flags.get("withrole", None)
         if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
-            raise aoi.RoleHierarchyError(f"{role.mention} must be below your highest role in order for you to delete it.")
+            raise aoi.RoleHierarchyError(f"{role.mention} must be below your highest role in order for "
+                                         f"you to delete it.")
         if role >= ctx.me.top_role:
             raise aoi.RoleHierarchyError(f"{role.mention} must be above my highest role for me to delete it.")
         members: List[discord.Member] = list(filter(lambda x: role.id not in [r.id for r in x.roles], # noqa

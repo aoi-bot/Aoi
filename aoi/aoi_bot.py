@@ -20,6 +20,7 @@ import aoi
 from wrappers import gmaps as gmaps, imgur
 from .cmds_gen import generate
 from .database import AoiDatabase
+import ksoftapi
 
 if TYPE_CHECKING:
     from aoi import AoiContext
@@ -86,6 +87,7 @@ class AoiBot(commands.Bot):
         self.weather_gov: str = ""
         self.google: str = ""
         self.nasa: str = ""
+        self.ksoft_api: str = ""
         self.accuweather: str = ""
         self.gmap: Optional[gmaps.GeoLocation] = None
         self.imgur_user: str = ""
@@ -104,6 +106,7 @@ class AoiBot(commands.Bot):
         self.placeholders = PlaceholderManager()
         self.tasks: Dict[discord.Member, List[aoi.AoiTask]] = {}
         self.commands_ran = {}
+        self.ksoft: Optional[ksoftapi.Client] = None
 
         async def command_ran(ctx: aoi.AoiContext):
             self.commands_executed += 1
@@ -175,6 +178,7 @@ class AoiBot(commands.Bot):
         self.imgur_secret = os.getenv("IMGUR_SECRET")
         self.gmap = gmaps.GeoLocation(self.google)
         self.pixiv_user = os.getenv("PIXIV")
+        self.ksoft_api = os.getenv("KSOFT")
         self.pixiv_password = os.getenv("PIXIV_PASSWORD")
 
         self.pixiv.login(self.pixiv_user, self.pixiv_password)
@@ -224,6 +228,8 @@ class AoiBot(commands.Bot):
             return
 
         generate(self)
+
+        self.ksoft = ksoftapi.Client(self.ksoft_api, loop=self.loop)
 
         await self.connect(reconnect=reconnect)
 
@@ -315,10 +321,13 @@ class AoiBot(commands.Bot):
                 delete_after=delete_after
             )
         thumbnail = msg.pop("thumbnail", None) if msg else None
+        image = msg.pop("image", None) if msg else None
         msg["description"] = msg.get("description", "_ _")
         embed = discord.Embed.from_dict(msg)
         if thumbnail:
             embed.set_thumbnail(url=thumbnail)
+        if image:
+            embed.set_image(url=image)
         await self.get_channel(channel).send(
             content=content,
             embed=embed,

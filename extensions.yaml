@@ -10,6 +10,7 @@
     "cogs.administration.taskmgmt": "TaskManagement"
     "cogs.administration.users": "Users"
     "cogs.settings.guildsettings": "GuildSettings"
+    "cogs.administration.triggers": "Triggers"
 "Misc":
     "cogs.colors": "Colors"
     "cogs.nsfw": "NSFW"
@@ -21,6 +22,7 @@
     "cogs.geolocation": "Geolocation"
     "cogs.fun": "Fun"
     "cogs.weather": "Weather"
+    "cogs.utility": "Utility"
 "Profile/Currency":
     "cogs.user.xp": "XP"
     "cogs.user.profile": "Profile"

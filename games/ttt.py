@@ -12,7 +12,7 @@ class TicTacToe(Game):
     def __init__(self, ctx: aoi.AoiContext):
         super().__init__(ctx)
 
-    async def play(self):
+    async def play(self):  # noqa C901
         board = [[0] * 3 for _ in range(3)]
 
         def _c(x: int) -> Tuple[int, int]:

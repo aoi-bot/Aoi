@@ -28,7 +28,9 @@ class GuildSettings(commands.Cog):
 
     @commands.has_permissions(manage_guild=True)
     @commands.command(brief="Set Aoi's prefix")
-    async def prefix(self, ctx: aoi.AoiContext, *, prefix: str):
+    async def prefix(self, ctx: aoi.AoiContext, *, prefix: str = None):
+        if not prefix:
+            return await ctx.send_ok(f"Prefix is set to `{escape(self.bot.db.prefixes[ctx.guild.id], ctx)}`")
         await self.bot.db.set_prefix(ctx.guild.id, prefix)
         return await ctx.send_ok(f"Prefix set to `{escape(prefix, ctx)}`")
 

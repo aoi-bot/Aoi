@@ -9,7 +9,7 @@ class SpoilerMinesweeper:
     BOMB = -1
     UNCOVERED = -2
 
-    def __init__(self, height: int = 10, width: int = 10, bombs: int = 10):
+    def __init__(self, height: int = 10, width: int = 10, bombs: int = 10):  # noqa C901
         self.board = [[0 for _ in range(width)] for _ in range(height)]
         if bombs > height * width:
             raise MinesweeperError("Number of bombs cannot be bigger than the number of squares")

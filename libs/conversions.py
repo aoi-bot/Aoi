@@ -11,8 +11,10 @@ if TYPE_CHECKING:
 
 num_list = "zero,one,two,three,four,five,six,seven,eight,nine".split(",")
 
+
 def discord_number_emojis(num: int):
     return "".join(f":{num_list[int(n)]}:" for n in str(num))
+
 
 def color_to_string(color: discord.Color) -> str:
     return "".join(hex(n)[2:] for n in color.to_rgb())
