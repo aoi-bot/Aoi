@@ -10,6 +10,7 @@
     "cogs.administration.taskmgmt": "TaskManagement"
     "cogs.administration.users": "Users"
     "cogs.settings.guildsettings": "GuildSettings"
+    "cogs.administration.triggers": "Triggers"
 "Misc":
     "cogs.colors": "Colors"
     "cogs.nsfw": "NSFW"

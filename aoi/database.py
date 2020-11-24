@@ -118,6 +118,13 @@ CREATE TABLE IF NOT EXISTS "rero" (
 CREATE TABLE IF NOT EXISTS "selfrole" (
   "guild" INTEGER NOT NULL,
   "role" INTEGER NOT NULL
+);;
+CREATE TABLE IF NOT EXISTS "roletriggers" (
+  "guild" INTEGER NOT NULL,
+  "role" INTEGER NOT NULL,
+  "channel" INTEGER NOT NULL,
+  "message" TEXT NOT NULL,
+  "type" TEXT NOT NULL
 )
 """
 
