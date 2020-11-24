@@ -38,17 +38,20 @@ class Triggers(commands.Cog):
             else:
                 await self._append_roleremove_trigger(guild, role, channel, message, False)
 
+    @commands.has_permissions(manage_guild=True)
     @commands.command(brief="Set a trigger for a role addition", aliases=["onra"])
     async def onroleadd(self, ctx: aoi.AoiContext, role: discord.Role, channel: discord.TextChannel, *, message: str):
         await self._append_roleadd_trigger(ctx.guild.id, role.id, channel.id, message, True)
         await ctx.send_ok(f"Message will be sent in {channel.mention} when {role.mention} is added.")
 
+    @commands.has_permissions(manage_guild=True)
     @commands.command(brief="Set a trigger for a role removal", aliases=["onrr"])
     async def onroleremove(self, ctx: aoi.AoiContext, role: discord.Role, channel: discord.TextChannel, *,
                            message: str):
         await self._append_roleremove_trigger(ctx.guild.id, role.id, channel.id, message, True)
         await ctx.send_ok(f"Message will be sent in {channel.mention} when {role.mention} is removed.")
 
+    @commands.has_permissions(manage_guild=True)
     @commands.command(brief="Remove a trigger", aliases=["remtr"])
     async def removetrigger(self, ctx: aoi.AoiContext, trigger_type: str, *, arg: str):
         supported_trigger_types = ["addrole", "removerole"]
@@ -67,6 +70,7 @@ class Triggers(commands.Cog):
                 await self._remove_roleremove_trigger(ctx.guild.id, role.id)
             await ctx.send_ok(f"Trigger for {role.mention} removed.")
 
+    @commands.has_permissions(manage_guild=True)
     @commands.command(brief="Lists the role triggers", aliases=["roletr", "roletrigger"])
     async def roletriggers(self, ctx: aoi.AoiContext, for_role: discord.Role = None, add_or_remove: str = None): # noqa C901
         rows = await self.db.execute_fetchall("SELECT * FROM roletriggers WHERE guild=?", (ctx.guild.id,))
