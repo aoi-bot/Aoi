@@ -65,7 +65,7 @@ class Triggers(commands.Cog):
                     return await ctx.send_error(f"There isn't an addrole trigger for {role.mention}")
                 await self._remove_roleadd_trigger(ctx.guild.id, role.id)
             else:
-                if ctx.guild.id not in self.role_add_triggers or role.id not in self.role_add_triggers[ctx.guild.id]:
+                if ctx.guild.id not in self.role_remove_triggers or role.id not in self.role_remove_triggers[ctx.guild.id]:
                     return await ctx.send_error(f"There isn't an removerole trigger for {role.mention}")
                 await self._remove_roleremove_trigger(ctx.guild.id, role.id)
             await ctx.send_ok(f"Trigger for {role.mention} removed.")
