@@ -12,7 +12,7 @@ from typing import Dict, Optional, List, Union, TYPE_CHECKING, Awaitable, Any, C
 
 import aiohttp.client_exceptions
 import discord
-import pixivapi
+# import pixivapi
 from discord.ext import commands, tasks
 from ruamel.yaml import YAML
 
@@ -94,7 +94,7 @@ class AoiBot(commands.Bot):
         self.imgur_secret: str = ""
         self.pixiv_user: str = ""
         self.pixiv_password: str = ""
-        self.pixiv = pixivapi.Client()
+        # self.pixiv = pixivapi.Client()
         self.imgur: Optional[imgur.Imgur] = None
         self.messages = 0
         self.commands_executed = 0
@@ -181,7 +181,7 @@ class AoiBot(commands.Bot):
         self.ksoft_api = os.getenv("KSOFT")
         self.pixiv_password = os.getenv("PIXIV_PASSWORD")
 
-        self.pixiv.login(self.pixiv_user, self.pixiv_password)
+        # self.pixiv.login(self.pixiv_user, self.pixiv_password)
         self.imgur = imgur.Imgur(self.imgur_user)
         await self.db.load()
         self.load_configs()
