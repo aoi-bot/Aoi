@@ -1,20 +1,105 @@
 import asyncio
 import datetime
 import io
+import json
 from typing import List, Optional, Union
 
 import discord
 from discord.ext import commands
+
 import aoi
 
 
-class Chat(commands.Cog):
+class Messages(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
 
     @property
-    def description(self) -> str:
-        return "Commands to deal with chat"
+    def description(self):
+        return "Commands to deal with messages"
+
+    @commands.has_permissions(manage_messages=True)
+    @commands.command(
+        brief="Lists the users who have not reacted to a message"
+    )
+    async def noreactions(self, ctx: aoi.AoiContext, msg: discord.Message):
+        m: discord.Member
+        r: discord.Reaction
+        lst: List[int] = []
+        for r in msg.reactions:
+            for u in await r.users().flatten():
+                if u.id not in lst and not u.bot:
+                    lst.append(u.id)
+        if not lst:
+            return await ctx.send_info("No one reacted")
+        await ctx.paginate(
+            lst=[f"<@{u.id}> | {u}" for u in ctx.guild.members if u.id not in lst],
+            n=30,
+            title="Members who did not react"
+        )
+
+    @commands.has_permissions(manage_messages=True)
+    @commands.command(
+        brief="Lists the users who have reacted to a message"
+    )
+    async def reactions(self, ctx: aoi.AoiContext, msg: discord.Message):
+        m: discord.Member
+        r: discord.Reaction
+        lst: List[int] = []
+        for r in msg.reactions:
+            for u in await r.users().flatten():
+                if u.id not in lst and not u.bot:
+                    lst.append(u.id)
+        if not lst:
+            return await ctx.send_info("No one reacted.")
+        await ctx.paginate(
+            lst=[f"<@{u}> | {ctx.guild.get_member(u)}" for u in lst],
+            n=30,
+            title="Members who reacted"
+        )
+
+    @commands.has_permissions(manage_messages=True)
+    @commands.command(
+        brief="Send a message with Aoi. Use [this site](https://embed.aoibot.xyz/) to make embeds."
+    )
+    async def say(self, ctx: aoi.AoiContext, *, msg: str):
+        await ctx.send_json(msg)
+
+    @commands.has_permissions(manage_messages=True)
+    @commands.command(
+        brief="Edit a message from Aoi. Use [this site](https://embed.aoibot.xyz/) to make embeds."
+    )
+    async def edit(self, ctx: aoi.AoiContext, message: discord.Message, *, msg: str):
+        if ctx.author:
+            msg = self.bot.placeholders.replace(ctx.author, msg)
+        try:
+            msg = json.loads(msg)
+        except json.JSONDecodeError:
+            msg = {
+                "plainText": msg
+            }
+        if isinstance(msg, str):
+            msg = {
+                "plainText": msg
+            }
+        if "plainText" in msg:
+            content = msg.pop("plainText")
+        else:
+            content = None
+        if len(msg.keys()) < 2:  # no embed here:
+            return await message.edit(content=content)
+        thumbnail = msg.pop("thumbnail", None) if msg else None
+        image = msg.pop("image", None) if msg else None
+        msg["description"] = msg.get("description", "_ _")
+        embed = discord.Embed.from_dict(msg)
+        if thumbnail:
+            embed.set_thumbnail(url=thumbnail)
+        if image:
+            embed.set_image(url=image)
+        await message.edit(
+            content=content,
+            embed=embed
+        )
 
     @commands.has_permissions(manage_messages=True)
     @commands.command(brief="Delete a message")
@@ -127,8 +212,5 @@ class Chat(commands.Cog):
 
         await ctx.send_ok(confirmation)
 
-
-
-
 def setup(bot: aoi.AoiBot) -> None:
-    bot.add_cog(Chat(bot))
+    bot.add_cog(Messages(bot))

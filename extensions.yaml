@@ -11,12 +11,11 @@
     "cogs.administration.users": "Users"
     "cogs.settings.guildsettings": "GuildSettings"
     "cogs.administration.triggers": "Triggers"
-    "cogs.administration.chat": "Chat"
+    "cogs.administration.messages": "Messages"
 "Misc":
     "cogs.colors": "Colors"
     "cogs.nsfw": "NSFW"
     "cogs.math": "Math"
-    "cogs.messages": "Messages"
     "cogs.searches": "Searches"
     "cogs.nasa": "Nasa"
     "cogs.games": "Minigames"
