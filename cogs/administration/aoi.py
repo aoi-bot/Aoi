@@ -82,7 +82,7 @@ class Aoi(commands.Cog):
 
     @commands.is_owner()
     @commands.command(
-        brief="Log AOI out"
+        brief="Log Aoi out"
     )
     async def die(self, ctx: aoi.AoiContext):
         await self.bot.db.close()
@@ -98,7 +98,7 @@ class Aoi(commands.Cog):
 
     @commands.is_owner()
     @commands.command(
-        brief="List servers this server is part of"
+        brief="List servers the bot is part of"
     )
     async def guildlist(self, ctx: aoi.AoiContext):
         await ctx.paginate(
