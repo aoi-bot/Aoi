@@ -25,6 +25,10 @@ import ksoftapi
 if TYPE_CHECKING:
     from aoi import AoiContext
 
+class FakeUser(discord.User):
+    def __init__(self, *, state, data):
+        super().__init__(state=state, data=data)
+        self.name = ""
 
 class PlaceholderManager:
     def user_name(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
@@ -146,7 +150,7 @@ class AoiBot(commands.Bot):
     async def on_message(self, message: discord.Message):
         ctx: aoi.AoiContext = await self.get_context(message, cls=aoi.AoiContext)
         await self.invoke(ctx)
-        if not ctx.command and not message.author.bot:
+        if not ctx.command and not message.author.bot and message.guild:
             await self.db.ensure_xp_entry(message)
             await self.db.add_xp(message)
             await self.db.add_global_currency(message)

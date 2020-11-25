@@ -10,7 +10,7 @@ import aoi
 from libs.conversions import dhm_notation
 
 
-class Aoi(commands.Cog):
+class Bot(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
         self.mem: int = 0
@@ -67,7 +67,7 @@ class Aoi(commands.Cog):
                         ],
                         thumbnail=self.bot.user.avatar_url)
 
-    @commands.command(brief="Gives a link to invite Aoi to your server")
+    @commands.command(brief=f"Gives a link to invite #BOT# to your server")
     async def invite(self, ctx: aoi.AoiContext):
         permissions_int = 268659776
         invite_url = f"https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=" \
@@ -75,16 +75,17 @@ class Aoi(commands.Cog):
         await ctx.send_info(f"Invite me to your server [here]({invite_url})")
 
     @commands.command(
-        brief="Shows Aoi's latency to discord"
+        brief="Shows #BOT#'s latency to discord"
     )
     async def ping(self, ctx: aoi.AoiContext):
         await ctx.send_info(f":ping_pong: {round(self.bot.latency * 1000)}ms")
 
     @commands.is_owner()
     @commands.command(
-        brief="Log AOI out"
+        brief="Log #BOT# out"
     )
     async def die(self, ctx: aoi.AoiContext):
+        await ctx.send_ok("Bye :(")
         await self.bot.db.close()
         await self.bot.logout()
 
@@ -98,12 +99,12 @@ class Aoi(commands.Cog):
 
     @commands.is_owner()
     @commands.command(
-        brief="List servers this server is part of"
+        brief="List servers the bot is part of"
     )
     async def guildlist(self, ctx: aoi.AoiContext):
         await ctx.paginate(
             [f"{g.id}\n{g.name}\n" for g in self.bot.guilds],
-            title="Servers Aoi is in",
+            title=f"Servers {self.bot.user.name if self.bot.user else ''} is in",
             n=5
         )
 
@@ -164,4 +165,4 @@ class Aoi(commands.Cog):
 
 
 def setup(bot: aoi.AoiBot) -> None:
-    bot.add_cog(Aoi(bot))
+    bot.add_cog(Bot(bot))

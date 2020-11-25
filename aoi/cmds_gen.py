@@ -94,4 +94,4 @@ def generate(bot: AoiBot):
                         </div></div></div>
                     <div>
                 </div>
-        """)
+        """.replace("#BOT#", "Aoi"))
