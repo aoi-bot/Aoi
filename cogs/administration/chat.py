@@ -1,6 +1,7 @@
 import asyncio
 import datetime
-from typing import List, Optional
+import io
+from typing import List, Optional, Union
 
 import discord
 from discord.ext import commands
@@ -14,6 +15,48 @@ class Chat(commands.Cog):
     @property
     def description(self) -> str:
         return "Commands to deal with chat"
+
+    @commands.has_permissions(manage_messages=True)
+    @commands.cooldown(1, 30, commands.BucketType.channel)
+    @commands.command(brief="Saves chat in a txt file. Limit can be a message to stop at or a number of messages")
+    async def savechat(self, ctx: aoi.AoiContext, channel: Optional[discord.TextChannel],
+                       limit: Union[int, discord.Message]):
+        time = datetime.datetime.now()
+        channel = channel or ctx.channel
+        await ctx.trigger_typing()
+        # fetch the messages first, in blocks
+        current_message: Optional[discord.Message]
+        if isinstance(limit, int):
+            messages: List[discord.Message] = (await channel.history(limit=min(limit, 1000)).flatten())[::-1]
+        else:
+            messages: List[discord.Message] = \
+                (await channel.history(limit=1000, after=limit).flatten())[::-1]
+        buf = io.StringIO()
+        buf.write(f"Channel save of {channel.name} [{channel.id}] triggered by {ctx.author} [{ctx.author.id}] on "
+                  f"{datetime.datetime.now().strftime('%x %X')}. The messages go from "
+                  f"{messages[0].created_at.strftime('%x %X')} "
+                  f"to {messages[-1].created_at.strftime('%x %X')}\n\n")
+        seen_ids = []
+        seen_dates = []
+        for m in messages:
+            date = m.created_at.strftime("%x")
+            if date not in seen_dates:
+                seen_dates.append(date)
+                buf.write("="*10 + date + "="*10)
+            buf.write(f"\n[{m.created_at.strftime('%X')}] ")
+            if m.author.id not in seen_ids:
+                seen_ids.append(m.author.id)
+                buf.write(f"[{m.author} | {m.author.id}] ")
+            else:
+                buf.write(f"[{m.author}]")
+            if m.author.bot:
+                buf.write(f" [BOT]")
+            content = " " + m.content
+            buf.write(f":{content.splitlines(keepends=False)[0]}\n")
+            buf.write("\n".join(f"      {line}" for line in content.splitlines(keepends=False)[1:]))
+        buf.seek(0)
+        await ctx.send(content=f"Saved {len(messages)} in {(datetime.datetime.now() - time).seconds} s",
+                       file=discord.File(buf, filename="chat-save.txt"))
 
     @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_channels=True, manage_messages=True)
@@ -38,7 +81,7 @@ class Chat(commands.Cog):
             async for current_message in channel.history(limit=min(100, n - len(messages)), before=last_message):
                 if current_message.id == ctx.message.id:
                     continue
-                if log and  current_message.id == msg.id:
+                if log and current_message.id == msg.id:
                     continue
                 last_message = current_message
                 if (datetime.datetime.now() - current_message.created_at).days >= 13:
