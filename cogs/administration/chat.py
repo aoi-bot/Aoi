@@ -17,6 +17,11 @@ class Chat(commands.Cog):
         return "Commands to deal with chat"
 
     @commands.has_permissions(manage_messages=True)
+    @commands.command(brief="Delete a message")
+    async def delete(self, ctx: aoi.AoiContext, message: discord.Message, delay: int = 0):
+        await message.delete(delay=delay)
+
+    @commands.has_permissions(manage_messages=True)
     @commands.cooldown(1, 30, commands.BucketType.channel)
     @commands.command(brief="Saves chat in a txt file. Limit can be a message to stop at or a number of messages")
     async def savechat(self, ctx: aoi.AoiContext, channel: Optional[discord.TextChannel],
