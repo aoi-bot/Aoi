@@ -60,14 +60,14 @@ class Messages(commands.Cog):
 
     @commands.has_permissions(manage_messages=True)
     @commands.command(
-        brief="Send a message with Aoi. Use [this site](https://embed.aoibot.xyz/) to make embeds."
+        brief="Send a message with #BOT#. Use [this site](https://embed.aoibot.xyz/) to make embeds."
     )
     async def say(self, ctx: aoi.AoiContext, *, msg: str):
         await ctx.send_json(msg)
 
     @commands.has_permissions(manage_messages=True)
     @commands.command(
-        brief="Edit a message from Aoi. Use [this site](https://embed.aoibot.xyz/) to make embeds."
+        brief="Edit a message from #BOT#. Use [this site](https://embed.aoibot.xyz/) to make embeds."
     )
     async def edit(self, ctx: aoi.AoiContext, message: discord.Message, *, msg: str):
         if ctx.author:

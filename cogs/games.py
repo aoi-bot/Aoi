@@ -10,7 +10,7 @@ class Minigames(commands.Cog):
 
     @property
     def description(self) -> str:
-        return "Minigames to play with Aoi or others"
+        return f"Minigames to play with {self.bot.user.name if self.bot.user else ''} or others"
 
     @commands.command(brief="Play tic tac toe", aliases=["ttt"])
     async def tictactoe(self, ctx: aoi.AoiContext):

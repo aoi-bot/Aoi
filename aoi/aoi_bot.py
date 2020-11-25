@@ -25,6 +25,10 @@ import ksoftapi
 if TYPE_CHECKING:
     from aoi import AoiContext
 
+class FakeUser(discord.User):
+    def __init__(self, *, state, data):
+        super().__init__(state=state, data=data)
+        self.name = ""
 
 class PlaceholderManager:
     def user_name(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa

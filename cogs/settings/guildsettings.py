@@ -12,7 +12,7 @@ class GuildSettings(commands.Cog):
 
     @property
     def description(self):
-        return "Change and view Aoi's configuration in your server"
+        return f"Change and view {self.bot.user.name if self.bot.user else ''}'s configuration in your server"
 
     async def okcolor(self, ctx: aoi.AoiContext, color: discord.Color):
         await self.bot.db.set_ok_color(ctx.guild.id, conversions.color_to_string(color))
@@ -27,7 +27,7 @@ class GuildSettings(commands.Cog):
         await ctx.send_ok("Color changed!")
 
     @commands.has_permissions(manage_guild=True)
-    @commands.command(brief="Set Aoi's prefix")
+    @commands.command(brief="Set #BOT#'s prefix")
     async def prefix(self, ctx: aoi.AoiContext, *, prefix: str = None):
         if not prefix:
             return await ctx.send_ok(f"Prefix is set to `{escape(self.bot.db.prefixes[ctx.guild.id], ctx)}`")
@@ -70,7 +70,7 @@ class GuildSettings(commands.Cog):
         colors = await self.bot.db.guild_setting(ctx.guild.id)
         gain = await self.bot.db.get_currency_gain(ctx.guild)
         await ctx.embed(
-            title="Aoi Configs",
+            title=f"{self.bot.user.name if self.bot.user else ''} Configs",
             fields=[
                 ("Embed Colors", f"ErrorColor: `{conversions.hex_color_to_string(colors.error_color)}`\n"
                                  f"InfoColor: `{conversions.hex_color_to_string(colors.info_color)}`\n"

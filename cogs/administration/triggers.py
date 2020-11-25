@@ -19,7 +19,7 @@ class Triggers(commands.Cog):
 
     @property
     def description(self) -> str:
-        return "Add custom triggers to Aoi"
+        return f"Add custom triggers to {self.bot.user.name if self.bot.user else ''}"
 
     async def dbload(self):
         await self.bot.wait_until_ready()

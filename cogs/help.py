@@ -29,7 +29,7 @@ class Help(commands.Cog):
     def description(self):
         return "Help module"
 
-    @commands.command(brief="Lists Aoi's modules", aliases=["mdls"])
+    @commands.command(brief="Lists #BOT#'s modules", aliases=["mdls"])
     async def modules(self, ctx: aoi.AoiContext):
         s = ""
         for grp_name, cogs in self.bot.cog_groups.items():
@@ -55,11 +55,18 @@ class Help(commands.Cog):
         no = ":x:"
         if "all" in flags:
             built = "\n".join(
-                [f"{yes if await _can_run(c, ctx) else no} **{c.name}** - {c.brief}" for c in cog.get_commands()]
+                [
+                    f"{yes if await _can_run(c, ctx) else no} **{c.name}** - "
+                    f"{c.brief.replace('#BOT#',self.bot.user.name)}"
+                    for c in cog.get_commands()
+                ]
             )
         else:
             built = "\n".join(
-                [f"**{c.name}** - {c.brief}" for c in cog.get_commands() if await _can_run(c, ctx)]
+                [
+                    f"**{c.name}** - {c.brief.replace('#BOT#',self.bot.user.name)}"
+                    for c in cog.get_commands() if await _can_run(c, ctx)
+                ]
             )
         await ctx.embed(
             title=f"Commands for {cog.qualified_name} module",
@@ -71,22 +78,26 @@ class Help(commands.Cog):
     @commands.command(brief="Shows help for a command", aliases=["h"])
     async def help(self, ctx: aoi.AoiContext, command: str = None):
         if not command:
-            return await ctx.embed(title="Aoi Help",
-                                   fields=[("Module List", f"`{ctx.clean_prefix}modules` to view "
-                                                           f"the list of Aoi's modules"),
-                                           ("Module Commands", f"`{ctx.clean_prefix}commands module_name` "
-                                                               f"to view commands in a module"),
-                                           ("Command Help", f"`{ctx.clean_prefix}help command_name` to "
-                                                            f"view help for a command"),
-                                           ("Other Guides", f"`{ctx.clean_prefix}cmds guides` to "
-                                                            f"view the guides"),
-                                           ("Support Server", f"Still need help? Join our [support "
-                                                              f"server](https://discord.gg/pCgEj8t)"),
-                                           ("Command List", f"View Aoi's [command list]"
-                                                            f"(https://www.aoibot.xyz/commands.html)"),
+            return await ctx.embed(title="Help",
+                                   fields=
+                                   [("Module List", f"`{ctx.clean_prefix}modules` to view "
+                                                    f"the list of {self.bot.user.name if self.bot.user else ''}'s modules"),
+                                    ("Module Commands", f"`{ctx.clean_prefix}commands module_name` "
+                                                        f"to view commands in a module"),
+                                    ("Command Help", f"`{ctx.clean_prefix}help command_name` to "
+                                                     f"view help for a command"),
+                                    ("Other Guides", f"`{ctx.clean_prefix}cmds guides` to "
+                                                     f"view the guides"),
+                                    ("Support Server", f"Still need help? Join our [support "
+                                                       f"server](https://discord.gg/pCgEj8t)"),
+                                    ("Command List", f"View {self.bot.user.name if self.bot.user else ''}'s [command list]"
+                                                     f"(https://www.aoibot.xyz/commands.html)"),
+                                    ] + (
+                                       [
                                            ("Voting", f"Vote for Aoi [here]"
                                                       f"(https://top.gg/bot/738856230994313228)")
-                                           ],
+                                       ] if self.bot.user.id == 738856230994313228 else []
+                                   ),
                                    not_inline=[2, 3, 4])
         cmd: commands.Command = self.bot.get_command(command.lower())
         if not cmd:
@@ -104,7 +115,7 @@ class Help(commands.Cog):
             title=cmd.name,
             fields=[
                        ("Usage", f"`{cmd.name} {cmd.signature or ''}" + (" [flags]`" if flags else "`")),
-                       ("Description", cmd.brief),
+                       ("Description", cmd.brief.replace("#BOT#", self.bot.user.name if self.bot.user else '')),
                        ("Module", cmd.cog.qualified_name)
                    ] + (
                        [("User permissions needed",
