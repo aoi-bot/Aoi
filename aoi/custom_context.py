@@ -126,6 +126,8 @@ class AoiContext(commands.Context):
         return message
 
     async def get_color(self, typ: int):
+        if not self.guild:
+            return discord.Color([0x0000ff, 0xff0000, 0x00cc00][typ])
         if typ == 0:
             return discord.Color((await self.bot.db.guild_setting(self.guild.id)).info_color)
         if typ == 1:
