@@ -2,6 +2,7 @@ import asyncio
 import logging
 import os
 import sys
+import traceback
 
 import discord
 import dotenv
@@ -71,5 +72,8 @@ async def permission_check(ctx: aoi.AoiContext):  # noqa: C901
                                    f"is disallowing you from this command")
     return True
 
-
-bot.run(os.getenv("TOKEN"))
+try:
+    bot.run(os.getenv("TOKEN"))
+except Exception as error:
+    traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+    exit(1)
