@@ -36,6 +36,8 @@ bot.load_extensions()
 
 @bot.check
 async def permission_check(ctx: aoi.AoiContext):  # noqa: C901
+    if not ctx.guild:
+        return True
     can_use = True
     current_n = 0
 
