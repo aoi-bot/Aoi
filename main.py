@@ -21,6 +21,8 @@ dotenv.load_dotenv(".env")
 
 
 def get_prefix(_bot: aoi.AoiBot, message: discord.Message):
+    if not message.guild:
+        return commands.when_mentioned_or(",")(_bot, message)
     if message.guild.id not in _bot.db.prefixes:
         asyncio.create_task(_bot.db.guild_setting(message.guild.id))
         return commands.when_mentioned_or(",")(_bot, message)
