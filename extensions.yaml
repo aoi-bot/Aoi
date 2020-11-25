@@ -11,6 +11,7 @@
     "cogs.administration.users": "Users"
     "cogs.settings.guildsettings": "GuildSettings"
     "cogs.administration.triggers": "Triggers"
+    "cogs.administration.chat": "Chat"
 "Misc":
     "cogs.colors": "Colors"
     "cogs.nsfw": "NSFW"
