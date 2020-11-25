@@ -85,6 +85,7 @@ class Bot(commands.Cog):
         brief="Log #BOT# out"
     )
     async def die(self, ctx: aoi.AoiContext):
+        await ctx.send_ok("Bye :(")
         await self.bot.db.close()
         await self.bot.logout()
 
