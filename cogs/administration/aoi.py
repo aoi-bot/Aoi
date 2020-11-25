@@ -10,7 +10,7 @@ import aoi
 from libs.conversions import dhm_notation
 
 
-class Aoi(commands.Cog):
+class Bot(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
         self.mem: int = 0
@@ -164,4 +164,4 @@ class Aoi(commands.Cog):
 
 
 def setup(bot: aoi.AoiBot) -> None:
-    bot.add_cog(Aoi(bot))
+    bot.add_cog(Bot(bot))
