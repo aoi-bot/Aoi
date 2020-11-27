@@ -1,3 +1,4 @@
+from __future__ import annotations
 import colorsys
 import datetime
 import math
@@ -10,7 +11,8 @@ import webcolors
 from discord.ext import commands
 from discord.ext.commands import BadArgument
 
-import aoi
+if typing.TYPE_CHECKING:
+    from aoi.custom_context import AoiContext
 
 
 def allowed_strings(*values, preserve_case: bool = False) -> typing.Callable[[str], str]:
@@ -160,7 +162,7 @@ class AoiColor:
         self.b = b
 
     @classmethod
-    async def convert(cls, ctx: aoi.AoiContext, arg: str) -> "AoiColor":
+    async def convert(cls, ctx: AoiContext, arg: str) -> "AoiColor":
         orig = arg
         arg = arg.lower().strip("#x")
         if arg.startswith("0x"):
@@ -203,7 +205,7 @@ class FuzzyAoiColor(AoiColor):
         self.attempt = attempt
 
     @classmethod
-    async def convert(cls, ctx: aoi.AoiContext, arg: str) -> "AoiColor":
+    async def convert(cls, ctx: AoiContext, arg: str) -> "AoiColor":
         orig = arg
         arg = arg.lower().strip("#x")
         if arg.startswith("0x"):

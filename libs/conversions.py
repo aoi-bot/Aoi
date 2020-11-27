@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import re
 from datetime import timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
+from libs.converters import AoiColor
 
 import discord
 
@@ -16,8 +17,8 @@ def discord_number_emojis(num: int):
     return "".join(f":{num_list[int(n)]}:" for n in str(num))
 
 
-def color_to_string(color: discord.Color) -> str:
-    return "".join(hex(n)[2:] for n in color.to_rgb())
+def color_to_string(color: Union[discord.Color, AoiColor]) -> str:
+    return "".join(hex(n)[2:].rjust(2, "0") for n in color.to_rgb())
 
 
 def hex_color_to_string(color: int) -> str:

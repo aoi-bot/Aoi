@@ -4,6 +4,7 @@ from discord.ext import commands
 import aoi
 from libs import conversions
 from libs.conversions import escape
+from libs.converters import AoiColor
 
 
 class GuildSettings(commands.Cog):
@@ -14,15 +15,15 @@ class GuildSettings(commands.Cog):
     def description(self):
         return f"Change and view {self.bot.user.name if self.bot.user else ''}'s configuration in your server"
 
-    async def okcolor(self, ctx: aoi.AoiContext, color: discord.Color):
+    async def okcolor(self, ctx: aoi.AoiContext, color: AoiColor):
         await self.bot.db.set_ok_color(ctx.guild.id, conversions.color_to_string(color))
         await ctx.send_ok("Color changed!")
 
-    async def infocolor(self, ctx: aoi.AoiContext, color: discord.Color):
+    async def infocolor(self, ctx: aoi.AoiContext, color: AoiColor):
         await self.bot.db.set_info_color(ctx.guild.id, conversions.color_to_string(color))
         await ctx.send_ok("Color changed!")
 
-    async def errorcolor(self, ctx: aoi.AoiContext, color: discord.Color):
+    async def errorcolor(self, ctx: aoi.AoiContext, color: AoiColor):
         await self.bot.db.set_error_color(ctx.guild.id, conversions.color_to_string(color))
         await ctx.send_ok("Color changed!")
 
@@ -44,9 +45,8 @@ class GuildSettings(commands.Cog):
             "infocolor": self.infocolor
         }
         if setting in color_funcs:
-            conv = commands.ColourConverter()
             try:
-                color: discord.Colour = await conv.convert(ctx, value)
+                color: AoiColor = await AoiColor.convert(ctx, value)
             except commands.CommandError:
                 return await ctx.send_error("Invalid color")
             # noinspection PyArgumentList
