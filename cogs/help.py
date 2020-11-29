@@ -134,7 +134,7 @@ class Help(commands.Cog):
                        if cmd.aliases else []
                    ),
             footer="<> indicate required parameters, [] indicate optional parameters",
-            not_inline=[0, 1, 2, 3]
+            not_inline=[0, 1, 2, 3, 4]
         )
 
 
