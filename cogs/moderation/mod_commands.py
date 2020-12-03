@@ -27,7 +27,7 @@ class Moderation(commands.Cog):
     def get_action_embed(self, ctx: aoi.AoiContext, member: Union[discord.Member, discord.User],
                          typ: int, reason: str = None, extra: str = None) -> discord.Embed:
         action = ["banned", "kicked", "muted", "warned", "unbanned", "soft-banned"][typ]
-        return discord.Embed(title=f"User {action}", timestamp=datetime.now(), description=reason + f"\n\n{extra}"). \
+        return discord.Embed(title=f"User {action}", timestamp=datetime.now(), description=f"{reason}\n\n{extra}"). \
             add_field(name="User", value=str(member)). \
             add_field(name="ID", value=str(member.id)). \
             add_field(name="Staff Member", value=ctx.author.mention). \
@@ -55,6 +55,15 @@ class Moderation(commands.Cog):
         await self.bot.db.add_user_ban(member.id, ctx, reason)
 
     @commands.has_permissions(ban_members=True)
+    @commands.command(brief="Softbans a member from the server")
+    async def softban(self, ctx: aoi.AoiContext, member: discord.Member, *, reason: str = None):
+        self._check_role(ctx, member, "softban")
+        await member.ban(reason=f"{reason} | {ctx.author.id} {ctx.author} | Softban")
+        await ctx.guild.unban(member, reason=f"Softban")
+        await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentType.SOFTBAN, reason))
+        await self.bot.db.add_punishment(member.id, ctx.guild.id, ctx.author.id, PunishmentType.SOFTBAN, reason)
+
+    @commands.has_permissions(ban_members=True)
     @commands.command(brief="Unbans a member from the server")
     async def unban(self, ctx: aoi.AoiContext, user: Union[discord.User, int], *, reason: str = None):
         if isinstance(user, discord.User):
@@ -67,9 +76,10 @@ class Moderation(commands.Cog):
                 break
         else:
             return await ctx.send_error(f"User ID {user} not banned from this server")
+        user = await self.bot.fetch_unknown_user(user)
         await ctx.guild.unban(found.user, reason=f"{reason} | {ctx.author.id} {ctx.author}")
         await ctx.send(embed=self.get_action_embed(ctx, user, PunishmentType.UNBAN, reason))
-        await self.bot.db.add_punishment(user, ctx.guild.id, ctx.author.id, PunishmentType.UNBAN, reason)
+        await self.bot.db.add_punishment(user.id, ctx.guild.id, ctx.author.id, PunishmentType.UNBAN, reason)
 
     @commands.has_permissions(ban_members=True)
     @commands.command(brief="Bans a member from the server")
