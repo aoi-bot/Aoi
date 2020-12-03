@@ -12,6 +12,8 @@
     "cogs.settings.guildsettings": "GuildSettings"
     "cogs.administration.triggers": "Triggers"
     "cogs.administration.messages": "Messages"
+"Moderation":
+    "cogs.moderation.mod_commands": "Moderation"
 "Misc":
     "cogs.colors": "Colors"
     "cogs.nsfw": "NSFW"

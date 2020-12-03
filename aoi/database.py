@@ -145,7 +145,7 @@ class _RoleShopItem:
 
 
 @dataclass(frozen=True)
-class _Punishment:
+class Punishment:
     user: int
     guild: int
     staff: int
@@ -159,6 +159,8 @@ class PunishmentType:
     KICK = 1
     MUTE = 2
     WARN = 3
+    UNBAN = 4
+    SOFTBAN = 5
 
 
 @dataclass()
@@ -747,11 +749,11 @@ class AoiDatabase:
 
     # region # Moderation
 
-    async def lookup_punishments(self, user: int) -> List[_Punishment]:
+    async def lookup_punishments(self, user: int) -> List[Punishment]:
         cursor = await self.db.execute("SELECT * from punishments where user=?", (user,))
         punishments = await cursor.fetchall()
         return [
-            _Punishment(
+            Punishment(
                 *p[:5],
                 time=datetime.datetime.fromtimestamp(p[5])
             )
