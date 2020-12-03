@@ -49,3 +49,4 @@ class RPS(Game):
         await self.ctx.send(
             f"{phrase}\n**Game over**\n{final[1 if comp == user else 2 if comp > user else 0]}\n\n"
             f"**Final Score**\n{self.score(comp, user)}")
+        return 1 if comp == user else 2 if comp > user else 0
