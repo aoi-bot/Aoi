@@ -1,0 +1,10 @@
+---
+hug:
+  trigger: hug
+  responses:
+    - "{user} hugged {target}"
+    - "{target} got a hug from {user}. Awww!"
+  images:
+    - "https://media1.tenor.com/images/351d47a904045e930dec5e0a5b18e84b/tenor.gif"
+    - "https://media1.tenor.com/images/8bf79639f0d6ebecfbf3f0c7c1fa8cc9/tenor.gif"
+    - "https://media1.tenor.com/images/2e0cea385c98b63a21ae2f483472e9e3/tenor.gif"
