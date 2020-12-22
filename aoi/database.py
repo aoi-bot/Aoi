@@ -128,6 +128,15 @@ CREATE TABLE IF NOT EXISTS "roletriggers" (
 )
 """
 
+MIGRATIONS = {
+    1: """
+ALTER TABLE guild_settings ADD COLUMN currency_img TEXT;
+ALTER TABLE guild_settings ADD COLUMN currency_chance INTEGER;
+ALTER TABLE guild_settings ADD COLUMN currency_max INTEGER;
+ALTER TABLE guild_settings ADD COLUMN currency_min INTEGER;
+ALTER TABLE guild_settings ADD COLUMN currency_gen_channels TEXT;
+    """
+}
 
 @dataclass
 class _GuildSetting:
@@ -220,6 +229,16 @@ class AoiDatabase:
         self.global_currency_cooldown = commands.CooldownMapping.from_cooldown(
             1.0, 60.0, commands.BucketType.user)
 
+    async def perform_migrations(self):
+        version = (await (await self.db.execute("pragma user_version")).fetchone())[0]
+        self.bot.logger.info(f"database:Version {version} found")
+        for i in sorted(MIGRATIONS.keys()):
+            if i > version:
+                self.bot.logger.info(f"database:Upgrading to version {version + 1}")
+                [await self.db.execute(_) for _ in MIGRATIONS[i].splitlines() if _]
+                await self.db.execute(f"pragma user_version={i}")
+                await self.db.commit()
+
     async def load(self):  # noqa: C901
         self.bot.logger.info("database:Connecting to database")
         self.db = await aiosqlite.connect("database.db")
@@ -239,6 +258,8 @@ class AoiDatabase:
         for r in rows:
             self.perm_chains[r[0]] = r[1].split(";")
         self.bot.logger.info("database:Database loaded")
+
+        await self.perform_migrations()
 
         cursor = await self.db.execute("SELECT * from messages")
         rows = await cursor.fetchall()
