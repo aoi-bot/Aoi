@@ -76,7 +76,7 @@ class AoiContext(commands.Context):
                 title=title,
                 description=f"{_wrap_user(user) if user else ''}{message}",
                 colour=await self.get_color(self.INFO)
-            ))
+            ).set_footer(text=f"Important announcement, do {self.clean_prefix}migration to view"))
         if trash:
             await self.trash_reaction(msg)
         else:
@@ -92,7 +92,7 @@ class AoiContext(commands.Context):
                 title=title,
                 description=f"{_wrap_user(user) if user else ''}{message}",
                 colour=await self.get_color(self.OK)
-            ))
+            ).set_footer(text=f"Important announcement, do {self.clean_prefix}migration to view"))
         if trash:
             await self.trash_reaction(msg)
         else:
@@ -107,8 +107,8 @@ class AoiContext(commands.Context):
             embed=discord.Embed(
                 title=title,
                 description=f"{_wrap_user(user) if user else ''}{message}",
-                colour=await self.get_color(self.ERROR)
-            ))
+                colour=await self.get_color(self.ERROR),
+            ).set_footer(text=f"Important announcement, do {self.clean_prefix}migration to view"))
         if trash:
             await self.trash_reaction(msg)
         else:
@@ -170,6 +170,7 @@ class AoiContext(commands.Context):
                 embed.set_image(url="attachment://image.png")
         else:
             f = None
+        footer = (footer or "") + f"Important announcement, do {self.clean_prefix}migration to view"
         if footer:
             embed.set_footer(text=footer)
         if thumbnail:

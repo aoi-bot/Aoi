@@ -9,6 +9,16 @@ from discord.ext import commands, tasks
 import aoi
 from libs.conversions import dhm_notation
 
+MESSAGE = """
+Due to some recent technical issues, I'll be moving both Aoi to a new account under a different discord.
+
+Here's what this means for you -
+
+- Aoi will go offline January 2nd, 2021. A few minutes later, her replacement will come online.
+- The replacement Aoi will have to be invited to your server - but will require no setup. It'll just be using the previous bots' settings.
+
+Join the [support server](https://discord.gg/A7spueHq38) for more info, and to invite the new bot.
+"""
 
 class Bot(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
@@ -23,6 +33,11 @@ class Bot(commands.Cog):
     @property
     def description(self):
         return "Commands having to do with the bot herself"
+
+    @commands.command(brief="Announcement")
+    async def migration(self, ctx: aoi.AoiContext):
+        await ctx.embed(description=MESSAGE)
+
 
     @tasks.loop(minutes=2)
     async def resource_loop(self):
