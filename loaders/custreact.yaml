@@ -1,6 +1,5 @@
 ---
 hug:
-  trigger: hug
   responses:
     - "{user} hugged {target}"
     - "{target} got a hug from {user}. Awww!"
