@@ -10,6 +10,7 @@ import ksoftapi
 from PIL import Image, ImageDraw
 from ksoftapi.models import LyricResult
 
+import aiohttp
 import aoi
 import discord
 from discord.ext import commands
@@ -185,6 +186,24 @@ class Fun(commands.Cog):
                      .set_thumbnail(url=lyr.album_art)
              ]
         )
+
+    @commands.command()
+    async def megumin(self, ctx : aoi.AoiContext):
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get('https://waifu.pics/api/sfw/megumin') as r:
+
+                megumin = (await r.json())['url']
+
+                await ctx.embed(image=megumin)
+    
+    @commands.command()
+    async def shinobu(self, ctx : aoi.AoiContext):
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get('https://waifu.pics/api/sfw/shinobu') as r:
+
+                shinobu = (await r.json())['url']
+
+                await ctx.embed(image=shinobu)
 
 
 def setup(bot: aoi.AoiBot) -> None:
