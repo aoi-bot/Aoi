@@ -9,3 +9,6 @@ colorama~=0.4.4
 sympy~=1.6.2
 psutil~=5.7.2
 webcolors~=1.11.1
+discord~=1.0.1
+ksoftapi~=0.2.4a0
+ruamel.yaml
