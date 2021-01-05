@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import List
+from typing import List, Dict
 
 import aiohttp
 
@@ -9,7 +9,8 @@ import psutil
 from discord.ext import commands, tasks
 
 import aoi
-from libs.conversions import dhm_notation
+from discord.shard import Shard
+from libs.conversions import dhm_notation, hms_notation
 
 
 class Bot(commands.Cog):
@@ -18,9 +19,12 @@ class Bot(commands.Cog):
         self.mem: int = 0
         self.max_mem: int = 0
         self.resource_loop.start()
+        self.shard_loop.start()
         self.ping: int = 0
         self.ping_run: List[int] = []
         self.avg_ping: int = 0
+        self.shard_times: Dict[int, datetime] = {}
+        self.shard_statuses: Dict[int, bool] = {}
 
     @property
     def description(self):
@@ -42,6 +46,18 @@ class Bot(commands.Cog):
         await self.bot.wait_until_ready()
         self.bot.logger.info("aoi:Ready!")
 
+    @tasks.loop(seconds=5)
+    async def shard_loop(self):
+        await self.bot.wait_until_ready()
+        for shard in self.bot.shards:
+            if shard not in self.shard_times:
+                self.shard_times[shard] = datetime.now()
+                self.shard_statuses[shard] = not self.bot.get_shard(shard).is_closed()
+            if self.bot.get_shard(shard).is_closed() != self.shard_statuses[shard]:
+                self.shard_times[shard] = datetime.now()
+                self.shard_statuses[shard] = not self.bot.get_shard(shard).is_closed()
+
+
     @commands.command(
         brief="Shows bot stats"
     )
@@ -60,6 +76,7 @@ class Bot(commands.Cog):
                             ("Messages", f"{self.bot.messages}"),
                             ("Commands\nExecuted", f"{self.bot.commands_executed}"),
                             ("Uptime", dhm_notation(datetime.now() - self.bot.start_time)),
+                            ("Shard", f"{self.bot.shard_id or 0}/{self.bot.shard_count}"),
                             ("Memory", f"{self.mem} MB\n"
                                        f"{self.max_mem} MB max"),
                             ("Presence", f"{len(self.bot.guilds)} Guilds\n"
@@ -192,6 +209,24 @@ class Bot(commands.Cog):
             await ctx.send_ok("Username set!")
         except discord.HTTPException as e:
             return await ctx.send_error(f"An error occurred while setting my name: {e}")
+
+    @commands.command(brief="Shows shard stats")
+    async def shards(self, ctx: aoi.AoiContext):
+        # collect shard data
+        closed = 0
+        for shard in self.shard_statuses:
+            if not self.shard_statuses[shard]:
+                closed += 1
+        await ctx.paginate(
+            [f"Shard **{shard}**: **{round(self.bot.get_shard(shard).latency * 1000)}ms** - "
+             f"**{'Connected' if self.shard_statuses[shard] else 'Disconnected'}** for "
+             f"**{hms_notation(datetime.now() - self.shard_times[shard])}**"
+             for shard in self.bot.shards],
+            30,
+            f"{self.bot.shard_count-closed}/{self.bot.shard_count} shards online"
+        )
+
+
 
 
 def setup(bot: aoi.AoiBot) -> None:

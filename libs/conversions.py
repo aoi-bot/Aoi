@@ -33,7 +33,9 @@ def dhm_notation(td: timedelta, sep="", full=False):
                      f"{minutes}{'minutes' if full else 'm'}"])
 
 
-def hms_notation(seconds: int):
+def hms_notation(seconds: Union[int, timedelta]):
+    if isinstance(seconds, timedelta):
+        seconds = seconds.total_seconds()
     seconds = int(seconds)
     hours = seconds // 3600
     minutes = (seconds % 3600) // 60
