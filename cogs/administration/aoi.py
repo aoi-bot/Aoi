@@ -2,6 +2,8 @@ import os
 from datetime import datetime
 from typing import List
 
+import aiohttp
+
 import discord
 import psutil
 from discord.ext import commands, tasks
@@ -162,6 +164,34 @@ class Bot(commands.Cog):
             ),
             not_inline=list(range(10))
         )
+
+    @commands.is_owner()
+    @commands.command(brief="Sets #BOT#'s avatar", aliases=["setav"])
+    async def setavatar(self, ctx: aoi.AoiContext, *, url: str):
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url=url) as resp:
+                    await self.bot.user.edit(avatar=await resp.read())
+            await ctx.send_ok("Avatar set!")
+        except discord.InvalidArgument:
+            return await ctx.send_error("URL must be a direct image link.")
+        except discord.HTTPException as e:
+            return await ctx.send_error(f"An error occurred while setting my avatar: {e}")
+
+    @commands.is_owner()
+    @commands.command(brief="Sets #BOT#'s name", aliases=["newname"])
+    async def setname(self, ctx: aoi.AoiContext, *, name: str):
+        if len(name) < 2 or len(name) > 32:
+            return await ctx.send_error("Username must be between 2 and 32 characters")
+        if any(substr in name for substr in ["@", "#", ":", "```"]):
+            return await ctx.send_error("Usernames cannot contain @, #, \\`\\`\\`, or :")
+        if name in ["discordtag", "everyone", "here"]:
+            return await ctx.send_error("Usernames cannot be `discordtag`, `everyone`, or `here`")
+        try:
+            await self.bot.user.edit(username=name)
+            await ctx.send_ok("Username set!")
+        except discord.HTTPException as e:
+            return await ctx.send_error(f"An error occurred while setting my name: {e}")
 
 
 def setup(bot: aoi.AoiBot) -> None:
