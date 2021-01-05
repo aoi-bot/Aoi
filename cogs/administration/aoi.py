@@ -10,7 +10,7 @@ from discord.ext import commands, tasks
 
 import aoi
 from discord.shard import Shard
-from libs.conversions import dhm_notation, hms_notation
+from libs.conversions import dhm_notation, hms_notation, maybe_pluralize
 
 
 class Bot(commands.Cog):
@@ -20,11 +20,13 @@ class Bot(commands.Cog):
         self.max_mem: int = 0
         self.resource_loop.start()
         self.shard_loop.start()
+        self.shard_counts_loop.start()
         self.ping: int = 0
         self.ping_run: List[int] = []
         self.avg_ping: int = 0
         self.shard_times: Dict[int, datetime] = {}
         self.shard_statuses: Dict[int, bool] = {}
+        self.shard_server_counts: Dict[int, int] = {}
 
     @property
     def description(self):
@@ -57,6 +59,12 @@ class Bot(commands.Cog):
                 self.shard_times[shard] = datetime.now()
                 self.shard_statuses[shard] = not self.bot.get_shard(shard).is_closed()
 
+    @tasks.loop(minutes=5)
+    async def shard_counts_loop(self):
+        await self.bot.wait_until_ready()
+        for guild in self.bot.guilds:
+            shard_id = (guild.id >> 22) % self.bot.shard_count
+            self.shard_server_counts[shard_id] = self.shard_server_counts.get(shard_id, 0) + 1
 
     @commands.command(
         brief="Shows bot stats"
@@ -220,7 +228,8 @@ class Bot(commands.Cog):
         await ctx.paginate(
             [f"Shard **{shard}**: **{round(self.bot.get_shard(shard).latency * 1000)}ms** - "
              f"**{'Connected' if self.shard_statuses[shard] else 'Disconnected'}** for "
-             f"**{hms_notation(datetime.now() - self.shard_times[shard])}**"
+             f"**{hms_notation(datetime.now() - self.shard_times[shard])}** - "
+             f"{maybe_pluralize(self.shard_server_counts[shard], 'server', 'servers', number_format='**%i** ')}"
              for shard in self.bot.shards],
             30,
             f"{self.bot.shard_count-closed}/{self.bot.shard_count} shards online"
