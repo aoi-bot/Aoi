@@ -8,6 +8,7 @@ import typing
 
 import dateparser
 import webcolors
+from discord_slash import SlashContext
 
 import discord
 from discord.ext import commands
@@ -164,7 +165,7 @@ class AoiColor:
         self.b = b
 
     @classmethod
-    async def convert(cls, ctx: AoiContext, arg: str) -> "AoiColor":
+    async def convert(cls, ctx: typing.Union[AoiContext, SlashContext], arg: str) -> "AoiColor":
         orig = arg
         arg = arg.lower().strip("#x")
         if arg.startswith("0x"):
