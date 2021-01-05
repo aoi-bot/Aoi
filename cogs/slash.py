@@ -64,6 +64,7 @@ class Slash(commands.Cog, aoi.SlashMixin, aoi.ColorCogMixin):
         bot.slash = SlashCommand(bot, override_type=True)
         self.bot.slash.get_cog_commands(self)
         bot.loop.create_task(self.register_commands())
+        super(Slash, self).__init__()
 
     def cog_unload(self):
         self.bot.slash.remove_cog_commands(self)
@@ -84,8 +85,6 @@ class Slash(commands.Cog, aoi.SlashMixin, aoi.ColorCogMixin):
 
     @cog_ext.cog_slash(name="gradient")
     async def _gradient(self, ctx: SlashContext, color1: str, color2: str, num: int, hls: bool = False):
-        if num < 3 or num > 10:
-            return await ctx.send(content="Number of colors must be between 3 and 10")
         try:
             color1: AoiColor = await AoiColor.convert(ctx, color1)
         except commands.BadColourArgument:
@@ -96,7 +95,10 @@ class Slash(commands.Cog, aoi.SlashMixin, aoi.ColorCogMixin):
         except commands.BadColourArgument:
             return await ctx.send(content=f"`{color2}` is an invalid color. Aoi supports CSS color names "
                                           f"and colors in the formats `#rgb` and `#rrggbb`")
-        buf, colors = self._gradient_buf(color1, color2, num, hls)
+        try:
+            buf, colors = self._gradient_buf(color1, color2, num, hls)
+        except commands.BadArgument as e:
+            return await ctx.send(content=str(e))
         await ctx.send(send_type=5)
         await self.embed(ctx, title="Gradient",
                          description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in colors),

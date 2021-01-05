@@ -10,13 +10,13 @@ import aoi
 import discord
 from discord.ext import commands
 from discord.ext.commands import Greedy
-from libs.colors import rgb_gradient, hls_gradient
 from libs.converters import AoiColor, FuzzyAoiColor
 
 
 class Colors(commands.Cog, aoi.ColorCogMixin):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
+        super(Colors, self).__init__()
 
     @property
     def description(self):
@@ -95,8 +95,6 @@ class Colors(commands.Cog, aoi.ColorCogMixin):
         aliases=["grad"]
     )
     async def gradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor, num: int = 4):
-        if num < 3 or num > 10:
-            return await ctx.send_error("Number of colors must be between 3 and 10")
         buf, colors = self._gradient_buf(color1, color2, num, False)
         await ctx.embed(title="Gradient",
                         description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in colors),
@@ -108,8 +106,6 @@ class Colors(commands.Cog, aoi.ColorCogMixin):
         aliases=["hgrad"]
     )
     async def hgradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor, num: int = 4):
-        if num < 3 or num > 10:
-            return await ctx.send_error("Number of colors must be between 3 and 10")
         buf, colors = self._gradient_buf(color1, color2, num, True)
         await ctx.embed(title="Gradient",
                         description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in colors),
