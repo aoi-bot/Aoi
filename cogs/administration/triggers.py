@@ -1,12 +1,12 @@
 from typing import Dict, List, Optional
 
-import discord
 from aiosqlite import Connection
-from discord.ext import commands
-from discord.ext.commands import RoleConverter
 
 import aoi
+import discord
 from aoi.triggers import Trigger
+from discord.ext import commands
+from discord.ext.commands import RoleConverter
 
 
 class Triggers(commands.Cog):
@@ -65,14 +65,16 @@ class Triggers(commands.Cog):
                     return await ctx.send_error(f"There isn't an addrole trigger for {role.mention}")
                 await self._remove_roleadd_trigger(ctx.guild.id, role.id)
             else:
-                if ctx.guild.id not in self.role_remove_triggers or role.id not in self.role_remove_triggers[ctx.guild.id]:
+                if ctx.guild.id not in self.role_remove_triggers or role.id not in self.role_remove_triggers[
+                        ctx.guild.id]:
                     return await ctx.send_error(f"There isn't an removerole trigger for {role.mention}")
                 await self._remove_roleremove_trigger(ctx.guild.id, role.id)
             await ctx.send_ok(f"Trigger for {role.mention} removed.")
 
     @commands.has_permissions(manage_guild=True)
     @commands.command(brief="Lists the role triggers", aliases=["roletr", "roletrigger"])
-    async def roletriggers(self, ctx: aoi.AoiContext, for_role: discord.Role = None, add_or_remove: str = None): # noqa C901
+    async def roletriggers(self, ctx: aoi.AoiContext, for_role: discord.Role = None, # noqa C901
+                           add_or_remove: str = None):  # noqa C901
         rows = await self.db.execute_fetchall("SELECT * FROM roletriggers WHERE guild=?", (ctx.guild.id,))
         valid_rows = []
         lost_rows = []

@@ -3,9 +3,9 @@ from __future__ import annotations
 import re
 from datetime import timedelta
 from typing import TYPE_CHECKING, Union
-from libs.converters import AoiColor
 
 import discord
+from libs.converters import AoiColor
 
 if TYPE_CHECKING:
     from aoi import AoiContext
@@ -33,7 +33,9 @@ def dhm_notation(td: timedelta, sep="", full=False):
                      f"{minutes}{'minutes' if full else 'm'}"])
 
 
-def hms_notation(seconds: int):
+def hms_notation(seconds: Union[int, timedelta]):
+    if isinstance(seconds, timedelta):
+        seconds = seconds.total_seconds()
     seconds = int(seconds)
     hours = seconds // 3600
     minutes = (seconds % 3600) // 60
@@ -60,3 +62,7 @@ def escape(text: str, ctx: AoiContext):
         channel = ctx.guild.get_channel(int(mention[2:-1]))
         text = text.replace(mention, f"#{channel.name}" if channel else mention)
     return text
+
+
+def maybe_pluralize(count: int, word: str, word_pl: str, *, number_format="") -> str:
+    return number_format % count + (word if count == 1 else word_pl)

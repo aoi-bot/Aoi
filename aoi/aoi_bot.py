@@ -8,27 +8,29 @@ import os
 import re
 import subprocess
 from datetime import datetime
-from typing import Dict, Optional, List, Union, TYPE_CHECKING, Awaitable, Any, Callable
+from typing import Dict, Optional, List, Union, TYPE_CHECKING, Awaitable, Any, Callable, Tuple
 
 import aiohttp.client_exceptions
-import discord
-# import pixivapi
-from discord.ext import commands, tasks
+import ksoftapi
 from ruamel.yaml import YAML
 
 import aoi
+import discord
+# import pixivapi
+from discord.ext import commands, tasks
 from wrappers import gmaps as gmaps, imgur
 from .cmds_gen import generate
 from .database import AoiDatabase
-import ksoftapi
 
 if TYPE_CHECKING:
     from aoi import AoiContext
+
 
 class FakeUser(discord.User):
     def __init__(self, *, state, data):
         super().__init__(state=state, data=data)
         self.name = ""
+
 
 class PlaceholderManager:
     def user_name(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
@@ -66,7 +68,7 @@ class PlaceholderManager:
         return pattern.sub(lambda match: repl[match.group(0)], msg)
 
 
-class AoiBot(commands.Bot):
+class AoiBot(commands.AutoShardedBot):
 
     def __init__(self, *args, **kwargs):
         super(AoiBot, self).__init__(*args, **kwargs)
@@ -108,6 +110,7 @@ class AoiBot(commands.Bot):
         self.tasks: Dict[discord.Member, List[aoi.AoiTask]] = {}
         self.commands_ran = {}
         self.ksoft: Optional[ksoftapi.Client] = None
+        self.fetched_users: Dict[int, Tuple[discord.User, datetime]] = {}
 
         async def command_ran(ctx: aoi.AoiContext):
             self.commands_executed += 1
@@ -127,6 +130,16 @@ class AoiBot(commands.Bot):
         )
 
         self.add_listener(on_ready, "on_ready")
+
+    async def fetch_unknown_user(self, user_id: int) -> discord.User:
+        if self.get_user(user_id):
+            if user_id in self.fetched_users:
+                del self.fetched_users[user_id]
+            return self.get_user(user_id)
+        if user_id in self.fetched_users:
+            if (datetime.now() - self.fetched_users[user_id][1]).seconds > 3600:
+                del self.fetched_users[user_id]
+                self.fetched_users[user_id] = (await self.fetch_user(user_id), datetime.now())
 
     @tasks.loop(minutes=20)
     async def status_loop(self):
@@ -340,7 +353,8 @@ class AoiBot(commands.Bot):
         for param in signature.parameters.values():
             if param.name in ("self", "ctx"):
                 continue
-            signature_string.append(f"&lt;{param.name}&gt;" if param.default is not inspect.Parameter.empty else param.name) # noqa
+            signature_string.append(
+                f"&lt;{param.name}&gt;" if param.default is not inspect.Parameter.empty else param.name)  # noqa
             if param.default is not inspect.Parameter.empty:
                 defaults[param.name] = param.default
         return " ".join(signature_string), defaults

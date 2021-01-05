@@ -1,5 +1,5 @@
 [flake8]
-exclude = .git,venv,.github,scratch,template
+exclude = .git,venv,.github,scratch,template,disputils
 max-complexity = 10
 max-line-length = 120
 

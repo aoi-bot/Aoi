@@ -1,6 +1,8 @@
 import io
 import os
-from typing import Optional, Union, List
+import random
+from dataclasses import dataclass
+from typing import Optional, Union, List, Dict
 
 import PIL.Image
 import PIL.ImageDraw
@@ -9,6 +11,7 @@ import PIL.ImageOps
 import ksoftapi
 from PIL import Image, ImageDraw
 from ksoftapi.models import LyricResult
+from ruamel.yaml import YAML
 
 import aoi
 import discord
@@ -33,10 +36,21 @@ class Fun(commands.Cog):
         self.av_mask_draw.ellipse((430, 384, 430 + 83, 384 + 83), fill=255)
         self._frames = []
         self._reload_frames()
+        self.custom_reactions: Dict[str, CustomReaction] = {}
+
+        async def _exec(ctx: aoi.AoiContext):
+            await self.exec_customcmd(ctx)
 
     @property
     def description(self) -> str:
         return "Fun! :D"
+
+    @commands.command(brief="Lists the active custom commands")
+    async def customcmds(self, ctx: aoi.AoiContext):
+        await ctx.embed(description="\n".join(
+            f"{trigger} - {len(c.responses)} responses - {len(c.images)} images"
+            for trigger, c in self.custom_reactions.items()
+        ))
 
     @commands.command(brief="Makes a discord minesweeper game",
                       flags={"raw": (None, "Show raw text"),
@@ -188,4 +202,38 @@ class Fun(commands.Cog):
 
 
 def setup(bot: aoi.AoiBot) -> None:
-    bot.add_cog(Fun(bot))
+    fun = Fun(bot)
+
+    async def exec_customcmd(_, ctx: aoi.AoiContext, user: discord.Member):
+        command = ctx.command.name
+        await ctx.embed(
+            title=random.choice(fun.custom_reactions[command].responses)
+                .replace("{user}", ctx.author.display_name)  # noqa
+                .replace("{target}", user.display_name),
+            image=random.choice(fun.custom_reactions[command].images)
+        )
+
+    bot.add_cog(fun)
+
+    with open("loaders/custreact.yaml") as fp:
+        doc = YAML().load(fp)
+        for key in doc:
+            fun.custom_reactions[key] = CustomReaction(doc[key]["responses"], doc[key]["images"])
+
+            cmd = commands.Command(
+                name=key,
+                func=exec_customcmd,
+                brief=f"{key} custom command",
+            )
+
+            cmd.cog = fun
+
+            fun.bot.add_command(cmd)
+
+            fun.__cog_commands__ += (cmd,)
+
+
+@dataclass
+class CustomReaction:
+    responses: List[str]
+    images: List[str]

@@ -128,6 +128,19 @@ CREATE TABLE IF NOT EXISTS "roletriggers" (
 )
 """
 
+MIGRATIONS = {
+    1: """
+ALTER TABLE guild_settings ADD COLUMN currency_img TEXT;
+ALTER TABLE guild_settings ADD COLUMN currency_chance INTEGER DEFAULT 4;
+ALTER TABLE guild_settings ADD COLUMN currency_max INTEGER DEFAULT 10;
+ALTER TABLE guild_settings ADD COLUMN currency_min INTEGER DEFAULT 8;
+ALTER TABLE guild_settings ADD COLUMN currency_gen_channels TEXT DEFAULT '';
+    """,
+    2: """
+ALTER TABLE guild_settings ADD COLUMN delete_on_ban INTEGER DEFAULT 1;
+    """
+}
+
 
 @dataclass
 class _GuildSetting:
@@ -135,6 +148,12 @@ class _GuildSetting:
     error_color: int
     info_color: int
     perm_errors: bool
+    currency_img: str
+    currency_chance: int
+    currency_max: int
+    currency_min: int
+    currency_gen_channels: List[int]
+    delete_on_ban: int
 
 
 @dataclass(frozen=True)
@@ -145,7 +164,7 @@ class _RoleShopItem:
 
 
 @dataclass(frozen=True)
-class _Punishment:
+class Punishment:
     user: int
     guild: int
     staff: int
@@ -159,6 +178,8 @@ class PunishmentType:
     KICK = 1
     MUTE = 2
     WARN = 3
+    UNBAN = 4
+    SOFTBAN = 5
 
 
 @dataclass()
@@ -218,6 +239,16 @@ class AoiDatabase:
         self.global_currency_cooldown = commands.CooldownMapping.from_cooldown(
             1.0, 60.0, commands.BucketType.user)
 
+    async def perform_migrations(self):
+        version = (await (await self.db.execute("pragma user_version")).fetchone())[0]
+        self.bot.logger.info(f"database:Version {version} found")
+        for i in sorted(MIGRATIONS.keys()):
+            if i > version:
+                self.bot.logger.info(f"database:Upgrading to version {version + 1}")
+                [await self.db.execute(_) for _ in MIGRATIONS[i].splitlines() if _]
+                await self.db.execute(f"pragma user_version={i}")
+                await self.db.commit()
+
     async def load(self):  # noqa: C901
         self.bot.logger.info("database:Connecting to database")
         self.db = await aiosqlite.connect("database.db")
@@ -228,8 +259,12 @@ class AoiDatabase:
         rows = await cursor.fetchall()
         await cursor.close()
         for r in rows:
-            self.guild_settings[r[0]] = _GuildSetting(*(int(color, 16) for color in r[1:4]),
-                                                      r[5])
+            self.guild_settings[r[0]] = _GuildSetting(int(r[1], 16),
+                                                      int(r[2], 16),
+                                                      int(r[3], 16),
+                                                      r[5], r[6], int(r[7]), int(r[8]), int(r[9]),
+                                                      [int(x) for x in r[10].split(",")] if r[10] else [],
+                                                      r[11] == 1)
             self.prefixes[r[0]] = r[4]
         cursor = await self.db.execute("SELECT * from permissions")
         rows = await cursor.fetchall()
@@ -237,6 +272,8 @@ class AoiDatabase:
         for r in rows:
             self.perm_chains[r[0]] = r[1].split(";")
         self.bot.logger.info("database:Database loaded")
+
+        await self.perform_migrations()
 
         cursor = await self.db.execute("SELECT * from messages")
         rows = await cursor.fetchall()
@@ -747,11 +784,11 @@ class AoiDatabase:
 
     # region # Moderation
 
-    async def lookup_punishments(self, user: int) -> List[_Punishment]:
+    async def lookup_punishments(self, user: int) -> List[Punishment]:
         cursor = await self.db.execute("SELECT * from punishments where user=?", (user,))
         punishments = await cursor.fetchall()
         return [
-            _Punishment(
+            Punishment(
                 *p[:5],
                 time=datetime.datetime.fromtimestamp(p[5])
             )
@@ -851,7 +888,13 @@ class AoiDatabase:
                 ok_color=0x00aa00,
                 error_color=0xaa0000,
                 info_color=0x0000aa,
-                perm_errors=True
+                perm_errors=True,
+                currency_img='',
+                currency_chance=4,
+                currency_min=8,
+                currency_max=10,
+                currency_gen_channels=[],
+                delete_on_ban=False
             )
             self.prefixes[guild] = ","
         return self.guild_settings[guild]

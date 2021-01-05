@@ -3,9 +3,9 @@ import io
 from typing import Dict, Tuple
 
 import aiohttp
-from discord.ext import commands
 
 import aoi
+from discord.ext import commands
 from libs.converters import dtime
 from wrappers import gmaps
 

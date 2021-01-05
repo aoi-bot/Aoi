@@ -9,10 +9,10 @@ import PIL.Image as Im
 import PIL.ImageDraw as Dw
 import PIL.ImageFont as Fn
 import aiohttp
-import discord
-from discord.ext import commands
 
 import aoi
+import discord
+from discord.ext import commands
 
 lvl_list = [0] + [8 * lvl + 40 for lvl in range(100000)]
 ttl_lvl_list = list(itertools.accumulate(lvl_list))

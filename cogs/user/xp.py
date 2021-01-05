@@ -6,10 +6,10 @@ import PIL
 import PIL.Image
 import PIL.ImageDraw
 import PIL.ImageFont
-import discord
-from discord.ext import commands
 
 import aoi
+import discord
+from discord.ext import commands
 
 # xp levelling functions
 lvl_list = [0] + [8 * lvl + 40 for lvl in range(100000)]

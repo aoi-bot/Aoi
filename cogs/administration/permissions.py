@@ -1,10 +1,8 @@
-import logging
 from typing import Optional
 
+import aoi
 import discord
 from discord.ext import commands
-
-import aoi
 from libs.converters import disenable
 
 

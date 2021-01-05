@@ -4,8 +4,10 @@ import json
 from types import coroutine
 from typing import List, Tuple, Union, Any, Callable, Dict
 
+from PIL.Image import Image
+
 import discord
-import disputils
+from disputils import disputils
 from discord.ext import commands
 
 from libs.conversions import escape
@@ -164,6 +166,12 @@ class AoiContext(commands.Context):
             if isinstance(image, str):
                 embed.set_image(url=image)
                 f = None
+            elif isinstance(image, Image):
+                buf = io.BytesIO()
+                image.save(buf, "png")
+                buf.seek(0)
+                f = discord.File(buf, filename="image.png")
+                embed.set_image(url="attachment://image.png")
             else:
                 image.seek(0)
                 f = discord.File(image, filename="image.png")

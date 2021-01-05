@@ -1,7 +1,6 @@
+import aoi
 import discord
 from discord.ext import commands
-
-import aoi
 from libs.currency_classes import CurrencyLock
 
 

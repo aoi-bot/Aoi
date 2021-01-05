@@ -1,6 +1,5 @@
-from discord.ext import commands
-
 import aoi
+from discord.ext import commands
 
 
 class Guides(commands.Cog):
@@ -30,9 +29,10 @@ class Guides(commands.Cog):
     async def currencyguide(self, ctx: aoi.AoiContext):
         await ctx.embed(
             title="Currency guide",
-            description=f"There are two types of currency in {self.bot.user.name if self.bot.user else ''}: Server and Global.\n"
-                        f"Global currency is gained at the rate of $3/message, and can only be gained "
-                        f"once every 3 minutes. Global currency is used over in `{ctx.prefix}cmds globalshop` to "
+            description=f"There are two types of currency in {self.bot.user.name if self.bot.user else ''}: "
+                        f"Server and Global.\nGlobal currency is gained at the rate of $3/message, and can only "
+                        f"be gained once every 3 minutes. Global currency is used over in "
+                        f"`{ctx.prefix}cmds globalshop` to "
                         f"buy a title for your card an over in `{ctx.prefix}profilecard` to buy a background change "
                         f"for your profile card.\n"
                         f"Server currency is gained at a rate set by the server staff, and is viewable with "
