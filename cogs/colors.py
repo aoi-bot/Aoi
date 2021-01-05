@@ -14,7 +14,7 @@ from libs.colors import rgb_gradient, hls_gradient
 from libs.converters import AoiColor, FuzzyAoiColor
 
 
-class Colors(commands.Cog):
+class Colors(commands.Cog, aoi.ColorCogMixin):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
 
@@ -24,11 +24,8 @@ class Colors(commands.Cog):
 
     @commands.command(brief="Shows a color")
     async def color(self, ctx: aoi.AoiContext, *, color: AoiColor):
-        img = Image.new("RGB", (120, 120), color.to_rgb())
-        buf = io.BytesIO()
-        img.save(buf, format="PNG")
         await ctx.embed(title=str(color),
-                        image=buf)
+                        image=self._color_buf(color))
 
     @commands.command(brief="Shows a color palette")
     async def colors(self, ctx: aoi.AoiContext, clrs: Greedy[FuzzyAoiColor]):
@@ -100,16 +97,7 @@ class Colors(commands.Cog):
     async def gradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor, num: int = 4):
         if num < 3 or num > 10:
             return await ctx.send_error("Number of colors must be between 3 and 10")
-        colors = rgb_gradient(color1, color2, num)
-        img = Image.new("RGB", (240, 48))
-        img_draw = ImageDraw.Draw(img)
-        for n, clr in enumerate(colors):
-            img_draw.rectangle([
-                (n * 240 / num, 0),
-                ((n + 1) * 240 / num, 48)
-            ], fill=tuple(map(int, clr)))
-        buf = io.BytesIO()
-        img.save(buf, format="PNG")
+        buf, colors = self._gradient_buf(color1, color2, num, False)
         await ctx.embed(title="Gradient",
                         description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in colors),
                         image=buf)
@@ -122,16 +110,7 @@ class Colors(commands.Cog):
     async def hgradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor, num: int = 4):
         if num < 3 or num > 10:
             return await ctx.send_error("Number of colors must be between 3 and 10")
-        colors = hls_gradient(color1, color2, num)
-        img = Image.new("RGB", (240, 48))
-        img_draw = ImageDraw.Draw(img)
-        for n, clr in enumerate(colors):
-            img_draw.rectangle([
-                (n * 240 / num, 0),
-                ((n + 1) * 240 / num, 48)
-            ], fill=tuple(map(int, clr)))
-        buf = io.BytesIO()
-        img.save(buf, format="PNG")
+        buf, colors = self._gradient_buf(color1, color2, num, True)
         await ctx.embed(title="Gradient",
                         description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in colors),
                         image=buf)
