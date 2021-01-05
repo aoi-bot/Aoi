@@ -4,11 +4,11 @@ import os
 import sys
 import traceback
 
-import discord
 import dotenv
-from discord.ext import commands
 
 import aoi
+import discord
+from discord.ext import commands
 
 try:
     os.chdir(os.path.dirname(sys.argv[0]))
@@ -75,6 +75,7 @@ async def permission_check(ctx: aoi.AoiContext):  # noqa: C901
         raise aoi.PermissionFailed(f"Permission #{current_n} - {perms[current_n]} "
                                    f"is disallowing you from this command")
     return True
+
 
 try:
     bot.run(os.getenv("TOKEN"))

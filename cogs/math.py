@@ -3,9 +3,9 @@ from io import BytesIO
 
 import sympy
 from PIL import Image, ImageOps
-from discord.ext import commands
 
 import aoi
+from discord.ext import commands
 from libs.converters import integer, allowed_strings
 from libs.expressions import evaluate
 

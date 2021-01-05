@@ -208,7 +208,7 @@ def setup(bot: aoi.AoiBot) -> None:
         command = ctx.command.name
         await ctx.embed(
             title=random.choice(fun.custom_reactions[command].responses)
-                .replace("{user}", ctx.author.display_name) # noqa
+                .replace("{user}", ctx.author.display_name)  # noqa
                 .replace("{target}", user.display_name),
             image=random.choice(fun.custom_reactions[command].images)
         )

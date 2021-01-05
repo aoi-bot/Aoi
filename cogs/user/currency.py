@@ -5,10 +5,10 @@ import PIL
 import PIL.Image as Im
 import PIL.ImageDraw as Dw
 import PIL.ImageFont as Fn
-import discord
-from discord.ext import commands
 
 import aoi
+import discord
+from discord.ext import commands
 
 
 def _cur_string(cur: int):

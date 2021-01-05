@@ -1,10 +1,9 @@
 import asyncio
 from datetime import timedelta
 
+import aoi
 import discord
 from discord.ext import commands
-
-import aoi
 from libs.conversions import hms_notation
 from libs.converters import t_delta
 

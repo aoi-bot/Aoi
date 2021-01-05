@@ -42,7 +42,7 @@ class Utility(commands.Cog):
     async def exchangerates(self, ctx: aoi.AoiContext, base: str = "usd"):
         def _(val):
             int_part = int(val)
-            float_part = f"{val-int_part:.6f}"[2:]
+            float_part = f"{val - int_part:.6f}"[2:]
             return f"{int_part:>5}.{float_part}"
 
         base = base.upper()

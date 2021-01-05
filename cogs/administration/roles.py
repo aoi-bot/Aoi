@@ -1,15 +1,14 @@
 import asyncio
 import io
-import shlex
 from typing import List, Union
 
-import discord
 from PIL import Image
 from PIL import ImageDraw
-from discord.ext import commands
-from discord.ext.commands import Greedy
 
 import aoi
+import discord
+from discord.ext import commands
+from discord.ext.commands import Greedy
 from libs import conversions
 from libs.colors import rgb_gradient, hls_gradient
 from libs.converters import AoiColor, rolename
@@ -218,7 +217,7 @@ class Roles(commands.Cog):
                                          f"you to delete it.")
         if role >= ctx.me.top_role:
             raise aoi.RoleHierarchyError(f"{role.mention} must be above my highest role for me to delete it.")
-        members: List[discord.Member] = list(filter(lambda x: role.id not in [r.id for r in x.roles], # noqa
+        members: List[discord.Member] = list(filter(lambda x: role.id not in [r.id for r in x.roles],  # noqa
                                                     ctx.guild.members))
         if ignore_bots:
             members = [member for member in members if not member.bot]

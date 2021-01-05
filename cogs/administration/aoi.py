@@ -3,13 +3,11 @@ from datetime import datetime
 from typing import List, Dict
 
 import aiohttp
-
-import discord
 import psutil
-from discord.ext import commands, tasks
 
 import aoi
-from discord.shard import Shard
+import discord
+from discord.ext import commands, tasks
 from libs.conversions import dhm_notation, hms_notation, maybe_pluralize
 
 
@@ -232,10 +230,8 @@ class Bot(commands.Cog):
              f"{maybe_pluralize(self.shard_server_counts[shard], 'server', 'servers', number_format='**%i** ')}"
              for shard in self.bot.shards],
             30,
-            f"{self.bot.shard_count-closed}/{self.bot.shard_count} shards online"
+            f"{self.bot.shard_count - closed}/{self.bot.shard_count} shards online"
         )
-
-
 
 
 def setup(bot: aoi.AoiBot) -> None:

@@ -2,7 +2,6 @@ import aoi
 from discord.ext import commands
 from games import TicTacToe
 from games.rps import RPS
-from libs.currency_classes import CurrencyLock
 
 
 class Minigames(commands.Cog):
@@ -33,15 +32,14 @@ class Minigames(commands.Cog):
             try:
                 res = await RPS(ctx, turns).play()
                 if res == 0:
-                    return await self.bot.db.award_guild_currency(ctx.author, int(1.95*bet))
+                    return await self.bot.db.award_guild_currency(ctx.author, int(1.95 * bet))
                 if res == 1:
                     return await self.bot.db.award_guild_currency(ctx.author, bet)
                 return
-            except Exception: # noqa
+            except Exception:  # noqa
                 return await self.bot.db.award_guild_currency(ctx.author, bet)
         else:
             await RPS(ctx, turns).play()
-
 
 
 def setup(bot: aoi.AoiBot) -> None:

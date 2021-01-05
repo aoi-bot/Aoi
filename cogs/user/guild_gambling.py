@@ -1,8 +1,7 @@
 import random
 
-from discord.ext import commands
-
 import aoi
+from discord.ext import commands
 
 
 class ServerGambling(commands.Cog):

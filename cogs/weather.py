@@ -1,14 +1,13 @@
 import io
-import logging
 from datetime import datetime
 from functools import reduce
 from typing import Optional, Dict, Any, Tuple
 
 import aiohttp
 from PIL import Image
-from discord.ext import commands
 
 import aoi
+from discord.ext import commands
 from wrappers import gmaps as gmaps
 from wrappers import weather as wx
 

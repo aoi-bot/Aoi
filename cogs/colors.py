@@ -3,13 +3,13 @@ import io
 import random
 from typing import List, Optional, Union
 
-import discord
 from PIL import Image, ImageDraw
 from PIL.ImageOps import grayscale, colorize
-from discord.ext import commands
-from discord.ext.commands import Greedy
 
 import aoi
+import discord
+from discord.ext import commands
+from discord.ext.commands import Greedy
 from libs.colors import rgb_gradient, hls_gradient
 from libs.converters import AoiColor, FuzzyAoiColor
 
@@ -51,7 +51,8 @@ class Colors(commands.Cog):
         img.save(buf, format="PNG")
         await ctx.embed(title="Color Palette",
                         image=buf,
-                        description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c.to_rgb()) for c in clrs) + # noqa
+                        description=" ".join(
+                            "#" + "".join(hex(x)[2:].rjust(2, "0") for x in c.to_rgb()) for c in clrs) +  # noqa
                                     ("\nUnknown Colors: " + ", ".join(invalid_colors) if invalid_colors else "")
                         )
 

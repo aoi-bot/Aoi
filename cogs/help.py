@@ -57,14 +57,14 @@ class Help(commands.Cog):
             built = "\n".join(
                 [
                     f"{yes if await _can_run(c, ctx) else no} **{c.name}** - "
-                    f"{c.brief.replace('#BOT#',self.bot.user.name)}"
+                    f"{c.brief.replace('#BOT#', self.bot.user.name)}"
                     for c in cog.get_commands()
                 ]
             )
         else:
             built = "\n".join(
                 [
-                    f"**{c.name}** - {c.brief.replace('#BOT#',self.bot.user.name)}"
+                    f"**{c.name}** - {c.brief.replace('#BOT#', self.bot.user.name)}"
                     for c in cog.get_commands() if await _can_run(c, ctx)
                 ]
             )
@@ -79,9 +79,10 @@ class Help(commands.Cog):
     async def help(self, ctx: aoi.AoiContext, command: str = None):
         if not command:
             return await ctx.embed(title="Help",
-                                   fields=
+                                   fields= # noqa E251
                                    [("Module List", f"`{ctx.clean_prefix}modules` to view "
-                                                    f"the list of {self.bot.user.name if self.bot.user else ''}'s modules"),
+                                                    f"the list of {self.bot.user.name if self.bot.user else ''}'s "
+                                                    f"modules"),
                                     ("Module Commands", f"`{ctx.clean_prefix}commands module_name` "
                                                         f"to view commands in a module"),
                                     ("Command Help", f"`{ctx.clean_prefix}help command_name` to "
@@ -90,8 +91,9 @@ class Help(commands.Cog):
                                                      f"view the guides"),
                                     ("Support Server", f"Still need help? Join our [support "
                                                        f"server](https://discord.gg/pCgEj8t)"),
-                                    ("Command List", f"View {self.bot.user.name if self.bot.user else ''}'s [command list]"
-                                                     f"(https://www.aoibot.xyz/commands.html)"),
+                                    ("Command List",
+                                     f"View {self.bot.user.name if self.bot.user else ''}'s [command list]"
+                                     f"(https://www.aoibot.xyz/commands.html)"),
                                     ] + (
                                        [
                                            ("Voting", f"Vote for Aoi [here]"

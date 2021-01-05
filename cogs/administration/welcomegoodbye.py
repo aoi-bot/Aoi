@@ -1,9 +1,8 @@
 from typing import Optional, Union
 
+import aoi
 import discord
 from discord.ext import commands
-
-import aoi
 
 
 class WelcomeGoodbye(commands.Cog):

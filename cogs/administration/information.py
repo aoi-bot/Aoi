@@ -1,9 +1,8 @@
 from typing import List, Union, Optional
 
+import aoi
 import discord
 from discord.ext import commands
-
-import aoi
 from libs import conversions
 
 

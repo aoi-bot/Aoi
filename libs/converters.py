@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import colorsys
 import datetime
 import math
@@ -6,8 +7,9 @@ import re
 import typing
 
 import dateparser
-import discord
 import webcolors
+
+import discord
 from discord.ext import commands
 from discord.ext.commands import BadArgument
 

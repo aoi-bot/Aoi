@@ -4,10 +4,9 @@ import io
 import json
 from typing import List, Optional, Union
 
+import aoi
 import discord
 from discord.ext import commands
-
-import aoi
 
 
 class Messages(commands.Cog):
@@ -132,7 +131,7 @@ class Messages(commands.Cog):
             date = m.created_at.strftime("%x")
             if date not in seen_dates:
                 seen_dates.append(date)
-                buf.write("="*10 + date + "="*10)
+                buf.write("=" * 10 + date + "=" * 10)
             buf.write(f"\n[{m.created_at.strftime('%X')}] ")
             if m.author.id not in seen_ids:
                 seen_ids.append(m.author.id)
@@ -153,8 +152,8 @@ class Messages(commands.Cog):
     @commands.cooldown(1, 30, commands.BucketType.channel)
     @commands.command(brief="Clear message from a channel",
                       flags={"safe": (None, "Ignore pinned messages"),
-                                      "from": (discord.Member, "From a certain member")})
-    async def clear(self, ctx: aoi.AoiContext, n: int):
+                             "from": (discord.Member, "From a certain member")})
+    async def clear(self, ctx: aoi.AoiContext, n: int): # noqa C901
         await ctx.trigger_typing()
         # fetch the messages first, in blocks
         messages: List[discord.Message] = []
@@ -191,14 +190,14 @@ class Messages(commands.Cog):
 
         for n, row in enumerate(to_delete):
             if log:
-                await msg.edit(content=f"Deleting batch {n+1}/{len(to_delete)}")
+                await msg.edit(content=f"Deleting batch {n + 1}/{len(to_delete)}")
             if len(row) == 0:
                 continue
             if len(row) == 1:
                 await row[0].delete()
                 continue
             await self.bot.http.delete_messages(ctx.channel.id, message_ids=[m.id for m in row],
-                                                reason=f"Bulk | {n+1}/{len(to_delete)} | "
+                                                reason=f"Bulk | {n + 1}/{len(to_delete)} | "
                                                        f"{ctx.author} ({ctx.author.id})")
             await asyncio.sleep(1)
 
@@ -211,6 +210,7 @@ class Messages(commands.Cog):
             await msg.delete()
 
         await ctx.send_ok(confirmation)
+
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Messages(bot))
