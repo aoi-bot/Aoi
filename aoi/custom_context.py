@@ -7,7 +7,7 @@ from typing import List, Tuple, Union, Any, Callable, Dict
 from PIL.Image import Image
 
 import discord
-import disputils
+from disputils import disputils
 from discord.ext import commands
 
 from libs.conversions import escape
