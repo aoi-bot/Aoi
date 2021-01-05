@@ -68,7 +68,7 @@ class PlaceholderManager:
         return pattern.sub(lambda match: repl[match.group(0)], msg)
 
 
-class AoiBot(commands.Bot):
+class AoiBot(commands.AutoShardedBot):
 
     def __init__(self, *args, **kwargs):
         super(AoiBot, self).__init__(*args, **kwargs)
