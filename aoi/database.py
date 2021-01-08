@@ -138,6 +138,9 @@ ALTER TABLE guild_settings ADD COLUMN currency_gen_channels TEXT DEFAULT '';
     """,
     2: """
 ALTER TABLE guild_settings ADD COLUMN delete_on_ban INTEGER DEFAULT 1;
+    """,
+    3: """
+ALTER TABLE guild_settings ADD COLUMN reply_embeds INTEGER DEFAULT 1;
     """
 }
 
@@ -153,7 +156,8 @@ class _GuildSetting:
     currency_max: int
     currency_min: int
     currency_gen_channels: List[int]
-    delete_on_ban: int
+    delete_on_ban: bool
+    reply_embeds: bool
 
 
 @dataclass(frozen=True)
@@ -254,6 +258,8 @@ class AoiDatabase:
         self.db = await aiosqlite.connect("database.db")
         [await self.db.execute(_) for _ in SQL_STRING.split(";;")]
         await self.db.commit()
+        await self.perform_migrations()
+
         self.bot.logger.info("database:Loading database into memory")
         cursor = await self.db.execute("SELECT * from guild_settings")
         rows = await cursor.fetchall()
@@ -264,7 +270,7 @@ class AoiDatabase:
                                                       int(r[3], 16),
                                                       r[5], r[6], int(r[7]), int(r[8]), int(r[9]),
                                                       [int(x) for x in r[10].split(",")] if r[10] else [],
-                                                      r[11] == 1)
+                                                      r[11] == 1, r[12] == 1)
             self.prefixes[r[0]] = r[4]
         cursor = await self.db.execute("SELECT * from permissions")
         rows = await cursor.fetchall()
@@ -273,7 +279,6 @@ class AoiDatabase:
             self.perm_chains[r[0]] = r[1].split(";")
         self.bot.logger.info("database:Database loaded")
 
-        await self.perform_migrations()
 
         cursor = await self.db.execute("SELECT * from messages")
         rows = await cursor.fetchall()
@@ -894,7 +899,8 @@ class AoiDatabase:
                 currency_min=8,
                 currency_max=10,
                 currency_gen_channels=[],
-                delete_on_ban=False
+                delete_on_ban=False,
+                reply_embeds=True
             )
             self.prefixes[guild] = ","
         return self.guild_settings[guild]
@@ -913,6 +919,11 @@ class AoiDatabase:
         await self.db.execute(f"UPDATE guild_settings SET InfoColor=? WHERE Guild=?", (value, guild))
         await self.db.commit()
         self.guild_settings[guild].info_color = int(value, 16)
+
+    async def set_reply_embeds(self, guild: int, value: bool):
+        await self.db.execute("UPDATE guild_settings SET reply_embeds=? WHERE Guild=?", (1 if value else 0, guild))
+        await self.db.commit()
+        self.guild_settings[guild].reply_embeds = value
 
     async def set_prefix(self, guild: int, prefix: str):
         await self.db.execute(f"UPDATE guild_settings SET Prefix=? WHERE Guild=?", (prefix, guild))

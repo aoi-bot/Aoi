@@ -102,6 +102,9 @@ class Moderation(commands.Cog):
         punishments: List[Punishment] = sorted(await self.bot.db.lookup_punishments(member.id),
                                                key=lambda punishment: punishment.time, reverse=True)
 
+        if not punishments:
+            await ctx.send_info(f"{member} has no punishments")
+
         async def fmt(punishment: Punishment) -> str:
             action = ["banned", "kicked", "muted", "warned", "unbanned", "softbanned"][punishment.typ]
             return f"{action} by {await self.bot.fetch_unknown_user(punishment.staff)}\n" \

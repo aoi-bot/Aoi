@@ -26,6 +26,9 @@ class AoiContext(commands.Context):
     def clean_prefix(self):
         return escape(self.prefix, self)
 
+    async def using_embeds(self):
+        return (await self.bot.db.guild_setting(self.guild.id)).reply_embeds
+
     async def trash_reaction(self, message: discord.Message):
         if len(message.embeds) == 0:
             return
@@ -72,13 +75,16 @@ class AoiContext(commands.Context):
                         title: str = None, trash: bool = False, ping: bool = False):
         if not user:
             user = self.author
-        msg = await self.send(
-            user.mention if ping else None,
-            embed=discord.Embed(
-                title=title,
-                description=f"{_wrap_user(user) if user else ''}{message}",
-                colour=await self.get_color(self.INFO)
-            ))
+        if not (await self.bot.db.guild_setting(self.guild.id)).reply_embeds:
+            msg = await self.send(f"{_wrap_user(user)} {message}")
+        else:
+            msg = await self.send(
+                user.mention if ping else None,
+                embed=discord.Embed(
+                    title=title,
+                    description=f"{_wrap_user(user) if user else ''}{message}",
+                    colour=await self.get_color(self.INFO)
+                ))
         if trash:
             await self.trash_reaction(msg)
         else:
@@ -86,6 +92,8 @@ class AoiContext(commands.Context):
 
     async def send_ok(self, message: str, *, user: discord.abc.User = None,
                       title: str = None, trash: bool = False, ping: bool = False):
+        if not (await self.bot.db.guild_setting(self.guild.id)).reply_embeds:
+            return await self.send_info(message, user=user, title=title, trash=trash, ping=ping)
         if not user:
             user = self.author
         msg = await self.send(
@@ -102,6 +110,8 @@ class AoiContext(commands.Context):
 
     async def send_error(self, message: str, *, user: discord.abc.User = None,
                          title: str = None, trash: bool = False, ping: bool = False):
+        if not (await self.bot.db.guild_setting(self.guild.id)).reply_embeds:
+            return await self.send_info(message, user=user, title=title, trash=trash, ping=ping)
         if not user:
             user = self.author
         msg = await self.send(

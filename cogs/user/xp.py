@@ -119,11 +119,25 @@ class XP(commands.Cog):
                   fill=color)
         return img
 
+    async def _xp_values(self, ctx: aoi.AoiContext, member: discord.Member,
+                         rank_func: callable, xp: int):
+        member = member or ctx.author
+        await self.bot.db.ensure_xp_entry(member)
+        level, partial = _level(xp)
+        rank = rank_func(member)
+        required = _xp_per_level(level + 1)
+        return level, partial, rank, required
+
     @commands.command(
         brief="Gets the XP of a user"
     )
     async def xp(self, ctx: aoi.AoiContext, member: discord.Member = None):
         member = member or ctx.author
+        if not await ctx.using_embeds():
+            level, partial, rank, required = \
+                await self._xp_values(ctx, member, self._get_rank, self.bot.db.xp[ctx.guild.id][member.id])
+            return await ctx.send(f"**{member}'s Server XP**\n"
+                                  f"#**{rank}**  Level: **{level}**  **{partial}**/**{required}**")
         buf = io.BytesIO()
         (await self._xp_template(ctx, member, self._get_rank, (130, 36, 252), self.xp_img,
                                  self.bot.db.xp[ctx.guild.id][member.id])).save(fp=buf, format="PNG")
@@ -135,6 +149,12 @@ class XP(commands.Cog):
     )
     async def gxp(self, ctx: aoi.AoiContext, member: discord.Member = None):
         member = member or ctx.author
+        if not await ctx.using_embeds():
+            level, partial, rank, required = \
+                await self._xp_values(ctx, member, self._get_global_rank,
+                                      self.bot.db.global_xp[member.id])
+            return await ctx.send(f"**{member}'s Global XP**\n"
+                                  f"#**{rank}**  Level: **{level}**  **{partial}**/**{required}**")
         buf = io.BytesIO()
         (await self._xp_template(ctx, member,
                                  self._get_global_rank, (0xff, 0x2a, 0x5b),
