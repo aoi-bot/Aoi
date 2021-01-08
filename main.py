@@ -82,3 +82,6 @@ try:
 except Exception as error:
     traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
     exit(1)
+
+if bot.is_restarting:
+    os.execl(sys.executable, sys.executable, *sys.argv)
