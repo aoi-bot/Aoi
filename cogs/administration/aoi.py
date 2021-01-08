@@ -4,6 +4,7 @@ from typing import List, Dict
 
 import aiohttp
 import psutil
+import subprocess
 
 import aoi
 import discord
@@ -30,13 +31,13 @@ class Bot(commands.Cog):
     def description(self):
         return "Commands having to do with the bot herself"
 
-    @tasks.loop(minutes=2)
+    @tasks.loop(seconds=2)
     async def resource_loop(self):
         self.mem = psutil.Process(os.getpid()).memory_info().rss // 1000000
         self.max_mem = max(self.mem, self.max_mem)
         self.ping = round(self.bot.latency * 1000)
         self.ping_run.append(self.ping)
-        if len(self.ping_run) > 30:
+        if len(self.ping_run) > 30 * 60:
             del self.ping_run[0]
         self.avg_ping = round(sum(self.ping_run) / len(self.ping_run))
 
@@ -232,6 +233,35 @@ class Bot(commands.Cog):
             30,
             f"{self.bot.shard_count - closed}/{self.bot.shard_count} shards online"
         )
+
+    @commands.is_owner()
+    @commands.command(brief="Update Aoi from Github")
+    async def update(self, ctx: aoi.AoiContext):
+        process = subprocess.Popen(["git", "pull"], stdout=subprocess.PIPE)
+        output = process.communicate()[0]
+        await ctx.send(f"Output: ```{str(output[:1800], 'utf-8')}```")
+        process = subprocess.Popen(["git", "describe", "--tags"], stdout=subprocess.PIPE)
+        output = process.communicate()[0]
+        await ctx.send(f"Updated to {str(output, 'utf-8')}")
+
+    @commands.is_owner()
+    @commands.command(brief="Restart Aoi")
+    async def restart(self, ctx: aoi.AoiContext):
+        self.bot.is_restarting = True
+        self.bot.restart_response_channel = ctx.channel.id
+        await ctx.send_ok("Attempting to restart. See you on the other side!")
+        await self.bot.logout()
+
+    @commands.is_owner()
+    @commands.command(brief="Reload a shard - **Might have strange side effects**")
+    async def reloadshard(self, ctx: aoi.AoiContext, shard: int):
+        if shard < 0 or shard >= self.bot.shard_count:
+            return await ctx.send_error(f"{shard} is an invalid shard number")
+        await ctx.send_ok(f"Attempting to reload shard {shard}...")
+        self.bot.status_loop.stop()
+        await self.bot.get_shard(shard).reconnect()
+        await ctx.send_ok(f"Shard {shard} reloaded")
+
 
 
 def setup(bot: aoi.AoiBot) -> None:

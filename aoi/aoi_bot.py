@@ -113,6 +113,7 @@ class AoiBot(commands.AutoShardedBot):
         self.ksoft: Optional[ksoftapi.Client] = None
         self.fetched_users: Dict[int, Tuple[discord.User, datetime]] = {}
         self.slash: Optional[SlashCommand] = None
+        self.is_restarting = False
 
         async def command_ran(ctx: aoi.AoiContext):
             self.commands_executed += 1
