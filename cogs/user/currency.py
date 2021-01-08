@@ -79,6 +79,10 @@ class Currency(commands.Cog):
         img = self.background.copy()
         draw = Dw.Draw(img)
         await self.bot.db.ensure_global_currency_entry(member)
+        if not (await self.bot.db.guild_setting(ctx.guild.id)).reply_embeds:
+            return await ctx.send(f"**{member}'s Wallet**\n*"
+                                  f"*Global**: ${await self.bot.db.get_global_currency(member):,}\n"
+                                  f"**Server**: ${await self.bot.db.get_guild_currency(member):,}")
         for i in range(3):
             x, y, _, _, sz = _center_and_fit(
                 [14, 78, 78][i],
