@@ -63,6 +63,12 @@ class GuildSettings(commands.Cog):
                 return await ctx.send_ok(f"Currency gain " + ("turned off" if not v else f"set to {v}/3min"))
             except ValueError:
                 return await ctx.send_error("Gain value must be a number between 0 and 50")
+        if setting == "embeds":
+            if value.lower() not in ["true", "false"]:
+                return await ctx.send_error("Value must be true or false")
+            await self.bot.db.set_reply_embeds(ctx.guild.id, value == "true")
+            return await ctx.send_ok(f"Normal responses will now " + ("" if value == "true" else "not ") +
+                                     "be in an embed")
         await ctx.send_error("Invalid config")
 
     @commands.command(brief="Lists current configs for the server.")
