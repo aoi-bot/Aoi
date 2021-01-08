@@ -26,6 +26,9 @@ class AoiContext(commands.Context):
     def clean_prefix(self):
         return escape(self.prefix, self)
 
+    async def using_embeds(self):
+        return (await self.bot.db.guild_setting(self.guild.id)).reply_embeds
+
     async def trash_reaction(self, message: discord.Message):
         if len(message.embeds) == 0:
             return
