@@ -4,6 +4,7 @@ from typing import List, Dict
 
 import aiohttp
 import psutil
+import subprocess
 
 import aoi
 import discord
@@ -232,6 +233,16 @@ class Bot(commands.Cog):
             30,
             f"{self.bot.shard_count - closed}/{self.bot.shard_count} shards online"
         )
+
+    @commands.is_owner()
+    @commands.command(brief="Update Aoi from Github")
+    async def update(self, ctx: aoi.AoiContext):
+        process = subprocess.Popen(["git", "pull"], stdout=subprocess.PIPE)
+        output = process.communicate()[0]
+        await ctx.send(f"Output: ```{str(output[:1800], 'utf-8')}```")
+        process = subprocess.Popen(["git", "describe", "--tags"], stdout=subprocess.PIPE)
+        output = process.communicate()[0]
+        await ctx.send(f"Updated to {str(output, 'utf-8')}")
 
 
 def setup(bot: aoi.AoiBot) -> None:
