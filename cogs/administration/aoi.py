@@ -47,14 +47,15 @@ class Bot(commands.Cog):
         await self.bot.wait_until_ready()
         self.bot.logger.info("aoi:Ready!")
 
-    @tasks.loop(seconds=5)
+    @tasks.loop(seconds=1)
     async def shard_loop(self):
-        await self.bot.wait_until_ready()
+        if not self.bot.is_ready():
+            return
         for shard in self.bot.shards:
             if shard not in self.shard_times:
                 self.shard_times[shard] = datetime.now()
                 self.shard_statuses[shard] = not self.bot.get_shard(shard).is_closed()
-            if self.bot.get_shard(shard).is_closed() != self.shard_statuses[shard]:
+            if self.bot.get_shard(shard).is_closed() == self.shard_statuses[shard]:
                 self.shard_times[shard] = datetime.now()
                 self.shard_statuses[shard] = not self.bot.get_shard(shard).is_closed()
 
