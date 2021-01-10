@@ -36,7 +36,7 @@ wrappers/  # where API wrappers go
         __init__.py  # all wrappers should be importable as `import x from wrapper_name`
         file1.py
         file2.py
-looaders/  # where custom commands go
+loaders/  # where custom commands go
 libs/  # reusable code goes here
 cogs/  # Aoi's modules go here
 assets/  # Any assets used by Aoi go here
