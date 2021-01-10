@@ -264,6 +264,14 @@ class Bot(commands.Cog):
         await self.bot.get_shard(shard).reconnect()
         await ctx.send_ok(f"Shard {shard} reloaded")
 
+    @commands.command(brief="Shows the list of placeholders")
+    async def placeholders(self, ctx: aoi.AoiContext):
+        await ctx.send_info(self.bot.placeholders.replace(
+            ctx,
+            "\n" + 
+            "\n".join(f"`&\u200b{p};` - &{p};" for p in self.bot.placeholders.supported)
+        ))
+
 
 
 def setup(bot: aoi.AoiBot) -> None:
