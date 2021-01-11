@@ -46,7 +46,7 @@ class Help(commands.Cog):
                                   f"Do {ctx.clean_prefix}commands module_name` to view commands in a module")
         await ctx.embed(title="Modules", description=s.strip(),
                         footer=f"Do {ctx.clean_prefix}commands module_name to view commands in a module",
-                        thumbnail=self.bot.random_tbhk())
+                        thumbnail=self.bot.random_thumbnail())
 
     @commands.command(brief="Lists commands within a module", name="commands",
                       aliases=["cmds"],
@@ -84,7 +84,7 @@ class Help(commands.Cog):
             description=cog.description + "\n\n" + built,
             footer=f"Do {ctx.clean_prefix}help command_name for help on a command, "
                    f"and {ctx.clean_prefix}cmds {module} --all to view all commands for the module",
-            thumbnail=self.bot.random_tbhk()
+            thumbnail=self.bot.random_thumbnail()
         )
 
     @commands.command(brief="Shows help for a command", aliases=["h"])
@@ -112,7 +112,7 @@ class Help(commands.Cog):
                                                       f"(https://top.gg/bot/738856230994313228)")
                                        ] if self.bot.user.id == 738856230994313228 else []
                                    ),
-                                   thumbnail=self.bot.random_tbhk(),
+                                   thumbnail=self.bot.random_thumbnail(),
                                    not_inline=[2, 3, 4])
         cmd: commands.Command = self.bot.get_command(command.lower())
         if not cmd:
@@ -164,7 +164,7 @@ class Help(commands.Cog):
                        [("Aliases", ", ".join([f"`{a}`" for a in cmd.aliases]))]
                        if cmd.aliases else []
                    ),
-            thumbnail=self.bot.random_tbhk(),
+            thumbnail=self.bot.random_thumbnail(),
             footer="<> indicate required parameters, [] indicate optional parameters",
             not_inline=[0, 1, 2, 3, 4]
         )

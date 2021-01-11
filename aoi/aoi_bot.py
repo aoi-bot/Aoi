@@ -147,15 +147,6 @@ class AoiBot(commands.AutoShardedBot):
                 del self.fetched_users[user_id]
                 self.fetched_users[user_id] = (await self.fetch_user(user_id), datetime.now())
 
-    async def load_thumbnails(self):
-        if not os.path.exists("loaders/thumbnails.txt"):
-            with open("loaders/thumbnails.txt", "w") as fp:
-                fp.write(str(self.user.avatar_url))
-                self.thumbnails = [self.user.avatar_url]
-        else:
-            with open("loaders/thumbnails.txt", "r") as fp:
-                self.thumbnails = fp.readlines()
-
     @tasks.loop(minutes=20)
     async def status_loop(self):
         await self.change_presence(activity=discord.Game(f",help | {len(self.guilds)} servers"))
@@ -301,8 +292,13 @@ class AoiBot(commands.AutoShardedBot):
                     raise
                 self.set_cog_group(cog_name, grp_name)
 
-    def random_tbhk(self) -> str:
-        return random.choice(self.thumbnails)
+    def random_thumbnail(self) -> str:
+        return random.choice(self.thumbnails) if self.thumbnails else self.user.avatar_url
+
+    async def load_thumbnails(self):
+        if os.path.exists("loaders/thumbnails.txt"):
+            with open("loaders/thumbnails.txt", "r") as fp:
+                self.thumbnails = fp.readlines()
 
     def convert_json(self, msg: str):  # does not convert placeholders
         try:
