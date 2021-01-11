@@ -46,7 +46,7 @@ class Help(commands.Cog):
                                   f"Do {ctx.clean_prefix}commands module_name` to view commands in a module")
         await ctx.embed(title="Modules", description=s.strip(),
                         footer=f"Do {ctx.clean_prefix}commands module_name to view commands in a module",
-                        thumbnail=self.bot.user.avatar_url)
+                        thumbnail=self.bot.random_tbhk())
 
     @commands.command(brief="Lists commands within a module", name="commands",
                       aliases=["cmds"],
@@ -83,7 +83,8 @@ class Help(commands.Cog):
             title=f"Commands for {cog.qualified_name} module",
             description=cog.description + "\n\n" + built,
             footer=f"Do {ctx.clean_prefix}help command_name for help on a command, "
-                   f"and {ctx.clean_prefix}cmds {module} --all to view all commands for the module"
+                   f"and {ctx.clean_prefix}cmds {module} --all to view all commands for the module",
+            thumbnail=self.bot.random_tbhk()
         )
 
     @commands.command(brief="Shows help for a command", aliases=["h"])
