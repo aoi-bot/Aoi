@@ -115,6 +115,7 @@ class AoiBot(commands.AutoShardedBot):
         self.fetched_users: Dict[int, Tuple[discord.User, datetime]] = {}
         self.slash: Optional[SlashCommand] = None
         self.is_restarting = False
+        self.thumbnails: List[str] = []
 
         async def command_ran(ctx: aoi.AoiContext):
             self.commands_executed += 1
@@ -127,6 +128,7 @@ class AoiBot(commands.AutoShardedBot):
             self.logger.info(f"Aoi {self.version} online!")
             await self.change_presence(activity=discord.Game(f",help | {len(self.guilds)} servers"))
             self.status_loop.start()
+            await self.load_thumbnails()
 
         self.add_listener(
             command_ran,
@@ -144,6 +146,15 @@ class AoiBot(commands.AutoShardedBot):
             if (datetime.now() - self.fetched_users[user_id][1]).seconds > 3600:
                 del self.fetched_users[user_id]
                 self.fetched_users[user_id] = (await self.fetch_user(user_id), datetime.now())
+
+    async def load_thumbnails(self):
+        if not os.path.exists("loaders/thumbnails.txt"):
+            with open("loaders/thumbnails.txt", "w") as fp:
+                fp.write(str(self.user.avatar_url))
+                self.thumbnails = [self.user.avatar_url]
+        else:
+            with open("loaders/thumbnails.txt", "r") as fp:
+                self.thumbnails = fp.readlines()
 
     @tasks.loop(minutes=20)
     async def status_loop(self):
@@ -291,14 +302,7 @@ class AoiBot(commands.AutoShardedBot):
                 self.set_cog_group(cog_name, grp_name)
 
     def random_tbhk(self) -> str:
-        return random.choice([
-            "https://cdn.discordapp.com/emojis/798002325036728350.png?v=1",
-            "https://cdn.discordapp.com/attachments/790843364895227935/798071080987131954/latest.png",
-            "https://cdn.discordapp.com/emojis/751471213439877131.png?v=1",
-            "https://cdn.discordapp.com/emojis/791281336899600394.png?v=1",
-            "https://cdn.discordapp.com/emojis/798014696690155540.png?v=1",
-            "https://cdn.discordapp.com/emojis/791281408387579974.gif?v=1",
-        ])
+        return random.choice(self.thumbnails)
 
     def convert_json(self, msg: str):  # does not convert placeholders
         try:
