@@ -5,6 +5,7 @@ import inspect
 import json
 import logging
 import os
+import random
 import re
 import subprocess
 from datetime import datetime
@@ -114,6 +115,7 @@ class AoiBot(commands.AutoShardedBot):
         self.fetched_users: Dict[int, Tuple[discord.User, datetime]] = {}
         self.slash: Optional[SlashCommand] = None
         self.is_restarting = False
+        self.thumbnails: List[str] = []
 
         async def command_ran(ctx: aoi.AoiContext):
             self.commands_executed += 1
@@ -126,6 +128,7 @@ class AoiBot(commands.AutoShardedBot):
             self.logger.info(f"Aoi {self.version} online!")
             await self.change_presence(activity=discord.Game(f",help | {len(self.guilds)} servers"))
             self.status_loop.start()
+            await self.load_thumbnails()
 
         self.add_listener(
             command_ran,
@@ -288,6 +291,14 @@ class AoiBot(commands.AutoShardedBot):
                     self.logger.critical(e.__str__().split(":")[-1].strip())
                     raise
                 self.set_cog_group(cog_name, grp_name)
+
+    def random_thumbnail(self) -> str:
+        return random.choice(self.thumbnails) if self.thumbnails else self.user.avatar_url
+
+    async def load_thumbnails(self):
+        if os.path.exists("loaders/thumbnails.txt"):
+            with open("loaders/thumbnails.txt", "r") as fp:
+                self.thumbnails = fp.readlines()
 
     def convert_json(self, msg: str):  # does not convert placeholders
         try:

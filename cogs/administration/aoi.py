@@ -47,14 +47,15 @@ class Bot(commands.Cog):
         await self.bot.wait_until_ready()
         self.bot.logger.info("aoi:Ready!")
 
-    @tasks.loop(seconds=5)
+    @tasks.loop(seconds=1)
     async def shard_loop(self):
-        await self.bot.wait_until_ready()
+        if not self.bot.is_ready():
+            return
         for shard in self.bot.shards:
             if shard not in self.shard_times:
                 self.shard_times[shard] = datetime.now()
                 self.shard_statuses[shard] = not self.bot.get_shard(shard).is_closed()
-            if self.bot.get_shard(shard).is_closed() != self.shard_statuses[shard]:
+            if self.bot.get_shard(shard).is_closed() == self.shard_statuses[shard]:
                 self.shard_times[shard] = datetime.now()
                 self.shard_statuses[shard] = not self.bot.get_shard(shard).is_closed()
 
@@ -98,7 +99,8 @@ class Bot(commands.Cog):
         permissions_int = 268659776
         invite_url = f"https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=" \
                      f"{permissions_int}&scope=bot"
-        await ctx.send_info(f"Invite me to your server [here]({invite_url})")
+        await ctx.send_info(f"Invite me to your server [without slash commands]({invite_url}) or "
+                            f"[with slash commands]({invite_url}%20applications.commands)")
 
     @commands.command(
         brief="Shows #BOT#'s latency to discord"
@@ -261,6 +263,14 @@ class Bot(commands.Cog):
         self.bot.status_loop.stop()
         await self.bot.get_shard(shard).reconnect()
         await ctx.send_ok(f"Shard {shard} reloaded")
+
+    @commands.command(brief="Shows the list of placeholders")
+    async def placeholders(self, ctx: aoi.AoiContext):
+        await ctx.send_info(self.bot.placeholders.replace(
+            ctx,
+            "\n" + 
+            "\n".join(f"`&\u200b{p};` - &{p};" for p in self.bot.placeholders.supported)
+        ))
 
 
 

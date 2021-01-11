@@ -1,16 +1,13 @@
-import io
 import os
-from typing import List, Tuple, Union
 
-from PIL import Image, ImageDraw
+import discord
+from discord.ext import commands
 from discord_slash import SlashCommand, cog_ext, SlashContext
 from discord_slash.utils import manage_commands
 
 import aoi
-import discord
-from discord.ext import commands
-from libs.colors import rgb_gradient, hls_gradient
 from libs.converters import AoiColor
+from libs.expressions import evaluate
 
 BASE = "https://discord.com/api/v8"
 
@@ -25,6 +22,9 @@ COMMANDS = {
                 "required": True
             }
         ]
+    ],
+    "slashes": [
+        "View activated slash commands"
     ],
     "gradient": [
         "Show a list of colors",
@@ -61,7 +61,7 @@ COMMANDS = {
 class Slash(commands.Cog, aoi.SlashMixin, aoi.ColorCogMixin):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
-        bot.slash = SlashCommand(bot, override_type=True)
+        bot.slash = SlashCommand(bot, override_type=True, auto_delete=True, auto_register=True)
         self.bot.slash.get_cog_commands(self)
         bot.loop.create_task(self.register_commands())
         super(Slash, self).__init__()
@@ -72,6 +72,13 @@ class Slash(commands.Cog, aoi.SlashMixin, aoi.ColorCogMixin):
     @property
     def description(self) -> str:
         return "Slash commands"
+
+    @cog_ext.cog_slash(name="slashes", description="Activated slash commands")
+    async def _slashes(self, ctx: SlashContext):
+        await ctx.send(send_type=3, hidden=True, content="Enabled slash commands on Aoi:\n"
+                                                         "`/color [color]`\n"
+                                                         "`/gradient [color1] [color2] [num] [hls]`\n"
+                                                         "`/calc [expression]`")
 
     @cog_ext.cog_slash(name="color")
     async def _color(self, ctx: SlashContext, color: str):
@@ -104,16 +111,32 @@ class Slash(commands.Cog, aoi.SlashMixin, aoi.ColorCogMixin):
                          description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in colors),
                          image=buf)
 
+    @cog_ext.cog_slash(name="calc", description="Calculate an expression", options=[
+        {
+            "type": 3,
+            "name": "expr",
+            "description": "The expression",
+            "required": True
+        }
+    ])
+    async def _calc(self, ctx: SlashContext, expr: str):
+        try:
+            res = await evaluate(expr)
+        except aoi.CalculationSyntaxError:
+            await ctx.send(send_type=3, hidden=True, content="Syntax error")
+        except aoi.DomainError as e:
+            await ctx.send(send_type=3, hidden=True, content="Domain error for {e}")
+        except aoi.MathError:
+            await ctx.send(send_type=3, hidden=True, content="Math error")
+        else:
+            await ctx.send(send_type=3, hidden=True, content=f"Expression: {discord.utils.escape_markdown(expr)}\n"
+                                                             f"Result:\n{res}")
+
     async def register_commands(self):
         await self.bot.wait_until_ready()
         # await manage_commands.remove_all_commands(self.bot.user.id, os.getenv("TOKEN"), None)
         cmds = await manage_commands.get_all_commands(self.bot.user.id, os.getenv("TOKEN"), None)
         print(cmds)
-        existing = [cmd["name"] for cmd in cmds]
-        for cmd in COMMANDS:
-            if cmd not in existing:
-                await manage_commands.add_slash_command(self.bot.user.id, os.getenv("TOKEN"), None, cmd,
-                                                        COMMANDS[cmd][0], COMMANDS[cmd][1])
 
 
 def setup(bot: aoi.AoiBot) -> None:

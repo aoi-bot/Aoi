@@ -40,9 +40,13 @@ class Help(commands.Cog):
                 c = self.bot.get_cog(cog)
                 if c.description:
                     s += f"◆ **{c.qualified_name}** - {c.description}\n"
+        if not await ctx.using_embeds():
+            return await ctx.send(f"**__Modules__**\n"
+                                  f"{s.strip()}\n"
+                                  f"Do {ctx.clean_prefix}commands module_name` to view commands in a module")
         await ctx.embed(title="Modules", description=s.strip(),
                         footer=f"Do {ctx.clean_prefix}commands module_name to view commands in a module",
-                        thumbnail=self.bot.user.avatar_url)
+                        thumbnail=self.bot.random_thumbnail())
 
     @commands.command(brief="Lists commands within a module", name="commands",
                       aliases=["cmds"],
@@ -68,18 +72,26 @@ class Help(commands.Cog):
                     for c in cog.get_commands() if await _can_run(c, ctx)
                 ]
             )
+        if not await ctx.using_embeds():
+            return await ctx.send(f"**__Commands for {cog.qualified_name} module__**\n"
+                                  f"> {cog.description}\n\n"
+                                  f"{built}\n\n"
+                                  f"Do `{ctx.clean_prefix}help command_name` for help on a command, "
+                                  f"and `{ctx.clean_prefix}cmds {module} --all` to view all commands for the module"
+                                  )
         await ctx.embed(
             title=f"Commands for {cog.qualified_name} module",
             description=cog.description + "\n\n" + built,
             footer=f"Do {ctx.clean_prefix}help command_name for help on a command, "
-                   f"and {ctx.clean_prefix}cmds {module} --all to view all commands for the module"
+                   f"and {ctx.clean_prefix}cmds {module} --all to view all commands for the module",
+            thumbnail=self.bot.random_thumbnail()
         )
 
     @commands.command(brief="Shows help for a command", aliases=["h"])
     async def help(self, ctx: aoi.AoiContext, command: str = None):
         if not command:
             return await ctx.embed(title="Help",
-                                   fields= # noqa E251
+                                   fields=  # noqa E251
                                    [("Module List", f"`{ctx.clean_prefix}modules` to view "
                                                     f"the list of {self.bot.user.name if self.bot.user else ''}'s "
                                                     f"modules"),
@@ -100,6 +112,7 @@ class Help(commands.Cog):
                                                       f"(https://top.gg/bot/738856230994313228)")
                                        ] if self.bot.user.id == 738856230994313228 else []
                                    ),
+                                   thumbnail=self.bot.random_thumbnail(),
                                    not_inline=[2, 3, 4])
         cmd: commands.Command = self.bot.get_command(command.lower())
         if not cmd:
@@ -112,6 +125,22 @@ class Help(commands.Cog):
                 return f"◆`--{flag_tup[0]} <{flag_tup[1][0].__name__}>` - {flag_tup[1][1]}"
             else:
                 return f"◆`--{flag_tup[0]}` - {flag_tup[1][1]}"
+
+        if not await ctx.using_embeds():
+            return await ctx.send(
+                f"__`{cmd.name}`__\n"
+                f"Usage: `{ctx.prefix}{cmd.name} {cmd.signature or ''}{' [flags]' if flags else ''}`\n"
+                f"Description: {cmd.brief.replace('#BOT#', self.bot.user.name if self.bot.user else '')}\n"
+                f"Module: {cmd.cog.qualified_name}\n" +
+                (("User permissions needed: " +
+                  ", ".join(
+                      " ".join(map(lambda x: x.title(), x.split("_"))) for x in p
+                  ) + "\n") if p else '') +
+                ("You are missing permissions needed to turn this command\n" if not await _can_run(cmd, ctx) else '') +
+                (("Flags:\n" + "\n".join(map(str, map(format_flag, flags.items()))) + "\n") if flags else "") +
+                (("Aliases:" + ", ".join([f"`{a}`" for a in cmd.aliases])) if cmd.aliases else "") +
+                "\n<> indicate required parameters, [] indicate optional parameters"
+            )
 
         await ctx.embed(
             title=cmd.name,
@@ -135,6 +164,7 @@ class Help(commands.Cog):
                        [("Aliases", ", ".join([f"`{a}`" for a in cmd.aliases]))]
                        if cmd.aliases else []
                    ),
+            thumbnail=self.bot.random_thumbnail(),
             footer="<> indicate required parameters, [] indicate optional parameters",
             not_inline=[0, 1, 2, 3, 4]
         )
