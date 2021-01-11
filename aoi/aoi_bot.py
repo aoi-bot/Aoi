@@ -5,6 +5,7 @@ import inspect
 import json
 import logging
 import os
+import random
 import re
 import subprocess
 from datetime import datetime
@@ -288,6 +289,16 @@ class AoiBot(commands.AutoShardedBot):
                     self.logger.critical(e.__str__().split(":")[-1].strip())
                     raise
                 self.set_cog_group(cog_name, grp_name)
+
+    def random_tbhk(self) -> str:
+        return random.choice([
+            "https://cdn.discordapp.com/emojis/798002325036728350.png?v=1",
+            "https://cdn.discordapp.com/attachments/790843364895227935/798071080987131954/latest.png",
+            "https://cdn.discordapp.com/emojis/751471213439877131.png?v=1",
+            "https://cdn.discordapp.com/emojis/791281336899600394.png?v=1",
+            "https://cdn.discordapp.com/emojis/798014696690155540.png?v=1",
+            "https://cdn.discordapp.com/emojis/791281408387579974.gif?v=1",
+        ])
 
     def convert_json(self, msg: str):  # does not convert placeholders
         try:

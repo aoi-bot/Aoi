@@ -100,6 +100,7 @@ class Help(commands.Cog):
                                                       f"(https://top.gg/bot/738856230994313228)")
                                        ] if self.bot.user.id == 738856230994313228 else []
                                    ),
+                                   thumbnail=self.bot.random_tbhk(),
                                    not_inline=[2, 3, 4])
         cmd: commands.Command = self.bot.get_command(command.lower())
         if not cmd:
@@ -135,6 +136,7 @@ class Help(commands.Cog):
                        [("Aliases", ", ".join([f"`{a}`" for a in cmd.aliases]))]
                        if cmd.aliases else []
                    ),
+            thumbnail=self.bot.random_tbhk(),
             footer="<> indicate required parameters, [] indicate optional parameters",
             not_inline=[0, 1, 2, 3, 4]
         )
