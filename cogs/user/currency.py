@@ -8,7 +8,9 @@ import PIL.ImageFont as Fn
 
 import aoi
 import discord
+from aoi.mixins.currency import CurrencyMixin
 from discord.ext import commands
+from libs.converters import disenable
 
 
 def _cur_string(cur: int):
@@ -49,8 +51,9 @@ def _font(size: int) -> PIL.ImageFont.ImageFont:
         "assets/merged.ttf", size=size)
 
 
-class Currency(commands.Cog):
+class Currency(commands.Cog, CurrencyMixin):
     def __init__(self, bot: aoi.AoiBot):
+        CurrencyMixin.__init__(self, bot)
         self.bot = bot
         self.fp = open("assets/wallet.png", "rb")
         self.background: PIL.Image.Image = PIL.Image.open(self.fp)
@@ -106,6 +109,36 @@ class Currency(commands.Cog):
         img.save(fp=buf, format="png")
         buf.seek(0)
         await ctx.send(file=(discord.File(buf, "profile.png")))
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        if message.author.bot:
+            return
+        for i in await self.bot.get_prefix(message):
+            if message.content.startswith(i):
+                return
+        await self.maybe_gen_currency(message)
+
+    @commands.command(brief="Catch currency")
+    async def grab(self, ctx: aoi.AoiContext):
+        amount = await self._grab(ctx)
+        if amount is not None:
+            await ctx.send_ok(f"Grabbed ${amount}")
+
+    @commands.has_permissions(manage_guild=True)
+    @commands.command(brief="Turn currency generation for a channel on or off")
+    async def gencur(self, ctx: aoi.AoiContext, channel: Optional[discord.TextChannel], state: disenable()):
+        channel = channel or ctx.channel
+        if state.lower() == "enable":
+            if channel.id not in (await self.bot.db.guild_setting(ctx.guild.id)).currency_gen_channels:
+                await self.bot.db.add_currency_channel(channel)
+                return await ctx.send_ok(f"Currency will now generate in {channel.mention}")
+            return await ctx.send_ok(f"Currency can already generate in {channel.mention}")
+        if channel.id in (await self.bot.db.guild_setting(ctx.guild.id)).currency_gen_channels:
+            await self.bot.db.remove_currency_channel(channel)
+            return await ctx.send_ok(f"Currency will not generate in {channel.mention}")
+        return await ctx.send_ok(f"Currency already couldn't generate in {channel.mention}")
+
 
 
 def setup(bot: aoi.AoiBot) -> None:

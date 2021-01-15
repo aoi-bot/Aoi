@@ -67,6 +67,37 @@ class GuildSettings(commands.Cog):
             await self.bot.db.set_reply_embeds(ctx.guild.id, value == "true")
             return await ctx.send_ok(f"Normal responses will now " + ("" if value == "true" else "not ") +
                                      "be in an embed")
+        if setting == "currencymin":
+            try:
+                v = int(value)
+                if v < 0:
+                    return await ctx.send_error("Value must be above 0")
+                if v > (await self.bot.db.guild_setting(ctx.guild.id)).currency_max:
+                    return await ctx.send_error("Minimum currency generation value cannot be above maximum")
+            except ValueError:
+                return await ctx.send_error("Value must be a number above 0")
+            await self.bot.db.set_currency_gen(ctx.guild.id, min_amt=v)
+            return await ctx.send_ok(f"Min currency generation amount set to ${v}")
+        if setting == "currencymax":
+            try:
+                v = int(value)
+                if v < 0:
+                    return await ctx.send_error("Value must be above 0")
+                if v < (await self.bot.db.guild_setting(ctx.guild.id)).currency_min:
+                    return await ctx.send_error("Minimum currency generation value cannot be below minimum")
+            except ValueError:
+                return await ctx.send_error("Value must be a number above 0")
+            await self.bot.db.set_currency_gen(ctx.guild.id, max_amt=v)
+            return await ctx.send_ok(f"Max currency generation amount set to ${v}")
+        if setting == "currencychance":
+            try:
+                v = int(value)
+                if v < 0 or v > 100:
+                    return await ctx.send_error("Currency generation chance must be between 0 and 100")
+            except ValueError:
+                return await ctx.send_error("Currency generation chance must be a number between 0 and 100")
+            await self.bot.db.set_currency_gen(ctx.guild.id, chance=v)
+            return await ctx.send_ok(f"Currency generation chance set to {v}%")
         await ctx.send_error("Invalid config")
 
     @commands.command(brief="Lists current configs for the server.")
@@ -82,6 +113,11 @@ class GuildSettings(commands.Cog):
                                      f"OKColor: `{conversions.hex_color_to_string(colors.ok_color)}`"),
                     ("Prefix", f"`{escape(self.bot.db.prefixes[ctx.guild.id], ctx)}`"),
                     ("Currency Gain", "Off" if not gain else f"{gain}/3m"),
+                    ("Currency Generation", f"**{colors.currency_chance}** to generate between "
+                                            f"**${colors.currency_min}** and **${colors.currency_max}**"),
+                    ("Generation Channels", " ".join(
+                        f"<#{c}>" for c in colors.currency_gen_channels) if colors.currency_gen_channels else "None"
+                     ),
                     ("Normal response embeds", "On" if colors.reply_embeds else "Off")
                 ]
             )
@@ -93,8 +129,14 @@ class GuildSettings(commands.Cog):
                            f"⋄ OKColor: `{conversions.hex_color_to_string(colors.ok_color)}`\n"
                            f"Prefix: `{escape(self.bot.db.prefixes[ctx.guild.id], ctx)}`\n"
                            f"Currency Gain: {'Off' if not gain else str(gain) + '/3m'}\n"
+                           f"Currency Generation: **{colors.currency_chance}** to generate between "
+                           f"**${colors.currency_min}** and **${colors.currency_max}**\n"
+                           f"Currency Generates on:\n" +
+                           ("\n".join(
+                               f"<#{c}>" for c in colors.currency_gen_channels)
+                            if colors.currency_gen_channels else "None"
+                            ) +
                            f"Normal response embeds: {'On' if colors.reply_embeds else 'Off'}")
-
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(GuildSettings(bot))

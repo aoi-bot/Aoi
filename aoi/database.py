@@ -7,8 +7,9 @@ from dataclasses import dataclass
 from typing import Dict, Optional, List, TYPE_CHECKING, Union, Tuple
 
 import aiosqlite
-import discord
 from aiosqlite import Connection
+
+import discord
 from discord.ext import tasks, commands
 
 if TYPE_CHECKING:
@@ -248,7 +249,7 @@ class AoiDatabase:
         self.bot.logger.info(f"database:Version {version} found")
         for i in sorted(MIGRATIONS.keys()):
             if i > version:
-                self.bot.logger.info(f"database:Upgrading to version {version + 1}")
+                self.bot.logger.info(f"database:Upgrading to version {i + 1}")
                 [await self.db.execute(_) for _ in MIGRATIONS[i].splitlines() if _]
                 await self.db.execute(f"pragma user_version={i}")
                 await self.db.commit()
@@ -268,7 +269,10 @@ class AoiDatabase:
             self.guild_settings[r[0]] = _GuildSetting(int(r[1], 16),
                                                       int(r[2], 16),
                                                       int(r[3], 16),
-                                                      r[5], r[6], int(r[7]), int(r[8]), int(r[9]),
+                                                      r[5], r[6],
+                                                      int(r[7]),
+                                                      int(r[8]),
+                                                      int(r[9]),
                                                       [int(x) for x in r[10].split(",")] if r[10] else [],
                                                       r[11] == 1, r[12] == 1)
             self.prefixes[r[0]] = r[4]
@@ -278,7 +282,6 @@ class AoiDatabase:
         for r in rows:
             self.perm_chains[r[0]] = r[1].split(";")
         self.bot.logger.info("database:Database loaded")
-
 
         cursor = await self.db.execute("SELECT * from messages")
         rows = await cursor.fetchall()
@@ -904,6 +907,38 @@ class AoiDatabase:
             )
             self.prefixes[guild] = ","
         return self.guild_settings[guild]
+
+    async def set_currency_gen(self, guild: int, **kwargs):
+        await self.guild_setting(guild)
+        if "min_amt" in kwargs:
+            self.guild_settings[guild].currency_min = kwargs["min_amt"]
+            await self.db.execute("UPDATE guild_settings SET currency_min=? WHERE guild=?", (kwargs["min_amt"], guild))
+        if "max_amt" in kwargs:
+            self.guild_settings[guild].currency_max = kwargs["min_amt"]
+            await self.db.execute("UPDATE guild_settings SET currency_max=? WHERE guild=?", (kwargs["max_amt"], guild))
+        if "chance" in kwargs:
+            self.guild_settings[guild].currency_chance = kwargs["chance"]
+            await self.db.execute("UPDATE guild_settings SET currency_chance=? WHERE guild=?",
+                                  (kwargs["chance"], guild))
+        await self.db.commit()
+
+    async def add_currency_channel(self, channel: discord.TextChannel):
+        await self.guild_setting(channel.guild.id)
+        if channel.id not in self.guild_settings[channel.guild.id].currency_gen_channels:
+            self.guild_settings[channel.guild.id].currency_gen_channels.append(channel.id)
+        await self.db.execute(f"UPDATE guild_settings SET currency_gen_channels=? WHERE Guild=?",
+                              (",".join(map(str, self.guild_settings[channel.guild.id].currency_gen_channels)),
+                               channel.guild.id))
+        await self.db.commit()
+
+    async def remove_currency_channel(self, channel: discord.TextChannel):
+        await self.guild_setting(channel.guild.id)
+        if channel.id in self.guild_settings[channel.guild.id].currency_gen_channels:
+            self.guild_settings[channel.guild.id].currency_gen_channels.remove(channel.id)
+        await self.db.execute(f"UPDATE guild_settings SET currency_gen_channels=? WHERE Guild=?",
+                              (",".join(map(str, self.guild_settings[channel.guild.id].currency_gen_channels)),
+                               channel.guild.id))
+        await self.db.commit()
 
     async def set_ok_color(self, guild: int, value: str):
         await self.db.execute(f"UPDATE guild_settings SET OkColor=? WHERE Guild=?", (value, guild))
