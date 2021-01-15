@@ -1,4 +1,4 @@
-from typing import Any, List, Union
+from typing import Any, List, Union, Iterable, Callable, TypeVar, Dict
 
 
 def arrows_from_direction(direction: str):
@@ -21,3 +21,10 @@ def arg_or_0_index(arg: Union[List[Any], Any]) -> Any:
         return arg[0]
     else:
         return arg
+
+
+_T = TypeVar("_T")
+
+
+def count(iterable: Iterable[_T], check: Callable[[_T], bool]) -> int:
+    return len([i for i in iterable if check(i)])
