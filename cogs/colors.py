@@ -91,7 +91,7 @@ class Colors(commands.Cog, aoi.ColorCogMixin):
 
     @commands.command(
         brief="Makes an RGB gradient between colors. Number of colors is optional, defaults to 4 and must be "
-              "between 3 and 10.",
+              "between 3 and 60.",
         aliases=["grad"]
     )
     async def gradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor, num: int = 4):
@@ -102,7 +102,7 @@ class Colors(commands.Cog, aoi.ColorCogMixin):
 
     @commands.command(
         brief="Makes an HLS gradient between RGB colors. Number of colors is optional, defaults to 4 and must be "
-              "between 3 and 10.",
+              "between 3 and 60.",
         aliases=["hgrad"]
     )
     async def hgradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor, num: int = 4):
