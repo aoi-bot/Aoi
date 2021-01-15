@@ -61,6 +61,8 @@ async def permission_check(ctx: aoi.AoiContext):  # noqa: C901
         if tok[0] == "acm":
             if ctx.channel.id == int(tok[1]):
                 update_use(tok[2] == "enable", n)
+        if tok[0] == "arm" and int(tok[1]) in [r.id for r in ctx.author.roles]:
+            update_use(tok[1] == "enable", n)
         if tok[0] == "cm":
             if ctx.channel.id == int(tok[1]) and \
                     ctx.command.cog.qualified_name.lower() == tok[3].lower():
