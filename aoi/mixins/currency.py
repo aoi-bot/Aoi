@@ -28,10 +28,24 @@ class CurrencyMixin:
 
         amount = random.randint(gs.currency_min, gs.currency_max + 1)
 
-        msg: discord.Message = await msg.channel.send(embed=discord.Embed(description=random.choice([
-            f"You see ${amount} blowing in the wind! `{prefix}grab` it."
-        ]
-        )))
+        with open("assets/currency_mokke.png", "rb") as fp:
+            file = discord.File(fp, filename="mokke.png")
+
+        if gs.reply_embeds:
+            msg: discord.Message = await msg.channel.send(embed=discord.Embed(description=random.choice([
+                f"A mokke passes by you carrying ${amount}. `{prefix}grab` it.",
+                f"You see a mokke with ${amount}! `{prefix}grab` it!"
+            ]
+            )).set_image(url="attachment://mokke.png"), file=file)
+        else:
+            msg: discord.Message = await msg.channel.send(
+                random.choice(["<:mokke:798002325036728350>",
+                               "<:mokke_jump:798073920104169492>"]) +
+                random.choice([
+                    f" A mokke passes by you carrying ${amount}. `{prefix}grab` it.",
+                    f" You see a mokke with ${amount}! `{prefix}grab` it!"
+                ])
+            )
 
         async with self.lock:
             if msg.channel not in self.active_catches:
