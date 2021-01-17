@@ -4,12 +4,10 @@
     "cogs.administration.permissions": "Permissions"
     "cogs.administration.welcomegoodbye": "WelcomeGoodbye"
 "Administration":
-    "cogs.administration.aoi": "Bot"
     "cogs.administration.information": "Information"
     "cogs.administration.guild": "Guilds"
     "cogs.administration.taskmgmt": "TaskManagement"
     "cogs.administration.users": "Users"
-    "cogs.settings.guildsettings": "GuildSettings"
     "cogs.administration.triggers": "Triggers"
     "cogs.administration.messages": "Messages"
     "cogs.administration.mod_commands": "Moderation"
@@ -28,9 +26,11 @@
     "cogs.user.global_shop": "GlobalShop"
     "cogs.user.guild_shop": "ServerShop"
     "cogs.user.guild_gambling": "ServerGambling"
-"Utility/Config":
+"Bot Utility/Config":
     "cogs.help": "Help"
     "cogs.guides": "Guides"
+    "cogs.settings.guildsettings": "GuildSettings"
+    "cogs.administration.aoi": "Bot"
 "Hidden":
     "cogs.errorhandler": "ErrorHandler"
     "cogs.administration.reactionroles": "ReactionRoles"
