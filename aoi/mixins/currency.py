@@ -64,6 +64,9 @@ class CurrencyMixin:
             amount: int = sum(catch[1] for catch in self.active_catches[ctx.channel])
             del self.active_catches[ctx.channel]
 
-        asyncio.create_task(self.bot.http.delete_messages(ctx.channel.id, [m.id for m in messages]))
+        if len(messages) == 1:
+            asyncio.create_task(messages[0].delete())
+        else:
+            asyncio.create_task(self.bot.http.delete_messages(ctx.channel.id, [m.id for m in messages]))
         await self.bot.db.award_guild_currency(ctx.author, amount)
         return amount
