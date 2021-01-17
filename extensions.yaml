@@ -12,15 +12,11 @@
     "cogs.settings.guildsettings": "GuildSettings"
     "cogs.administration.triggers": "Triggers"
     "cogs.administration.messages": "Messages"
-"Moderation":
-    "cogs.moderation.mod_commands": "Moderation"
+    "cogs.administration.mod_commands": "Moderation"
 "Misc":
     "cogs.colors": "Colors"
-    # "cogs.nsfw": "NSFW"
-    "cogs.math": "Math"
     "cogs.searches": "Searches"
     "cogs.nasa": "Nasa"
-    "cogs.games": "Minigames"
     "cogs.geolocation": "Geolocation"
     "cogs.fun": "Fun"
     "cogs.weather": "Weather"
