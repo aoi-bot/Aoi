@@ -16,7 +16,7 @@
     "cogs.moderation.mod_commands": "Moderation"
 "Misc":
     "cogs.colors": "Colors"
-    "cogs.nsfw": "NSFW"
+    # "cogs.nsfw": "NSFW"
     "cogs.math": "Math"
     "cogs.searches": "Searches"
     "cogs.nasa": "Nasa"
