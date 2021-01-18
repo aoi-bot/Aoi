@@ -81,8 +81,8 @@ class Moderation(commands.Cog):
         await ctx.send(embed=self.get_action_embed(ctx, user, PunishmentType.UNBAN, reason))
         await self.bot.db.add_punishment(user.id, ctx.guild.id, ctx.author.id, PunishmentType.UNBAN, reason)
 
-    @commands.has_permissions(ban_members=True)
-    @commands.command(brief="Bans a member from the server")
+    @commands.has_permission(kick_members=True)
+    @commands.command(brief="Warns a member")
     async def warn(self, ctx: aoi.AoiContext, member: discord.Member, *, reason: str = "No reason provided"):
         self._check_role(ctx, member, "warn")
         dm_sent = True
