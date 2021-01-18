@@ -4,6 +4,8 @@ import re
 from dataclasses import dataclass
 from typing import List, Union
 
+from discord.ext import commands
+
 import aoi
 
 logging.getLogger("aoi").info("expr:Initializing the expression evaluator")
@@ -15,6 +17,30 @@ class _Operator:
     func: callable
     arguments: int
 
+
+def _get_prime_factors(number):
+    pfact = {}
+    if number < 0:
+        pfact[-1] = 1
+    number = abs(number)
+    if number == 1:
+        pfact[1] = 1
+        return pfact
+    while number % 2 == 0:
+        number = number // 2
+        pfact[2] = pfact.get(2, 0) + 1
+    for i in range(3, int(math.sqrt(number)) + 1, 2):
+        while number % i == 0:
+            number = number // i
+            pfact[i] = pfact.get(i, 0) + 1
+    if number > 2:
+        pfact[number] = pfact.get(number, 0) + 1
+    return pfact
+
+
+def _inlimits(number):
+    if number > 100000000000:
+        raise commands.BadArgument("Number must be less than 100000000000")
 
 _PRECEDENCE_DICT = {
     "^": _Operator(

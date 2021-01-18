@@ -14,7 +14,7 @@ class CurrencyLock:
                  amount: int,
                  is_global: bool,
                  success: str,
-                 error: Optional[str] = "An error occured, and your currency was not affected."):
+                 error: Optional[str] = "An error occurred, and your currency was not affected."):
         self.ctx = ctx
         self.amount = amount
         self.is_global = is_global

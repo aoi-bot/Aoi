@@ -29,6 +29,8 @@ class Permissions(commands.Cog):
             tok = r.split()
             if tok[0] in ["acm", "cm"]:
                 tok[1] = f"<#{tok[1]}>"
+            if tok[0] in ["arm"]:
+                tok[1] = f"<@&{tok[1]}>"
             perms[n] = " ".join(tok)
         await ctx.paginate(perms, title="Permissions list", n=10, numbered=True)
 
@@ -78,6 +80,12 @@ class Permissions(commands.Cog):
         module = self.bot.find_cog(module)[0]
         await self.db.add_permission(ctx.guild.id, f"sm {module} {enabled}")
         await ctx.send_ok(f"**sm {module} {enabled}** added.", trash=False)
+
+    @commands.has_permissions(administrator=True)
+    @commands.command(brief="Disable or enable all commands for a role", aliases=["arm"])
+    async def allrolemdls(self, ctx: aoi.AoiContext, role: discord.Role, enabled: disenable()):
+        await self.db.add_permission(ctx.guild.id, f"arm {role.id} {enabled}")
+        await ctx.send_ok(f"**arm {role.name} {enabled}** added.", trash=False)
 
 
 def setup(bot: aoi.AoiBot) -> None:

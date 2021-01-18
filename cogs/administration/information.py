@@ -1,9 +1,9 @@
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Dict
 
 import aoi
 import discord
 from discord.ext import commands
-from libs import conversions
+from libs import conversions, misc as m
 
 
 class Information(commands.Cog):
@@ -238,6 +238,75 @@ class Information(commands.Cog):
                             f"{conversions.camel_to_title(perm[0])}"
                             for perm in perms
                         ) + "```"
+        )
+
+    @commands.command(
+        brief="Shows people in a role"
+    )
+    async def hasrole(self, ctx: aoi.AoiContext, *, role: discord.Role):
+        await ctx.paginate(
+            [f"{user.mention} - {user.id} - {user}" for user in role.members],
+            20,
+            f"Users with {role}"
+        )
+
+    @commands.command(
+        brief="Shows people with all of the listed roles"
+    )
+    async def hasroles(self, ctx: aoi.AoiContext, roles: commands.Greedy[discord.Role]):
+        users: List[discord.Member] = []
+        for user in ctx.guild.members:
+            role_ids = [role.id for role in user.roles]
+            if all(role.id in role_ids for role in roles):
+                users.append(user)
+        await ctx.paginate(
+            [f"{user.mention} - {user.id} - {user}" for user in users],
+            20,
+            f"Users with: {', '.join(map(str, roles))}"
+        )
+
+    @commands.command(
+        brief="Shows the number of members with each role",
+        flags={"stacked": [None, "Only count the highest of the roles if someone has multiple. "
+                                 "Respect discord role order"],
+               "sort": [None, "Sort roles by member count"]},
+        aliases=["rcompare"]
+    )
+    async def rolecompare(self, ctx: aoi.AoiContext, roles: commands.Greedy[discord.Role]):
+        if len(roles) < 2 or len(roles) > 20:
+            raise commands.BadArgument("You must supply 2-20 roles.")
+        if "stacked" not in ctx.flags:
+            return await ctx.embed(description="\n".join(
+                (f"{n+1}. {role} - {len(role.members)}"
+                 for n, role in enumerate(sorted(roles, key=lambda x: -len(x.members))))
+                if "sort" in ctx.flags else
+                (f"{role} - {len(role.members)}" for role in roles)
+            ))
+        members: Dict[discord.Member, discord.Role] = {}
+        await ctx.trigger_typing()
+        for member in ctx.guild.members:
+            role_ids: List[int] = [r.id for r in member.roles]
+            # grab member's highest role in the list
+            for role in roles:
+                if role.id in role_ids:
+                    if member not in members:
+                        members[member] = role
+                    elif role.position > members[member].position:
+                        members[member] = role
+
+        count: Dict[discord.Role, int] = {
+            role: m.count(members.values(), lambda x: x.id == role.id)
+            for role in roles
+        }
+        if "sort" in ctx.flags:
+            count = dict(sorted(count.items(), key=lambda i: -i[1]))  # noqa what the fuck pycharm
+
+        await ctx.embed(
+            description="\n".join(
+                (f"{n+1}. {i[0]} - {i[1]}" for n, i in enumerate(count.items()))  # noqa also what the fuck pycharm
+                if "sort" in ctx.flags else
+                (f"{role} - {members}" for role, members in count.items())
+            )
         )
 
 

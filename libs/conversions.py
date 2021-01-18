@@ -47,7 +47,7 @@ def camel_to_title(camel: str):
     return camel.replace("_", " ").title()
 
 
-def escape(text: str, ctx: AoiContext):
+def escape(text: str, ctx: Union[AoiContext, discord.Message]):
     role_mentions = re.findall(r"<@&\d{17,21}>", text)
     for mention in role_mentions:
         role = ctx.guild.get_role(int(mention[3:-1]))
