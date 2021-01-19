@@ -120,16 +120,22 @@ class Moderation(commands.Cog):
             await msg.edit(embed=msg.embeds[0].add_field(name="Automod Banned", value=f"{len(punishments)} warns"))
 
     @commands.has_permissions(ban_members=True)
-    @commands.command(brief="Clears a warning for a user", aliases=["pclear"])
+    @commands.command(brief="Clears a warning for a user", aliases=["pclear"],
+                      flags={"del": [None, "Completely delete the warning"]})
     async def punishmentclear(self, ctx: aoi.AoiContext, member: discord.Member, num: int = 1):
         punishments: List[Punishment] = sorted(await self.bot.db.lookup_punishments(member.id),
                                                key=lambda punishment: punishment.time, reverse=True)
         if num < 1 or num > len(punishments):
             return ctx.send_error("Invalid warning number")
-        await self.bot.db.db.execute("delete from punishments where user=? and guild=? and timestamp=?",
-                                     (punishments[num-1].user,
-                                      punishments[num-1].guild,
-                                      punishments[num-1].time.timestamp()))
+        p = punishments[num-1]
+        if "del" in ctx.flags:
+            await self.bot.db.db.execute("delete from punishments where user=? and guild=? and timestamp=?",
+                                         (p.user,
+                                          p.guild,
+                                          p.time.timestamp()))
+        else:
+            await self.bot.db.db.execute("update punishments set cleared=1,cleared_by=? where user=? and guild=? "
+                                         "and timestamp=?", (ctx.author.id, p.user, p.guild, p.time.timestamp()))
         await self.bot.db.db.commit()
         await ctx.send_ok(f"Cleared punishment #{num} for {member}")
 
@@ -145,10 +151,12 @@ class Moderation(commands.Cog):
             await ctx.send_info(f"{member} has no punishments")
 
         async def fmt(punishment: Punishment) -> str:
+            _ = "~~" if punishment.cleared else ""
+            cl = f"Cleared By: {await self.bot.fetch_unknown_user(punishment.cleared_by)}\n" if punishment.cleared else ""
             action = ["banned", "kicked", "muted", "warned", "unbanned", "softbanned"][punishment.typ]
-            return f"{action} by {await self.bot.fetch_unknown_user(punishment.staff)}\n" \
+            return f"{_}{action} by {await self.bot.fetch_unknown_user(punishment.staff)}{_}\n" \
                    f"Date: {punishment.time.strftime('%x %X')}\n" \
-                   f"Reason: {punishment.reason or 'None'}\n"
+                   f"Reason: {punishment.reason or 'None'}\n{cl}"
 
         await ctx.paginate([await fmt(punishment) for punishment in punishments],
                            10, f"Punishments for {member}", numbered=True, num_start=1)

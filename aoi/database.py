@@ -155,6 +155,10 @@ ALTER TABLE guild_settings ADD COLUMN delete_on_ban INTEGER DEFAULT 1;
     """,
     3: """
 ALTER TABLE guild_settings ADD COLUMN reply_embeds INTEGER DEFAULT 1;
+    """,
+    4: """
+ALTER TABLE punishments ADD COLUMN cleared INTEGER DEFAULT 0;
+ALTER TABLE punishments ADD COLUMN cleared_by INTEGER DEFAULT 0;
     """
 }
 
@@ -189,6 +193,8 @@ class Punishment:
     typ: int
     reason: str
     time: datetime.datetime
+    cleared: int
+    cleared_by: int
 
 
 class PunishmentType:
@@ -819,7 +825,9 @@ class AoiDatabase:
         return [
             Punishment(
                 *p[:5],
-                time=datetime.datetime.fromtimestamp(p[5])
+                time=datetime.datetime.fromtimestamp(p[5]),
+                cleared=p[6],
+                cleared_by=p[7]
             )
             for p in punishments
         ]
