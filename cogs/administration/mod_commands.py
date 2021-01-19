@@ -48,25 +48,31 @@ class Moderation(commands.Cog):
     @commands.command(brief="Kicks a member from the server")
     async def kick(self, ctx: aoi.AoiContext, member: discord.Member, *, reason: str = None):
         self._check_role(ctx, member, "kick")
+        dm_sent = await self._dm(member, discord.Embed(title=f"Kicked from {ctx.guild}", description=reason))
         await member.kick(reason=f"{reason} | {ctx.author.id} {ctx.author}")
-        await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentType.KICK, reason))
+        await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentType.KICK, reason,
+                                                   extra="DM could not be sent" if not dm_sent else ""))
         await self.bot.db.add_user_kick(member.id, ctx, reason)
 
     @commands.has_permissions(ban_members=True)
     @commands.command(brief="Bans a member from the server")
     async def ban(self, ctx: aoi.AoiContext, member: discord.Member, *, reason: str = None):
         self._check_role(ctx, member, "ban")
+        dm_sent = await self._dm(member, discord.Embed(title=f"Banned from {ctx.guild}", description=reason))
         await member.ban(reason=f"{reason} | {ctx.author.id} {ctx.author}")
-        await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentType.BAN, reason))
+        await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentType.BAN, reason,
+                                                   extra="DM could not be sent" if not dm_sent else ""))
         await self.bot.db.add_user_ban(member.id, ctx, reason)
 
     @commands.has_permissions(ban_members=True)
     @commands.command(brief="Softbans a member from the server")
     async def softban(self, ctx: aoi.AoiContext, member: discord.Member, *, reason: str = None):
         self._check_role(ctx, member, "softban")
+        dm_sent = await self._dm(member, discord.Embed(title=f"Softbanned from {ctx.guild}", description=reason))
         await member.ban(reason=f"{reason} | {ctx.author.id} {ctx.author} | Softban")
         await ctx.guild.unban(member, reason=f"Softban")
-        await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentType.SOFTBAN, reason))
+        await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentType.SOFTBAN, reason,
+                                                   extra="DM could not be sent" if not dm_sent else ""))
         await self.bot.db.add_punishment(member.id, ctx.guild.id, ctx.author.id, PunishmentType.SOFTBAN, reason)
 
     @commands.has_permissions(ban_members=True)
@@ -91,23 +97,21 @@ class Moderation(commands.Cog):
     @commands.command(brief="Warns a member")
     async def warn(self, ctx: aoi.AoiContext, member: discord.Member, *, reason: str = "No reason provided"):
         self._check_role(ctx, member, "warn")
-        dm_sent = True
-        try:
-            await member.send(embed=discord.Embed(title=f"Warning from {ctx.guild}", description=reason))
-        except discord.Forbidden:
-            dm_sent = False
+        dm_sent = await self._dm(member, discord.Embed(title=f"Warning from {ctx.guild}", description=reason))
         msg = await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentType.WARN, reason,
-                                                   extra="DM could not be sent" if not dm_sent else ""))
+                                                         extra="DM could not be sent" if not dm_sent else ""))
         await self.bot.db.add_user_warn(member.id, ctx, reason)
 
         punishments = [x for x in (await self.bot.db.lookup_punishments(member.id)) if x.typ == PunishmentType.WARN]
         punishment = await self.bot.db.get_warnp(ctx.guild.id, len(punishments))
 
         if punishment == "kick":
+            await self._dm(member, discord.Embed(title=f"Kicked from {ctx.guild}", description="Automod"))
             await member.kick(reason="Automod")
             await self.bot.db.add_user_kick(member.id, ctx, "Automod")
             await msg.edit(embed=msg.embeds[0].add_field(name="Automod Kicked", value=f"{len(punishments)} warns"))
         elif punishment == "ban":
+            await self._dm(member, discord.Embed(title=f"Banned from {ctx.guild}", description="Automod"))
             await member.ban(reason="Automod")
             await self.bot.db.add_user_ban(member.id, ctx, "Automod")
             await msg.edit(embed=msg.embeds[0].add_field(name="Automod Banned", value=f"{len(punishments)} warns"))
@@ -159,6 +163,13 @@ class Moderation(commands.Cog):
         if args[0] == "ban":
             return None if len(args) == 1 else "Ban takes no extra arguments"
         return "Must give either kick or ban"
+
+    async def _dm(self, member: discord.Member, embed: discord.Embed):
+        try:
+            await member.send(embed=embed)
+            return True
+        except discord.Forbidden:
+            return True
 
 
 def setup(bot: aoi.AoiBot) -> None:
