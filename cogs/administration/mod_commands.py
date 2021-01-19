@@ -1,9 +1,9 @@
 from datetime import datetime
-from typing import List, Union
+from typing import List, Union, Optional, Dict
 
 import aoi
 import discord
-from aoi.database import Punishment, PunishmentType
+from aoi.database import Punishment, PunishmentType, TimedPunishment
 from discord.ext import commands
 
 
@@ -15,6 +15,12 @@ def _soft_check_role(ctx: aoi.AoiContext, member: discord.Member, action: str = 
 class Moderation(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
+        self.timed_punishments: Dict[int, List[TimedPunishment]] = {}
+        bot.loop.create_task(self._init())
+
+    async def _init(self):
+        await self.bot.wait_until_ready()
+        self.timed_punishments = await self.bot.db.load_backing_punishments()
 
     def _check_role(self, ctx: aoi.AoiContext, member: discord.Member, action: str = "edit"):
         if member.top_role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
@@ -81,7 +87,7 @@ class Moderation(commands.Cog):
         await ctx.send(embed=self.get_action_embed(ctx, user, PunishmentType.UNBAN, reason))
         await self.bot.db.add_punishment(user.id, ctx.guild.id, ctx.author.id, PunishmentType.UNBAN, reason)
 
-    @commands.has_permission(kick_members=True)
+    @commands.has_permissions(kick_members=True)
     @commands.command(brief="Warns a member")
     async def warn(self, ctx: aoi.AoiContext, member: discord.Member, *, reason: str = "No reason provided"):
         self._check_role(ctx, member, "warn")
@@ -90,9 +96,21 @@ class Moderation(commands.Cog):
             await member.send(embed=discord.Embed(title=f"Warning from {ctx.guild}", description=reason))
         except discord.Forbidden:
             dm_sent = False
-        await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentType.WARN, reason,
+        msg = await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentType.WARN, reason,
                                                    extra="DM could not be sent" if not dm_sent else ""))
         await self.bot.db.add_user_warn(member.id, ctx, reason)
+
+        punishments = [x for x in (await self.bot.db.lookup_punishments(member.id)) if x.typ == PunishmentType.WARN]
+        punishment = await self.bot.db.get_warnp(ctx.guild.id, len(punishments))
+
+        if punishment == "kick":
+            await member.kick(reason="Automod")
+            await self.bot.db.add_user_kick(member.id, ctx, "Automod")
+            await msg.edit(embed=msg.embeds[0].add_field(name="Automod Kicked", value=f"{len(punishments)} warns"))
+        elif punishment == "ban":
+            await member.ban(reason="Automod")
+            await self.bot.db.add_user_ban(member.id, ctx, "Automod")
+            await msg.edit(embed=msg.embeds[0].add_field(name="Automod Banned", value=f"{len(punishments)} warns"))
 
     @commands.command(brief="Views the punishment logs for a user")
     async def logs(self, ctx: aoi.AoiContext, member: discord.Member = None):
@@ -113,6 +131,34 @@ class Moderation(commands.Cog):
 
         await ctx.paginate([await fmt(punishment) for punishment in punishments],
                            10, f"Punishments for {member}", numbered=True, num_start=1)
+
+    @commands.has_permissions(administrator=True)
+    @commands.command(brief="Adds or removes a warn punishment")
+    async def warnp(self, ctx: aoi.AoiContext, warns: int, *, action: str = None):
+        if not action:
+            await self.bot.db.del_warnp(ctx.guild.id, warns)
+            return await ctx.send(f"No punishment will be applied at {warns} warns")
+        res = await self._validate_warnp(action)
+        if res:
+            return ctx.send_error(res)
+        await self.bot.db.set_warnp(ctx.guild.id, warns, action)
+        return await ctx.send_ok(f"`{action}` will be applied at {warns} warns")
+
+    @commands.command(brief="View the server's warning punishment list")
+    async def warnpl(self, ctx: aoi.AoiContext):
+        punishments = await self.bot.db.get_all_warnp(ctx.guild.id)
+        if punishments:
+            await ctx.paginate([f"{n}: {p}" for n, p in punishments], title="Warn Punishments", n=20)
+        else:
+            await ctx.send_info("No warning punishments for this server")
+
+    async def _validate_warnp(self, warnp: str) -> Optional[str]:
+        args = warnp.lower().split()
+        if args[0] == "kick":
+            return None if len(args) == 1 else "Kick takes no extra arguments"
+        if args[0] == "ban":
+            return None if len(args) == 1 else "Ban takes no extra arguments"
+        return "Must give either kick or ban"
 
 
 def setup(bot: aoi.AoiBot) -> None:

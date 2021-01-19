@@ -126,7 +126,20 @@ CREATE TABLE IF NOT EXISTS "roletriggers" (
   "channel" INTEGER NOT NULL,
   "message" TEXT NOT NULL,
   "type" TEXT NOT NULL
-)
+);;
+CREATE TABLE IF NOT EXISTS "warnpunish" (
+  "guild" INTEGER NOT NULL,
+  "level" INTEGER NOT NULL,
+  "action" TEXT NOT NULL
+);;
+CREATE TABLE IF NOT EXISTS "current_punishments" (
+  "id" INTEGER NOT NULL,
+  "guild" INTEGER NOT NULL,
+  "role" INTEGER NOT NULL,
+  "end" INTEGER NOT NULL,
+  "ismute" INTEGER NOT NULL,
+  "user" INTEGER NOT NULL
+);;
 """
 
 MIGRATIONS = {
@@ -186,6 +199,14 @@ class PunishmentType:
     UNBAN = 4
     SOFTBAN = 5
 
+@dataclass()
+class TimedPunishment:
+    _id: int
+    guild: int
+    role: int
+    end: int
+    ismute: bool
+    user: int
 
 @dataclass()
 class _Message:
@@ -823,6 +844,46 @@ class AoiDatabase:
 
     async def add_user_kick(self, user: int, ctx: aoi.AoiContext, reason: str = None):
         await self.add_punishment(user, ctx.guild.id, ctx.author.id, PunishmentType.KICK, reason)
+
+    async def get_warnp(self, guild: int, warns: int) -> Optional[str]:
+        rows = list(await self.db.execute_fetchall("select action from warnpunish where guild=? and level=?",
+                                                   (guild, warns)))
+        return rows[0][0] if rows else None
+
+    async def set_warnp(self, guild: int, warns: int, action: str):
+        await self.db.execute("delete from warnpunish where guild=? and level=?", (guild, warns))
+        await self.db.execute("insert into warnpunish (guild, level, action) values (?,?,?)",
+                              (guild, warns, action))
+        await self.db.commit()
+
+    async def del_warnp(self, guild: int, warns: int):
+        await self.db.execute("delete from warnpunish where guild=? and level=?", (guild, warns))
+        await self.db.commit()
+
+    async def get_all_warnp(self, guild: int) -> List[Tuple[int, str]]:
+        rows = list(await self.db.execute_fetchall("select level, action from warnpunish where guild=? order by level",
+                                                   (guild,)))
+        return list(map(tuple, rows))
+
+    async def add_timed_punishment(self, guild: int, duration: datetime.timedelta, user: int, role: int, mute: bool):
+        await self.db.execute("insert into punishments (id, guild, end, user, role, ismute) values (?,?,?,?,?)",
+                              (datetime.datetime.now().utcnow(), guild, datetime.datetime.utcnow() + duration,
+                               user, role, 1 if mute else 0))
+        await self.db.commit()
+
+    async def removed_timed_punishment(self, _id: int):
+        await self.db.execute("delete from punishments where id=?", (_id, ))
+        await self.db.commit()
+
+    async def load_backing_punishments(self) -> Dict[int, List[TimedPunishment]]:
+        rows = await self.db.execute_fetchall("select * from punishments")
+        punishments = {}
+        for r in rows:
+            _id, guild, role, end, ismute, user = *r[0:4], r[4] == 1, r[5] # noqa
+            if guild not in punishments:
+                punishments[guild] = []
+            punishments[guild].append(TimedPunishment(_id, guild, role, end, ismute, user))
+        return punishments
 
     # endregion
 
