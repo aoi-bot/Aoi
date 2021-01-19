@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 from typing import List, Union, Optional, Dict
 
@@ -105,6 +106,8 @@ class Moderation(commands.Cog):
         punishments = [x for x in (await self.bot.db.lookup_punishments(member.id)) if x.typ == PunishmentType.WARN]
         punishment = await self.bot.db.get_warnp(ctx.guild.id, len(punishments))
 
+        await asyncio.sleep(0.01)  # make sure timestamps differ enough
+
         if punishment == "kick":
             await self._dm(member, discord.Embed(title=f"Kicked from {ctx.guild}", description="Automod"))
             await member.kick(reason="Automod")
@@ -115,6 +118,20 @@ class Moderation(commands.Cog):
             await member.ban(reason="Automod")
             await self.bot.db.add_user_ban(member.id, ctx, "Automod")
             await msg.edit(embed=msg.embeds[0].add_field(name="Automod Banned", value=f"{len(punishments)} warns"))
+
+    @commands.has_permissions(ban_members=True)
+    @commands.command(brief="Clears a warning for a user", aliases=["pclear"])
+    async def punishmentclear(self, ctx: aoi.AoiContext, member: discord.Member, num: int = 1):
+        punishments: List[Punishment] = sorted(await self.bot.db.lookup_punishments(member.id),
+                                               key=lambda punishment: punishment.time, reverse=True)
+        if num < 1 or num > len(punishments):
+            return ctx.send_error("Invalid warning number")
+        await self.bot.db.db.execute("delete from punishments where user=? and guild=? and timestamp=?",
+                                     (punishments[num-1].user,
+                                      punishments[num-1].guild,
+                                      punishments[num-1].time.timestamp()))
+        await self.bot.db.db.commit()
+        await ctx.send_ok(f"Cleared punishment #{num} for {member}")
 
     @commands.command(brief="Views the punishment logs for a user")
     async def logs(self, ctx: aoi.AoiContext, member: discord.Member = None):
