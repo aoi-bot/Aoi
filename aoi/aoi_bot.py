@@ -116,6 +116,7 @@ class AoiBot(commands.AutoShardedBot):
         self.slash: Optional[SlashCommand] = None
         self.is_restarting = False
         self.thumbnails: List[str] = []
+        self.twitter_bearer = ""
 
         async def command_ran(ctx: aoi.AoiContext):
             self.commands_executed += 1
@@ -197,6 +198,7 @@ class AoiBot(commands.AutoShardedBot):
         self.imgur_secret = os.getenv("IMGUR_SECRET")
         self.gmap = gmaps.GeoLocation(self.google)
         self.ksoft_api = os.getenv("KSOFT")
+        self.twitter_bearer = os.getenv("TWITTER_BEARER")
 
         # self.pixiv.login(self.pixiv_user, self.pixiv_password)
         self.imgur = imgur.Imgur(self.imgur_user)

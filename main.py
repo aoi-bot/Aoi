@@ -54,24 +54,50 @@ async def permission_check(ctx: aoi.AoiContext):  # noqa: C901
     if ctx.command.cog.qualified_name == "Permissions":
         return True
     perms = await bot.db.get_permissions(ctx.guild.id)
+    roles = [r.id for r in ctx.author.roles]
+    channel = ctx.channel.id
+    category = ctx.channel.category.id if ctx.channel.category else 0
+    command_name = ctx.command.name.lower()
+    cog_name = ctx.command.cog.qualified_name.lower()
     for n, i in enumerate(perms):
         tok = i.split()
+
         if tok[0] == "asm":
             update_use(tok[1] == "enable", n)
         if tok[0] == "acm":
-            if ctx.channel.id == int(tok[1]):
+            if channel == int(tok[1]):
                 update_use(tok[2] == "enable", n)
-        if tok[0] == "arm" and int(tok[1]) in [r.id for r in ctx.author.roles]:
+        if tok[0] == "arm" and int(tok[1]) in roles:
             update_use(tok[1] == "enable", n)
+        if tok[0] == "axm" and int(tok[1]) == category:
+            update_use(tok[2] == "enable", n)
+
         if tok[0] == "cm":
             if ctx.channel.id == int(tok[1]) and \
-                    ctx.command.cog.qualified_name.lower() == tok[3].lower():
-                update_use(tok[2] == "enable", n)
-        if tok[0] == "sc":
-            if ctx.command.name.lower() == tok[1].lower():
+                    cog_name.lower() == tok[3].lower():
                 update_use(tok[2] == "enable", n)
         if tok[0] == "sm":
-            if ctx.command.cog.qualified_name.lower() == tok[1].lower():
+            if cog_name.lower() == tok[2].lower():
+                update_use(tok[1] == "enable", n)
+        if tok[0] == "xm":
+            if cog_name.lower() == tok[3].lower() and category == int(tok[1]):
+                update_use(tok[2] == "enable", n)
+        if tok[0] == "rm":
+            if cog_name.lower() == tok[3].lower() and int(tok[1]) in roles:
+                update_use(tok[2] == "enable", n)
+
+        if tok[0] == "cc":
+            if ctx.channel.id == int(tok[1]) and \
+                    command_name.lower() == tok[3].lower():
+                update_use(tok[2] == "enable", n)
+        if tok[0] == "sc":
+            if command_name.lower() == tok[2].lower():
+                update_use(tok[1] == "enable", n)
+        if tok[0] == "xc":
+            if command_name.lower() == tok[3].lower() and category == int(tok[1]):
+                update_use(tok[2] == "enable", n)
+        if tok[0] == "rc":
+            if command_name.lower() == tok[3].lower() and int(tok[1]) in roles:
                 update_use(tok[2] == "enable", n)
     if not can_use:
         raise aoi.PermissionFailed(f"Permission #{current_n} - {perms[current_n]} "
