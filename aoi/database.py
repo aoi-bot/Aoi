@@ -140,6 +140,7 @@ CREATE TABLE IF NOT EXISTS "current_punishments" (
   "ismute" INTEGER NOT NULL,
   "user" INTEGER NOT NULL
 );;
+CREATE TABLE IF NOT EXISTS "overriden_perms"
 """
 
 MIGRATIONS = {
