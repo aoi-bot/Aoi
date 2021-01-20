@@ -26,11 +26,11 @@ class Roles(commands.Cog):
         if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
             raise aoi.RoleHierarchyError(f"Role to {action} must be lower than your highest")
         if role >= ctx.me.top_role:
-            raise aoi.RoleHierarchyError(f"I can't {action} a role higher than mine")
+            raise aoi.RoleHierarchyError(f"I can't {action} a role higher than or equal to mine")
 
     def _soft_check_role(self, ctx: aoi.AoiContext, role: discord.Role, action: str = "edit"):
         if role >= ctx.me.top_role:
-            raise aoi.RoleHierarchyError(f"I can't {action} a role higher than mine")
+            raise aoi.RoleHierarchyError(f"I can't {action} a role higher than or equal to mine")
 
     @commands.bot_has_permissions(manage_roles=True)
     @commands.has_permissions(manage_roles=True)

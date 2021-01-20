@@ -10,7 +10,7 @@ from discord.ext import commands
 
 def _soft_check_role(ctx: aoi.AoiContext, member: discord.Member, action: str = "edit"):
     if member.top_role >= ctx.me.top_role:
-        raise aoi.RoleHierarchyError(f"I can't {action} someone with a role higher than mine")
+        raise aoi.RoleHierarchyError(f"I can't {action} someone with a role higher than or equal to mine")
 
 
 class Moderation(commands.Cog):
