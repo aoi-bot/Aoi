@@ -149,7 +149,7 @@ class Permissions(commands.Cog):
         cmd = self.bot.get_command(command.lower())
         if not cmd:
             raise commands.BadArgument(f"Command {command} not found")
-        await self.db.add_permission(ctx.guild.id, f"cc <#{channel.id}> {enabled} {command}")
+        await self.db.add_permission(ctx.guild.id, f"cc {channel.id} {enabled} {command}")
         await ctx.send_ok(f"**cc <#{channel.id}> {enabled} {command}** added.", trash=False)
 
     @commands.has_permissions(administrator=True)
@@ -158,7 +158,7 @@ class Permissions(commands.Cog):
         cmd = self.bot.get_command(command.lower())
         if not cmd:
             raise commands.BadArgument(f"Command {command} not found")
-        await self.db.add_permission(ctx.guild.id, f"xc <#{category.id}> {enabled} {command}")
+        await self.db.add_permission(ctx.guild.id, f"xc {category.id} {enabled} {command}")
         await ctx.send_ok(f"**xc <#{category.id}> {enabled} {command}** added.", trash=False)
 
     @commands.has_permissions(administrator=True)
@@ -167,7 +167,7 @@ class Permissions(commands.Cog):
         cmd = self.bot.get_command(command.lower())
         if not cmd:
             raise commands.BadArgument(f"Command {command} not found")
-        await self.db.add_permission(ctx.guild.id, f"uc <#{member.id}> {enabled} {command}")
+        await self.db.add_permission(ctx.guild.id, f"uc {member.id} {enabled} {command}")
         await ctx.send_ok(f"**uc <@{member.id}> {enabled} {command}** added.", trash=False)
 
     # endregion
