@@ -14,7 +14,7 @@ class Permissions(commands.Cog):
 
     @property
     def description(self):
-        return "Commands to channelnge command permissions"
+        return "Commands to change command permissions"
 
     async def _init(self):
         self.bot.logger.info("perms:Waiting for bot")
@@ -22,7 +22,7 @@ class Permissions(commands.Cog):
         self.db = self.bot.db
         self.bot.logger.info("perms:Ready!")
 
-    @commands.command(brief="View the entire permission channelin", aliases=["lp"])
+    @commands.command(brief="View the entire permission chain", aliases=["lp"])
     async def listperms(self, ctx: aoi.AoiContext):
         perms = await self.db.get_permissions(ctx.guild.id)
         for n, r in enumerate(perms):
