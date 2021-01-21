@@ -1,9 +1,10 @@
-from typing import Optional
+from typing import Optional, Union
 
 import aoi
 import discord
 from discord.ext import commands
 from libs.converters import disenable
+from libs.misc import null_safe
 
 
 class Permissions(commands.Cog):
@@ -171,6 +172,49 @@ class Permissions(commands.Cog):
         await ctx.send_ok(f"**uc <@{member.id}> {enabled} {command}** added.", trash=False)
 
     # endregion
+
+    @commands.is_owner()
+    @commands.command(brief="Blacklists a user from the bot", aliases=["bl"])
+    async def blacklist(self, ctx: aoi.AoiContext, user: Union[discord.User, int]):
+        if isinstance(user, int):
+            user = null_safe(await self.bot.fetch_unknown_user(user)).id
+            if not user:
+                raise commands.BadArgument("Invalid User ID")
+        else:
+            if await self.bot.is_owner(user):
+                return await ctx.send_error("You cant blacklist an owner")
+            user = user.id
+        if user in self.bot.db.blacklisted:
+            return await ctx.send_error("User already blacklisted")
+        self.bot.db.blacklisted.append(user)
+        await self.bot.db.db.execute("insert into blacklist values (?)", (user,))
+        await self.bot.db.db.commit()
+        await ctx.send_ok("User blacklisted")
+
+    @commands.is_owner()
+    @commands.command(brief="Un-blacklists a user from the bot", aliases=["ubl"])
+    async def unblacklist(self, ctx: aoi.AoiContext, user: Union[discord.User, int]):
+        if isinstance(user, int):
+            user = null_safe(await self.bot.fetch_unknown_user(user)).id
+            if not user:
+                raise commands.BadArgument("Invalid User ID")
+        else:
+            if await self.bot.is_owner(user):
+                return await ctx.send_error("You cant blacklist an owner")
+            user = user.id
+        if user not in self.bot.db.blacklisted:
+            return await ctx.send_error("User not blacklisted")
+        self.bot.db.blacklisted.remove(user)
+        await self.bot.db.db.execute("delete from blacklist where user=?", (user,))
+        await self.bot.db.db.commit()
+        await ctx.send_ok("User un-blacklisted")
+
+    @commands.is_owner()
+    @commands.command(brief="Checks if an ID is blacklisted, or else prints out blacklisted IDs", aliases=["cbl"])
+    async def blacklistcheck(self, ctx: aoi.AoiContext, user: int = None):
+        if not user:
+            return await ctx.paginate(self.bot.db.blacklisted, 20, "Blacklisted users")
+        await ctx.send_info(f"ID {user} is {'' if user in self.bot.db.blacklisted else 'not '} blacklisted")
 
 
 
