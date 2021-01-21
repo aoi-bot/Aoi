@@ -59,6 +59,7 @@ async def permission_check(ctx: aoi.AoiContext):  # noqa: C901
     category = ctx.channel.category.id if ctx.channel.category else 0
     command_name = ctx.command.name.lower()
     cog_name = ctx.command.cog.qualified_name.lower()
+    user = ctx.author.id
     for n, i in enumerate(perms):
         tok = i.split()
 
@@ -70,6 +71,8 @@ async def permission_check(ctx: aoi.AoiContext):  # noqa: C901
         if tok[0] == "arm" and int(tok[1]) in roles:
             update_use(tok[1] == "enable", n)
         if tok[0] == "axm" and int(tok[1]) == category:
+            update_use(tok[2] == "enable", n)
+        if tok[0] == "aum" and int(tok[1]) == user:
             update_use(tok[2] == "enable", n)
 
         if tok[0] == "cm":
@@ -85,6 +88,10 @@ async def permission_check(ctx: aoi.AoiContext):  # noqa: C901
         if tok[0] == "rm":
             if cog_name.lower() == tok[3].lower() and int(tok[1]) in roles:
                 update_use(tok[2] == "enable", n)
+        if tok[0] == "um":
+            if cog_name.lower() == tok[3].lower() and int(tok[1]) == user:
+                update_use(tok[2] == "enable", n)
+
 
         if tok[0] == "cc":
             if ctx.channel.id == int(tok[1]) and \
@@ -98,6 +105,9 @@ async def permission_check(ctx: aoi.AoiContext):  # noqa: C901
                 update_use(tok[2] == "enable", n)
         if tok[0] == "rc":
             if command_name.lower() == tok[3].lower() and int(tok[1]) in roles:
+                update_use(tok[2] == "enable", n)
+        if tok[0] == "rc":
+            if command_name.lower() == tok[3].lower() and int(tok[1]) == user:
                 update_use(tok[2] == "enable", n)
     if not can_use:
         raise aoi.PermissionFailed(f"Permission #{current_n} - {perms[current_n]} "
