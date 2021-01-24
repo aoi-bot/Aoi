@@ -2,7 +2,7 @@ import aoi
 from discord.ext import commands
 from libs import conversions
 from libs.conversions import escape
-from libs.converters import AoiColor
+from libs.converters import AoiColor, disenable
 
 
 class GuildSettings(commands.Cog):
@@ -62,10 +62,9 @@ class GuildSettings(commands.Cog):
             except ValueError:
                 return await ctx.send_error("Gain value must be a number between 0 and 50")
         if setting == "embeds":
-            if value.lower() not in ["true", "false"]:
-                return await ctx.send_error("Value must be true or false")
-            await self.bot.db.set_reply_embeds(ctx.guild.id, value == "true")
-            return await ctx.send_ok(f"Normal responses will now " + ("" if value == "true" else "not ") +
+            value = disenable()(value)
+            await self.bot.db.set_reply_embeds(ctx.guild.id, value == "enable")
+            return await ctx.send_ok(f"Normal responses will now " + ("" if value == "enable" else "not ") +
                                      "be in an embed")
         if setting == "currencymin":
             try:

@@ -35,13 +35,15 @@ def allowed_strings(*values, preserve_case: bool = False) -> typing.Callable[[st
 
 def disenable() -> typing.Callable[[str], str]:
     def converter(arg: str) -> str:
+        true = ["enable", "on", "true"]
+        false = ["disable", "off", "false"]
 
-        if arg.lower() not in ("enable", "disable"):
+        if arg.lower() not in true + false:
             raise commands.BadArgument(
-                f"Only **enable** or **disable** are allowed."
+                f"Allowed values: " + ", ".join(f"`{v}`" for v in true + false)
             )
         else:
-            return arg
+            return "enable" if arg.lower() in true else "disable"
 
     return converter
 
