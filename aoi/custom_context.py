@@ -76,7 +76,8 @@ class AoiContext(commands.Context):
         if not user:
             user = self.author
         if not (await self.bot.db.guild_setting(self.guild.id)).reply_embeds:
-            msg = await self.send(f":information_source: {_wrap_user(user)} {title if title else ''}\n{message}")
+            msg = await self.send(f":information_source: "
+                                  f"{_wrap_user(user)} {title if title is not None else ''}\n{message}")
         else:
             msg = await self.send(
                 user.mention if ping else None,
@@ -93,7 +94,8 @@ class AoiContext(commands.Context):
     async def send_ok(self, message: str, *, user: discord.abc.User = None,
                       title: str = None, trash: bool = False, ping: bool = False):
         if not (await self.bot.db.guild_setting(self.guild.id)).reply_embeds:
-            msg = await self.send(f":white_check_mark: {_wrap_user(user)} {title if title else ''}\n{message}")
+            return await self.send(f":white_check_mark: "
+                                   f"{_wrap_user(user)} {title if title is not None else ''}\n{message}")
         if not user:
             user = self.author
         msg = await self.send(
@@ -111,7 +113,7 @@ class AoiContext(commands.Context):
     async def send_error(self, message: str, *, user: discord.abc.User = None,
                          title: str = None, trash: bool = False, ping: bool = False):
         if not (await self.bot.db.guild_setting(self.guild.id)).reply_embeds:
-            msg = await self.send(f":x: {_wrap_user(user)} {title if title else ''}\n{message}")
+            return await self.send(f":x: {_wrap_user(user)} {title if title is not None else ''}\n{message}")
         if not user:
             user = self.author
         msg = await self.send(
