@@ -18,7 +18,7 @@ class _Operator:
     arguments: int
 
 
-def _get_prime_factors(number):
+def get_prime_factors(number):
     pfact = {}
     if number < 0:
         pfact[-1] = 1

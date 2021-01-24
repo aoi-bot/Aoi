@@ -14,10 +14,8 @@
 "Misc":
     "cogs.colors": "Colors"
     "cogs.searches": "Searches"
-    "cogs.nasa": "Nasa"
     "cogs.geolocation": "Geolocation"
     "cogs.fun": "Fun"
-    "cogs.weather": "Weather"
     "cogs.utility": "Utility"
     "cogs.tbhk": "TBHK"
 "Profile/Currency":
@@ -29,7 +27,6 @@
     "cogs.user.guild_gambling": "ServerGambling"
 "Bot Utility/Config":
     "cogs.help": "Help"
-    "cogs.guides": "Guides"
     "cogs.settings.guildsettings": "GuildSettings"
     "cogs.administration.aoi": "Bot"
 "Hidden":
