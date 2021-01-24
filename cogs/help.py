@@ -102,7 +102,7 @@ class Help(commands.Cog):
                                     ("Other Guides", f"`{ctx.clean_prefix}cmds guides` to "
                                                      f"view the guides"),
                                     ("Support Server", f"Still need help? Join our [support "
-                                                       f"server](https://discord.gg/ZE6ru6V7a7)"),
+                                                       f"server](https://discord.gg/zRvNtXFWeS)"),
                                     ("Command List",
                                      f"View {self.bot.user.name if self.bot.user else ''}'s [command list]"
                                      f"(https://www.aoibot.xyz/commands.html)"),
