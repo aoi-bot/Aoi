@@ -144,6 +144,15 @@ CREATE TABLE IF NOT EXISTS "blacklist" (
   "user" INTEGER NOT NULL
 );;
 CREATE INDEX IF NOT EXISTS idx_blacklist ON blacklist (user);;
+CREATE TABLE IF NOT EXISTS "slowmode" (
+  "channel" INTEGER NOT NULL UNIQUE,
+  "seconds" INTEGER NOT NULL
+);;
+CREATE TABLE IF NOT EXISTS "last_messages" (
+  "channel" INTEGER,
+  "user" INTEGER NOT NULL,
+  "timestamp" INTEGER NOT NULL
+);;
 """
 
 MIGRATIONS = {

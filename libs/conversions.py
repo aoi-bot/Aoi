@@ -43,6 +43,16 @@ def hms_notation(seconds: Union[int, timedelta]):
     return f"{hours}h{minutes}m{seconds}s"
 
 
+def dhms_notation(delta: Union[int, timedelta]):
+    if isinstance(delta, int):
+        delta = timedelta(seconds=delta)
+    seconds = delta.seconds
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    seconds = seconds % 60
+    return f"{delta.days}d{hours}h{minutes}m{seconds}s"
+
+
 def camel_to_title(camel: str):
     return camel.replace("_", " ").title()
 

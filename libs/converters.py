@@ -126,7 +126,7 @@ def rolename() -> typing.Callable[[str], str]:
 duration_parser = re.compile(
     r"((?P<days>\d+?) ?(days|day|D|d) ?)?"
     r"((?P<hours>\d+?) ?(hours|hour|H|h) ?)?"
-    r"((?P<minutes>\d+?) ?(minutes|minute|M) ?)?"
+    r"((?P<minutes>\d+?) ?(minutes|minute|M|m) ?)?"
     r"((?P<seconds>\d+?) ?(seconds|second|S|s))?"
 )
 
