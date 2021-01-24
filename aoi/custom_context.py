@@ -1,15 +1,15 @@
 import asyncio
 import io
 import json
+import re
 from types import coroutine
-from typing import List, Tuple, Union, Any, Callable, Dict
+from typing import List, Tuple, Union, Any, Callable
 
 from PIL.Image import Image
 
 import discord
-from disputils import disputils
 from discord.ext import commands
-
+from disputils import disputils
 from libs.conversions import escape
 
 
@@ -76,7 +76,7 @@ class AoiContext(commands.Context):
         if not user:
             user = self.author
         if not (await self.bot.db.guild_setting(self.guild.id)).reply_embeds:
-            msg = await self.send(f":information_source: {_wrap_user(user)} {title}\n{message}")
+            msg = await self.send(f":information_source: {_wrap_user(user)} {title if title else ''}\n{message}")
         else:
             msg = await self.send(
                 user.mention if ping else None,
@@ -93,7 +93,7 @@ class AoiContext(commands.Context):
     async def send_ok(self, message: str, *, user: discord.abc.User = None,
                       title: str = None, trash: bool = False, ping: bool = False):
         if not (await self.bot.db.guild_setting(self.guild.id)).reply_embeds:
-            msg = await self.send(f":white_check_mark: {_wrap_user(user)} {title}\n{message}")
+            msg = await self.send(f":white_check_mark: {_wrap_user(user)} {title if title else ''}\n{message}")
         if not user:
             user = self.author
         msg = await self.send(
@@ -111,7 +111,7 @@ class AoiContext(commands.Context):
     async def send_error(self, message: str, *, user: discord.abc.User = None,
                          title: str = None, trash: bool = False, ping: bool = False):
         if not (await self.bot.db.guild_setting(self.guild.id)).reply_embeds:
-            msg = await self.send(f":x: {_wrap_user(user)} {title}\n{message}")
+            msg = await self.send(f":x: {_wrap_user(user)} {title if title else ''}\n{message}")
         if not user:
             user = self.author
         msg = await self.send(
@@ -162,6 +162,18 @@ class AoiContext(commands.Context):
                     footer: str = None,
                     not_inline: List[int] = [],
                     trash_reaction: bool = False):
+        if not (await self.bot.db.guild_setting(self.guild.id)).reply_embeds:
+            msg = ""
+            msg += f"**{author}**\n" if author else ""
+            msg += f":{['information_source', 'x', 'white_check_mark'][typ]}: " + \
+                   (f"**{title}**" if title else "") + "\n"
+            msg += f"{description}\n" if description is not None else ""
+            for i in fields:
+                msg += f"**{i[0]}**\n{i[1]}\n\n"
+            msg += f"**{footer}**\n" if footer else ""
+            zw_sp = "​"
+            return await self.send(re.sub(r"\[(.*?)\]\((.*?)\)", rf"\1 ({zw_sp}<\2>{zw_sp})", msg)) # noqa ignore the \[
+
         if typ and clr:
             raise ValueError("typ and clr can not be both defined")
         embed = discord.Embed(
