@@ -61,7 +61,7 @@ class Permissions(commands.Cog):
         await ctx.send_ok(f"**acm <#{channel.id}> {enabled}** added", trash=False)
 
     @commands.has_permissions(administrator=True)
-    @commands.command(brief="Disable or enable all modules in a channel", aliases=["axm"])
+    @commands.command(brief="Disable or enable all modules in a category", aliases=["axm"])
     async def allcatmdls(self, ctx: aoi.AoiContext, category: discord.CategoryChannel,
                           enabled: disenable()):
         await self.db.add_permission(ctx.guild.id, f"axm {category.id} {enabled}")
@@ -74,7 +74,7 @@ class Permissions(commands.Cog):
         await ctx.send_ok(f"**arm <@&{role.id}> {enabled}** added.", trash=False)
 
     @commands.has_permissions(administrator=True)
-    @commands.command(brief="Disable or enable all commands for a role", aliases=["aum"])
+    @commands.command(brief="Disable or enable all commands for a user", aliases=["aum"])
     async def allusrmdls(self, ctx: aoi.AoiContext, member: discord.Member, enabled: disenable()):
         await self.db.add_permission(ctx.guild.id, f"aum {member.id} {enabled}")
         await ctx.send_ok(f"**aum <@{member.id}> {enabled}** added.", trash=False)
@@ -115,7 +115,7 @@ class Permissions(commands.Cog):
         await ctx.send_ok(f"**xm <#{category.id}> {enabled} {module}** added.", trash=False)
 
     @commands.has_permissions(administrator=True)
-    @commands.command(brief="Disable or enable a module in a category", aliases=["um"])
+    @commands.command(brief="Disable or enable a module for a user", aliases=["um"])
     async def usrmdl(self, ctx: aoi.AoiContext, member: discord.Member,
                       enabled: disenable(), module: str):
         module = self.bot.find_cog(module)[0]
@@ -145,7 +145,7 @@ class Permissions(commands.Cog):
         await ctx.send_ok(f"**rc <&{role.id}> {enabled} {command}** added.", trash=False)
 
     @commands.has_permissions(administrator=True)
-    @commands.command(brief="Disable or enable a command server-wide", aliases=["cc"])
+    @commands.command(brief="Disable or enable a command in a channel", aliases=["cc"])
     async def chancmd(self, ctx: aoi.AoiContext, channel: discord.TextChannel, enabled: disenable(), command: str):
         cmd = self.bot.get_command(command.lower())
         if not cmd:
@@ -163,8 +163,8 @@ class Permissions(commands.Cog):
         await ctx.send_ok(f"**xc <#{category.id}> {enabled} {command}** added.", trash=False)
 
     @commands.has_permissions(administrator=True)
-    @commands.command(brief="Disable or enable a command for a category", aliases=["uc"])
-    async def cusrcmd(self, ctx: aoi.AoiContext, member: discord.Member, enabled: disenable(), command: str):
+    @commands.command(brief="Disable or enable a command for a user", aliases=["uc"])
+    async def usrcmd(self, ctx: aoi.AoiContext, member: discord.Member, enabled: disenable(), command: str):
         cmd = self.bot.get_command(command.lower())
         if not cmd:
             raise commands.BadArgument(f"Command {command} not found")
