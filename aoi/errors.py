@@ -1,5 +1,3 @@
-from typing import List
-
 from discord.ext import commands
 
 
@@ -8,6 +6,10 @@ class RoleHierarchyError(commands.CommandError):
 
 
 class PermissionFailed(commands.CommandError):
+    pass
+
+
+class Blacklisted(commands.CommandError):
     pass
 
 

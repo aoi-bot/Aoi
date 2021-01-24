@@ -40,6 +40,9 @@ class Nullable:
     def __str__(self):
         return "None"
 
+    def __bool__(self):
+        return False
+
 
 def null_safe(obj: Any):
     return obj or Nullable()

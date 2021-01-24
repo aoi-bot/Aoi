@@ -8,7 +8,7 @@ import os
 import random
 import re
 import subprocess
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Optional, List, Union, TYPE_CHECKING, Awaitable, Any, Callable, Tuple
 
 import aiohttp.client_exceptions
@@ -117,6 +117,7 @@ class AoiBot(commands.AutoShardedBot):
         self.is_restarting = False
         self.thumbnails: List[str] = []
         self.twitter_bearer = ""
+        self.slowmodes: Dict[int, int] = {}
 
         async def command_ran(ctx: aoi.AoiContext):
             self.commands_executed += 1
@@ -168,6 +169,10 @@ class AoiBot(commands.AutoShardedBot):
         return task
 
     async def on_message(self, message: discord.Message):
+        # check slowmode before all else
+        if await self.check_slowmode(message):
+            return
+
         ctx: aoi.AoiContext = await self.get_context(message, cls=aoi.AoiContext)
         await self.invoke(ctx)
         if not ctx.command and not message.author.bot and message.guild:
@@ -374,3 +379,23 @@ class AoiBot(commands.AutoShardedBot):
             if param.default is not inspect.Parameter.empty:
                 defaults[param.name] = param.default
         return " ".join(signature_string), defaults
+
+    async def check_slowmode(self, message: discord.Message):
+        if message.channel.id not in self.slowmodes:
+            return False
+        if message.author.permissions_in(message.channel).manage_messages:
+            return False
+        duration: int = self.slowmodes[message.channel.id]
+        row = await (await self.db.db.execute("select timestamp from last_messages where user=? and channel=?",
+                                              (message.author.id, message.channel.id))).fetchone()
+        last = row[0] if row else 0
+        if message.created_at < datetime.fromtimestamp(last) + timedelta(seconds=duration):
+            await message.delete()
+            return True
+        if last:
+            await self.db.db.execute("update last_messages set timestamp=? where user=? and channel=?",
+                                     (message.created_at.timestamp(), message.author.id, message.channel.id))
+        else:
+            await self.db.db.execute("insert into last_messages values (?,?,?)",
+                                     (message.channel.id, message.author.id, message.created_at.timestamp()))
+        return False

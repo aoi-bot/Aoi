@@ -1,9 +1,10 @@
-from typing import Optional
+from typing import Optional, Union
 
 import aoi
 import discord
 from discord.ext import commands
 from libs.converters import disenable
+from libs.misc import null_safe
 
 
 class Permissions(commands.Cog):
@@ -60,7 +61,7 @@ class Permissions(commands.Cog):
         await ctx.send_ok(f"**acm <#{channel.id}> {enabled}** added", trash=False)
 
     @commands.has_permissions(administrator=True)
-    @commands.command(brief="Disable or enable all modules in a channel", aliases=["axm"])
+    @commands.command(brief="Disable or enable all modules in a category", aliases=["axm"])
     async def allcatmdls(self, ctx: aoi.AoiContext, category: discord.CategoryChannel,
                           enabled: disenable()):
         await self.db.add_permission(ctx.guild.id, f"axm {category.id} {enabled}")
@@ -73,7 +74,7 @@ class Permissions(commands.Cog):
         await ctx.send_ok(f"**arm <@&{role.id}> {enabled}** added.", trash=False)
 
     @commands.has_permissions(administrator=True)
-    @commands.command(brief="Disable or enable all commands for a role", aliases=["aum"])
+    @commands.command(brief="Disable or enable all commands for a user", aliases=["aum"])
     async def allusrmdls(self, ctx: aoi.AoiContext, member: discord.Member, enabled: disenable()):
         await self.db.add_permission(ctx.guild.id, f"aum {member.id} {enabled}")
         await ctx.send_ok(f"**aum <@{member.id}> {enabled}** added.", trash=False)
@@ -114,7 +115,7 @@ class Permissions(commands.Cog):
         await ctx.send_ok(f"**xm <#{category.id}> {enabled} {module}** added.", trash=False)
 
     @commands.has_permissions(administrator=True)
-    @commands.command(brief="Disable or enable a module in a category", aliases=["um"])
+    @commands.command(brief="Disable or enable a module for a user", aliases=["um"])
     async def usrmdl(self, ctx: aoi.AoiContext, member: discord.Member,
                       enabled: disenable(), module: str):
         module = self.bot.find_cog(module)[0]
@@ -144,7 +145,7 @@ class Permissions(commands.Cog):
         await ctx.send_ok(f"**rc <&{role.id}> {enabled} {command}** added.", trash=False)
 
     @commands.has_permissions(administrator=True)
-    @commands.command(brief="Disable or enable a command server-wide", aliases=["cc"])
+    @commands.command(brief="Disable or enable a command in a channel", aliases=["cc"])
     async def chancmd(self, ctx: aoi.AoiContext, channel: discord.TextChannel, enabled: disenable(), command: str):
         cmd = self.bot.get_command(command.lower())
         if not cmd:
@@ -162,8 +163,8 @@ class Permissions(commands.Cog):
         await ctx.send_ok(f"**xc <#{category.id}> {enabled} {command}** added.", trash=False)
 
     @commands.has_permissions(administrator=True)
-    @commands.command(brief="Disable or enable a command for a category", aliases=["uc"])
-    async def cusrcmd(self, ctx: aoi.AoiContext, member: discord.Member, enabled: disenable(), command: str):
+    @commands.command(brief="Disable or enable a command for a user", aliases=["uc"])
+    async def usrcmd(self, ctx: aoi.AoiContext, member: discord.Member, enabled: disenable(), command: str):
         cmd = self.bot.get_command(command.lower())
         if not cmd:
             raise commands.BadArgument(f"Command {command} not found")
@@ -171,6 +172,49 @@ class Permissions(commands.Cog):
         await ctx.send_ok(f"**uc <@{member.id}> {enabled} {command}** added.", trash=False)
 
     # endregion
+
+    @commands.is_owner()
+    @commands.command(brief="Blacklists a user from the bot", aliases=["bl"])
+    async def blacklist(self, ctx: aoi.AoiContext, user: Union[discord.User, int]):
+        if isinstance(user, int):
+            user = null_safe(await self.bot.fetch_unknown_user(user)).id
+            if not user:
+                raise commands.BadArgument("Invalid User ID")
+        else:
+            if await self.bot.is_owner(user):
+                return await ctx.send_error("You cant blacklist an owner")
+            user = user.id
+        if user in self.bot.db.blacklisted:
+            return await ctx.send_error("User already blacklisted")
+        self.bot.db.blacklisted.append(user)
+        await self.bot.db.db.execute("insert into blacklist values (?)", (user,))
+        await self.bot.db.db.commit()
+        await ctx.send_ok("User blacklisted")
+
+    @commands.is_owner()
+    @commands.command(brief="Un-blacklists a user from the bot", aliases=["ubl"])
+    async def unblacklist(self, ctx: aoi.AoiContext, user: Union[discord.User, int]):
+        if isinstance(user, int):
+            user = null_safe(await self.bot.fetch_unknown_user(user)).id
+            if not user:
+                raise commands.BadArgument("Invalid User ID")
+        else:
+            if await self.bot.is_owner(user):
+                return await ctx.send_error("You cant blacklist an owner")
+            user = user.id
+        if user not in self.bot.db.blacklisted:
+            return await ctx.send_error("User not blacklisted")
+        self.bot.db.blacklisted.remove(user)
+        await self.bot.db.db.execute("delete from blacklist where user=?", (user,))
+        await self.bot.db.db.commit()
+        await ctx.send_ok("User un-blacklisted")
+
+    @commands.is_owner()
+    @commands.command(brief="Checks if an ID is blacklisted, or else prints out blacklisted IDs", aliases=["cbl"])
+    async def blacklistcheck(self, ctx: aoi.AoiContext, user: int = None):
+        if not user:
+            return await ctx.paginate(self.bot.db.blacklisted, 20, "Blacklisted users")
+        await ctx.send_info(f"ID {user} is {'' if user in self.bot.db.blacklisted else 'not '} blacklisted")
 
 
 

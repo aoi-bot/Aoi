@@ -41,6 +41,9 @@ async def permission_check(ctx: aoi.AoiContext):  # noqa: C901
     can_use = True
     current_n = 0
 
+    if ctx.author.id in ctx.bot.db.blacklisted:
+        return
+
     def update_use(can: bool, _n: int):
         nonlocal current_n
         nonlocal can_use

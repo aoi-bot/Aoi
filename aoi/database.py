@@ -140,6 +140,19 @@ CREATE TABLE IF NOT EXISTS "current_punishments" (
   "ismute" INTEGER NOT NULL,
   "user" INTEGER NOT NULL
 );;
+CREATE TABLE IF NOT EXISTS "blacklist" (
+  "user" INTEGER NOT NULL
+);;
+CREATE INDEX IF NOT EXISTS idx_blacklist ON blacklist (user);;
+CREATE TABLE IF NOT EXISTS "slowmode" (
+  "channel" INTEGER NOT NULL UNIQUE,
+  "seconds" INTEGER NOT NULL
+);;
+CREATE TABLE IF NOT EXISTS "last_messages" (
+  "channel" INTEGER,
+  "user" INTEGER NOT NULL,
+  "timestamp" INTEGER NOT NULL
+);;
 """
 
 MIGRATIONS = {
@@ -266,6 +279,8 @@ class AoiDatabase:
 
         self.guild_shop: Dict[int, List[_RoleShopItem]] = {}
 
+        self.blacklisted: List[int] = []
+
         self.xp_cooldown = commands.CooldownMapping.from_cooldown(
             1.0, 180.0, commands.BucketType.member)
         self.global_currency_cooldown = commands.CooldownMapping.from_cooldown(
@@ -309,6 +324,9 @@ class AoiDatabase:
         for r in rows:
             self.perm_chains[r[0]] = r[1].split(";")
         self.bot.logger.info("database:Database loaded")
+
+        rows = await self.db.execute_fetchall("select * from blacklist")
+        self.blacklisted = [r[0] for r in rows]
 
         cursor = await self.db.execute("SELECT * from messages")
         rows = await cursor.fetchall()
@@ -747,6 +765,8 @@ class AoiDatabase:
                     self.changed_global_currency.append(member.id)
 
     async def add_global_currency(self, msg: discord.Message):
+        if msg.author.id in self.blacklisted:
+            return
         if self.global_currency_cooldown.get_bucket(msg).update_rate_limit():
             return
         async with self.global_currency_lock:
@@ -784,6 +804,8 @@ class AoiDatabase:
 
     async def add_xp(self, msg: discord.Message):
         if msg.author.bot:
+            return
+        if msg.author.id in self.blacklisted:
             return
         if self.xp_cooldown.get_bucket(msg).update_rate_limit():
             return
