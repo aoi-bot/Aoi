@@ -62,6 +62,7 @@ class Bot(commands.Cog):
     @tasks.loop(minutes=5)
     async def shard_counts_loop(self):
         await self.bot.wait_until_ready()
+        self.shard_server_counts = {}
         for guild in self.bot.guilds:
             shard_id = (guild.id >> 22) % self.bot.shard_count
             self.shard_server_counts[shard_id] = self.shard_server_counts.get(shard_id, 0) + 1
