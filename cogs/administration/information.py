@@ -241,6 +241,52 @@ class Information(commands.Cog):
         )
 
     @commands.command(
+        brief="Shows a role's permissions, optionally in a channel",
+        aliases=["rperms", "roleperms"]
+    )
+    async def rolepermissions(self, ctx: aoi.AoiContext, role: Union[discord.Role, str],
+                              channel: Optional[Union[discord.TextChannel, discord.VoiceChannel]] = None):
+        if isinstance(role, str):
+            if role == "@everyone" or role == "everyone":
+                role = ctx.guild.get_role(ctx.guild.id)
+            else:
+                raise commands.RoleNotFound(role
+                                            )
+        def _(perm, ov):
+            if ov.administrator:
+                return True
+            if perm[1] is False:
+                return "-"
+            if perm[1] is None:
+                return "#"
+            return "+"
+
+        if not channel:
+            # grab guild-level settings
+            perms = role.permissions
+            return await ctx.embed(
+                title=f"Server permissions for {role}",
+                description="```diff\n" +
+                            "\n".join(
+                                f"{'+' if perm[1] or perms.administrator else '-'} "
+                                f"{conversions.camel_to_title(perm[0])}"
+                                for perm in perms
+                            ) + "```"
+            )
+        overwrite: discord.PermissionOverwrite = channel.overwrites_for(role)
+        if not overwrite:
+            return await ctx.send_info(f"No permission overwrites in {channel} for {role}")
+        return await ctx.embed(
+            title=f"Permission overwrite for {role} in {channel}",
+            description="```diff\n" +
+                        "\n".join(
+                            f"{_(perm, overwrite)} "
+                            f"{conversions.camel_to_title(perm[0])}"
+                            for perm in overwrite
+                        ) + "```"
+        )
+
+    @commands.command(
         brief="Shows people in a role"
     )
     async def hasrole(self, ctx: aoi.AoiContext, *, role: discord.Role):
