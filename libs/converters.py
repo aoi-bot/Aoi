@@ -233,3 +233,17 @@ class FuzzyAoiColor(AoiColor):
             except ValueError:
                 return cls(0, 0, 0, attempt=orig)
         return cls(0, 0, 0, attempt=orig)
+
+
+async def partial_emoji_convert(ctx: AoiContext, arg: str) -> discord.PartialEmoji:
+    match = re.match(r'<(a?):([a-zA-Z0-9_]+):([0-9]+)>$', arg)
+
+    if match:
+        emoji_animated = bool(match.group(1))
+        emoji_name = match.group(2)
+        emoji_id = int(match.group(3))
+
+        return discord.PartialEmoji.with_state(ctx.bot._connection, animated=emoji_animated, name=emoji_name,
+                                               id=emoji_id)
+
+    return discord.PartialEmoji.with_state(ctx.bot._connection, name=arg)
