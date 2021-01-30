@@ -103,6 +103,10 @@ class ReactionRoles(commands.Cog):
                 return await ctx.send_error(f"Emoji {i[0]} invalid")
             except commands.RoleNotFound:
                 return await ctx.send_error(f"Role {i[1]} invalid")
+            if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
+                raise aoi.RoleHierarchyError(f"Role {role} must be lower than your highest")
+            if role >= ctx.me.top_role:
+                raise aoi.RoleHierarchyError(f"Role {role} must be lower than mine")
             try:
                 await message.add_reaction(emoji)
             except discord.Forbidden:
