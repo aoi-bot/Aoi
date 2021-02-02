@@ -286,7 +286,7 @@ class Bot(commands.Cog):
                 await self.bot.db.db.execute(sql)
                 await self.bot.db.db.commit()
                 await ctx.send_ok("Executed successfully")
-            except aiosqlite.Error as e:
+            except (aiosqlite.Error, aiosqlite.Warning) as e:
                 await ctx.send_error(f"An error occurred while running the SQL command. If this was a complex "
                                      f"statement, it may have been partially executed.\n```{e}```")
             finally:
@@ -296,18 +296,15 @@ class Bot(commands.Cog):
     @commands.command(brief="Runs an SQL select command")
     async def sqlselect(self, ctx: aoi.AoiContext, *, sql: str):
         sql = sql.strip("`")
-        await ctx.embed(description=f"`select {sql}`", footer="Type yes to run or cancel")
-        resp = await ctx.input(str, ch=lambda m: m.lower() in ("cancel", "yes"))
-        if resp == "yes":
-            try:
-                rows = await self.bot.db.db.execute_fetchall(f"select {sql}")
-                await self.bot.db.db.commit()
-                await ctx.paginate(["|".join(map(str, row)) for row in rows] if rows else ["None"], 20, "SQL output")
-            except aiosqlite.Error as e:
-                await ctx.send_error(f"An error occurred while running the SQL command. If this was a complex "
-                                     f"statement, it may have been partially executed.\n```{e}```")
-            finally:
-                await self.bot.db.db.commit()
+        try:
+            rows = await self.bot.db.db.execute_fetchall(f"select {sql}")
+            await self.bot.db.db.commit()
+            await ctx.paginate(["|".join(map(str, row)) for row in rows] if rows else ["None"], 20, sql)
+        except (aiosqlite.Error, aiosqlite.Warning) as e:
+            await ctx.send_error(f"An error occurred while running the SQL command. If this was a complex "
+                                 f"statement, it may have been partially executed.\n```{e}```")
+        finally:
+            await self.bot.db.db.commit()
 
 
 def setup(bot: aoi.AoiBot) -> None:
