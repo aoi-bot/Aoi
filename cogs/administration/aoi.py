@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import List, Dict
 
 import aiohttp
+import aiosqlite
 import psutil
 import subprocess
 
@@ -281,8 +282,15 @@ class Bot(commands.Cog):
         await ctx.embed(description=f"`{sql}`", footer="Type yes to run or cancel")
         resp = await ctx.input(str, ch=lambda m: m.lower() in ("cancel", "yes"))
         if resp == "yes":
-            await self.bot.db.db.execute(sql)
-            await self.bot.db.db.commit()
+            try:
+                await self.bot.db.db.execute(sql)
+                await self.bot.db.db.commit()
+                await ctx.send_ok("Executed successfully")
+            except aiosqlite.Error as e:
+                await ctx.send_error(f"An error occurred while running the SQL command. If this was a complex "
+                                     f"statement, it may have been partially executed.\n```{e}```")
+            finally:
+                await self.bot.db.db.commit()
 
     @commands.is_owner()
     @commands.command(brief="Runs an SQL select command")
@@ -291,9 +299,15 @@ class Bot(commands.Cog):
         await ctx.embed(description=f"`select {sql}`", footer="Type yes to run or cancel")
         resp = await ctx.input(str, ch=lambda m: m.lower() in ("cancel", "yes"))
         if resp == "yes":
-            rows = await self.bot.db.db.execute_fetchall(f"select {sql}")
-            await self.bot.db.db.commit()
-            await ctx.paginate(["|".join(map(str, row)) for row in rows] if rows else ["None"], 20, "SQL output")
+            try:
+                rows = await self.bot.db.db.execute_fetchall(f"select {sql}")
+                await self.bot.db.db.commit()
+                await ctx.paginate(["|".join(map(str, row)) for row in rows] if rows else ["None"], 20, "SQL output")
+            except aiosqlite.Error as e:
+                await ctx.send_error(f"An error occurred while running the SQL command. If this was a complex "
+                                     f"statement, it may have been partially executed.\n```{e}```")
+            finally:
+                await self.bot.db.db.commit()
 
 
 def setup(bot: aoi.AoiBot) -> None:
