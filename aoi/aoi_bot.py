@@ -118,6 +118,8 @@ class AoiBot(commands.AutoShardedBot):
         self.thumbnails: List[str] = []
         self.twitter_bearer = ""
         self.slowmodes: Dict[int, int] = {}
+        self.patreon_id: str = os.getenv("PATREON_ID")
+        self.patreon_secret: str = os.getenv("PATREON_SECRET")
 
         async def command_ran(ctx: aoi.AoiContext):
             self.commands_executed += 1

@@ -33,3 +33,4 @@
 "Hidden":
     "cogs.errorhandler": "ErrorHandler"
     "cogs.slash": "Slash"
+    "cogs.patreon": "Patreon"
