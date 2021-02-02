@@ -76,3 +76,13 @@ def escape(text: str, ctx: Union[AoiContext, discord.Message]):
 
 def maybe_pluralize(count: int, word: str, word_pl: str, *, number_format="") -> str:
     return number_format % count + (word if count == 1 else word_pl)
+
+
+def sql_trim(sql: str) -> str:
+    if sql.startswith("```sql") and sql.endswith("```"):
+        return sql[6:-3]
+    if sql.startswith("```") and sql.endswith("```"):
+        return sql[3:-3]
+    if sql.startswith("`") and sql.endswith("`"):
+        return sql[1:-1]
+    return sql
