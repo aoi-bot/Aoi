@@ -277,7 +277,8 @@ class Bot(commands.Cog):
     @commands.is_owner()
     @commands.command(brief="Runs an SQL command")
     async def sqlexec(self, ctx: aoi.AoiContext, *, sql):
-        await ctx.embed(description=sql, footer="Type yes to run or cancel")
+        sql = sql.strip("`")
+        await ctx.embed(description=f"`{sql}`", footer="Type yes to run or cancel")
         resp = await ctx.input(str, ch=lambda m: m.lower() in ("cancel", "yes"))
         if resp == "yes":
             await self.bot.db.db.execute(sql)
@@ -285,14 +286,14 @@ class Bot(commands.Cog):
 
     @commands.is_owner()
     @commands.command(brief="Runs an SQL select command")
-    async def sqlselect(self, ctx: aoi.AoiContext, *, sql):
-        await ctx.embed(description=f"select {sql}", footer="Type yes to run or cancel")
+    async def sqlselect(self, ctx: aoi.AoiContext, *, sql: str):
+        sql = sql.strip("`")
+        await ctx.embed(description=f"`select {sql}`", footer="Type yes to run or cancel")
         resp = await ctx.input(str, ch=lambda m: m.lower() in ("cancel", "yes"))
         if resp == "yes":
             rows = await self.bot.db.db.execute_fetchall(f"select {sql}")
             await self.bot.db.db.commit()
-            await ctx.paginate(["|".join(row) for row in rows] if rows else ["None"], 20, "SQL output")
-
+            await ctx.paginate(["|".join(map(str, row)) for row in rows] if rows else ["None"], 20, "SQL output")
 
 
 def setup(bot: aoi.AoiBot) -> None:
