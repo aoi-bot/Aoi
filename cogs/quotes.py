@@ -1,0 +1,56 @@
+import aoi
+import discord
+from discord.ext import commands
+
+
+class Quotes(commands.Cog):
+    def __init__(self, bot: aoi.AoiBot):
+        self.bot = bot
+
+    @property
+    def description(self) -> str:
+        return "Store and retrieve quotes"
+
+    @commands.command(brief="Adds a quote", aliases=["aq", "adq"])
+    async def addquote(self, ctx: aoi.AoiContext, trigger: str, *, response: str):
+        rowid = (await self.bot.db.db.execute_insert("insert into quotes (user, guild, name, content) values (?,?,?,?)",
+                                                     (ctx.author.id, ctx.guild.id, trigger, response)))[0]
+        await self.bot.db.db.commit()
+        await ctx.send_ok(f"Added quote **#{rowid}** - **{discord.utils.escape_markdown(trigger)}** - "
+                          f"**{discord.utils.escape_markdown(str(ctx.author))}**")
+
+    @commands.command(brief="Recalls a quote", aliases=["q"])
+    async def quote(self, ctx: aoi.AoiContext, trigger: str):
+        qid, content, user = (
+            await (await self.bot.db.db.execute("select id, content, user from quotes where guild=? and name=? "  # noqa
+                                                "order by RANDOM() limit 1",
+                                                (ctx.guild.id, trigger))
+                   ).fetchone())
+        msg = await ctx.send_json(content)
+        await msg.edit(
+            content=f"Quote **{qid}** by "
+                    f"**{discord.utils.escape_markdown(str(await self.bot.fetch_unknown_user(user)))}**\n"
+                    + msg.content)
+
+    @commands.command(brief="Lists all quotes", aliases=["luq"])
+    async def listuserquotes(self, ctx: aoi.AoiContext, member: discord.Member = None):
+        member = member or ctx.author
+        await ctx.paginate(
+            [f"**#{row[0]}** - **{discord.utils.escape_markdown(row[1])}**"
+             for row in await self.bot.db.db.execute_fetchall("select id, name from quotes where user=? and guild=?",
+                                                              (member.id, ctx.guild.id))],
+            30,
+            f"Quotes by {member}"
+        )
+
+    # TODO add deletions
+
+    # TODO add search
+
+    # TODO add list all by tag
+
+
+
+
+def setup(bot: aoi.AoiBot) -> None:
+    bot.add_cog(Quotes(bot))

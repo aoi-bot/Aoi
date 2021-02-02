@@ -157,6 +157,15 @@ CREATE TABLE IF NOT EXISTS "patreon" (
   "user" INTEGER NOT NULL PRIMARY KEY UNIQUE,
   "last_claim" TEXT NOT NULL
 );;
+CREATE INDEX IF NOT EXISTS idx_patreon on patreon (user);;
+CREATE TABLE IF NOT EXISTS "quotes" (
+  "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "user" INTEGER NOT NULL,
+  "guild" INTEGER NOT NULL,
+  "name" TEXT NOT NULL,
+  "content" TEXT NOT NULL
+);;
+CREATE INDEX IF NOT EXISTS idx_quotes on quotes (id);;
 """
 
 MIGRATIONS = {
