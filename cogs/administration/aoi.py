@@ -10,7 +10,7 @@ import subprocess
 import aoi
 import discord
 from discord.ext import commands, tasks
-from libs.conversions import dhm_notation, hms_notation, maybe_pluralize
+from libs.conversions import dhm_notation, hms_notation, maybe_pluralize, sql_trim
 
 
 class Bot(commands.Cog):
@@ -278,12 +278,12 @@ class Bot(commands.Cog):
     @commands.is_owner()
     @commands.command(brief="Runs an SQL command")
     async def sqlexec(self, ctx: aoi.AoiContext, *, sql):
-        sql = sql.strip("`")
-        await ctx.embed(description=f"`{sql}`", footer="Type yes to run or cancel")
+        sql = sql_trim(sql)
+        await ctx.embed(description=f"```sql\n{sql}\n```", footer="Type yes to run or cancel")
         resp = await ctx.input(str, ch=lambda m: m.lower() in ("cancel", "yes"))
         if resp == "yes":
             try:
-                await self.bot.db.db.execute(sql)
+                await self.bot.db.db.executescript(sql)
                 await self.bot.db.db.commit()
                 await ctx.send_ok("Executed successfully")
             except (aiosqlite.Error, aiosqlite.Warning) as e:
@@ -295,8 +295,9 @@ class Bot(commands.Cog):
     @commands.is_owner()
     @commands.command(brief="Runs an SQL select command")
     async def sqlselect(self, ctx: aoi.AoiContext, *, sql: str):
-        sql = sql.strip("`")
+        sql = sql_trim(sql)
         try:
+            # TODO this breaks ```sql formatted code blocks... :thonk:
             rows = await self.bot.db.db.execute_fetchall(f"select {sql}")
             await self.bot.db.db.commit()
             await ctx.paginate(["|".join(map(str, row)) for row in rows] if rows else ["None"], 20, sql)
