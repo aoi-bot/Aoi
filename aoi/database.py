@@ -153,6 +153,10 @@ CREATE TABLE IF NOT EXISTS "last_messages" (
   "user" INTEGER NOT NULL,
   "timestamp" INTEGER NOT NULL
 );;
+CREATE TABLE IF NOT EXISTS "patreon" (
+  "user" INTEGER NOT NULL PRIMARY KEY UNIQUE,
+  "last_claim" TEXT NOT NULL
+);;
 """
 
 MIGRATIONS = {

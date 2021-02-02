@@ -252,6 +252,7 @@ class Bot(commands.Cog):
     async def restart(self, ctx: aoi.AoiContext):
         self.bot.is_restarting = True
         self.bot.restart_response_channel = ctx.channel.id
+        await self.bot.db.cache_flush()
         await ctx.send_ok("Attempting to restart. See you on the other side!")
         await self.bot.logout()
 

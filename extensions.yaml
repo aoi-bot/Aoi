@@ -33,3 +33,4 @@
     "cogs.errorhandler": "ErrorHandler"
     "cogs.administration.reactionroles": "ReactionRoles"
     "cogs.slash": "Slash"
+    "cogs.patreon": "Patreon"
