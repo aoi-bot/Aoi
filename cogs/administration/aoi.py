@@ -297,7 +297,7 @@ class Bot(commands.Cog):
     async def sqlselect(self, ctx: aoi.AoiContext, *, sql: str):
         sql = sql_trim(sql)
         try:
-            # TODO this breaks ```sql formatted code blocks... :thonk:
+            # TODO this breaks ```sql formatted code blocks... :thonk:... maybe remove a beginning `select`?
             rows = await self.bot.db.db.execute_fetchall(f"select {sql}")
             await self.bot.db.db.commit()
             await ctx.paginate(["|".join(map(str, row)) for row in rows] if rows else ["None"], 20, sql)

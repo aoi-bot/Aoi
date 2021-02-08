@@ -36,20 +36,37 @@ class Quotes(commands.Cog):
     async def listuserquotes(self, ctx: aoi.AoiContext, member: discord.Member = None):
         member = member or ctx.author
         await ctx.paginate(
-            [f"**#{row[0]}** - **{discord.utils.escape_markdown(row[1])}**"
+            (f"**#{row[0]}** - **{discord.utils.escape_markdown(row[1])}**"
              for row in await self.bot.db.db.execute_fetchall("select id, name from quotes where user=? and guild=?",
-                                                              (member.id, ctx.guild.id))],
+                                                              (member.id, ctx.guild.id))),
             30,
             f"Quotes by {member}"
         )
 
-    # TODO add deletions
+    @commands.command(brief="Delete a quote", aliases=["delq"])
+    async def deletequote(self, ctx: aoi.AoiContext, quote: int):
+        qid, user, guild = (
+            await (await self.bot.db.db.execute("select id, user, guild from quotes where id=?",
+                                                (quote,))
+                   ).fetchone())
+        if user != ctx.author.id and not ctx.author.guild_permissions.administrator:
+            return ctx.send_error("You must be administrator to delete quotes that aren't yours.")
+        await self.bot.db.db.execute("delete from quotes where id=?", (qid,))
+        await self.bot.db.db.commit()
 
-    # TODO add search
+    @commands.command(brief="Search quotes", aliases=["searchq"])
+    async def searchquotes(self, ctx: aoi.AoiContext, *, search_term: str):
+        rows = await self.bot.db.db.execute_fetchall("select id, name from quotes where "
+                                                     "guild=? and content like ?",
+                                                     (ctx.guild.id, f"%{search_term}%"))
+        await ctx.paginate(
+            (f"**{row[0]}** - **{discord.utils.escape_markdown(row[1])}**"
+             for row in rows),
+            30,
+            "Quote Search"
+        )
 
     # TODO add list all by tag
-
-
 
 
 def setup(bot: aoi.AoiBot) -> None:
