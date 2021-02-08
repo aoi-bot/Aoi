@@ -11,6 +11,7 @@
     "cogs.administration.triggers": "Triggers"
     "cogs.administration.messages": "Messages"
     "cogs.administration.mod_commands": "Moderation"
+    "cogs.administration.reactionroles": "ReactionRoles"
 "Misc":
     "cogs.colors": "Colors"
     "cogs.searches": "Searches"
@@ -18,6 +19,7 @@
     "cogs.fun": "Fun"
     "cogs.utility": "Utility"
     "cogs.tbhk": "TBHK"
+    "cogs.quotes": "Quotes"
 "Profile/Currency":
     "cogs.user.xp": "XP"
     "cogs.user.profile": "Profile"
@@ -31,6 +33,5 @@
     "cogs.administration.aoi": "Bot"
 "Hidden":
     "cogs.errorhandler": "ErrorHandler"
-    "cogs.administration.reactionroles": "ReactionRoles"
     "cogs.slash": "Slash"
     "cogs.patreon": "Patreon"

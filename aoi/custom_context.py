@@ -3,7 +3,7 @@ import io
 import json
 import re
 from types import coroutine
-from typing import List, Tuple, Union, Any, Callable
+from typing import List, Tuple, Union, Any, Callable, Iterable
 
 from PIL.Image import Image
 
@@ -261,14 +261,14 @@ class AoiContext(commands.Context):
             ]
 
     @staticmethod
-    def numbered(lst: List[Any], num_start=0) -> List[str]:
+    def numbered(lst: Iterable[Any], num_start=0) -> List[str]:
         """
 
         Returns a numbered version of a list
         """
         return [f"**{i + num_start}.** {a}" for i, a in enumerate(lst)]
 
-    async def paginate(self, lst: List[Any], n: int,
+    async def paginate(self, lst: Iterable[Any], n: int,
                        title: str, *, fmt: str = "%s", sep: str = "\n",
                        numbered: bool = False, thumbnails: List[str] = None,
                        num_start: int = 0):

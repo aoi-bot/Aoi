@@ -388,16 +388,16 @@ class AoiBot(commands.AutoShardedBot):
         if message.author.permissions_in(message.channel).manage_messages:
             return False
         duration: int = self.slowmodes[message.channel.id]
-        row = await (await self.db.db.execute("select timestamp from last_messages where user=? and channel=?",
-                                              (message.author.id, message.channel.id))).fetchone()
+        row = await (await self.db.conn.execute("select timestamp from last_messages where user=? and channel=?",
+                                                (message.author.id, message.channel.id))).fetchone()
         last = row[0] if row else 0
         if message.created_at < datetime.fromtimestamp(last) + timedelta(seconds=duration):
             await message.delete()
             return True
         if last:
-            await self.db.db.execute("update last_messages set timestamp=? where user=? and channel=?",
-                                     (message.created_at.timestamp(), message.author.id, message.channel.id))
+            await self.db.conn.execute("update last_messages set timestamp=? where user=? and channel=?",
+                                       (message.created_at.timestamp(), message.author.id, message.channel.id))
         else:
-            await self.db.db.execute("insert into last_messages values (?,?,?)",
-                                     (message.channel.id, message.author.id, message.created_at.timestamp()))
+            await self.db.conn.execute("insert into last_messages values (?,?,?)",
+                                       (message.channel.id, message.author.id, message.created_at.timestamp()))
         return False

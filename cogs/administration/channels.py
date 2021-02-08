@@ -18,7 +18,7 @@ class Channels(commands.Cog):
 
     async def _init(self):
         await self.bot.wait_until_ready()
-        for row in await self.bot.db.db.execute_fetchall("select * from slowmode"):
+        for row in await self.bot.db.conn.execute_fetchall("select * from slowmode"):
             self.slowmodes[row[0]] = row[1]
 
         # update slowmodes
@@ -28,13 +28,13 @@ class Channels(commands.Cog):
             if not ch:
                 # channel doesn't exist anymore
                 del self.slowmodes[channel]
-                await self.bot.db.db.execute("delete from slowmode where channel=?", (channel,))
-                await self.bot.db.db.execute("delete from last_messages where channel=?", (channel,))
+                await self.bot.db.conn.execute("delete from slowmode where channel=?", (channel,))
+                await self.bot.db.conn.execute("delete from last_messages where channel=?", (channel,))
             if ch.slowmode_delay < 6 * 3600:
                 # slowmode is less than 6 hours, so Aoi no longer needs to handle it
-                await self.bot.db.db.execute("delete from slowmode where channel=?", (channel,))
-                await self.bot.db.db.execute("delete from last_messages where channel=?", (channel,))
-        await self.bot.db.db.commit()  # commit transaction once done
+                await self.bot.db.conn.execute("delete from slowmode where channel=?", (channel,))
+                await self.bot.db.conn.execute("delete from last_messages where channel=?", (channel,))
+        await self.bot.db.conn.commit()  # commit transaction once done
 
     @property
     def description(self):
@@ -63,16 +63,16 @@ class Channels(commands.Cog):
         if not time.days and time.seconds <= 21600:
             if ctx.channel.id in self.slowmodes:
                 del self.slowmodes[ctx.channel.id]
-                await self.bot.db.db.execute("delete from slowmode where channel=?", (ctx.channel.id,))
-                await self.bot.db.db.execute("delete from last_messages where channel=?", (ctx.channel.id,))
-                await self.bot.db.db.commit()
+                await self.bot.db.conn.execute("delete from slowmode where channel=?", (ctx.channel.id,))
+                await self.bot.db.conn.execute("delete from last_messages where channel=?", (ctx.channel.id,))
+                await self.bot.db.conn.commit()
             await ctx.channel.edit(slowmode_delay=time.seconds)
             return await ctx.send_ok(f"Slowmode set to {hms_notation(time.seconds)}"
                                      if time.total_seconds() else "Slowmode turned off.")
         await ctx.channel.edit(slowmode_delay=21600)
-        await self.bot.db.db.execute("delete from slowmode where channel=?", (ctx.channel.id, ))
-        await self.bot.db.db.execute("insert into slowmode values (?,?)", (ctx.channel.id, int(time.total_seconds())))
-        await self.bot.db.db.commit()
+        await self.bot.db.conn.execute("delete from slowmode where channel=?", (ctx.channel.id,))
+        await self.bot.db.conn.execute("insert into slowmode values (?,?)", (ctx.channel.id, int(time.total_seconds())))
+        await self.bot.db.conn.commit()
         self.slowmodes[ctx.channel.id] = int(time.total_seconds())
         await ctx.send_ok(f"Slowmode set to {dhms_notation(time)}"
                           if time.total_seconds() else "Slowmode turned off")
@@ -169,9 +169,9 @@ class Channels(commands.Cog):
         if after.slowmode_delay < 21600:
             if after.id in self.slowmodes:
                 del self.slowmodes[after.id]
-                await self.bot.db.db.execute("delete from slowmode where channel=?", (after.id,))
-                await self.bot.db.db.execute("delete from last_messages where channel=?", (after.id,))
-                await self.bot.db.db.commit()
+                await self.bot.db.conn.execute("delete from slowmode where channel=?", (after.id,))
+                await self.bot.db.conn.execute("delete from last_messages where channel=?", (after.id,))
+                await self.bot.db.conn.commit()
 
 
 def setup(bot: aoi.AoiBot) -> None:
