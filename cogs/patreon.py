@@ -72,13 +72,13 @@ if os.getenv("PATREON_ID") and os.getenv("PATREON_SECRET"):
                                                 "(https://support.patreon.com/hc/en-us/articles/212052266-Get-my-Discord-role)"  # noqa
                                                 ", and waited at least 5 minutes."
                     )
-                row = await (await self.bot.db.db.execute("select * from patreon where user=?", (int(user_id),))).fetchone()  # noqa
+                row = await (await self.bot.db.conn.execute("select * from patreon where user=?", (int(user_id),))).fetchone()  # noqa
                 dt = datetime.now()
                 dtf = f"{dt.month:0>2}{dt.year}"
                 if not row:
-                    await self.bot.db.db.execute("insert into patreon values (?,?)",
-                                                 (int(user_id), dtf))
-                    await self.bot.db.db.commit()
+                    await self.bot.db.conn.execute("insert into patreon values (?,?)",
+                                                   (int(user_id), dtf))
+                    await self.bot.db.conn.commit()
                     cur = int(self.patrons[patreon_user])
                     await self.bot.db.award_global_currency(ctx.author, cur)
                     return await ctx.send_ok(f"Awarded you ${cur}. Thanks for supporting! ♥")
@@ -86,8 +86,8 @@ if os.getenv("PATREON_ID") and os.getenv("PATREON_SECRET"):
                     return await ctx.send_error("You've already claimed your reward this month.")
                 cur = int(self.patrons[patreon_user])
                 await self.bot.db.award_global_currency(ctx.author, cur)
-                await self.bot.db.db.execute("update patreon set last_claim=? where user=?", (dtf, int(user_id)))
-                await self.bot.db.db.commit()
+                await self.bot.db.conn.execute("update patreon set last_claim=? where user=?", (dtf, int(user_id)))
+                await self.bot.db.conn.commit()
                 await ctx.send_ok(f"Awarded you ${cur}. Thanks for supporting! ♥")
 
 

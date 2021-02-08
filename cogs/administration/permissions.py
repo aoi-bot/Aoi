@@ -187,8 +187,8 @@ class Permissions(commands.Cog):
         if user in self.bot.db.blacklisted:
             return await ctx.send_error("User already blacklisted")
         self.bot.db.blacklisted.append(user)
-        await self.bot.db.db.execute("insert into blacklist values (?)", (user,))
-        await self.bot.db.db.commit()
+        await self.bot.db.conn.execute("insert into blacklist values (?)", (user,))
+        await self.bot.db.conn.commit()
         await ctx.send_ok("User blacklisted")
 
     @commands.is_owner()
@@ -205,8 +205,8 @@ class Permissions(commands.Cog):
         if user not in self.bot.db.blacklisted:
             return await ctx.send_error("User not blacklisted")
         self.bot.db.blacklisted.remove(user)
-        await self.bot.db.db.execute("delete from blacklist where user=?", (user,))
-        await self.bot.db.db.commit()
+        await self.bot.db.conn.execute("delete from blacklist where user=?", (user,))
+        await self.bot.db.conn.commit()
         await ctx.send_ok("User un-blacklisted")
 
     @commands.is_owner()

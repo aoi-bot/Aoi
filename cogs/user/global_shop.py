@@ -29,9 +29,9 @@ class GlobalShop(commands.Cog):
             f"Add `{title}` for ${amount:,}?",
             f"`{title}` added for ${amount:,}.",
             f"`{title}` not added.",
-            self.bot.db.db.execute("insert into title_shop (title, cost) values (?,?)", (title, amount))
+            self.bot.db.conn.execute("insert into title_shop (title, cost) values (?,?)", (title, amount))
         )
-        await self.bot.db.db.commit()
+        await self.bot.db.conn.commit()
 
     @commands.command(
         brief="Lists the available titles"
@@ -40,7 +40,7 @@ class GlobalShop(commands.Cog):
         await ctx.paginate(
             [f"**{r[0]} - ${r[2]:,}**\n{r[1]}\n"
              for r in
-             await (await self.bot.db.db.execute("select * from title_shop")).fetchall()],
+             await (await self.bot.db.conn.execute("select * from title_shop")).fetchall()],
             title="Title Shop",
             n=10,
             fmt=f"%s\n\nDo `{ctx.prefix}buytitle n` to buy a title."
@@ -51,7 +51,7 @@ class GlobalShop(commands.Cog):
     )
     async def buytitle(self, ctx: aoi.AoiContext, num: int):
         await self.bot.db.ensure_user_entry(ctx.author)
-        r = await (await self.bot.db.db.execute("select * from title_shop where id=?", (num,))).fetchone()
+        r = await (await self.bot.db.conn.execute("select * from title_shop where id=?", (num,))).fetchone()
         if not r:
             return await ctx.send_error(f"Title with ID `{num}` does not exist. Do `{ctx.prefix}titleshop` to list "
                                         f"the available titles")

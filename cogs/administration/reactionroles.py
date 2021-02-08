@@ -22,13 +22,13 @@ class ReactionRoles(commands.Cog):
         self.bot.loop.create_task(self._init())
 
     async def _delete(self, row):
-        await self._db.db.execute("delete from rero where rowid=?", (row[0],))
+        await self._db.conn.execute("delete from rero where rowid=?", (row[0],))
 
     async def _init(self):
         self.bot.logger.info("rero:Waiting for bot")
         await self.bot.wait_until_ready()
         self._db = self.bot.db
-        for row in await self._db.db.execute_fetchall("select rowid, * from rero"):
+        for row in await self._db.conn.execute_fetchall("select rowid, * from rero"):
             channel: discord.TextChannel = self.bot.get_channel(row[2])
             if not channel:
                 await self._delete(row)
@@ -48,7 +48,7 @@ class ReactionRoles(commands.Cog):
             if message_id not in self._roles:
                 self._roles[message_id] = {}
             self._roles[message_id][emoji_name] = _ReactionRoleData(role)
-        await self._db.db.commit()
+        await self._db.conn.commit()
         self.bot.logger.info("rero:Ready!")
 
     @property
@@ -118,10 +118,10 @@ class ReactionRoles(commands.Cog):
             if emoji.name in self._roles[message.id] or str(emoji.id) in self._roles[message.id]:
                 return await ctx.send_error("That emoji is already being used")
             self._roles[message.id][str(emoji.id) if emoji.id else emoji.name] = _ReactionRoleData(role)
-            await self._db.db.execute("insert into rero values (?,?,?,?,?,0,0)",
+            await self._db.conn.execute("insert into rero values (?,?,?,?,?,0,0)",
                                       (ctx.guild.id, message.channel.id, message.id,
                                        str(emoji.id) if emoji.id else emoji.name, role.id))
-            await self._db.db.commit()
+            await self._db.conn.commit()
             await ctx.send_ok("Added!")
 
     @commands.has_permissions(manage_roles=True)
@@ -132,15 +132,15 @@ class ReactionRoles(commands.Cog):
         if not emoji:
             await message.clear_reactions()
             del self._roles[message.id]
-            await self._db.db.execute("delete from rero where message=?", (message.id,))
-            await self._db.db.commit()
+            await self._db.conn.execute("delete from rero where message=?", (message.id,))
+            await self._db.conn.commit()
             return await ctx.send_ok("Cleared all reaction roles from message")
         emoji = await partial_emoji_convert(ctx, emoji)
         if self._emoji(emoji) not in self._roles[message.id]:
             return await ctx.send_error(f"{emoji} not part of the reaction role")
         del self._roles[message.id][self._emoji(emoji)]
-        await self._db.db.execute("delete from rero where message=? and emoji=?", (message.id, self._emoji(emoji)))
-        await self._db.db.commit()
+        await self._db.conn.execute("delete from rero where message=? and emoji=?", (message.id, self._emoji(emoji)))
+        await self._db.conn.commit()
         return await ctx.send_ok(f"Cleared {self._emoji(emoji)}")
 
     def _emoji(self, emoji: Union[str, discord.PartialEmoji]):

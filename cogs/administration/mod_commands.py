@@ -129,14 +129,14 @@ class Moderation(commands.Cog):
             return ctx.send_error("Invalid warning number")
         p = punishments[num-1]
         if "del" in ctx.flags:
-            await self.bot.db.db.execute("delete from punishments where user=? and guild=? and timestamp=?",
-                                         (p.user,
+            await self.bot.db.conn.execute("delete from punishments where user=? and guild=? and timestamp=?",
+                                           (p.user,
                                           p.guild,
                                           p.time.timestamp()))
         else:
-            await self.bot.db.db.execute("update punishments set cleared=1,cleared_by=? where user=? and guild=? "
+            await self.bot.db.conn.execute("update punishments set cleared=1,cleared_by=? where user=? and guild=? "
                                          "and timestamp=?", (ctx.author.id, p.user, p.guild, p.time.timestamp()))
-        await self.bot.db.db.commit()
+        await self.bot.db.conn.commit()
         await ctx.send_ok(f"Cleared punishment #{num} for {member}")
 
     @commands.command(brief="Views the punishment logs for a user")

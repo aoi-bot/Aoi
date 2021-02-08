@@ -23,7 +23,7 @@ class Triggers(commands.Cog):
 
     async def dbload(self):
         await self.bot.wait_until_ready()
-        self.db = self.bot.db.db
+        self.db = self.bot.db.conn
         rows = await self.db.execute_fetchall("SELECT * FROM roletriggers")
 
         for row in rows:
