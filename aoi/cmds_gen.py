@@ -106,7 +106,7 @@ def get_tab_pair(cog: commands.Cog) -> Tuple[str, str]:
                     <h4 class="mx-2 my-2">{cog.description}</h4>
                     #CONTENT#
                 </div>
-"""
+            """
             )
 
 
