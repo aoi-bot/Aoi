@@ -9,6 +9,7 @@ from discord.ext import commands
 if TYPE_CHECKING:
     from .aoi_bot import AoiBot
 
+
 def friendly_signature(command: commands.Command, bot: AoiBot) -> str:
     callback: Callable = command.callback
     signature_string = []
@@ -28,6 +29,7 @@ def friendly_signature(command: commands.Command, bot: AoiBot) -> str:
     result = " ".join(signature_string), defaults
     return " ".join(signature_string)
 
+
 def permissions_badge(permission: str) -> str:
     permission = " ".join(map(lambda x: x.title(), permission.split("_")))
     if permission == "Owner Only":
@@ -40,6 +42,7 @@ def permissions_badge(permission: str) -> str:
     else:
         typ = "primary"
     return f"""<span class="badge bg-{typ} my-1 mx-1">{permission}</span>"""
+
 
 async def gen_card(command: commands.Command, bot: AoiBot) -> str:
     aliases = ""
@@ -81,16 +84,23 @@ async def gen_card(command: commands.Command, bot: AoiBot) -> str:
 """
 
 
+module_active = False
+
+
 def get_tab_pair(cog: commands.Cog) -> Tuple[str, str]:
+    global module_active
+    show = "show" if not module_active else ""
+    active = "active" if not module_active else ""
+    module_active = True
     return (f"""
-                <button class="nav-link my-1" id="v-pills-{cog.qualified_name}-tab" data-bs-toggle="pill"
+                <button class="nav-link my-1 {active}" id="v-pills-{cog.qualified_name}-tab" data-bs-toggle="pill"
                         data-bs-target="#v-pills-{cog.qualified_name}"
                         type="button" role="tab" aria-controls="v-pills-{cog.qualified_name}" aria-selected="true">
                         {cog.qualified_name}
                 </button>
 """,
             f"""
-                <div class="tab-pane fade my-3 mx-4" id="v-pills-{cog.qualified_name}" role="tabpanel"
+                <div class="tab-pane fade my-3 mx-4 {show} {active}" id="v-pills-{cog.qualified_name}" role="tabpanel"
                      aria-labelledby="v-pills-{cog.qualified_name}-tab">
                     <h2 class="mx-2 my-2">{cog.qualified_name}</h2>
                     <h4 class="mx-2 my-2">{cog.description}</h4>
