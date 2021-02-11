@@ -27,6 +27,10 @@
             }
         }
 
+        .no-deco {
+            text-decoration: none;
+        }
+
 
     </style>
 
@@ -48,6 +52,23 @@
 </header>
 
 <main>
+    <div class="d-block d-md-none mx-auto my-auto vw-100">
+        <button class="btn btn-outline-primary mx-2" data-bs-toggle="collapse" data-bs-target="#menu" type="button">
+            <span class="material-icons">list</span>
+        </button>
+        <div class="collapse" id="menu">
+            <a class="py-2 d-block text-center btn-primary my-2 mx-3 no-deco" href="index.html">Home</a>
+            <a class="py-2 d-block text-center btn-primary my-2 mx-3 no-deco" href="commands.html">Commands</a>
+            <a class="py-2 d-block text-center btn-primary my-2 mx-3 no-deco" href="https://github.com/aoi-bot/Aoi">Github</a>
+            <a class="py-2 d-block text-center btn-primary my-2 mx-3 no-deco" href="https://discord.gg/zRvNtXFWeS">Discord</a>
+            <a class="py-2 d-block text-center btn-primary my-2 mx-3 no-deco" href="https://www.patreon.com/crazygmr101">Patreon</a>
+            <a class="py-2 d-block text-center btn-primary my-2 mx-3 no-deco"
+               href="https://discord.com/api/oauth2/authorize?client_id=791265892154867724&permissions=268659776&scope=bot%20applications.commands">Invite</a>
+            <div class="nav flex-column nav-pills">
+                #TAB2
+            </div>
+        </div>
+    </div>
     <div class="position-relative overflow-hidden p-3 p-md-1 m-md-1 text-center">
         <div class="col-md-5 p-lg-1 mx-auto">
             <h1 class="display-4 fw-normal">Aoi Command List</h1>
@@ -55,8 +76,8 @@
     </div>
     <div class="px-5">
         <div class="d-flex align-items-start">
-            <div class="nav flex-column nav-pills me-3 overflow-auto vh-50" id="v-pills-tab" role="tablist"
-                 aria-orientation="vertical">
+            <div class="nav flex-column nav-pills me-3 overflow-auto vh-50 navbar-expand-lg d-md-flex d-none"
+                 id="v-pills-tab" role="navigation" aria-orientation="vertical">
                 #TABS
             </div>
             <div class="tab-content flex-fill overflow-auto vh-50 sidenav sn-bg-4 fixed" id="v-pills-tabContent">
@@ -92,6 +113,15 @@
             "click",
             function() {
                 document.body.scrollTop=document.documentElement.scrollTop = 0;
+            }
+        ))
+
+     // make mobile module selection close menu
+    document.querySelectorAll(".mobile-nav")
+        .forEach(x=>x.addEventListener(
+            "click",
+            function() {
+                document.querySelector("#menu").classList.remove("show");
             }
         ))
 </script>

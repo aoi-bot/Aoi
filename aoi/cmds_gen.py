@@ -87,13 +87,13 @@ async def gen_card(command: commands.Command, bot: AoiBot) -> str:
 module_active = False
 
 
-def get_tab_pair(cog: commands.Cog) -> Tuple[str, str]:
+def get_tab_pair(cog: commands.Cog) -> Tuple[str, str, str]:
     global module_active
     show = "show" if not module_active else ""
     active = "active" if not module_active else ""
     module_active = True
     return (f"""
-                <button class="nav-link my-1 {active} text-white" id="v-pills-{cog.qualified_name}-tab" 
+                <button class="nav-link my-1 {active} text-white"
                         data-bs-toggle="pill" data-bs-target="#v-pills-{cog.qualified_name}"
                         type="button" role="tab" aria-controls="v-pills-{cog.qualified_name}" aria-selected="true">
                         {cog.qualified_name}
@@ -106,7 +106,14 @@ def get_tab_pair(cog: commands.Cog) -> Tuple[str, str]:
                     <h4 class="mx-2 my-2">{cog.description}</h4>
                     #CONTENT#
                 </div>
-            """
+            """,
+            f"""
+                <button class="nav-link my-1 {active} text-white mobile-nav"
+                        data-bs-toggle="pill" data-bs-target="#v-pills-{cog.qualified_name}"
+                        type="button" role="tab" aria-controls="v-pills-{cog.qualified_name}" aria-selected="true">
+                        {cog.qualified_name}
+                </button>
+""",
             )
 
 
@@ -115,21 +122,24 @@ async def generate(bot: AoiBot):
     cog: commands.Cog
     command: commands.Command
     tab_list = ""
+    tab_list_2 = ""
     json_list = {}
     panes = ""
 
     for cog in (bot.get_cog(name) for name in sorted(bot.cogs)):
         if cog.qualified_name in bot.cog_groups["Hidden"]:
             continue
-        tab, pane = get_tab_pair(cog)
+        tab, pane, tab2 = get_tab_pair(cog)
         tab_list += tab
+        tab_list_2 += tab2
         cog_html = ""
         for command in cog.get_commands():
             cog_html += await gen_card(command, bot)
         panes += pane.replace("#CONTENT#", cog_html)
 
     with open("website/commands.html", "w") as fp, open("gen_template.html", "r") as template:
-        fp.write(template.read().replace("#TABS", tab_list).replace("#PANES", panes).replace("#BOT#", "Aoi"))
+        fp.write(template.read().replace("#TABS", tab_list).replace("#PANES", panes)
+                 .replace("#BOT#", "Aoi").replace("#TAB2", tab_list_2))
 
     with open("commands.json", "w") as fp:
         json.dump(json_list, fp, indent=2)
