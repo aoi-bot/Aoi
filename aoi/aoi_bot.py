@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import inspect
 import json
 import logging
 import os
@@ -253,7 +252,7 @@ class AoiBot(commands.AutoShardedBot):
                 self.logger.error(f"bot: - {i.cog.qualified_name}.{i.name}")
             return
 
-        generate(self)
+        await generate(self)
 
         self.ksoft = ksoftapi.Client(self.ksoft_api, loop=self.loop)
 
@@ -367,20 +366,6 @@ class AoiBot(commands.AutoShardedBot):
             embed=embed,
             delete_after=delete_after
         )
-
-    def get_signature_data(self, command: commands.Command):
-        signature_string = []
-        defaults = {}
-        signature: inspect.Signature = inspect.signature(command.callback)
-        param: inspect.Parameter
-        for param in signature.parameters.values():
-            if param.name in ("self", "ctx"):
-                continue
-            signature_string.append(
-                f"&lt;{param.name}&gt;" if param.default is not inspect.Parameter.empty else param.name)  # noqa
-            if param.default is not inspect.Parameter.empty:
-                defaults[param.name] = param.default
-        return " ".join(signature_string), defaults
 
     async def check_slowmode(self, message: discord.Message):
         if message.channel.id not in self.slowmodes:
