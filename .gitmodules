@@ -1,3 +1,6 @@
 [submodule "disputils"]
 	path = disputils
 	url = https://github.com/aoi-bot/disputils.git
+[submodule "website"]
+	path = website
+	url = https://github.com/aoi-bot/website

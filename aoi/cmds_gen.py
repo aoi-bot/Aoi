@@ -93,15 +93,15 @@ def get_tab_pair(cog: commands.Cog) -> Tuple[str, str]:
     active = "active" if not module_active else ""
     module_active = True
     return (f"""
-                <button class="nav-link my-1 {active}" id="v-pills-{cog.qualified_name}-tab" data-bs-toggle="pill"
-                        data-bs-target="#v-pills-{cog.qualified_name}"
+                <button class="nav-link my-1 {active} text-white" id="v-pills-{cog.qualified_name}-tab" 
+                        data-bs-toggle="pill" data-bs-target="#v-pills-{cog.qualified_name}"
                         type="button" role="tab" aria-controls="v-pills-{cog.qualified_name}" aria-selected="true">
                         {cog.qualified_name}
                 </button>
 """,
             f"""
-                <div class="tab-pane fade my-3 mx-4 {show} {active}" id="v-pills-{cog.qualified_name}" role="tabpanel"
-                     aria-labelledby="v-pills-{cog.qualified_name}-tab">
+                <div class="tab-pane fade my-3 mx-4 {show} {active} text-white" id="v-pills-{cog.qualified_name}" 
+                    role="tabpanel" aria-labelledby="v-pills-{cog.qualified_name}-tab">
                     <h2 class="mx-2 my-2">{cog.qualified_name}</h2>
                     <h4 class="mx-2 my-2">{cog.description}</h4>
                     #CONTENT#
@@ -128,7 +128,7 @@ async def generate(bot: AoiBot):
             cog_html += await gen_card(command, bot)
         panes += pane.replace("#CONTENT#", cog_html)
 
-    with open("/home/crazygmr101/repo/website/commands.html", "w") as fp, open("gen_template.html", "r") as template:
+    with open("website/commands.html", "w") as fp, open("gen_template.html", "r") as template:
         fp.write(template.read().replace("#TABS", tab_list).replace("#PANES", panes).replace("#BOT#", "Aoi"))
 
     with open("commands.json", "w") as fp:
