@@ -173,7 +173,7 @@ class AoiContext(commands.Context):
             for i in fields:
                 msg += f"**{i[0]}**\n{i[1]}\n\n"
             msg += f"**{footer}**\n" if footer else ""
-            zw_sp = "​"
+            zw_sp = "​"  # not blank, there's a zero width space there, I swear
             return await self.send(re.sub(r"\[(.*?)\]\((.*?)\)", rf"\1 ({zw_sp}<\2>{zw_sp})", msg)) # noqa ignore the \[
 
         if typ and clr:

@@ -117,7 +117,7 @@ class GuildSettings(commands.Cog):
                     ("Generation Channels", " ".join(
                         f"<#{c}>" for c in colors.currency_gen_channels) if colors.currency_gen_channels else "None"
                      ),
-                    ("Normal response embeds", "On" if colors.reply_embeds else "Off")
+                    ("Normal Response Embeds", "On" if colors.reply_embeds else "Off")
                 ]
             )
         else:
@@ -130,12 +130,12 @@ class GuildSettings(commands.Cog):
                            f"Currency Gain: {'Off' if not gain else str(gain) + '/3m'}\n"
                            f"Currency Generation: **{colors.currency_chance}** to generate between "
                            f"**${colors.currency_min}** and **${colors.currency_max}**\n"
-                           f"Currency Generates on:\n" +
-                           ("\n".join(
-                               f"<#{c}>" for c in colors.currency_gen_channels)
-                            if colors.currency_gen_channels else "None"
+                           f"Currency Generates on: " +
+                           ("\n" + ("\n ⋄".join(
+                               f"<#{c}>" for c in colors.currency_gen_channels))
+                            if colors.currency_gen_channels else "No channels"
                             ) +
-                           f"Normal response embeds: {'On' if colors.reply_embeds else 'Off'}")
+                           f"\nNormal Response Embeds: {'On' if colors.reply_embeds else 'Off'}")
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(GuildSettings(bot))
