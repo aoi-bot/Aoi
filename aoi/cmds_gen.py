@@ -10,6 +10,30 @@ if TYPE_CHECKING:
     from .aoi_bot import AoiBot
 
 
+def type_string(annotation) -> str:
+    if hasattr(annotation, "__name__"):
+        if annotation.__name__ == "_empty":
+            return "str"
+        if not annotation.__name__.startswith("_"):
+            return annotation.__name__
+    s = str(annotation)
+    if s.startswith("typing.Union"):
+        args = s.replace("typing.Union[", "").replace("]", "").split(", ")
+        if "NoneType" in args:
+            args.remove("NoneType")
+            return f"Optional {args[0]}"
+        else:
+            return "</code> or <code>".join(a.split(".")[-1] for a in args)
+    if "_Greedy" in str(annotation):
+        if "<class" in str(annotation.converter):
+            return f"{type_string(annotation.converter)}(s)"
+        if "Union" in str(annotation.converter):
+            return f"{type_string(annotation.converter)}(s)"
+        return "str"
+
+    return "<b>Unknown Type</b>"
+
+
 def friendly_signature(command: commands.Command, bot: AoiBot) -> str:
     callback: Callable = command.callback
     signature_string = []
@@ -19,11 +43,18 @@ def friendly_signature(command: commands.Command, bot: AoiBot) -> str:
     for param in signature.parameters.values():
         if param.name in ("self", "ctx"):
             continue
-        signature_string.append(
-            f"""<a data-bs-toggle="tooltip" data-bs-placement="top" href="#" data-bs-html="true" 
-            title="Default: <code>{param.default}</code>" >
-            &lt;{param.name}&gt;</a>"""
-            if param.default is not inspect.Parameter.empty else param.name)  # noqa
+        if param.default is not inspect.Parameter.empty:
+            signature_string.append(
+                f"""<a data-bs-toggle="tooltip" data-bs-placement="top" href="#" data-bs-html="true" 
+                title="Type: <code>{type_string(param.annotation)}</code><br/>Default: <code>{param.default}</code><br/>Optional" 
+                class="argument default">
+                &lt;{param.name}&gt;</a>""")  # noqa
+        else:
+            signature_string.append(
+                f"""<a data-bs-toggle="tooltip" data-bs-placement="top" href="#" data-bs-html="true" 
+                title="Type: <code>{type_string(param.annotation)}</code>" 
+                class="argument required">
+                {param.name}</a>""")  # noqa
         if param.default is not inspect.Parameter.empty:
             defaults[param.name] = param.default
     result = " ".join(signature_string), defaults
