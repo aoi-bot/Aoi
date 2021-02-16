@@ -53,9 +53,9 @@ class AoiContext(commands.Context):
         conf = disputils.BotConfirmation(self, color=await self.get_color(self.INFO))
         await conf.confirm(message)
         if conf.confirmed:
-            await conf.update(text=confirmed, color=await self.get_color(self.OK))
+            await conf.update(text=self.loc(confirmed), color=await self.get_color(self.OK))
         else:
-            await conf.update(text=denied, color=await self.get_color(self.ERROR))
+            await conf.update(text=self.loc(denied), color=await self.get_color(self.ERROR))
         return conf.confirmed
 
     async def confirm_coro(self, message: str, confirmed: str, denied: str, coro: coroutine):
@@ -63,9 +63,9 @@ class AoiContext(commands.Context):
         await conf.confirm(message)
         if conf.confirmed:
             await coro
-            await conf.update(text=confirmed, color=await self.get_color(self.OK))
+            await conf.update(text=self.loc(confirmed), color=await self.get_color(self.OK))
         else:
-            await conf.update(text=denied, color=await self.get_color(self.ERROR))
+            await conf.update(text=self.loc(denied), color=await self.get_color(self.ERROR))
         return conf.confirmed
 
     async def done_ping(self):
