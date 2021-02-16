@@ -38,7 +38,7 @@ class Bot(commands.Cog):
     @tasks.loop(minutes=1)
     async def redis_loop(self):
         await self.bot.wait_until_ready()
-        self.redis.set("aoi-members", len(self.bot.users))
+        self.redis.set("aoi-members", sum(guild.member_count for guild in self.bot.guilds))
         self.redis.set("aoi-guilds", len(self.bot.guilds))
 
     @tasks.loop(seconds=2)
