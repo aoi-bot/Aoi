@@ -9,6 +9,7 @@ import subprocess
 
 import aoi
 import discord
+import redis
 from discord.ext import commands, tasks
 from libs.conversions import dhm_notation, hms_notation, maybe_pluralize, sql_trim
 
@@ -21,16 +22,24 @@ class Bot(commands.Cog):
         self.resource_loop.start()
         self.shard_loop.start()
         self.shard_counts_loop.start()
+        self.redis_loop.start()
         self.ping: int = 0
         self.ping_run: List[int] = []
         self.avg_ping: int = 0
         self.shard_times: Dict[int, datetime] = {}
         self.shard_statuses: Dict[int, bool] = {}
         self.shard_server_counts: Dict[int, int] = {}
+        self.redis = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
 
     @property
     def description(self):
         return "Commands having to do with the bot herself"
+
+    @tasks.loop(minutes=1)
+    async def redis_loop(self):
+        await self.bot.wait_until_ready()
+        self.redis.set("aoi-members", len(self.bot.users))
+        self.redis.set("aoi-guilds", len(self.bot.guilds))
 
     @tasks.loop(seconds=2)
     async def resource_loop(self):

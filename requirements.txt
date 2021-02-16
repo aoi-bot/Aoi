@@ -15,3 +15,5 @@ setuptools~=51.1.2
 discord-py-slash-command~=1.0.8.4
 idna~=2.9
 urllib3~=1.25.2
+sanic~=20.12.1
+redis~=3.5.3
