@@ -15,7 +15,7 @@ async def main(request):
     return json({
         "members": cache.get("aoi-members"),
         "guilds": cache.get("aoi-guilds")
-    }, 200)
+    }, 200, headers={"Access-Control-Allow-Origin": "*"})
 
 
 app.run(port=8000)
