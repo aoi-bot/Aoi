@@ -170,11 +170,27 @@ class AoiContext(commands.Context):
             msg += f":{['information_source', 'x', 'white_check_mark'][typ]}: " + \
                    (f"**{title}**" if title else "") + "\n"
             msg += f"{description}\n" if description is not None else ""
-            for i in fields:
+            for i in fields or []:
                 msg += f"**{i[0]}**\n{i[1]}\n\n"
             msg += f"**{footer}**\n" if footer else ""
             zw_sp = "​"  # not blank, there's a zero width space there, I swear
-            return await self.send(re.sub(r"\[(.*?)\]\((.*?)\)", rf"\1 ({zw_sp}<\2>{zw_sp})", msg)) # noqa ignore the \[
+            if image:
+                if isinstance(image, str):
+                    f = None
+                    url = image
+                elif isinstance(image, Image):
+                    buf = io.BytesIO()
+                    image.save(buf, "png")
+                    buf.seek(0)
+                    f = discord.File(buf, filename="image.png")
+                    url = ""
+                else:
+                    image.seek(0)
+                    f = discord.File(image, filename="image.png")
+                    url = ""
+            else:
+                f = None
+            return await self.send(re.sub(r"\[(.*?)\]\((.*?)\)", rf"\1 ({zw_sp}<\2>{zw_sp})", msg) + url, file=f) # noqa ignore the \[
 
         if typ and clr:
             raise ValueError("typ and clr can not be both defined")

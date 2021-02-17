@@ -26,6 +26,8 @@ class Utility(commands.Cog):
         bot.loop.create_task(self._init())
         self.sat_cache: Dict[str, Tuple[datetime, Any]] = {}
         self.apod_cache: Dict[str, Tuple[str, str, str, str]] = {}
+        self.wx = wx.WeatherGov(self.bot.weather_gov)
+        self.bot.logger.info("Ready!")
 
     async def _init(self):
         self.bot.logger.info("wx:Waiting for bot")
@@ -91,8 +93,6 @@ class Utility(commands.Cog):
             description=f"{expl}\n\n[Normal Resolution]({url})  [High Resolution]({hdurl})",
             image=url
         )
-        self.wx = wx.WeatherGov(self.bot.weather_gov)
-        self.bot.logger.info("Ready!")
 
     # endregion
 
@@ -338,6 +338,12 @@ class Utility(commands.Cog):
         await ctx.embed(image=result)
 
     # endregion
+
+    @commands.command(
+        brief="Starts a poll"
+    )
+    async def poll(self, ctx: aoi.AoiContext, *, content: str):
+        poll = content.split(";;")
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Utility(bot))
