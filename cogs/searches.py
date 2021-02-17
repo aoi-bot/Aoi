@@ -37,7 +37,9 @@ class Searches(commands.Cog):
 
     @commands.command(brief="Look up the lyrics for a song")
     async def lyrics(self, ctx: aoi.AoiContext, *, query: str):
-        try:
+        # TODO re-enable this
+        return await ctx.send_error("This command has been disabled temporarily while waiting on an API key")
+        try: # noqa
             lyrs: List[LyricResult] = sorted(await self.bot.ksoft.music.lyrics(query),
                                              key=lambda x: -x.search_score)
         except ksoftapi.NoResults:
