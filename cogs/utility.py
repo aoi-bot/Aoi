@@ -1,3 +1,4 @@
+import asyncio
 import io
 from datetime import datetime
 from functools import reduce
@@ -10,6 +11,7 @@ from PIL import Image
 from PIL import ImageOps
 
 import aoi
+import discord
 from discord.ext import commands, tasks
 from libs.converters import integer, allowed_strings, dtime
 from libs.expressions import evaluate, get_prime_factors
@@ -344,6 +346,24 @@ class Utility(commands.Cog):
     )
     async def poll(self, ctx: aoi.AoiContext, *, content: str):
         poll = content.split(";;")
+        if len(poll) == 1:
+            msg = await ctx.send(embed=discord.Embed(
+                title=poll[0]
+            ))
+            await msg.add_reaction("👍")
+            await msg.add_reaction("👎")
+        else:
+            choices = ["1️⃣", "2️⃣", "3️⃣",
+                       "4⃣", "5️⃣", "6️⃣",
+                       "7️⃣", "8️⃣", "9️⃣"]
+            msg = await ctx.send(embed=discord.Embed(
+                title=poll[0],
+                description="\n".join(f"{choices[n]} {poll[n+1]}" for n in range(len(poll) - 1))
+            ))
+            for i in range(len(poll) - 1):
+                await msg.add_reaction(choices[i])
+                await asyncio.sleep(0.5)
+
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Utility(bot))
