@@ -250,7 +250,7 @@ class Bot(commands.Cog):
     @commands.is_owner()
     @commands.command(brief="Update Aoi from Github")
     async def update(self, ctx: aoi.AoiContext):
-        process = subprocess.Popen(["git", "pull"], stdout=subprocess.PIPE)
+        process = subprocess.Popen(["git", "pull", "--recurse-submodules"], stdout=subprocess.PIPE)
         output = process.communicate()[0]
         await ctx.send(f"Output: ```{str(output[:1800], 'utf-8')}```")
         process = subprocess.Popen(["git", "describe", "--tags"], stdout=subprocess.PIPE)
