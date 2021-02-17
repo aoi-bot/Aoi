@@ -45,16 +45,16 @@ def friendly_signature(command: commands.Command, bot: AoiBot) -> str:
             continue
         if param.default is not inspect.Parameter.empty:
             signature_string.append(
-                f"""<a data-bs-toggle="tooltip" data-bs-placement="top" href="#" data-bs-html="true" 
+                f"""<span data-bs-toggle="tooltip" data-bs-placement="top" href="#" data-bs-html="true" 
                 title="Type: <code>{type_string(param.annotation)}</code><br/>Default: <code>{param.default}</code><br/>Optional" 
                 class="argument default">
-                &lt;{param.name}&gt;</a>""")  # noqa
+                &lt;{param.name}&gt;</span>""")  # noqa
         else:
             signature_string.append(
-                f"""<a data-bs-toggle="tooltip" data-bs-placement="top" href="#" data-bs-html="true" 
+                f"""<span data-bs-toggle="tooltip" data-bs-placement="top" href="#" data-bs-html="true" 
                 title="Type: <code>{type_string(param.annotation)}</code>" 
                 class="argument required">
-                {param.name}</a>""")  # noqa
+                {param.name}</span>""")  # noqa
         if param.default is not inspect.Parameter.empty:
             defaults[param.name] = param.default
     result = " ".join(signature_string), defaults
