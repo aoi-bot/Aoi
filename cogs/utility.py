@@ -354,7 +354,7 @@ class Utility(commands.Cog):
             await msg.add_reaction("👎")
         else:
             choices = ["1️⃣", "2️⃣", "3️⃣",
-                       "4⃣", "5️⃣", "6️⃣",
+                       "4️⃣", "5️⃣", "6️⃣",
                        "7️⃣", "8️⃣", "9️⃣"]
             msg = await ctx.send(embed=discord.Embed(
                 title=poll[0],
