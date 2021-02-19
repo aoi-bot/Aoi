@@ -29,7 +29,9 @@ def get_prefix(_bot: aoi.AoiBot, message: discord.Message):
     return commands.when_mentioned_or(_bot.db.prefixes[message.guild.id])(_bot, message)
 
 
-bot = aoi.AoiBot(command_prefix=get_prefix, help_command=None, intents=discord.Intents.all(), fetch_offline_users=True)
+bot = aoi.AoiBot(command_prefix=get_prefix, help_command=None,
+                 intents=discord.Intents.all(), fetch_offline_users=True,
+                 chunk_members_on_startup=True)
 
 bot.load_extensions()
 
