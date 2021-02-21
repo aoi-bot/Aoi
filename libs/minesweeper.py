@@ -18,12 +18,13 @@ class SpoilerMinesweeper:
             h = random.randint(0, height - 1)
             w = random.randint(0, width - 1)
             if self.board[h][w] == 0:
-                self.board[h][w] = -1
+                self.board[h][w] = -1  # place a bomb
                 placed += 1
         for h in range(height):
             for w in range(width):
                 if self.board[h][w] == -1:
                     continue
+                # count the bombs around a square
                 for dx in (-1, 0, 1):
                     for dy in (-1, 0, 1):
                         if h + dx < 0 or w + dy < 0 or h + dx >= height or w + dy >= width:
@@ -39,8 +40,11 @@ class SpoilerMinesweeper:
         return "\n".join(["".join(map(self._str, row)) for row in self.board])
 
     def discord_str(self, spoilers: bool = True):
-        d_str = "\n".join(["".join(map(lambda x: self._discord_str(x, spoilers), row)) for row in self.board])
-        if len(d_str) >= 1900:
+        d_str = "\n".join(
+            ["".join(map(lambda x: self._discord_str(x, spoilers), row))
+             for row in self.board]
+        )
+        if len(d_str) >= 2000:
             raise MinesweeperError("Board to big to send through discord")
         return d_str
 
@@ -52,7 +56,7 @@ class SpoilerMinesweeper:
         return str(n)
 
     def _discord_str(self, n: int, spoiler: bool = False):
-        fmt = "||:%s:||" if spoiler else ":%s:"
+        fmt = "<<:%s:>>" if spoiler else ":%s:"
         if n == -1:
             return fmt % "bomb"
         else:
