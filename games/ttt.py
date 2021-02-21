@@ -8,6 +8,15 @@ from libs.conversions import discord_number_emojis
 from .base import Game
 
 
+def _xo(num, neg=False):
+    return [":x:", None, ":o:"][num + 1] if not neg else \
+        [":regional_indicator_x:", None, ":regional_indicator_o:"][num + 1]
+
+
+def _board_pos(x: int) -> Tuple[int, int]:
+    return (x - 1) // 3, (x - 1) % 3
+
+
 class TicTacToe(Game):
     def __init__(self, ctx: aoi.AoiContext):
         super().__init__(ctx)
@@ -15,17 +24,10 @@ class TicTacToe(Game):
     async def play(self):  # noqa C901
         board = [[0] * 3 for _ in range(3)]
 
-        def _c(x: int) -> Tuple[int, int]:
-            return (x - 1) // 3, (x - 1) % 3
-
-        def _xo(num, neg=False):
-            return [":x:", None, ":o:"][num + 1] if not neg else \
-                [":regional_indicator_x:", None, ":regional_indicator_o:"][num + 1]
-
         def _get_board():
             s = "_ _\n"
             for i in range(1, 10):
-                row, col = _c(i)
+                row, col = _board_pos(i)
                 cur = board[row][col]
                 s += (_xo(cur) if cur else discord_number_emojis(i))
                 if col == 2:
@@ -45,7 +47,7 @@ class TicTacToe(Game):
             ]
             for i in [-1, 1]:
                 for row in wins:
-                    if all([board[_c(j)[0]][_c(j)[1]] == i for j in row]):
+                    if all([board[_board_pos(j)[0]][_board_pos(j)[1]] == i for j in row]):
                         return i, row
             for row in board:
                 for col in row:
@@ -56,29 +58,29 @@ class TicTacToe(Game):
         def _make_next():
             # make winning move
             for i in range(1, 10):
-                orig = board[_c(i)[0]][_c(i)[1]]
+                orig = board[_board_pos(i)[0]][_board_pos(i)[1]]
                 if orig != 0:
                     continue
-                board[_c(i)[0]][_c(i)[1]] = -1
+                board[_board_pos(i)[0]][_board_pos(i)[1]] = -1
                 if _status()[0] == -1:
-                    board[_c(i)[0]][_c(i)[1]] = -1
+                    board[_board_pos(i)[0]][_board_pos(i)[1]] = -1
                     return
-                board[_c(i)[0]][_c(i)[1]] = orig
+                board[_board_pos(i)[0]][_board_pos(i)[1]] = orig
 
             # block player's winning move
             for i in range(1, 10):
-                orig = board[_c(i)[0]][_c(i)[1]]
+                orig = board[_board_pos(i)[0]][_board_pos(i)[1]]
                 if orig != 0:
                     continue
-                board[_c(i)[0]][_c(i)[1]] = 1
+                board[_board_pos(i)[0]][_board_pos(i)[1]] = 1
                 if _status()[0] == 1:
-                    board[_c(i)[0]][_c(i)[1]] = -1
+                    board[_board_pos(i)[0]][_board_pos(i)[1]] = -1
                     return
-                board[_c(i)[0]][_c(i)[1]] = orig
+                board[_board_pos(i)[0]][_board_pos(i)[1]] = orig
 
             # pick a random square
-            sq = random.choice(list(filter(lambda i: board[_c(i)[0]][_c(i)[1]] == 0, list(range(0, 9)))))
-            board[_c(sq)[0]][_c(sq)[1]] = -1
+            sq = random.choice(list(filter(lambda i: board[_board_pos(i)[0]][_board_pos(i)[1]] == 0, list(range(0, 9)))))
+            board[_board_pos(sq)[0]][_board_pos(sq)[1]] = -1
 
         comp = (random.random() > 0.5)
 
@@ -88,9 +90,10 @@ class TicTacToe(Game):
             if not comp:
                 await msg.edit(embed=discord.Embed(title="Your turn!",
                                                    description=_get_board(), colour=discord.Colour.blue()))
-                sq = await self.ctx.input(int, ch=lambda x: (0 < x < 10) and board[_c(x)[0]][_c(x)[1]] == 0,
+                sq = await self.ctx.input(int, ch=lambda x: (0 < x < 10) and board[_board_pos(x)[0]][_board_pos(
+                    x)[1]] == 0,
                                           del_response=True)
-                board[_c(sq)[0]][_c(sq)[1]] = 1
+                board[_board_pos(sq)[0]][_board_pos(sq)[1]] = 1
                 if _status()[0] != 0:
                     break
             else:
@@ -106,7 +109,7 @@ class TicTacToe(Game):
         winner, win = _status()
         s = "_ _\n"
         for i in range(1, 10):
-            row, col = _c(i)
+            row, col = _board_pos(i)
             cur = board[row][col]
             s += (_xo(cur, neg=(i in win)) if cur else ":black_large_square:")
             if col == 2:
