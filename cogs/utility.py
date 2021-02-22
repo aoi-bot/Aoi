@@ -1,3 +1,4 @@
+import asyncio
 import io
 from datetime import datetime
 from functools import reduce
@@ -10,6 +11,7 @@ from PIL import Image
 from PIL import ImageOps
 
 import aoi
+import discord
 from discord.ext import commands, tasks
 from libs.converters import integer, allowed_strings, dtime
 from libs.expressions import evaluate, get_prime_factors
@@ -26,10 +28,12 @@ class Utility(commands.Cog):
         bot.loop.create_task(self._init())
         self.sat_cache: Dict[str, Tuple[datetime, Any]] = {}
         self.apod_cache: Dict[str, Tuple[str, str, str, str]] = {}
+        self.wx = wx.WeatherGov(self.bot.weather_gov)
 
     async def _init(self):
         self.bot.logger.info("wx:Waiting for bot")
         await self.bot.wait_until_ready()
+        self.bot.logger.info("wx:Ready!")
 
     @property
     def description(self) -> str:
@@ -91,8 +95,6 @@ class Utility(commands.Cog):
             description=f"{expl}\n\n[Normal Resolution]({url})  [High Resolution]({hdurl})",
             image=url
         )
-        self.wx = wx.WeatherGov(self.bot.weather_gov)
-        self.bot.logger.info("Ready!")
 
     # endregion
 
@@ -338,6 +340,7 @@ class Utility(commands.Cog):
         await ctx.embed(image=result)
 
     # endregion
+
 
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Utility(bot))

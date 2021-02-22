@@ -18,8 +18,8 @@
     "cogs.geolocation": "Geolocation"
     "cogs.fun": "Fun"
     "cogs.utility": "Utility"
-    "cogs.tbhk": "TBHK"
     "cogs.quotes": "Quotes"
+    "cogs.polls": "Polls"
 "Profile/Currency":
     "cogs.user.xp": "XP"
     "cogs.user.profile": "Profile"
@@ -35,3 +35,4 @@
     "cogs.errorhandler": "ErrorHandler"
     # "cogs.slash": "Slash"
     "cogs.patreon": "Patreon"
+    "cogs.tbhk": "TBHK"
