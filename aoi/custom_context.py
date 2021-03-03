@@ -356,3 +356,6 @@ class AoiContext(commands.Context):
             content=content,
             embed=embed if embed else None
         )
+
+    def loc(self, string: str) -> str:
+        return string
