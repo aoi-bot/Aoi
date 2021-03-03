@@ -2,6 +2,9 @@ import io
 from typing import Union
 
 import aiohttp
+from PIL import Image
+from aiohttp import ClientResponseError
+from aiohttp.http_exceptions import BadHttpMessage
 
 import aoi
 import discord
@@ -114,19 +117,44 @@ class Guilds(commands.Cog):
             src = str(src.url)
         buf = io.BytesIO()
         async with aiohttp.ClientSession() as sess:
-            async with sess.get(src) as resp:
-                if resp.status != 200:
-                    return await ctx.send_error(f"Server responded with a {resp.status}")
-                if "Content-Type" not in resp.headers or resp.headers["Content-Type"] not in \
-                        ("image/gif", "image/jpeg", "image/png"):
-                    return await ctx.send_error(f"That doesn't seem to be an image")
-                buf.write(await resp.content.read())
+            try:
+                async with sess.get(src) as resp:
+                    if resp.status != 200:
+                        return await ctx.send_error(f"Server responded with a {resp.status}")
+                    if "Content-Type" in resp.headers:
+                        typ = resp.headers["Content-Type"].split("/")[-1]
+                    if "Content-Type" not in resp.headers or resp.headers["Content-Type"] not in \
+                            ("image/gif", "image/jpeg", "image/png"):
+                        return await ctx.send_error(f"That doesn't seem to be an image")
+                    buf.write(await resp.content.read())
+            except (ClientResponseError, BadHttpMessage) as e:
+                await ctx.send_error(f"I got an error trying to get that image."
+                                     f"Try pasting the image into discord and using that link instead.")
+                raise
         buf.seek(0)
+        ratio = 0
+        total_ratio = 1
+        while buf.__sizeof__() > 255000 and typ != "gif":
+            # try to resize image to emoji size
+            ratio = 255000 / buf.__sizeof__()
+            total_ratio *= ratio
+            image: Image.Image = Image.open(buf)
+            image.load()
+            current_size = image.size
+            image = image.resize((int(current_size[0] * ratio), int(current_size[1] * ratio)))
+            buf2 = io.BytesIO()
+            image.save(buf2, format='PNG')
+            print(buf2.__sizeof__())
+            buf = buf2
+            buf.seek(0)
         try:
             emoji = await ctx.guild.create_custom_emoji(name=name, image=buf.read())
         except discord.HTTPException as e:
             return await ctx.send_error(str(e))
-        await ctx.send_ok(f"Added {emoji} {emoji.name}")
+        await ctx.send_ok(f"Added {emoji} {emoji.name}." +
+                          (f" Image was scaled down to 1/{round(1/total_ratio, 1)} its size to make it "
+                           f"small enough for an emoji"
+                           if ratio else ""))
 
 
 def setup(bot: aoi.AoiBot) -> None:
