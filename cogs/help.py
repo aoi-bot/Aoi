@@ -99,8 +99,9 @@ class Help(commands.Cog):
                                                         f"to view commands in a module"),
                                     ("Command Help", f"`{ctx.clean_prefix}help command_name` to "
                                                      f"view help for a command"),
-                                    ("Other Guides", f"`{ctx.clean_prefix}cmds guides` to "
-                                                     f"view the guides"),
+                                    ("Other Guides", f"`{ctx.clean_prefix}cmds help` to "
+                                                     f"view the guides or check out the [online guides]"
+                                                     f"(https://www.aoibot.xyz/guides.html)"),
                                     ("Support Server", f"Still need help? Join our [support "
                                                        f"server](https://discord.gg/zRvNtXFWeS)"),
                                     ("Command List",
@@ -109,8 +110,8 @@ class Help(commands.Cog):
                                     ] + (
                                        [
                                            ("Voting", f"Vote for Aoi [here]"
-                                                      f"(https://top.gg/bot/738856230994313228)")
-                                       ] if self.bot.user.id == 738856230994313228 else []
+                                                      f"(https://top.gg/bot/791265892154867724)")
+                                       ] if self.bot.user.id == 791265892154867724 else []
                                    ),
                                    thumbnail=self.bot.random_thumbnail(),
                                    not_inline=[2, 3, 4])
