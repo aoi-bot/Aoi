@@ -61,9 +61,10 @@ COMMANDS = {
 class Slash(commands.Cog, aoi.SlashMixin, aoi.ColorCogMixin):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
-        bot.slash = SlashCommand(bot, override_type=True, auto_delete=True, auto_register=True)
+        del bot.slash
+        bot.slash = SlashCommand(bot, sync_commands=True)
         self.bot.slash.get_cog_commands(self)
-        bot.loop.create_task(self.register_commands())
+        #bot.loop.create_task(self.register_commands())
         super(Slash, self).__init__()
 
     def cog_unload(self):
@@ -75,7 +76,7 @@ class Slash(commands.Cog, aoi.SlashMixin, aoi.ColorCogMixin):
 
     @cog_ext.cog_slash(name="slashes", description="Activated slash commands")
     async def _slashes(self, ctx: SlashContext):
-        await ctx.send(send_type=3, hidden=True, content="Enabled slash commands on Aoi:\n"
+        await ctx.send(hidden=True, content="Enabled slash commands on Aoi:\n"
                                                          "`/color [color]`\n"
                                                          "`/gradient [color1] [color2] [num] [hls]`\n"
                                                          "`/calc [expression]`")
@@ -87,7 +88,7 @@ class Slash(commands.Cog, aoi.SlashMixin, aoi.ColorCogMixin):
         except commands.BadColourArgument:
             return await ctx.send(content=f"`{color}` is an invalid color. Aoi supports CSS color names "
                                           f"and colors in the formats `#rgb` and `#rrggbb`")
-        await ctx.send(send_type=5)
+        await ctx.ack(False)
         await self.embed(ctx, title=str(clr), image=self._color_buf(clr))
 
     @cog_ext.cog_slash(name="gradient")
@@ -106,7 +107,7 @@ class Slash(commands.Cog, aoi.SlashMixin, aoi.ColorCogMixin):
             buf, colors = self._gradient_buf(color1, color2, num, hls)
         except commands.BadArgument as e:
             return await ctx.send(content=str(e))
-        await ctx.send(send_type=5)
+        await ctx.ack(False)
         await self.embed(ctx, title="Gradient",
                          description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in colors),
                          image=buf)
@@ -123,13 +124,13 @@ class Slash(commands.Cog, aoi.SlashMixin, aoi.ColorCogMixin):
         try:
             res = await evaluate(expr)
         except aoi.CalculationSyntaxError:
-            await ctx.send(send_type=3, hidden=True, content="Syntax error")
+            await ctx.send(hidden=True, content="Syntax error")
         except aoi.DomainError as e:
-            await ctx.send(send_type=3, hidden=True, content="Domain error for {e}")
+            await ctx.send(hidden=True, content="Domain error for {e}")
         except aoi.MathError:
-            await ctx.send(send_type=3, hidden=True, content="Math error")
+            await ctx.send(hidden=True, content="Math error")
         else:
-            await ctx.send(send_type=3, hidden=True, content=f"Expression: {discord.utils.escape_markdown(expr)}\n"
+            await ctx.send(hidden=True, content=f"Expression: {discord.utils.escape_markdown(expr)}\n"
                                                              f"Result:\n{res}")
 
     async def register_commands(self):

@@ -209,7 +209,13 @@ class Messages(commands.Cog):
         if log:
             await msg.delete()
 
-        await ctx.send_ok(confirmation)
+        msg = await ctx.send_ok(confirmation)
+        await asyncio.sleep(3)
+        await msg.delete(delay=3)
+        try:
+            await ctx.message.delete(delay=3)
+        except discord.Forbidden:
+            pass
 
 
 def setup(bot: aoi.AoiBot) -> None:

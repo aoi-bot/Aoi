@@ -8,7 +8,7 @@ import random
 import re
 import subprocess
 from datetime import datetime, timedelta
-from typing import Dict, Optional, List, Union, TYPE_CHECKING, Awaitable, Any, Callable, Tuple
+from typing import Dict, Optional, List, Union, TYPE_CHECKING, Awaitable, Any, Callable, Tuple, Protocol
 
 import aiohttp.client_exceptions
 import ksoftapi
@@ -119,6 +119,7 @@ class AoiBot(commands.AutoShardedBot):
         self.slowmodes: Dict[int, int] = {}
         self.patreon_id: str = os.getenv("PATREON_ID")
         self.patreon_secret: str = os.getenv("PATREON_SECRET")
+        self.aliases: Dict[int, Dict[str, Tuple[str, bool]]] = {}
 
         async def command_ran(ctx: aoi.AoiContext):
             self.commands_executed += 1
@@ -174,6 +175,9 @@ class AoiBot(commands.AutoShardedBot):
         if await self.check_slowmode(message):
             return
 
+        # handle aliases and transform message if needed
+        message = await self.handle_aliases(message)
+
         ctx: aoi.AoiContext = await self.get_context(message, cls=aoi.AoiContext)
         await self.invoke(ctx)
         if not ctx.command and not message.author.bot and message.guild:
@@ -209,6 +213,16 @@ class AoiBot(commands.AutoShardedBot):
         # self.pixiv.login(self.pixiv_user, self.pixiv_password)
         self.imgur = imgur.Imgur(self.imgur_user)
         await self.db.load()
+
+        self.logger.info("Loading alias table")
+        for row in await self.db.conn.execute_fetchall("select * from alias"):
+            if row[0] not in self.aliases:
+                self.aliases[row[0]] = {row[1]: row[2]}
+            else:
+                self.aliases[row[0]][row[1]] = row[2]
+
+        self.logger.info("Loaded alias table")
+
         self.load_configs()
 
         if kwargs:
@@ -386,3 +400,20 @@ class AoiBot(commands.AutoShardedBot):
             await self.db.conn.execute("insert into last_messages values (?,?,?)",
                                        (message.channel.id, message.author.id, message.created_at.timestamp()))
         return False
+
+    async def handle_aliases(self, message: discord.Message) -> discord.Message:
+        content: str = message.content
+        if message.guild.id not in self.aliases:
+            return message
+
+        if content.split(" ")[0] in self.aliases[message.guild.id]:
+            message.content = " ".join([self.aliases[message.guild.id][content.split(" ")[0]]] +
+                                                      content.split(" ")[1:])
+            return message
+        return message
+
+    async def rev_alias(self, ctx, command: str) -> Optional[List[Tuple[str, str]]]:
+        if ctx.guild.id in self.aliases and self.aliases[ctx.guild.id]:
+            return [(alias, to) for alias, to in self.aliases[ctx.guild.id].items()
+                    if to[0].split(" ")[0] == command] or None
+        return None

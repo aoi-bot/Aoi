@@ -137,5 +137,54 @@ class GuildSettings(commands.Cog):
                             ) +
                            f"\nNormal Response Embeds: {'On' if colors.reply_embeds else 'Off'}")
 
+    @commands.has_permissions(administrator=True)
+    @commands.command(brief="Set an alias for a command")
+    async def alias(self, ctx: aoi.AoiContext, alias_from: str, *, alias_to: str = None):
+        guild_id = ctx.guild.id
+        if guild_id not in self.bot.aliases:
+            if not alias_to:
+                return await ctx.send_error(f"`{alias_from}` isn't aliased to anything")
+            await self.bot.db.conn.execute("insert into alias values (?,?,?)", (guild_id, alias_from, alias_to))
+            await self.bot.db.conn.commit()
+            self.bot.aliases[guild_id] = {alias_from: alias_to}
+        else:
+            await self.bot.db.conn.execute("delete from alias where guild=? and 'from'=?", (guild_id, alias_from))
+            if alias_to:
+                await self.bot.db.conn.execute("insert into alias values (?,?,?)", (guild_id, alias_from, alias_to))
+                self.bot.aliases[guild_id][alias_from] = alias_to
+            else:
+                del self.bot.aliases[guild_id][alias_from]
+            await self.bot.db.conn.commit()
+        await ctx.send_ok(f"`{alias_from}` aliased to `{alias_to}`" if alias_to else
+                          f"`{alias_from}` no longer aliased.")
+
+    @commands.command(brief="Lists server aliases")
+    async def aliases(self, ctx: aoi.AoiContext, command: str = None):
+        if not command:
+            if ctx.guild.id in self.bot.aliases and self.bot.aliases[ctx.guild.id]:
+                await ctx.paginate(
+                    [f"`{alias_from}` ⇒ `{alias_to}`"
+                     for alias_from, alias_to in self.bot.aliases[ctx.guild.id].items()],
+                    20,
+                    "Command aliases"
+                )
+            else:
+                await ctx.send_info("There are no aliases set for this server.")
+        else:
+            if ctx.guild.id in self.bot.aliases and self.bot.aliases[ctx.guild.id]:
+                found = self.bot.rev_alias(ctx, command)
+                if not found:
+                    await ctx.send_info(f"There are no aliases for `{command}`")
+                else:
+                    await ctx.paginate(
+                        [f"`{alias_from}` ⇒ `{alias_to}`"
+                         for alias_from, alias_to in found],
+                        20,
+                        f"Command aliases for {command}"
+                    )
+            else:
+                await ctx.send_info("There are no aliases set for this server.")
+
+
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(GuildSettings(bot))
