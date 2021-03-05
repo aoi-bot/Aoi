@@ -166,6 +166,11 @@ CREATE TABLE IF NOT EXISTS "quotes" (
   "content" TEXT NOT NULL
 );;
 CREATE INDEX IF NOT EXISTS idx_quotes on quotes (id);;
+CREATE TABLE IF NOT EXISTS "alias" (
+  "guild" INTEGER NOT NULL,
+  "from" TEXT NOT NULL,
+  "to" TEXT NOT NULL
+);;
 """
 
 MIGRATIONS = {

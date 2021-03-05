@@ -139,6 +139,8 @@ class Help(commands.Cog):
                 ("You are missing permissions needed to turn this command\n" if not await _can_run(cmd, ctx) else '') +
                 (("Flags:\n" + "\n".join(map(str, map(format_flag, flags.items()))) + "\n") if flags else "") +
                 (("Aliases:" + ", ".join([f"`{a}`" for a in cmd.aliases])) if cmd.aliases else "") +
+                (f"\nAliases are pointing at this command, run `{ctx.clean_prefix}aliases {command}` to view them\n"
+                 if self.bot.rev_alias(ctx, command) else "") +
                 "\n<> indicate required parameters, [] indicate optional parameters"
             )
 
@@ -163,6 +165,9 @@ class Help(commands.Cog):
                    ) + (
                        [("Aliases", ", ".join([f"`{a}`" for a in cmd.aliases]))]
                        if cmd.aliases else []
+                   ) + (
+                       [("Active aliases", ", ".join([f"`{a}`" for a in cmd.aliases]))]
+                       if self.bot.rev_alias(ctx, command) else []
                    ),
             thumbnail=self.bot.random_thumbnail(),
             footer="<> indicate required parameters, [] indicate optional parameters",
