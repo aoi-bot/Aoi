@@ -62,6 +62,8 @@ async def ttt(request):
         y = pairs[i][1] + random.randrange(-10, 10)
         if char != "-":
             drw.text((x, y), char.upper(), font=font, fill=aoi_purple)
+        else:
+            drw.text((x, y), str(i+1), font=font, fill=aoi_purple + (0x77, ))
 
     io = BytesIO()
     copy.save(io, format="PNG")
