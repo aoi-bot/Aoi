@@ -29,7 +29,7 @@ class TicTacToe(Game):
             for i in range(1, 10):
                 row, col = _board_pos(i)
                 cur = board[row][col]
-                s += (_xo(cur) if cur else discord_number_emojis(i))
+                s += discord_number_emojis(i)
                 if col == 2:
                     s += "\n"
             return s
@@ -87,9 +87,14 @@ class TicTacToe(Game):
         msg = await self.ctx.embed(title="Type 1-9", description=_get_board())
 
         while True:
+            api_board = ""
+            for i in board:
+                for r in i:
+                    api_board += "x-o"[r+1]
             if not comp:
                 await msg.edit(embed=discord.Embed(title="Your turn!",
-                                                   description=_get_board(), colour=discord.Colour.blue()))
+                                                   description=None, colour=discord.Colour.blue())
+                               .set_image(url=f"https://api.aoibot.xyz/tictactoe?board={api_board}"))
                 sq = await self.ctx.input(int, ch=lambda x: (0 < x < 10) and board[_board_pos(x)[0]][_board_pos(
                     x)[1]] == 0,
                                           del_response=True)
@@ -98,7 +103,8 @@ class TicTacToe(Game):
                     break
             else:
                 await msg.edit(embed=discord.Embed(title="My turn!",
-                                                   description=_get_board(), colour=discord.Colour.gold()))
+                                                   description=None, colour=discord.Colour.gold())
+                               .set_image(url=f"https://api.aoibot.xyz/tictactoe?board={api_board}"))
                 async with self.ctx.typing():
                     await asyncio.sleep(1)
                 _make_next()
@@ -114,6 +120,9 @@ class TicTacToe(Game):
             s += (_xo(cur, neg=(i in win)) if cur else ":black_large_square:")
             if col == 2:
                 s += "\n"
+        for i in board:
+            for r in i:
+                api_board += "x-o"[r+1]
 
         if winner == 1:
             title = "You win!"
@@ -126,4 +135,5 @@ class TicTacToe(Game):
             color = discord.Colour.purple()
 
         await msg.edit(embed=discord.Embed(title=title,
-                                           description=s, colour=color))
+                                           description=None, colour=color)
+                       .set_image(url=f"https://api.aoibot.xyz/tictactoe?board={api_board}"))
