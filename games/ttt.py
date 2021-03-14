@@ -1,6 +1,9 @@
 import asyncio
 import random
+from io import BytesIO
 from typing import Tuple
+
+from PIL import Image, ImageFont, ImageDraw
 
 import aoi
 import discord
@@ -15,6 +18,40 @@ def _xo(num, neg=False):
 
 def _board_pos(x: int) -> Tuple[int, int]:
     return (x - 1) // 3, (x - 1) % 3
+
+
+with open("assets/ttt-template.png", "rb") as fp:
+    image: Image.Image = Image.open(fp)
+    image.load()
+    font = ImageFont.truetype("assets/merged.ttf", size=80)
+aoi_purple = 0x63, 0x44, 0x87
+
+
+def get_image(board):
+    copy: Image.Image = image.copy()
+    drw = ImageDraw.Draw(copy)
+    pairs = [
+        [56, 83],
+        [210, 83],
+        [355, 83],
+        [56, 220],
+        [210, 220],
+        [355, 220],
+        [56, 336],
+        [210, 336],
+        [355, 336]
+    ]
+    for i, char in enumerate(board):
+        x = pairs[i][0] + random.randrange(-10, 10)
+        y = pairs[i][1] + random.randrange(-10, 10)
+        if char != "-":
+            drw.text((x, y), char.upper(), font=font, fill=aoi_purple)
+        else:
+            drw.text((x, y), str(i + 1), font=font, fill=aoi_purple + (0x77,))
+    io = BytesIO()
+    copy.save(io, format="PNG")
+    io.seek(0)
+    return io
 
 
 class TicTacToe(Game):
@@ -79,7 +116,8 @@ class TicTacToe(Game):
                 board[_board_pos(i)[0]][_board_pos(i)[1]] = orig
 
             # pick a random square
-            sq = random.choice(list(filter(lambda i: board[_board_pos(i)[0]][_board_pos(i)[1]] == 0, list(range(0, 9)))))
+            sq = random.choice(
+                list(filter(lambda i: board[_board_pos(i)[0]][_board_pos(i)[1]] == 0, list(range(0, 9)))))
             board[_board_pos(sq)[0]][_board_pos(sq)[1]] = -1
 
         comp = (random.random() > 0.5)
@@ -90,11 +128,14 @@ class TicTacToe(Game):
             api_board = ""
             for i in board:
                 for r in i:
-                    api_board += "x-o"[r+1]
+                    api_board += "x-o"[r + 1]
             if not comp:
-                await msg.edit(embed=discord.Embed(title="Your turn!",
-                                                   description=None, colour=discord.Colour.blue())
-                               .set_image(url=f"https://api.aoibot.xyz/tictactoe?board={api_board}"))
+                await msg.delete()
+                msg = await self.ctx.embed(
+                    title="Your turn!",
+                    clr=discord.Colour.blue(),
+                    image=get_image(api_board)
+                )
                 sq = await self.ctx.input(int, ch=lambda x: (0 < x < 10) and board[_board_pos(x)[0]][_board_pos(
                     x)[1]] == 0,
                                           del_response=True)
@@ -102,9 +143,12 @@ class TicTacToe(Game):
                 if _status()[0] != 0:
                     break
             else:
-                await msg.edit(embed=discord.Embed(title="My turn!",
-                                                   description=None, colour=discord.Colour.gold())
-                               .set_image(url=f"https://api.aoibot.xyz/tictactoe?board={api_board}"))
+                await msg.delete()
+                msg = await self.ctx.embed(
+                    title="My turn!",
+                    clr=discord.Colour.blue(),
+                    image=get_image(api_board)
+                )
                 async with self.ctx.typing():
                     await asyncio.sleep(1)
                 _make_next()
@@ -123,7 +167,7 @@ class TicTacToe(Game):
         api_board = ""
         for i in board:
             for r in i:
-                api_board += "x-o"[r+1]
+                api_board += "x-o"[r + 1]
 
         if winner == 1:
             title = "You win!"
@@ -135,6 +179,9 @@ class TicTacToe(Game):
             title = "It's a tie"
             color = discord.Colour.purple()
 
-        await msg.edit(embed=discord.Embed(title=title,
-                                           description=None, colour=color)
-                       .set_image(url=f"https://api.aoibot.xyz/tictactoe?board={api_board}"))
+        await msg.delete()
+        msg = await self.ctx.embed(
+            title=title,
+            clr=color,
+            image=get_image(api_board)
+        )
