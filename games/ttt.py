@@ -84,7 +84,7 @@ class TicTacToe(Game):
 
         comp = (random.random() > 0.5)
 
-        msg = await self.ctx.embed(title="Type 1-9", description=_get_board())
+        msg = await self.ctx.embed(title="Type 1-9")
 
         while True:
             api_board = ""
@@ -120,6 +120,7 @@ class TicTacToe(Game):
             s += (_xo(cur, neg=(i in win)) if cur else ":black_large_square:")
             if col == 2:
                 s += "\n"
+        api_board = ""
         for i in board:
             for r in i:
                 api_board += "x-o"[r+1]
