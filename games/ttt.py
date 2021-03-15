@@ -59,6 +59,10 @@ class TicTacToe(Game):
         super().__init__(ctx)
 
     async def play(self):  # noqa C901
+
+        if not await self.ctx.using_embeds():
+            self.ctx.flags["noimages"] = None
+
         board = [[0] * 3 for _ in range(3)]
 
         def _get_board():
@@ -66,9 +70,9 @@ class TicTacToe(Game):
             for i in range(1, 10):
                 row, col = _board_pos(i)
                 cur = board[row][col]
-                s += discord_number_emojis(i)
+                s += (_xo(cur) if cur else discord_number_emojis(i)) + "     "
                 if col == 2:
-                    s += "\n"
+                    s += "\n\n"
             return s
 
         def _status():

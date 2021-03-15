@@ -174,6 +174,7 @@ class AoiContext(commands.Context):
                 msg += f"**{i[0]}**\n{i[1]}\n\n"
             msg += f"**{footer}**\n" if footer else ""
             zw_sp = "​"  # not blank, there's a zero width space there, I swear
+            url = ""
             if image:
                 if isinstance(image, str):
                     f = None
