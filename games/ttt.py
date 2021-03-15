@@ -144,6 +144,9 @@ class TicTacToe(Game):
                 sq = await self.ctx.input(int, ch=lambda x: (0 < x < 10) and board[_board_pos(x)[0]][_board_pos(
                     x)[1]] == 0,
                                           del_response=True)
+                if sq is None:
+                    await self.ctx.send("Cancelled")
+                    return
                 board[_board_pos(sq)[0]][_board_pos(sq)[1]] = 1
                 if _status()[0] != 0:
                     break
