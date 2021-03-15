@@ -134,7 +134,8 @@ class TicTacToe(Game):
                 msg = await self.ctx.embed(
                     title="Your turn!",
                     clr=discord.Colour.blue(),
-                    image=get_image(api_board)
+                    description=_get_board() if "noimages" in self.ctx.flags else None,
+                    image=get_image(api_board) if "noimages" not in self.ctx.flags else None
                 )
                 sq = await self.ctx.input(int, ch=lambda x: (0 < x < 10) and board[_board_pos(x)[0]][_board_pos(
                     x)[1]] == 0,
@@ -147,7 +148,8 @@ class TicTacToe(Game):
                 msg = await self.ctx.embed(
                     title="My turn!",
                     clr=discord.Colour.blue(),
-                    image=get_image(api_board)
+                    description=_get_board() if "noimages" in self.ctx.flags else None,
+                    image=get_image(api_board) if "noimages" not in self.ctx.flags else None
                 )
                 async with self.ctx.typing():
                     await asyncio.sleep(1)

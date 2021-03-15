@@ -157,7 +157,8 @@ class Fun(commands.Cog):
         self.bot.logger.info(", ".join(self._frames))
         self.bot.logger.info("frames:Loaded frames")
 
-    @commands.command(brief="Play tic tac toe", aliases=["ttt"])
+    @commands.command(brief="Play tic tac toe", aliases=["ttt"],
+                      flags={"noimages": [None, "don't use images during gameplay"]})
     async def tictactoe(self, ctx: aoi.AoiContext):
         await TicTacToe(ctx).play()
 
