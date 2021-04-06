@@ -14,5 +14,5 @@ ruamel.yaml
 setuptools==53.1.0
 discord-py-slash-command~=1.0.9.5
 idna==3.1
-urllib3==1.26.3
+urllib3==1.26.4
 redis~=3.5.3
