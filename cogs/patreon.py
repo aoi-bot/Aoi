@@ -90,15 +90,14 @@ if os.getenv("PATREON_ID") and os.getenv("PATREON_SECRET"):
                 await self.bot.db.conn.commit()
                 await ctx.send_ok(f"Awarded you ${cur}. Thanks for supporting! ♥")
 
+else:
 
-
-
-
+    class Patreon(commands.Cog):
+        pass
 
 
 def setup(bot: aoi.AoiBot) -> None:
-    if bot.patreon_id and bot.patreon_secret:
-        bot.add_cog(Patreon(bot))
-    else:
+    bot.add_cog(Patreon(bot))
+    if not bot.patreon_id or not bot.patreon_secret:
         bot.logger.warn("patreon:Not loading cog")
         bot.logger.warn("patreon: both PATREON_ID and PATREON_CAMPAIGN must be present in .env")
