@@ -220,7 +220,7 @@ class Utility(commands.Cog):
     def _convert(self, amount: float, from_unit: str, to_unit: str):
         return amount / self.cur_rates[from_unit] * self.cur_rates[to_unit]
 
-    @commands.command(brief="Convert currency")
+    @commands.command(brief="Convert currency", enabled=False)
     async def currency(self, ctx: aoi.AoiContext, amount: float, from_unit: str, to_unit: str):
         from_unit = from_unit.upper()
         to_unit = to_unit.upper()
