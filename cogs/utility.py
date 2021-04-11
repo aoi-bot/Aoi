@@ -125,9 +125,8 @@ class Utility(commands.Cog):
     )
     async def radarloop(self, ctx: aoi.AoiContext, location: gmaps.LocationCoordinates):
         res = await self.wx.lookup_grid(location.lat, location.long)
-        radar = res.radar_station[-3:]
         await ctx.embed(
-            image=f"https://radar.weather.gov/ridge/lite/N0R/{radar}_loop.gif"
+            image=f"https://radar.weather.gov/ridge/lite/{res.radar_station}_loop.gif"
         )
 
     @commands.command(
