@@ -23,7 +23,7 @@ class Utility(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
         self.cur_rates = {}
-        self._currency_update.start()
+        # self._currency_update.start()
         self.wx: Optional[wx.WeatherGov] = None
         bot.loop.create_task(self._init())
         self.sat_cache: Dict[str, Tuple[datetime, Any]] = {}
