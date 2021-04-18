@@ -6,9 +6,10 @@ import logging
 import os
 import random
 import re
+import signal
 import subprocess
 from datetime import datetime, timedelta
-from typing import Dict, Optional, List, Union, TYPE_CHECKING, Awaitable, Any, Callable, Tuple, Protocol
+from typing import Dict, Optional, List, Union, TYPE_CHECKING, Awaitable, Any, Callable, Tuple
 
 import aiohttp.client_exceptions
 import ksoftapi
@@ -19,6 +20,7 @@ import aoi
 import discord
 # import pixivapi
 from discord.ext import commands, tasks
+from discord.ext.tasks import Loop
 from wrappers import gmaps as gmaps, imgur
 from .cmds_gen import generate
 from .database import AoiDatabase
@@ -73,6 +75,7 @@ class AoiBot(commands.AutoShardedBot):
 
     def __init__(self, *args, **kwargs):
         super(AoiBot, self).__init__(*args, **kwargs)
+        self.shutting_down = False
         self.TRACE = 7
         for logger in [
             "aoi",
@@ -141,6 +144,17 @@ class AoiBot(commands.AutoShardedBot):
 
         self.add_listener(on_ready, "on_ready")
 
+        async def check_shutting_down():
+            if self.shutting_down:
+                self.logger.info("Shutdown flag set")
+                self.logger.info("Flushing db cache")
+                await self.db.cache_flush()
+                await self.logout()
+
+        self.shutdown_loop = Loop(coro=check_shutting_down, seconds=5, loop=self.loop, hours=0, minutes=0,
+                                  reconnect=True, count=None)
+        self.shutdown_loop.start()
+
     async def fetch_unknown_user(self, user_id: int) -> discord.User:
         if self.get_user(user_id):
             if user_id in self.fetched_users:
@@ -194,6 +208,14 @@ class AoiBot(commands.AutoShardedBot):
         TypeError
             An unexpected keyword argument was received.
         """
+        try:
+            self.loop.remove_signal_handler(signal.SIGTERM)
+            self.loop.remove_signal_handler(signal.SIGINT)
+            self.loop.add_signal_handler(signal.SIGTERM, self.handle_sigterm)
+            self.loop.add_signal_handler(signal.SIGINT, self.handle_sigterm)
+        except NotImplementedError:
+            pass
+
         bot = kwargs.pop('bot', True)
         reconnect = kwargs.pop('reconnect', True)
         self.db = AoiDatabase(self)
@@ -408,7 +430,7 @@ class AoiBot(commands.AutoShardedBot):
 
         if content.split(" ")[0] in self.aliases[message.guild.id]:
             message.content = " ".join([self.aliases[message.guild.id][content.split(" ")[0]]] +
-                                                      content.split(" ")[1:])
+                                       content.split(" ")[1:])
             return message
         return message
 
@@ -417,3 +439,6 @@ class AoiBot(commands.AutoShardedBot):
             return [(alias, to) for alias, to in self.aliases[ctx.guild.id].items()
                     if to[0].split(" ")[0] == command] or None
         return None
+
+    def handle_sigterm(self):
+        self.shutting_down = True
