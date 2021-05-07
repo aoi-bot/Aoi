@@ -43,10 +43,6 @@ class Polls(commands.Cog):
             for i in range(len(poll) - 1):
                 await msg.add_reaction(choices[i])
                 await asyncio.sleep(0.5)
-        try:
-            await ctx.message.delete()
-        except discord.Forbidden:
-            pass
 
     @property
     def description(self) -> str:
