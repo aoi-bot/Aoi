@@ -28,12 +28,14 @@ class Utility(commands.Cog):
         bot.loop.create_task(self._init())
         self.sat_cache: Dict[str, Tuple[datetime, Any]] = {}
         self.apod_cache: Dict[str, Tuple[str, str, str, str]] = {}
+        self.gmap: Optional[gmaps.GeoLocation] = None
         self.wx = wx.WeatherGov(self.bot.weather_gov)
 
     async def _init(self):
-        self.bot.logger.info("wx:Waiting for bot")
+        self.bot.logger.info("util:Waiting for bot")
         await self.bot.wait_until_ready()
-        self.bot.logger.info("wx:Ready!")
+        self.gmap = self.bot.gmap
+        self.bot.logger.info("util:Ready!")
 
     @property
     def description(self) -> str:
@@ -209,6 +211,24 @@ class Utility(commands.Cog):
     # endregion
 
     # region # Utility
+
+    @commands.command(
+        brief="Get basic geolocation data on an address"
+    )
+    async def geolookup(self, ctx: aoi.AoiContext, *, address):
+        result = (await self.gmap.lookup_address(address))[0]
+        await ctx.embed(
+            title="Geolocation Lookup",
+            fields=[
+                       ("Looked up address", address),
+                       ("Resolved address", result.formatted_address),
+                       ("Location", result.geometry.location)
+                   ] + ([
+                            ("Bounds", f"{result.geometry.northeast}\n"
+                                       f"{result.geometry.southwest}\n")
+                        ] if result.geometry.northeast else []),
+            not_inline=[0, 1, 2]
+        )
 
     @tasks.loop(hours=1)
     async def _currency_update(self):
