@@ -166,9 +166,6 @@ class Help(commands.Cog):
                    ) + (
                        [("Aliases", ", ".join([f"`{a}`" for a in cmd.aliases]))]
                        if cmd.aliases else []
-                   ) + (
-                       [("Active aliases", ", ".join([f"`{a}`" for a in cmd.aliases]))]
-                       if self.bot.rev_alias(ctx, command) else []
                    ),
             thumbnail=self.bot.random_thumbnail(),
             footer="<> indicate required parameters, [] indicate optional parameters",
