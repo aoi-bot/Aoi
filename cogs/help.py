@@ -1,5 +1,5 @@
 import inspect
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 import aoi
 import discord
@@ -201,6 +201,24 @@ class Help(commands.Cog):
                             f"`{ctx.prefix}configs`. It is used for roles and gambling - see `{ctx.prefix}cmds ServerShop` "
                             f"and `{ctx.prefix}cmds ServerGambling`."
                             )
+
+    @commands.command(
+        brief="Searches through the help commands"
+    )
+    async def helpsearch(self, ctx: aoi.AoiContext, *, text: str):
+        cmds: List[commands.Command] = []
+        tokenized = text.lower().split(" ")
+        cmd: commands.Command
+        for cmd in self.bot.walk_commands():
+            searchable_string = f"{cmd.name} {' '.join(cmd.aliases)} {cmd.usage} {cmd.description} {cmd.brief}".lower()
+            if all(token in searchable_string for token in tokenized):
+                cmds.append(cmd)
+        await ctx.paginate(
+            [f"**{cmd.name}** from **{cmd.cog.qualified_name}**: "
+             f"{cmd.brief[:100] if cmd.brief else (cmd.description[:100] if cmd.description else '')}" for cmd in cmds],
+            n=20,
+            title="Help search"
+        )
 
 
 def setup(bot: aoi.AoiBot) -> None:
