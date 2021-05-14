@@ -1,4 +1,3 @@
-import asyncio
 import io
 from datetime import datetime
 from functools import reduce
@@ -11,7 +10,6 @@ from PIL import Image
 from PIL import ImageOps
 
 import aoi
-import discord
 from discord.ext import commands, tasks
 from libs.converters import integer, allowed_strings, dtime
 from libs.expressions import evaluate, get_prime_factors
@@ -349,9 +347,10 @@ class Utility(commands.Cog):
         await ctx.trigger_typing()
         buffer = BytesIO()
         try:
-            sympy.preview(f"\\[{formula.strip('`')}\\]", viewer="BytesIO", outputbuffer=buffer)
-        except RuntimeError:
-            return await ctx.send_error("An error occurred while rendering.")
+            sympy.preview(f"$${formula.strip('`')}$$", viewer="BytesIO", outputbuffer=buffer,
+                          dvioptions=["-T", "tight", "-z", "0", "--truecolor", "-D 150"])
+        except RuntimeError as e:
+            await ctx.send_error("An error occurred while rendering.")
         result = BytesIO()
         buffer.seek(0)
         old = Image.open(buffer)
