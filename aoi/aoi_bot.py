@@ -20,7 +20,6 @@ import aoi
 import discord
 # import pixivapi
 from discord.ext import commands, tasks
-from discord.ext.tasks import Loop
 from wrappers import gmaps as gmaps, imgur
 from .cmds_gen import generate
 from .database import AoiDatabase
@@ -46,7 +45,7 @@ class PlaceholderManager:
         return ctx.author.mention if isinstance(ctx, aoi.AoiContext) else ctx.mention
 
     def user_avatar(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
-        return str(ctx.author.avatar_url if isinstance(ctx, aoi.AoiContext) else ctx.avatar_url)
+        return str(ctx.author.avatar.url if isinstance(ctx, aoi.AoiContext) else ctx.avatar.url)
 
     def user_tag(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
         return str(ctx.author if isinstance(ctx, aoi.AoiContext) else ctx)
@@ -143,17 +142,6 @@ class AoiBot(commands.AutoShardedBot):
         )
 
         self.add_listener(on_ready, "on_ready")
-
-        async def check_shutting_down():
-            if self.shutting_down:
-                self.logger.info("Shutdown flag set")
-                self.logger.info("Flushing db cache")
-                await self.db.cache_flush()
-                await self.logout()
-
-        self.shutdown_loop = Loop(coro=check_shutting_down, seconds=5, loop=self.loop, hours=0, minutes=0,
-                                  reconnect=True, count=None)
-        self.shutdown_loop.start()
 
     async def fetch_unknown_user(self, user_id: int) -> discord.User:
         if self.get_user(user_id):
@@ -253,7 +241,7 @@ class AoiBot(commands.AutoShardedBot):
         for i in range(0, 6):
             try:
                 self.logger.debug(f"bot:Connecting, try {i + 1}/6")
-                await self.login(*args, bot=bot)
+                await self.login(*args)
                 break
             except aiohttp.client_exceptions.ClientConnectionError as e:
                 self.logger.warning(f"bot:Connection {i + 1}/6 failed")
@@ -337,8 +325,7 @@ class AoiBot(commands.AutoShardedBot):
                 self.set_cog_group(cog_name, grp_name)
 
     def random_thumbnail(self) -> str:
-        return random.choice(self.thumbnails) if self.thumbnails else self.user.avatar_url
-
+        return random.choice(self.thumbnails) if self.thumbnails else self.user.avatar.url
     async def load_thumbnails(self):
         if os.path.exists("loaders/thumbnails.txt"):
             with open("loaders/thumbnails.txt", "r") as fp:
@@ -441,4 +428,8 @@ class AoiBot(commands.AutoShardedBot):
         return None
 
     def handle_sigterm(self):
-        self.shutting_down = True
+        asyncio.get_event_loop().create_task(self._handle_sigterm())
+
+    async def _handle_sigterm(self):
+        await self.db.cache_flush()
+        await self.close()

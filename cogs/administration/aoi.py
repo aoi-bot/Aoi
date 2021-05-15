@@ -104,7 +104,7 @@ class Bot(commands.Cog):
                                          f"{voice_channels} Voice Channels\n"
                                          f"{len(self.bot.users)} Users Cached"),
                         ],
-                        thumbnail=self.bot.user.avatar_url)
+                        thumbnail=self.bot.user.avatar.url)
 
     @commands.command(brief=f"Gives a link to invite #BOT# to your server")
     async def invite(self, ctx: aoi.AoiContext):
