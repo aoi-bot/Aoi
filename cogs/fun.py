@@ -39,19 +39,10 @@ class Fun(commands.Cog):
         self.av_mask_draw.ellipse((430, 384, 430 + 83, 384 + 83), fill=255)
         self._frames = []
         self._reload_frames()
-        self.custom_reactions: Dict[str, CustomReaction] = {}
-        self.roleplay_responses: Dict[str, RoleplayResponse] = {}
 
     @property
     def description(self) -> str:
         return "Fun! :D"
-
-    @commands.command(brief="Lists the active custom commands")
-    async def customcmds(self, ctx: aoi.AoiContext):
-        await ctx.embed(description="\n".join(
-            f"{trigger} - {len(c.responses)} responses - {len(c.images)} images"
-            for trigger, c in self.custom_reactions.items()
-        ))
 
     @commands.command(brief="Makes a discord minesweeper game",
                       flags={"raw": (None, "Show raw text"),
@@ -170,50 +161,3 @@ def setup(bot: aoi.AoiBot) -> None:
 
     bot.add_cog(fun)
 
-    async def get_data(name) -> Tuple[RoleplayResponse, str]:
-        async with aiohttp.ClientSession() as sess:
-            async with sess.get(f"https://api.waifu.pics/sfw/{name}") as resp:
-                return fun.roleplay_responses[name], (await resp.json())["url"]
-
-    async def exec_multi_rp_command(self: Fun, ctx: aoi.AoiContext, user: discord.Member):
-        resp, image = await get_data(ctx.command.name)
-        await ctx.embed(
-            description=random.choice(resp.phrases).format(f"**{ctx.author.display_name}**", f"**{user.display_name}**"),
-            image=image
-        )
-
-    async def exec_single_rp_command(self: Fun, ctx: aoi.AoiContext):
-        resp, image = await get_data(ctx.command.name)
-        await ctx.embed(
-            description=random.choice(resp.phrases).format(f"**{ctx.author.display_name}**"),
-            image=image
-        )
-
-    with open("loaders/roleplay.yaml") as fp:
-        doc = YAML().load(fp)
-        for key in doc:
-            if doc[key]["enabled"] == "no":
-                continue
-
-            fun.roleplay_responses[key] = RoleplayResponse(doc[key]["multi"] == "yes", doc[key]["phrases"])
-
-            cmd = commands.Command(
-                name=key,
-                func=exec_multi_rp_command if fun.roleplay_responses[key] else exec_single_rp_command,
-                brief=f"{key} roleplay command",
-            )
-
-            cmd.cog = fun
-            fun.bot.add_command(cmd)
-            fun.__cog_commands__ += (cmd,)
-
-
-@dataclass
-class CustomReaction:
-    responses: List[str]
-    images: List[str]
-
-@dataclass
-class RoleplayResponse:
-    multi: bool
-    phrases: List[str]
