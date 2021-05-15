@@ -97,7 +97,6 @@ async def permission_check(ctx: aoi.AoiContext):  # noqa: C901
             if cog_name.lower() == tok[3].lower() and int(tok[1]) == user:
                 update_use(tok[2] == "enable", n)
 
-
         if tok[0] == "cc":
             if ctx.channel.id == int(tok[1]) and \
                     command_name.lower() == tok[3].lower():
@@ -121,6 +120,7 @@ async def permission_check(ctx: aoi.AoiContext):  # noqa: C901
 
 
 try:
+    bot.logger.info(f"Starting Aoi Bot with PID {os.getpid()}")
     bot.run(os.getenv("TOKEN"))
 except Exception as error:
     traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)

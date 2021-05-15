@@ -90,7 +90,7 @@ class ReactionRoles(commands.Cog):
                     await payload.member.remove_roles(role)
 
     @commands.has_permissions(manage_roles=True)
-    @commands.command(brief="Add a reaction role message")
+    @commands.command(brief="Add a reaction role message, pass them in emoji - role pairs")
     async def addrero(self, ctx: aoi.AoiContext, message: discord.Message, *, args: str):
         split = ctx.group_list(args.split(), 2)
         role_converter = commands.RoleConverter()

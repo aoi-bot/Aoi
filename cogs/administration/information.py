@@ -87,8 +87,7 @@ class Information(commands.Cog):
                 ("Ansura Profile", f"https://www.ansura.xyz/profile/{member.id}")
             ],
             clr=member.color,
-            thumbnail=member.avatar_url
-        )
+            thumbnail=member.avatar.url        )
 
     @commands.command(brief="Shows info on the current server", aliases=["sinfo"])
     async def serverinfo(self, ctx: aoi.AoiContext):

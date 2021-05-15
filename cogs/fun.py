@@ -153,6 +153,9 @@ class Fun(commands.Cog):
 
     def _reload_frames(self):
         self.bot.logger.info("frames:Loading frames")
+        if not os.path.isdir("assets/frames"):
+            self.bot.logger.info("frames:Creating frames directory")
+            os.mkdir("assets/frames")
         self._frames = [image.split(".")[0] for image in os.listdir("assets/frames/") if image.endswith(".png")]
         self.bot.logger.info(", ".join(self._frames))
         self.bot.logger.info("frames:Loaded frames")

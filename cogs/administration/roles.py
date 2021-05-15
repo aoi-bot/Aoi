@@ -449,12 +449,10 @@ class Roles(commands.Cog):
         aliases=["lsr"]
     )
     async def listselfroles(self, ctx: aoi.AoiContext):
-        if ctx.guild.id not in self.bot.db.self_roles or not self.bot.db.self_roles[ctx.guild.id]:
-            return await ctx.send_error(f"{ctx.guild} has no self-assignable roles")
 
         # remove invalid self-roles
         lost_roles = []
-        for r in self.bot.db.self_roles[ctx.guild.id]:
+        for r in await self.bot.db.get_self_roles(ctx.guild):
             if not ctx.guild.get_role(r):
                 lost_roles.append(r)
         if lost_roles:
@@ -462,9 +460,12 @@ class Roles(commands.Cog):
         for r in lost_roles:
             await self.bot.db.remove_self_role(ctx.guild, r)
 
+        if not await self.bot.db.get_self_roles(ctx.guild):
+            return await ctx.send_error(f"{ctx.guild} has no self-assignable roles")
+
         await ctx.send_info("Self-assignable roles on this server\n" +
                             "\n".join(
-                                f"<@&{i}>" for i in self.bot.db.self_roles[ctx.guild.id]
+                                f"<@&{i}>" for i in await self.bot.db.get_self_roles(ctx.guild)
                             ))
 
     @commands.has_permissions(manage_roles=True)
@@ -490,12 +491,12 @@ class Roles(commands.Cog):
         brief="Adds a self-assignable role to you"
     )
     async def addrole(self, ctx: aoi.AoiContext, *, role: discord.Role):
-        if ctx.guild.id not in self.bot.db.self_roles or not self.bot.db.self_roles[ctx.guild.id]:
+        if not await self.bot.db.get_self_roles(ctx.guild):
             return await ctx.send_error(f"{ctx.guild} has no self-assignable roles")
         self._soft_check_role(ctx, role, "add")
         # remove invalid self-roles
         lost_roles = []
-        for r in self.bot.db.self_roles[ctx.guild.id]:
+        for r in await self.bot.db.get_self_roles(ctx.guild):
             if not ctx.guild.get_role(r):
                 lost_roles.append(r)
         if lost_roles:
@@ -503,7 +504,7 @@ class Roles(commands.Cog):
         for r in lost_roles:
             await self.bot.db.remove_self_role(ctx.guild, r)
 
-        if role.id not in self.bot.db.self_roles[ctx.guild.id]:
+        if role.id not in await self.bot.db.get_self_roles(ctx.guild):
             return await ctx.send_error(f"{role.mention} is not self-assignable")
 
         if role.id in [r.id for r in ctx.author.roles]:
@@ -516,12 +517,12 @@ class Roles(commands.Cog):
         brief="Removes a self-assignable role from you"
     )
     async def removerole(self, ctx: aoi.AoiContext, *, role: discord.Role):
-        if ctx.guild.id not in self.bot.db.self_roles or not self.bot.db.self_roles[ctx.guild.id]:
+        if not await self.bot.db.get_self_roles(ctx.guild):
             return await ctx.send_error(f"{ctx.guild} has no self-assignable roles")
         self._soft_check_role(ctx, role, "remove")
         # remove invalid self-roles
         lost_roles = []
-        for r in self.bot.db.self_roles[ctx.guild.id]:
+        for r in await self.bot.db.get_self_roles(ctx.guild):
             if not ctx.guild.get_role(r):
                 lost_roles.append(r)
         if lost_roles:
@@ -529,7 +530,7 @@ class Roles(commands.Cog):
         for r in lost_roles:
             await self.bot.db.remove_self_role(ctx.guild, r)
 
-        if role.id not in self.bot.db.self_roles[ctx.guild.id]:
+        if role.id not in await self.bot.db.get_self_roles(ctx.guild):
             return await ctx.send_error(f"{role.mention} is not self-assignable")
 
         if role.id not in [r.id for r in ctx.author.roles]:

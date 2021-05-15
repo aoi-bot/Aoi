@@ -6,6 +6,7 @@ from types import coroutine
 from typing import List, Tuple, Union, Any, Callable, Iterable
 
 from PIL.Image import Image
+from discord.embeds import EmptyEmbed
 
 import discord
 from discord.ext import commands
@@ -82,7 +83,7 @@ class AoiContext(commands.Context):
             msg = await self.send(
                 user.mention if ping else None,
                 embed=discord.Embed(
-                    title=title,
+                    title=title or EmptyEmbed,
                     description=f"{_wrap_user(user) if user else ''}{message}",
                     colour=await self.get_color(self.INFO)
                 ))
@@ -101,7 +102,7 @@ class AoiContext(commands.Context):
         msg = await self.send(
             user.mention if ping else None,
             embed=discord.Embed(
-                title=title,
+                title=title or EmptyEmbed,
                 description=f"{_wrap_user(user) if user else ''}{message}",
                 colour=await self.get_color(self.OK)
             ))
@@ -119,7 +120,7 @@ class AoiContext(commands.Context):
         msg = await self.send(
             user.mention if ping else None,
             embed=discord.Embed(
-                title=title,
+                title=title or EmptyEmbed,
                 description=f"{_wrap_user(user) if user else ''}{message}",
                 colour=await self.get_color(self.ERROR)
             ))
@@ -133,7 +134,7 @@ class AoiContext(commands.Context):
         if not user:
             user = self.author
         await message.edit(embed=discord.Embed(
-            title=title,
+            title=title or EmptyEmbed,
             description=f"{_wrap_user(user) if user else ''}{message}",
             colour=await self.get_color(color)
         ))
@@ -155,7 +156,6 @@ class AoiContext(commands.Context):
                     author: str = None,
                     description: str = None,
                     title: str = None,
-                    title_url: str = None,
                     typ: int = INFO,
                     fields: List[Tuple[str, str]] = None,
                     thumbnail: str = None,
@@ -196,10 +196,9 @@ class AoiContext(commands.Context):
         if typ and clr:
             raise ValueError("typ and clr can not be both defined")
         embed = discord.Embed(
-            title=title,
-            description=description,
-            colour=(await self.get_color(typ) if not clr else clr),
-            title_url=title_url
+            title=title or discord.embeds.EmptyEmbed,
+            description=description or discord.embeds.EmptyEmbed,
+            colour=(await self.get_color(typ) if not clr else clr)
         )
         if author:
             embed.set_author(name=author)

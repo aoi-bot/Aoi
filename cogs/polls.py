@@ -20,11 +20,16 @@ class Polls(commands.Cog):
         brief="Starts a poll"
     )
     async def poll(self, ctx: aoi.AoiContext, *, content: str):
+        if content.endswith("--anon"):
+            anon = True
+            content = content[:-6]
+        else:
+            anon = False
         poll = content.split(";;")
         if len(poll) == 1:
             msg = await ctx.send(embed=discord.Embed(
                 title=poll[0]
-            ))
+            ).set_footer(text=f"Poll by {ctx.author}" if not anon else "Anonymous poll"))
             await msg.add_reaction("👍")
             await msg.add_reaction("👎")
         else:
@@ -34,14 +39,10 @@ class Polls(commands.Cog):
             msg = await ctx.send(embed=discord.Embed(
                 title=poll[0],
                 description="\n".join(f"{choices[n]} {poll[n+1]}" for n in range(len(poll) - 1))
-            ))
+            ).set_footer(text=f"Poll by {ctx.author}" if not anon else "Anonymous poll"))
             for i in range(len(poll) - 1):
                 await msg.add_reaction(choices[i])
                 await asyncio.sleep(0.5)
-        try:
-            await ctx.message.delete()
-        except discord.Forbidden:
-            pass
 
     @property
     def description(self) -> str:

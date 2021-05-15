@@ -6,9 +6,10 @@ import logging
 import os
 import random
 import re
+import signal
 import subprocess
 from datetime import datetime, timedelta
-from typing import Dict, Optional, List, Union, TYPE_CHECKING, Awaitable, Any, Callable, Tuple, Protocol
+from typing import Dict, Optional, List, Union, TYPE_CHECKING, Awaitable, Any, Callable, Tuple
 
 import aiohttp.client_exceptions
 import ksoftapi
@@ -44,7 +45,7 @@ class PlaceholderManager:
         return ctx.author.mention if isinstance(ctx, aoi.AoiContext) else ctx.mention
 
     def user_avatar(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
-        return str(ctx.author.avatar_url if isinstance(ctx, aoi.AoiContext) else ctx.avatar_url)
+        return str(ctx.author.avatar.url if isinstance(ctx, aoi.AoiContext) else ctx.avatar.url)
 
     def user_tag(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
         return str(ctx.author if isinstance(ctx, aoi.AoiContext) else ctx)
@@ -73,6 +74,7 @@ class AoiBot(commands.AutoShardedBot):
 
     def __init__(self, *args, **kwargs):
         super(AoiBot, self).__init__(*args, **kwargs)
+        self.shutting_down = False
         self.TRACE = 7
         for logger in [
             "aoi",
@@ -194,6 +196,14 @@ class AoiBot(commands.AutoShardedBot):
         TypeError
             An unexpected keyword argument was received.
         """
+        try:
+            self.loop.remove_signal_handler(signal.SIGTERM)
+            self.loop.remove_signal_handler(signal.SIGINT)
+            self.loop.add_signal_handler(signal.SIGTERM, self.handle_sigterm)
+            self.loop.add_signal_handler(signal.SIGINT, self.handle_sigterm)
+        except NotImplementedError:
+            pass
+
         bot = kwargs.pop('bot', True)
         reconnect = kwargs.pop('reconnect', True)
         self.db = AoiDatabase(self)
@@ -231,7 +241,7 @@ class AoiBot(commands.AutoShardedBot):
         for i in range(0, 6):
             try:
                 self.logger.debug(f"bot:Connecting, try {i + 1}/6")
-                await self.login(*args, bot=bot)
+                await self.login(*args)
                 break
             except aiohttp.client_exceptions.ClientConnectionError as e:
                 self.logger.warning(f"bot:Connection {i + 1}/6 failed")
@@ -315,8 +325,7 @@ class AoiBot(commands.AutoShardedBot):
                 self.set_cog_group(cog_name, grp_name)
 
     def random_thumbnail(self) -> str:
-        return random.choice(self.thumbnails) if self.thumbnails else self.user.avatar_url
-
+        return random.choice(self.thumbnails) if self.thumbnails else self.user.avatar.url
     async def load_thumbnails(self):
         if os.path.exists("loaders/thumbnails.txt"):
             with open("loaders/thumbnails.txt", "r") as fp:
@@ -408,7 +417,7 @@ class AoiBot(commands.AutoShardedBot):
 
         if content.split(" ")[0] in self.aliases[message.guild.id]:
             message.content = " ".join([self.aliases[message.guild.id][content.split(" ")[0]]] +
-                                                      content.split(" ")[1:])
+                                       content.split(" ")[1:])
             return message
         return message
 
@@ -417,3 +426,10 @@ class AoiBot(commands.AutoShardedBot):
             return [(alias, to) for alias, to in self.aliases[ctx.guild.id].items()
                     if to[0].split(" ")[0] == command] or None
         return None
+
+    def handle_sigterm(self):
+        asyncio.get_event_loop().create_task(self._handle_sigterm())
+
+    async def _handle_sigterm(self):
+        await self.db.cache_flush()
+        await self.close()

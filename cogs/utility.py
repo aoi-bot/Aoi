@@ -1,4 +1,3 @@
-import asyncio
 import io
 from datetime import datetime
 from functools import reduce
@@ -11,7 +10,6 @@ from PIL import Image
 from PIL import ImageOps
 
 import aoi
-import discord
 from discord.ext import commands, tasks
 from libs.converters import integer, allowed_strings, dtime
 from libs.expressions import evaluate, get_prime_factors
@@ -23,17 +21,19 @@ class Utility(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
         self.cur_rates = {}
-        self._currency_update.start()
+        # self._currency_update.start()
         self.wx: Optional[wx.WeatherGov] = None
         bot.loop.create_task(self._init())
         self.sat_cache: Dict[str, Tuple[datetime, Any]] = {}
         self.apod_cache: Dict[str, Tuple[str, str, str, str]] = {}
+        self.gmap: Optional[gmaps.GeoLocation] = None
         self.wx = wx.WeatherGov(self.bot.weather_gov)
 
     async def _init(self):
-        self.bot.logger.info("wx:Waiting for bot")
+        self.bot.logger.info("util:Waiting for bot")
         await self.bot.wait_until_ready()
-        self.bot.logger.info("wx:Ready!")
+        self.gmap = self.bot.gmap
+        self.bot.logger.info("util:Ready!")
 
     @property
     def description(self) -> str:
@@ -125,9 +125,8 @@ class Utility(commands.Cog):
     )
     async def radarloop(self, ctx: aoi.AoiContext, location: gmaps.LocationCoordinates):
         res = await self.wx.lookup_grid(location.lat, location.long)
-        radar = res.radar_station[-3:]
         await ctx.embed(
-            image=f"https://radar.weather.gov/ridge/lite/N0R/{radar}_loop.gif"
+            image=f"https://radar.weather.gov/ridge/lite/{res.radar_station}_loop.gif"
         )
 
     @commands.command(
@@ -210,6 +209,24 @@ class Utility(commands.Cog):
     # endregion
 
     # region # Utility
+
+    @commands.command(
+        brief="Get basic geolocation data on an address"
+    )
+    async def geolookup(self, ctx: aoi.AoiContext, *, address):
+        result = (await self.gmap.lookup_address(address))[0]
+        await ctx.embed(
+            title="Geolocation Lookup",
+            fields=[
+                       ("Looked up address", address),
+                       ("Resolved address", result.formatted_address),
+                       ("Location", result.geometry.location)
+                   ] + ([
+                            ("Bounds", f"{result.geometry.northeast}\n"
+                                       f"{result.geometry.southwest}\n")
+                        ] if result.geometry.northeast else []),
+            not_inline=[0, 1, 2]
+        )
 
     @tasks.loop(hours=1)
     async def _currency_update(self):
@@ -330,9 +347,10 @@ class Utility(commands.Cog):
         await ctx.trigger_typing()
         buffer = BytesIO()
         try:
-            sympy.preview(f"\\[{formula.strip('`')}\\]", viewer="BytesIO", outputbuffer=buffer)
-        except RuntimeError:
-            return await ctx.send_error("An error occurred while rendering.")
+            sympy.preview(f"$${formula.strip('`')}$$", viewer="BytesIO", outputbuffer=buffer,
+                          dvioptions=["-T", "tight", "-z", "0", "--truecolor", "-D 150"])
+        except RuntimeError as e:
+            await ctx.send_error("An error occurred while rendering.")
         result = BytesIO()
         buffer.seek(0)
         old = Image.open(buffer)
