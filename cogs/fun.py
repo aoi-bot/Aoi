@@ -2,12 +2,13 @@ import io
 import os
 import random
 from dataclasses import dataclass
-from typing import Optional, Union, List, Dict
+from typing import Optional, Union, List, Dict, Tuple
 
 import PIL.Image
 import PIL.ImageDraw
 import PIL.ImageFont
 import PIL.ImageOps
+import aiohttp
 import ksoftapi
 from PIL import Image, ImageDraw
 from ksoftapi.models import LyricResult
@@ -39,9 +40,7 @@ class Fun(commands.Cog):
         self._frames = []
         self._reload_frames()
         self.custom_reactions: Dict[str, CustomReaction] = {}
-
-        async def _exec(ctx: aoi.AoiContext):
-            await self.exec_customcmd(ctx)
+        self.roleplay_responses: Dict[str, RoleplayResponse] = {}
 
     @property
     def description(self) -> str:
@@ -169,32 +168,43 @@ class Fun(commands.Cog):
 def setup(bot: aoi.AoiBot) -> None:
     fun = Fun(bot)
 
-    async def exec_customcmd(_, ctx: aoi.AoiContext, user: discord.Member):
-        command = ctx.command.name
-        await ctx.embed(
-            title=random.choice(fun.custom_reactions[command].responses)
-                .replace("{user}", ctx.author.display_name)  # noqa
-                .replace("{target}", user.display_name),
-            image=random.choice(fun.custom_reactions[command].images)
-        )
-
     bot.add_cog(fun)
 
-    with open("loaders/custreact.yaml") as fp:
+    async def get_data(name) -> Tuple[RoleplayResponse, str]:
+        async with aiohttp.ClientSession() as sess:
+            async with sess.get(f"https://api.waifu.pics/sfw/{name}") as resp:
+                return fun.roleplay_responses[name], (await resp.json())["url"]
+
+    async def exec_multi_rp_command(self: Fun, ctx: aoi.AoiContext, user: discord.Member):
+        resp, image = await get_data(ctx.command.name)
+        await ctx.embed(
+            description=random.choice(resp.phrases).format(f"**{ctx.author.display_name}**", f"**{user.display_name}**"),
+            image=image
+        )
+
+    async def exec_single_rp_command(self: Fun, ctx: aoi.AoiContext):
+        resp, image = await get_data(ctx.command.name)
+        await ctx.embed(
+            description=random.choice(resp.phrases).format(f"**{ctx.author.display_name}**"),
+            image=image
+        )
+
+    with open("loaders/roleplay.yaml") as fp:
         doc = YAML().load(fp)
         for key in doc:
-            fun.custom_reactions[key] = CustomReaction(doc[key]["responses"], doc[key]["images"])
+            if doc[key]["enabled"] == "no":
+                continue
+
+            fun.roleplay_responses[key] = RoleplayResponse(doc[key]["multi"] == "yes", doc[key]["phrases"])
 
             cmd = commands.Command(
                 name=key,
-                func=exec_customcmd,
-                brief=f"{key} custom command",
+                func=exec_multi_rp_command if fun.roleplay_responses[key] else exec_single_rp_command,
+                brief=f"{key} roleplay command",
             )
 
             cmd.cog = fun
-
             fun.bot.add_command(cmd)
-
             fun.__cog_commands__ += (cmd,)
 
 
@@ -202,3 +212,8 @@ def setup(bot: aoi.AoiBot) -> None:
 class CustomReaction:
     responses: List[str]
     images: List[str]
+
+@dataclass
+class RoleplayResponse:
+    multi: bool
+    phrases: List[str]

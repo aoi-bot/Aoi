@@ -1,0 +1,143 @@
+---
+waifu:
+  multi: no
+  enabled: no
+  phrases: [ ]
+neko:
+  multi: no
+  enabled: no
+  phrases: [ ]
+shinobu:
+  multi: no
+  enabled: no
+  phrases: [ ]
+megumin:
+  multi: no
+  enabled: no
+  phrases: [ ]
+awoo:
+  multi: no
+  enabled: no
+  phrases: [ ]
+bully:
+  multi: yes
+  enabled: yes
+  phrases:
+    - "{0} is bullying {1}. What did {1} do?"
+    - "{1} is getting bullied by {0}. How rude"
+cuddle:
+  multi: yes
+  enabled: yes
+  phrases:
+    - "{0} is cuddling {1}"
+cry:
+  multi: no
+  enabled: yes
+  phrases:
+    - "{0} is crying :("
+hug:
+  multi: yes
+  enabled: yes
+  phrases:
+    - "{1} got a hug from {0}"
+kiss:
+  multi: yes
+  enabled: yes
+  phrases:
+    - "{0} kissed {1}"
+lick:
+  multi: yes
+  enabled: yes
+  phrases:
+    - "{0} licked {1}"
+pat:
+  multi: yes
+  enabled: yes
+  phrases:
+    - "{1} got a pat from {0}"
+smug:
+  multi: no
+  enabled: yes
+  phrases:
+    - "{0} seems a little smug"
+bonk:
+  multi: yes
+  enabled: yes
+  phrases:
+    - "{0} bonked {1}"
+yeet:
+  multi: yes
+  enabled: yes
+  phrases:
+    - "{0} threw {1} across the room"
+    - "{1} got yeeted by {0}"
+blush:
+  multi: no
+  enabled: yes
+  phrases:
+    - "{0} is blushing.. awww"
+smile:
+  multi: no
+  enabled: yes
+  phrases:
+    - "{0} is smiling :D"
+wave:
+  multi: no
+  enabled: yes
+  phrases:
+    - "{0} waves"
+highfive:
+  multi: yes
+  enabled: yes
+  phrases:
+    - "{0} high-fived {1}"
+handhold:
+  multi: yes
+  enabled: yes
+  phrases:
+    - "{0} is holding {1}'s hand"
+nom:
+  multi: yes
+  enabled: yes
+  phrases:
+    - "{0} nommed {1}"
+bite:
+  multi: yes
+  enabled: yes
+  phrases:
+    - "{0} bit {1}"
+slap:
+  multi: yes
+  enabled: yes
+  phrases:
+    - "{0} slapped {1}. Ow"
+kill:
+  multi: yes
+  enabled: yes
+  phrases:
+    - "{0} killed {1}"
+happy:
+  multi: no
+  enabled: yes
+  phrases:
+    - "{0} seems happy :)"
+wink:
+  multi: yes
+  enabled: yes
+  phrases:
+    - "{0} winked at {1}. ;)"
+poke:
+  multi: yes
+  enabled: yes
+  phrases:
+    - "{0} poked {1}"
+dance:
+  multi: no
+  enabled: yes
+  phrases:
+    - "Look at {0} dance"
+cringe:
+  multi: no
+  enabled: yes
+  phrases:
+    - "{0} cringed. Must have seen some stupid stuff"

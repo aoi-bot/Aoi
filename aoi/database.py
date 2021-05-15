@@ -171,6 +171,10 @@ CREATE TABLE IF NOT EXISTS "alias" (
   "from" TEXT NOT NULL,
   "to" TEXT NOT NULL
 );;
+CREATE TABLE IF NOT EXISTS roleplay (
+  "user" INTEGER NOT NULL,
+  "times" TEXT NOT NULL default "{}"
+);;
 """
 
 MIGRATIONS = {
