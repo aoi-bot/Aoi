@@ -1,31 +1,13 @@
-import io
-import os
 import random
 from dataclasses import dataclass
-from typing import Optional, Union, List, Dict, Tuple
+from typing import List, Dict, Tuple
 
-import PIL.Image
-import PIL.ImageDraw
-import PIL.ImageFont
-import PIL.ImageOps
 import aiohttp
-import ksoftapi
-from PIL import Image, ImageDraw
-from ksoftapi.models import LyricResult
 from ruamel.yaml import YAML
 
 import aoi
 import discord
 from discord.ext import commands
-from games import TicTacToe
-from games.rps import RPS
-from libs.minesweeper import SpoilerMinesweeper, MinesweeperError
-from libs.misc import arg_or_0_index
-
-
-def _font(size: int) -> PIL.ImageFont.ImageFont:
-    return PIL.ImageFont.truetype(
-        "assets/merged.ttf", size=size)
 
 
 class Roleplay(commands.Cog):
@@ -52,7 +34,8 @@ def setup(bot: aoi.AoiBot) -> None:
     async def exec_multi_rp_command(self: Roleplay, ctx: aoi.AoiContext, user: discord.Member):
         resp, image = await get_data(ctx.command.name)
         await ctx.embed(
-            description=random.choice(resp.phrases).format(f"**{ctx.author.display_name}**", f"**{user.display_name}**"),
+            description=random.choice(resp.phrases).format(f"**{ctx.author.display_name}**",
+                                                           f"**{user.display_name}**"),
             image=image
         )
 
@@ -73,8 +56,8 @@ def setup(bot: aoi.AoiBot) -> None:
 
             cmd = commands.Command(
                 name=key,
-                func=exec_multi_rp_command if fun.roleplay_responses[key] else exec_single_rp_command,
-                brief=f"{key} roleplay command",
+                func=exec_multi_rp_command if fun.roleplay_responses[key].multi else exec_single_rp_command,
+                brief=f"{key} roleplay command"
             )
 
             cmd.cog = fun
@@ -86,6 +69,7 @@ def setup(bot: aoi.AoiBot) -> None:
 class CustomReaction:
     responses: List[str]
     images: List[str]
+
 
 @dataclass
 class RoleplayResponse:
