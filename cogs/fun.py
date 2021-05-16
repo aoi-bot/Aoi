@@ -155,6 +155,15 @@ class Fun(commands.Cog):
     async def tictactoe(self, ctx: aoi.AoiContext):
         await TicTacToe(ctx).play()
 
+    @commands.command(brief="Sends a waifu pic")
+    async def waifu(self, ctx: aoi.AoiContext):
+        async with aiohttp.ClientSession() as sess:
+            async with sess.get("https://api.waifu.pics/sfw/waifu") as resp:
+                await ctx.embed(
+                    title="A waifu",
+                    image=(await resp.json())["url"]
+                )
+
 
 def setup(bot: aoi.AoiBot) -> None:
     fun = Fun(bot)
