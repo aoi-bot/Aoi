@@ -67,7 +67,7 @@ bonk:
     - "{0} bonked {1}"
 yeet:
   multi: yes
-  enabled: yes
+  enabled: no
   phrases:
     - "{0} threw {1} across the room"
     - "{1} got yeeted by {0}"
@@ -97,10 +97,10 @@ handhold:
   phrases:
     - "{0} is holding {1}'s hand"
 nom:
-  multi: yes
+  multi: no
   enabled: yes
   phrases:
-    - "{0} nommed {1}"
+    - "{0} is eating tasty food"
 bite:
   multi: yes
   enabled: yes
