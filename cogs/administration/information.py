@@ -61,6 +61,15 @@ class Information(commands.Cog):
         if isinstance(obj, (discord.Emoji, discord.PartialEmoji)):
             return await self.emojiinfo(ctx, obj)
 
+    @commands.command(brief="Shows a user's avatar", aliases=["av", "pfp"])
+    async def avatar(self, ctx: aoi.AoiContext, member: Optional[discord.Member] = None):
+        member = member or ctx.author
+        await ctx.embed(
+            image=member.avatar.url,
+            title=f"{member}'s avatar",
+            description=f"{member.avatar.url}"
+        )
+
     @commands.command(brief="Shows info on a user", aliases=["uinfo"])
     async def userinfo(self, ctx: aoi.AoiContext, member: discord.Member = None):
         if not member:
