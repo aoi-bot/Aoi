@@ -174,9 +174,5 @@ async def generate(bot: AoiBot):
             commands_json[cog.qualified_name]["commands"][command.name] = card
         panes += pane.replace("#CONTENT#", cog_html)
 
-    with open("website/commands.html", "w") as fp, open("gen_template.html", "r") as template:
-        fp.write(template.read().replace("#TABS", tab_list).replace("#PANES", panes)
-                 .replace("#BOT#", "Aoi").replace("#TAB2", tab_list_2))
-
     with open("complexity/context/commands.json", "w") as fp:
         json.dump(commands_json, fp, indent=4)
