@@ -1,0 +1,11 @@
+@font-face {
+    font-family: aoi;
+    font-face-name: aoi;
+    src: url("../assets/merged.ttf")
+}
+
+.aoi {
+    font-family: aoi;
+    font-weight: bolder;
+    font-size: larger;
+}
