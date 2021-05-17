@@ -1,0 +1,68 @@
+$primary: #6d30b8;
+$secondary: #52248c;
+$aoi: #1e0d2c;
+$body-bg: $aoi;
+$body-color: #fff;
+
+$custom-colors: (
+        "discord": #7289DA,
+        "github": #222222,
+        "gitkraken": #155815
+);
+$custom-borders: (
+        "discord": #7289DA,
+        "github": #000,
+        "gitkraken": #155815
+);
+
+
+@import "../bootstrap/scss/bootstrap";
+
+$theme-colors: map-merge($theme-colors, $custom-colors);
+
+@each $color, $value in $custom-colors {
+  .#{$color}-bg {
+    background-color: $value;
+    border-color: map-get($custom-borders, $color),;
+  }
+  .#{$color}-bg:hover {
+    background-color: darken($value, 10);
+    border-color: darken(map-get($custom-borders, $color), 10);
+  }
+}
+
+[data-bs-toggle=pill]:hover {
+  background-color: darken($primary, 30);
+}
+
+.bg-purple {
+  background-color: $aoi;
+}
+
+.argument {
+  @extend .badge;
+  text-decoration: none;
+  text-underline-style: none;
+}
+.default {
+  background-color: #0a3622;
+  color: white;
+}
+.required {
+  background-color: #1aa179;
+  color: black;
+}
+
+.alert-xdark {
+  @extend .alert-dark;
+  background-color: #222;
+  color: white;
+}
+
+[code] {
+  @extend code;
+}
+
+pre {
+  @extend code;
+}

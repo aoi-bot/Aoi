@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Aoi Bot{% endblock %}
+{% block content %}
+    <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center row">
+        <div class="col-md-5 p-lg-5 mx-auto my-5">
+            <h1 class="display-4 fw-normal">
+                Aoi
+            </h1>
+            <p class="lead fw-normal">A multipurpose discord bot based on server management and community.</p>
+            <div class="btn-group" role="group" aria-label="Invite button group">
+                <a class="btn btn-primary"
+                   href="https://discord.com/api/oauth2/authorize?client_id=791265892154867724&permissions=268659776&scope=bot%20applications.commands">
+                    Invite <br/>(Slash Commands)
+                </a>
+                <a class="btn btn-secondary"
+                   href="https://discord.com/api/oauth2/authorize?client_id=791265892154867724&permissions=268659776&scope=bot%20applications.commands">
+                    Invite <br/>(No Slash Commands)
+                </a>
+            </div>
+        </div>
+        <div class="col-md-3 p-lg-3 mx-auto my-5 d-none d-md-block">
+            <div class="position-relative h-100">
+                <img src="assets/aoi.jpeg" class="rounded-circle" alt="Aoi Logo"
+                     role="img" id="aoi_img"/>
+            </div>
+        </div>
+        <div class="product-device shadow-sm d-none d-md-block"></div>
+        <div class="product-device product-device-2 shadow-sm d-none d-md-block"></div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-6 text-center"><h1 id="users-heading"></h1></div>
+            <div class="col-6 text-center"><h1 id="servers-heading"></h1></div>
+        </div>
+    </div>
+
+    <div class="d-md-flex flex-md-equal w-100 my-md-3 ps-md-3">
+        <div class="bg-dark me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
+            <div class="my-3 py-3">
+                <h2 class="display-5">What even <i>is</i> Aoi?</h2>
+                <p class="lead">Aoi is a brand-new bot, customizable enough to fit in any server.
+                    Look up information on a user, role, or server. Do math, render LaTeX. Make color palettes randomly
+                    or from an image, have server money to get roles, use global money to buy a fancy background for
+                    your profile card, and more coming soon!
+                    Make use of the fine-grained permissions to control where/how Aoi can be used. Manage your server,
+                    give everyone a role. Color roles according to a gradient (looking at you, aesthetic server
+                    owners). <br/>
+                    <a class="btn-primary btn my-5" href="commands.html">View the command list</a>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="mx-5">
+        <div class="row">
+            <div class="col-md-4 col-12">
+                <div class="card bg-dark">
+                    <img src="assets/samples/xp.png" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h4 class="card-title">Chat XP</h4>
+                        <p class="card-text">Level up with chat XP and get to the top of the leaderboard! </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-12">
+                <div class="card bg-dark">
+                    <img src="assets/samples/wallet.png" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h4 class="card-title">Currency</h4>
+                        <p class="card-text">Customizable currency generation for server shops, and global currency for
+                            customization.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-12">
+                <div class="card bg-dark">
+                    <img src="assets/samples/profile.png" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h4 class="card-title">Global Profile</h4>
+                        <p class="card-text">Customize your global profile</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script type="application/javascript">
+    let url = "https://api.aoibot.xyz"
+    fetch(url)
+    .then(res => res.json())
+    .then((out) => {
+        document.getElementById("users-heading").innerText = `${out["members"]} Users` ;
+        document.getElementById("servers-heading").innerText = `${out["guilds"]} Servers` ;
+    })
+</script>
+
+{% endblock %}
+

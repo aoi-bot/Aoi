@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import inspect
 import json
-from typing import TYPE_CHECKING, Tuple, Callable
+from typing import TYPE_CHECKING, Tuple, Callable, Dict, Union
 
 from discord.ext import commands
 
@@ -154,23 +154,29 @@ async def generate(bot: AoiBot):
     command: commands.Command
     tab_list = ""
     tab_list_2 = ""
-    json_list = {}
+    commands_json: Dict[str, Dict[str, Union[str, Dict[str, str]]]] = {}
     panes = ""
 
     for cog in (bot.get_cog(name) for name in sorted(bot.cogs)):
         if cog.qualified_name in bot.cog_groups["Hidden"]:
             continue
+        commands_json[cog.qualified_name] = {
+            "description": cog.description,
+            "commands": {}
+        }
         tab, pane, tab2 = get_tab_pair(cog)
         tab_list += tab
         tab_list_2 += tab2
         cog_html = ""
         for command in cog.get_commands():
-            cog_html += await gen_card(command, bot)
+            card = await gen_card(command, bot)
+            cog_html += card
+            commands_json[cog.qualified_name]["commands"][command.name] = card
         panes += pane.replace("#CONTENT#", cog_html)
 
     with open("website/commands.html", "w") as fp, open("gen_template.html", "r") as template:
         fp.write(template.read().replace("#TABS", tab_list).replace("#PANES", panes)
                  .replace("#BOT#", "Aoi").replace("#TAB2", tab_list_2))
 
-    with open("commands.json", "w") as fp:
-        json.dump(json_list, fp, indent=2)
+    with open("complexity/context/commands.json", "w") as fp:
+        json.dump(commands_json, fp, indent=4)

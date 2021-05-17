@@ -102,6 +102,7 @@ class Roles(commands.Cog):
     @commands.command(brief="Moves roles to a position",
                       aliases=["mr"])
     async def moverole(self, ctx: aoi.AoiContext, position: int, roles: Greedy[discord.Role]):
+        raise commands.DisabledCommand()
         if not roles:
             raise commands.BadArgument("I need to know what role(s) to move!")
         roles: List[discord.Role] = list(roles)
