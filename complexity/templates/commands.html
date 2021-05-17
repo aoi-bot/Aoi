@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Aoi Bot{% endblock %}
+{% block content %}
+<div class="position-relative overflow-hidden p-3 p-md-1 m-md-1 text-center">
+    <div class="col-md-5 p-lg-1 mx-auto">
+        <h1 class="display-4 fw-normal">Aoi Command List</h1>
+    </div>
+</div>
+<div class="px-5">
+    <div class="d-flex align-items-start">
+        <div class="nav flex-column nav-pills me-3 overflow-auto vh-50 navbar-expand-lg d-md-flex d-none"
+             id="v-pills-tab" role="navigation" aria-orientation="vertical">
+            {% for cog in commands %}
+            <button class="nav-link my-1 {active} text-white"
+                    data-bs-toggle="pill" data-bs-target="#v-pills-{{cog}}"
+                    type="button" role="tab" aria-controls="v-pills-{{cog}}" aria-selected="true">
+                {{cog}}
+            </button>
+            {% endfor %}
+        </div>
+        <div class="tab-content flex-fill overflow-auto vh-50 sidenav sn-bg-4 fixed" id="v-pills-tabContent">
+            {% for cog in commands %}
+            <div class="tab-pane fade my-3 mx-4 {show} {active} text-white" id="v-pills-{{cog}}"
+                 role="tabpanel" aria-labelledby="v-pills-{{cog}}-tab">
+                <h2 class="mx-2 my-2">{{cog}}</h2>
+                <h4 class="mx-2 my-2">{{commands[cog].description}}</h4>
+                {% for command in commands[cog].commands %}
+                {{ commands[cog].commands[command] }}
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
