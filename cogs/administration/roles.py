@@ -257,10 +257,10 @@ class Roles(commands.Cog):
         aliases=["aarole"]
     )
     async def addautorole(self, ctx: aoi.AoiContext, role: discord.Role):
-        if ctx.guild.id in self.bot.db.auto_roles and len(self.bot.db.auto_roles[ctx.guild.id]) >= self.bot.config[
-            "max_auto_role"]:  # noqa
-            await ctx.send_error(
-                f"You are only allowed to have {self.bot.config['max_auto_role']} autoroles per server. "  # noqa
+        if (ctx.guild.id in self.bot.db.auto_roles) and \
+                len(self.bot.db.auto_roles[ctx.guild.id]) >= self.bot.config.get("admin.max_autorole"):  # noqa
+            return await ctx.send_error(
+                f"You are only allowed to have {self.bot.config.get('admin.max_autorole')} autoroles per server. "  # noqa
                 f"You can list the current autoroles with `{ctx.prefix}larole` and delete one with "
                 f"`{ctx.prefix}darole`")
         await self.bot.db.add_auto_role(ctx.guild, role)
@@ -345,11 +345,11 @@ class Roles(commands.Cog):
                                 f"{'W' if r.permissions.manage_webhooks or r.permissions.administrator else '·'}"
                                 f"{'I' if r.permissions.view_guild_insights or r.permissions.administrator else '·'}"
                                 f"{'R' if r.permissions.manage_roles or r.permissions.administrator else '·'}│"
-                                
+
                                 f"{'n' if r.permissions.change_nickname or r.permissions.administrator else '·'}"
                                 f"{'i' if r.permissions.create_instant_invite or r.permissions.administrator else '·'}"
                                 f"{'r' if r.permissions.add_reactions or r.permissions.administrator else '·'}"
-                                
+
                                 f"{'#' if r.permissions.external_emojis or r.permissions.administrator else '·'}│"
                                 f"{'F' if r.permissions.attach_files or r.permissions.administrator else '·'}"
                                 f"{'L' if r.permissions.embed_links or r.permissions.administrator else '·'}"
@@ -357,12 +357,12 @@ class Roles(commands.Cog):
                                 f"{'r' if r.permissions.read_messages or r.permissions.administrator else '·'}"
                                 f"{'$' if r.permissions.send_messages or r.permissions.administrator else '·'}"
                                 f"{'T' if r.permissions.send_tts_messages or r.permissions.administrator else '·'}│"
-                                
+
                                 f"{'L' if r.permissions.view_audit_log or r.permissions.administrator else '·'}"
                                 f"{'K' if r.permissions.kick_members or r.permissions.administrator else '·'}"
                                 f"{'!' if r.permissions.manage_messages or r.permissions.administrator else '·'}"
                                 f"{'B' if r.permissions.ban_members or r.permissions.administrator else '·'}│"
-                                
+
                                 f"{'P' if r.permissions.priority_speaker or r.permissions.administrator else '·'}"
                                 f"{'s' if r.permissions.stream or r.permissions.administrator else '·'}"
                                 f"{'S' if r.permissions.speak or r.permissions.administrator else '·'}"
@@ -371,7 +371,7 @@ class Roles(commands.Cog):
                                 f"{'D' if r.permissions.deafen_members or r.permissions.administrator else '·'}"
                                 f"{'X' if r.permissions.mute_members or r.permissions.administrator else '·'}"
                                 f"{'←' if r.permissions.move_members or r.permissions.administrator else '·'}│"
-                                
+
                                 f"{'A' if r.permissions.administrator else '·'} "
                                 f"{discord.utils.escape_markdown(r.name)}"
                                 for r in ctx.guild.roles[::-1]], 20, "Role list",

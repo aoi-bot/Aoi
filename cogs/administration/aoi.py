@@ -1,15 +1,15 @@
 import os
+import subprocess
 from datetime import datetime
 from typing import List, Dict
 
 import aiohttp
 import aiosqlite
 import psutil
-import subprocess
+import redis
 
 import aoi
 import discord
-import redis
 from discord.ext import commands, tasks
 from libs.conversions import dhm_notation, hms_notation, maybe_pluralize, sql_trim
 
@@ -30,6 +30,10 @@ class Bot(commands.Cog):
         self.shard_statuses: Dict[int, bool] = {}
         self.shard_server_counts: Dict[int, int] = {}
         self.redis = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+
+    @property
+    def _config(self):
+        return self.bot.config
 
     @property
     def description(self):
@@ -265,7 +269,7 @@ class Bot(commands.Cog):
         self.bot.restart_response_channel = ctx.channel.id
         await self.bot.db.cache_flush()
         await ctx.send_ok("Attempting to restart. See you on the other side!")
-        await self.bot.logout()
+        await self.bot.close()
 
     @commands.is_owner()
     @commands.command(brief="Reload a shard - **Might have strange side effects**")
@@ -281,7 +285,7 @@ class Bot(commands.Cog):
     async def placeholders(self, ctx: aoi.AoiContext):
         await ctx.send_info(self.bot.placeholders.replace(
             ctx,
-            "\n" + 
+            "\n" +
             "\n".join(f"`&\u200b{p};` - &{p};" for p in self.bot.placeholders.supported)
         ))
 
@@ -316,6 +320,59 @@ class Bot(commands.Cog):
                                  f"statement, it may have been partially executed.\n```{e}```")
         finally:
             await self.bot.db.conn.commit()
+
+    @commands.is_owner()
+    @commands.command(brief="View bot-wide configs")
+    async def botconfig(self, ctx: aoi.AoiContext, key: str = None, value: str = None):
+        if not key:
+            return await ctx.embed(
+                title="Bot config categories",
+                description=(
+                        f"Do `{ctx.clean_prefix}botconfig category` to view the configs for a category\n" +
+                        "\n".join(f"⋄ {cat}" for cat in self._config.yaml)
+                )
+            )
+        if "." not in key:
+            key = key.lower()
+            try:
+                return await ctx.embed(
+                    title=f"Bot configs for {key}",
+                    description=(
+                            f"Do `{ctx.clean_prefix}botconfig category config_name config_value` to set a bot config\n" +
+                            "\n".join(f"⋄ **{key}.{k}**: {v}" for k, v in self._config.all_keys_in(key))
+                    )
+                )
+            except ValueError:
+                return await ctx.send_error(f"**{key}** is an invalid category. Do `{ctx.clean_prefix}botconfig` to "
+                                            f"view the valid categories.")
+        if not value:
+            key = key.lower()
+            try:
+                return await ctx.send_info(f"**{key}** is set to {self._config.get(key)}")
+            except ValueError:
+                if key.split(".")[0] not in self._config.yaml:
+                    return await ctx.send_error(f"**{key}** is an invalid category. Do `{ctx.clean_prefix}botconfig` to "
+                                                f"view the valid categories.")
+                else:
+                    return await ctx.send_error(f"**{key}** is an invalid key. Do `{ctx.clean_prefix}botconfig "
+                                                f"{key.split('.')[0]}` to view valid keys in that category")
+        key = key.lower()
+        try:
+            previous = self._config.get(key)
+        except ValueError:
+            if key.split(".")[0] not in self._config.yaml:
+                return await ctx.send_error(f"**{key}** is an invalid category. Do `{ctx.clean_prefix}botconfig` to "
+                                            f"view the valid categories.")
+            else:
+                return await ctx.send_error(f"**{key}** is an invalid key. Do `{ctx.clean_prefix}botconfig "
+                                            f"{key.split('.')[0]}` to view valid keys in that category")
+        try:
+            self._config.set(key, value)
+            return await ctx.send_info(f"**{key}** was changed to `{self._config.get(key)}`"
+                                       f"from `{previous}`")
+        except ValueError:
+            return await ctx.send_error(f"An error was raised setting the key")
+
 
 
 def setup(bot: aoi.AoiBot) -> None:

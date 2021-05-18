@@ -22,6 +22,7 @@ import discord
 from discord.ext import commands, tasks
 from wrappers import gmaps as gmaps, imgur
 from .cmds_gen import generate
+from .config import ConfigHandler
 from .database import AoiDatabase
 
 if TYPE_CHECKING:
@@ -86,7 +87,7 @@ class AoiBot(commands.AutoShardedBot):
             logging.getLogger(logger).setLevel(logging.DEBUG if logger == "aoi" else logging.INFO)
             logging.getLogger(logger).addHandler(aoi.LoggingHandler())
         self.logger = logging.getLogger("aoi")
-        self.config = {}
+        self.config = ConfigHandler()
         self.db: Optional[AoiDatabase] = None
         self.prefixes: Dict[int, str] = {}
         self.banned_tags: List[str] = []
@@ -156,9 +157,6 @@ class AoiBot(commands.AutoShardedBot):
     @tasks.loop(minutes=20)
     async def status_loop(self):
         await self.change_presence(activity=discord.Game(f",help | {len(self.guilds)} servers"))
-
-    def load_configs(self):
-        self.config["max_auto_role"] = 10
 
     def create_task(self,
                     ctx: commands.Context,
@@ -232,8 +230,6 @@ class AoiBot(commands.AutoShardedBot):
                 self.aliases[row[0]][row[1]] = row[2]
 
         self.logger.info("Loaded alias table")
-
-        self.load_configs()
 
         if kwargs:
             raise TypeError("unexpected keyword argument(s) %s" % list(kwargs.keys()))
