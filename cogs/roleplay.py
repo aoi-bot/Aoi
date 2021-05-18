@@ -20,6 +20,11 @@ class Roleplay(commands.Cog):
     def description(self) -> str:
         return "Roleplay commands"
 
+    @commands.command(brief="[Salad](https://github.com/aoi-bot/Aoi/issues/39)")
+    async def salad(self, ctx: aoi.AoiContext):
+        await ctx.embed(title=f"{ctx.author.display_name} wants salad",
+                        image="https://user-images.githubusercontent.com/78463713/106702249-a3653a80-65ad-11eb-8d11-8597aef608e3.png")
+
 
 def setup(bot: aoi.AoiBot) -> None:
     fun = Roleplay(bot)

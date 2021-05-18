@@ -45,6 +45,7 @@
 
 
 
+
     </style>
 
     <!-- Custom styles for this page -->
@@ -53,7 +54,12 @@
 <body class="bg-purple">
 
 <header class="site-header sticky-top py-1">
-    <nav class="container d-flex flex-column flex-md-row justify-content-between">
+    <nav class="container d-md-flex flex-column flex-md-row justify-content-between">
+        <button class="btn mx-2 d-md-none d-inline-block"
+                data-bs-toggle="collapse" data-bs-target="#menu" type="button" onclick="window.scrollTo(0,0)">
+            <span class="material-icons">list</span>
+        </button>
+        <span class="d-md-none">{% block header %}{% endblock %}</span>
         <a class="py-2 d-none d-md-inline-block" href="/">Home</a>
         <a class="py-2 d-none d-md-inline-block" href="/commands">Commands</a>
         <a class="py-2 d-none d-md-inline-block" href="/guides">Guides</a>
@@ -66,9 +72,7 @@
 </header>
 <main>
     <div class="d-block d-md-none mx-auto my-auto vw-100">
-        <button class="btn btn-outline-primary mx-2" data-bs-toggle="collapse" data-bs-target="#menu" type="button">
-            <span class="material-icons">list</span>
-        </button>
+
         <div class="collapse" id="menu">
             <a class="py-2 d-block text-center btn-primary my-2 mx-3 no-deco" href="/">Home</a>
             <a class="py-2 d-block text-center btn-primary my-2 mx-3 no-deco" href="/commands">Commands</a>

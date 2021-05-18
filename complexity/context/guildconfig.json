@@ -1,0 +1,56 @@
+[
+  {
+    "name": "okcolor",
+    "description": "The color embeds have when the command had an OK response",
+    "type": "<a href=\"#color\" data-bs-toggle=\"tooltip\" title=\"See bottom of table\">Color</a>",
+    "default": "00aa00"
+  },
+  {
+    "name": "infocolor",
+    "description": "The color embeds have when the command had a generic response",
+    "type": "<a href=\"#color\" data-bs-toggle=\"tooltip\" title=\"See bottom of table\">Color</a>",
+    "default": "0000aa"
+  },
+  {
+    "name": "errorcolor",
+    "description": "The color embeds have when the command had an error",
+    "type": "<a href=\"#color\" data-bs-toggle=\"tooltip\" title=\"See bottom of table\">Color</a>",
+    "default": "aa0000"
+  },
+  {
+    "name": "prefix",
+    "description": "The prefix for the server",
+    "type": "text",
+    "default": ","
+  },
+  {
+    "name": "currencygain",
+    "description": "The amount of server currency a member gains per message. Note that a user can only gain currency every 3 minutes.",
+    "type": "number",
+    "default": "0"
+  },
+  {
+    "name": "currencymin",
+    "description": "The minimum possible amount of currency that gets generated in a channel that has it enabled.",
+    "type": "number",
+    "default": "8"
+  },
+  {
+    "name": "currencymax",
+    "description": "The maximum possible amount of currency that gets generated in a channel that has it enabled.",
+    "type": "number",
+    "default": "10"
+  },
+  {
+    "name": "currencychance",
+    "description": "The chance that a message will generate currency on a channel that has it enabled.",
+    "type": "number (%)",
+    "default": "4"
+  },
+  {
+    "name": "embeds",
+    "description": "Whether Aoi will use embeds in command responses. <div class=\"alert alert-xdark\"> Due to certain commands needing images and better organization, some commands will always use embeds.</div>",
+    "type": "<code>on</code>/<code>off</code>",
+    "default": "<code>on</code>"
+  }
+]
