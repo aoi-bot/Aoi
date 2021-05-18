@@ -1,288 +1,260 @@
 {% extends "base.html" %}
-{% block title %}Aoi Bot{% endblock %}
+{% block title %}Aoi Bot - Guide{% endblock %}
+{% block header %}Guide{% endblock %}
 {% block content %}
 <div class="container">
-<div class="bd-toc py-2" id="toc">
-    <h2>Table of Contents</h2>
-</div>
+    <div class="bd-toc py-2" id="toc">
+        <h2>Table of Contents</h2>
+    </div>
 
-<div id="help">
-    <h2>Help System</h2>
-    Aoi's help system makes it easy to find the command you're looking for without leaving Discord. It consists of 3
-    basic commands:<br>
-    <ul>
-        <li>
-            <div><code>,modules</code> - this command lists Aoi's modules<br></div>
-        </li>
-        <li>
-            <div><code>,commands module_name</code> - this command shows you the commands in a specified module
-            </div>
-            <div class="alert-xdark alert">
-                By default, this command only shows you the commands you can run in the current channel. To change
-                this,
-                you can use <code>,cmds module_name --all</code>
-            </div>
-        </li>
-        <li>
-            <div><code>,help command_name</code> - this command gives you help for a specific command<br></div>
-        </li>
-    </ul>
-    Some commands have aliases, or another way to invoke them. <code>,help</code> can look up commands by their
-    alias, too. For example, <code>,help</code>'s alias is <code>,h</code>, so the two can be used interchangeably.
-</div>
-
-<div id="configs">
-    <h2>Configuration</h2>
-    <p>
-        Most of Aoi can be configured in the <code>,config</code> command. The settings you set there can be viewed
-        with
-        <code>,configs</code>. <code>,config</code> is used <code>,config setting value</code>.
-    </p>
-    <table class="table table-hover">
-        <thead>
-        <tr>
-            <th scope="col">Setting</th>
-            <th scope="col">Explanation</th>
-            <th scope="col">Type</th>
-            <th scope="col">Default</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <th scope="row" code>okcolor</th>
-            <td>The color embeds have when the command had an OK response</td>
-            <td><a href="#color" data-bs-toggle="tooltip" title="See bottom of table">Color</a></td>
-            <td code>00aa00</td>
-        </tr>
-        <tr>
-            <th scope="row" code>errorcolor</th>
-            <td>The color embeds have when the command an error</td>
-            <td><a href="#color" data-bs-toggle="tooltip" title="See bottom of table">Color</a></td>
-            <td code>aa0000</td>
-        </tr>
-        <tr>
-            <th scope="row" code>infocolor</th>
-            <td>The color embeds have when the command has a generic response</td>
-            <td><a href="#color" data-bs-toggle="tooltip" title="See bottom of table">Color</a></td>
-            <td code>0000aa</td>
-        </tr>
-        <tr>
-            <th scope="row" code>prefix</th>
-            <td>Aoi's prefix for the server</td>
-            <td>text</td>
-            <td code>,</td>
-        </tr>
-        <tr>
-            <th scope="row" code>currencygain</th>
-            <td>The amount of server currency a member gains per message. Note that a user can only gain
-                currency every 3 minutes.
-            </td>
-            <td>Number</td>
-            <td code>0</td>
-        </tr>
-        <tr>
-            <th scope="row" code>currencymin</th>
-            <td>The minimum possible amount of currency that gets generated in a channel that has it enabled</td>
-            <td>Number</td>
-            <td code>8</td>
-        </tr>
-        <tr>
-            <th scope="row" code>currencymax</th>
-            <td>The minimum possible amount of currency that gets generated in a channel that has it enabled</td>
-            <td>Number</td>
-            <td code>8</td>
-        </tr>
-        <tr>
-            <th scope="row" code>currencychance</th>
-            <td>The chance that a message will generate currency on a channel that has it enabled</td>
-            <td>Number</td>
-            <td code>4</td>
-        </tr>
-        <tr>
-            <th scope="row" code>embeds</th>
-            <td>
-                Whether Aoi will use embeds in command responses.
-                <div class="alert alert-xdark">
-                    Due to certain commands needing images and better organization, some commands will always use
-                    embeds.
+    <div id="help">
+        <h2>Help System</h2>
+        Aoi's help system makes it easy to find the command you're looking for without leaving Discord. It consists of 3
+        basic commands:<br>
+        <ul>
+            <li>
+                <div><code>,modules</code> - this command lists Aoi's modules<br></div>
+            </li>
+            <li>
+                <div><code>,commands module_name</code> - this command shows you the commands in a specified module
                 </div>
-            </td>
-            <td><code>on</code>/<code>off</code></td>
-            <td code>on</td>
-        </tr>
-        </tbody>
-    </table>
-</div>
+                <div class="alert-xdark alert">
+                    By default, this command only shows you the commands you can run in the current channel. To change
+                    this,
+                    you can use <code>,cmds module_name --all</code>
+                </div>
+            </li>
+            <li>
+                <div><code>,help command_name</code> - this command gives you help for a specific command<br></div>
+            </li>
+        </ul>
+        Some commands have aliases, or another way to invoke them. <code>,help</code> can look up commands by their
+        alias, too. For example, <code>,help</code>'s alias is <code>,h</code>, so the two can be used interchangeably.
+    </div>
 
-<div id="color">
-    <h2>What's with colors?</h2>
-    <p>Aoi accepts a few different color formats for commands that use them.</p>
-    <ul>
-        <li>6 digit hex colors (<code>000000</code>)</li>
-        <li>3 digit hex colors (<code>000</code>)</li>
-        <li>
-            <p>
-                Extended colors
-                <a data-bs-toggle="collapse" href="#colors" role="button" aria-expanded="false"
-                   aria-controls="colors">Expand color list</a>
-            </p>
-            <p>
-            <div class="collapse" id="colors">
-                <div class="row">
-                    <div class="col-lg-3 col-md-6 col-12" id="color1">
-                    </div>
-                    <div class="col-lg-3 col-md-6 col-12" id="color2">
-                    </div>
-                    <div class="col-lg-3 col-md-6 col-12" id="color3">
-                    </div>
-                    <div class="col-lg-3 col-md-6 col-12" id="color4">
+    <div id="configs">
+        <h2>Server Configuration</h2>
+        <div>
+            A lot of Aoi can be configured in your server with the following commands.
+            <ul>
+                <li><code>,configs</code> - View your server configs</li>
+                <li><code>,configs settings value</code> - Set a server config. You need
+                    <span class="badge bg-success my-1 mx-1">Manage Server</span> for this.
+                </li>
+            </ul>
+        </div>
+        <div class="d-none d-sm-none d-md-block">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">Setting</th>
+                    <th scope="col">Explanation</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Default</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for config in guildconfig %}
+                <tr>
+                    <th scope="row" code>{{config.name}}</th>
+                    <td>{{config.description}}</td>
+                    <td>{{config.type}}</td>
+                    <td code>{{config.default}}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="d-block d-md-none container">
+            {% for config in guildconfig %}
+            <div>
+                <b><code>{{config.name}}</code></b>
+                <ul>
+                    <li>Type: {{config.type}}</li>
+                    <li>Default: {{config.default}}</li>
+                    <li>{{config.description}}</li>
+                </ul>
+            </div>
+
+            {% endfor %}
+        </div>
+    </div>
+
+    <div id="color">
+        <h2>What's with colors?</h2>
+        <p>Aoi accepts a few different color formats for commands that use them.</p>
+        <ul>
+            <li>6 digit hex colors (<code>000000</code>)</li>
+            <li>3 digit hex colors (<code>000</code>)</li>
+            <li>
+                <p>
+                    Extended colors
+                    <a data-bs-toggle="collapse" href="#colors" role="button" aria-expanded="false"
+                       aria-controls="colors">Expand color list</a>
+                </p>
+                <p>
+                <div class="collapse" id="colors">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 col-12" id="color1">
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-12" id="color2">
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-12" id="color3">
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-12" id="color4">
+                        </div>
                     </div>
                 </div>
-            </div>
-        </li>
-    </ul>
-</div>
+            </li>
+        </ul>
+    </div>
 
-<div id="selfhosting">
-    <h2>I want to host my own copy of Aoi! How can I do that?</h2>
-    <p>As of the writing of this guide, the selfhost script for Aoi is a WIP, but you can still selfhost by
-        following the directions below</p>
-    <h4>Install prerequisites</h4>
-    <p>You need to be running at least Python 3.8 to run Aoi.</p>
-    <ul>
-        <li>For Windows and Linux machines with a GUI, you can get python from <a
-                href="https://www.python.org/downloads/release/python-392/">here</a></li>
-        <li>For Linux machines without a GUI:
-            <ul>
-                <li>Debian/Ubuntu - <code>sudo apt install python3</code></li>
-                <li>OpenSUSE - <code>sudo zypper in python3</code></li>
-            </ul>
-        </li>
-    </ul>
-    <p>You also need git and redis</p>
-    <ul>
-        <li>For Windows, you can get git from <a href="https://git-scm.com/downloads">here</a> and redis from
-        </li>
-        <li>For Linux, install via your package manager
-            <ul>
-                <li>Debian/Ubuntu - <code>sudo apt install git redis</code></li>
-                <li>OpenSUSE - <code>sudo zypper in git redis && sudo systemctl start redis@yourusername</code></li>
-            </ul>
-        </li>
-    </ul>
-    <h4>Downloading Aoi</h4>
-    <p>Once you have Python and git installed, you can download Aoi from github by running the following
-        commands</p>
-    <pre class="d-block">
+    <div id="selfhosting">
+        <h2>I want to host my own copy of Aoi! How can I do that?</h2>
+        <p>As of the writing of this guide, the selfhost script for Aoi is a WIP, but you can still selfhost by
+            following the directions below</p>
+        <h4>Install prerequisites</h4>
+        <p>You need to be running at least Python 3.8 to run Aoi.</p>
+        <ul>
+            <li>For Windows and Linux machines with a GUI, you can get python from <a
+                    href="https://www.python.org/downloads/release/python-392/">here</a></li>
+            <li>For Linux machines without a GUI:
+                <ul>
+                    <li>Debian/Ubuntu - <code>sudo apt install python3</code></li>
+                    <li>OpenSUSE - <code>sudo zypper in python3</code></li>
+                </ul>
+            </li>
+        </ul>
+        <p>You also need git and redis</p>
+        <ul>
+            <li>For Windows, you can get git from <a href="https://git-scm.com/downloads">here</a> and redis from
+            </li>
+            <li>For Linux, install via your package manager
+                <ul>
+                    <li>Debian/Ubuntu - <code>sudo apt install git redis</code></li>
+                    <li>OpenSUSE - <code>sudo zypper in git redis && sudo systemctl start redis@yourusername</code></li>
+                </ul>
+            </li>
+        </ul>
+        <h4>Downloading Aoi</h4>
+        <p>Once you have Python and git installed, you can download Aoi from github by running the following
+            commands</p>
+        <pre class="d-block">
             git clone https://github.com/aoi-bot/Aoi.git
             cd Aoi
             git submodule init
             git submodule update
         </pre>
-    <h4>Setting up a virtual environment</h4>
-    <p>Run the following commands to install venv and activate the virtual environment where you'll be installing
-        Aoi's dependencies</p>
-    <ul>
-        <li>
-            Windows
-            <pre class="d-block">
+        <h4>Setting up a virtual environment</h4>
+        <p>Run the following commands to install venv and activate the virtual environment where you'll be installing
+            Aoi's dependencies</p>
+        <ul>
+            <li>
+                Windows
+                <pre class="d-block">
     py -m pip install --user virtualenv
     py -m venv venv
     .\venv\Scripts\activate
                 </pre>
-        </li>
-        <li>
-            Linux
-            <pre class="d-block">
+            </li>
+            <li>
+                Linux
+                <pre class="d-block">
     python3 -m pip install --user virtualenv
     python3 -m venv venv
     source venv/bin/activate
                 </pre>
-        </li>
-    </ul>
-    <h4>Next, install the prerequisites Aoi needs</h4>
-    <pre>
+            </li>
+        </ul>
+        <h4>Next, install the prerequisites Aoi needs</h4>
+        <pre>
     pip install -U -r requirements.txt
         </pre>
-    <h4>Set up your <code>.env</code> file</h4>
-    <ul>
-        <li>Make a copy of the file named <code>.env-example</code> in the <code>Aoi</code> folder. Name it
-            <code>.env</code></li>
-        <li>Open the file in a text editor</li>
-    </ul>
-    Fill out the <code>.env</code> file. An explanation of each key is below
-    <ul>
-        <li><code>TOKEN</code> - this is your bot's token. You can use <a
-                href="https://discordpy.readthedocs.io/en/latest/discord.html">this guide</a>
-            to show you how to make a bot account
-            <div class="alert alert-xdark">
-                This is the <i>only</i> required API key or token. The rest that follow are for using specific commands
-                or groups of commands in Aoi.
-            </div>
-        </li>
+        <h4>Set up your <code>.env</code> file</h4>
+        <ul>
+            <li>Make a copy of the file named <code>.env-example</code> in the <code>Aoi</code> folder. Name it
+                <code>.env</code></li>
+            <li>Open the file in a text editor</li>
+        </ul>
+        Fill out the <code>.env</code> file. An explanation of each key is below
+        <ul>
+            <li><code>TOKEN</code> - this is your bot's token. You can use <a
+                    href="https://discordpy.readthedocs.io/en/latest/discord.html">this guide</a>
+                to show you how to make a bot account
+                <div class="alert alert-xdark">
+                    This is the <i>only</i> required API key or token. The rest that follow are for using specific
+                    commands
+                    or groups of commands in Aoi.
+                </div>
+            </li>
 
-        <li><code>WEATHER_GOV_API</code> - according to weather.gov, this should be something that uniquely identifies
-            your application. Used for
-            weather related commands
-        </li>
+            <li><code>WEATHER_GOV_API</code> - according to weather.gov, this should be something that uniquely
+                identifies
+                your application. Used for
+                weather related commands
+            </li>
 
-        <li><code>GOOGLE_API_KEY</code> - used for the geolocation commands. See <a
-                href="https://developers.google.com/maps/documentation/geocoding/get-api-key">
-            Google's documentation on how to get your key and activate it</a></li>
+            <li><code>GOOGLE_API_KEY</code> - used for the geolocation commands. See <a
+                    href="https://developers.google.com/maps/documentation/geocoding/get-api-key">
+                Google's documentation on how to get your key and activate it</a></li>
 
-        <li><code>NASA</code> - used for LANDSAT and APOD commands. See <a href="https://api.nasa.gov/">api.nasa.gov</a>
-            for information on how to
-            get your key
-        </li>
+            <li><code>NASA</code> - used for LANDSAT and APOD commands. See <a
+                    href="https://api.nasa.gov/">api.nasa.gov</a>
+                for information on how to
+                get your key
+            </li>
 
-        <li><code>IMGUR</code> and <code>IMGUR_SECRET</code> - used for imgur command. See <a
-                href="https://apidocs.imgur.com/">Imgur's site</a>
-            for documentation on how to get your key
-        </li>
+            <li><code>IMGUR</code> and <code>IMGUR_SECRET</code> - used for imgur command. See <a
+                    href="https://apidocs.imgur.com/">Imgur's site</a>
+                for documentation on how to get your key
+            </li>
 
-        <li><code>PATREON_ID</code> and <code>PATREON_SECRET</code> - set these if you want to allow users to get global
-            currency for donating to your
-            patreon. See <a href="https://forum.idunetwork.eu.org/topic/10-get-your-patreon-campaignid/">this</a>
-            tutorial to get them
-        </li>
-    </ul>
+            <li><code>PATREON_ID</code> and <code>PATREON_SECRET</code> - set these if you want to allow users to get
+                global
+                currency for donating to your
+                patreon. See <a href="https://forum.idunetwork.eu.org/topic/10-get-your-patreon-campaignid/">this</a>
+                tutorial to get them
+            </li>
+        </ul>
 
-    <div class="alert alert-danger">
-        <b>These keys are the equivalent of your password for the services they belong to.</b> Posting these keys let
-        someone make requests as you, so
-        treat them as securely as your own password.
+        <div class="alert alert-danger">
+            <b>These keys are the equivalent of your password for the services they belong to.</b> Posting these keys
+            let
+            someone make requests as you, so
+            treat them as securely as your own password.
+        </div>
+
+        <h4>Start Aoi</h4>
+        To start Aoi, simply run <code>python main.py</code>
+        <div class="alert-xdark alert">
+            If you close the window you're currently running the bot in, or disconnect from your VPS, the bot will go
+            offline. Either leave the window open or
+            use a session/process manager like pm2, tmux, or screen. While I won't add instructions for them all here,
+            feel
+            free to come to
+            the <a href="https://discord.gg/zRvNtXFWeS">Support Discord</a> for help.
+        </div>
+
+        <h4>Updating Aoi</h4>
+        <ol>
+            <li>Stop the bot</li>
+            <li>Reactivate your virtualenv if you have to
+                <ul>
+                    <li>Windows - <code>.\venv\Scripts\activate</code></li>
+                    <li>Linux - <code>source venv/bin/activate</code></li>
+                </ul>
+            </li>
+            <li>
+                Update the bot with <code>git pull --recurse-submodules</code>
+            </li>
+            <li>
+                Make sure your dependencies are up to date with <code>pip install -U -r requirements.txt</code>
+            </li>
+            <li>
+                Start the bot, as above
+            </li>
+        </ol>
     </div>
-
-    <h4>Start Aoi</h4>
-    To start Aoi, simply run <code>python main.py</code>
-    <div class="alert-xdark alert">
-        If you close the window you're currently running the bot in, or disconnect from your VPS, the bot will go
-        offline. Either leave the window open or
-        use a session/process manager like pm2, tmux, or screen. While I won't add instructions for them all here, feel
-        free to come to
-        the <a href="https://discord.gg/zRvNtXFWeS">Support Discord</a> for help.
-    </div>
-
-    <h4>Updating Aoi</h4>
-    <ol>
-        <li>Stop the bot</li>
-        <li>Reactivate your virtualenv if you have to
-            <ul>
-                <li>Windows - <code>.\venv\Scripts\activate</code></li>
-                <li>Linux - <code>source venv/bin/activate</code></li>
-            </ul>
-        </li>
-        <li>
-            Update the bot with <code>git pull --recurse-submodules</code>
-        </li>
-        <li>
-            Make sure your dependencies are up to date with <code>pip install -U -r requirements.txt</code>
-        </li>
-        <li>
-            Start the bot, as above
-        </li>
-    </ol>
-</div>
 </div>
 
 <script>
@@ -324,6 +296,10 @@
     let collapseList = collapseElementList.map(function (collapseEl) {
         return new bootstrap.Collapse(collapseEl, {toggle: false})
     });
+
+
+
+
 
 
 </script>

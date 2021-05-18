@@ -36,6 +36,8 @@ class GuildSettings(commands.Cog):
     @commands.has_permissions(manage_guild=True)
     @commands.command(brief="Set server config")
     async def config(self, ctx: aoi.AoiContext, setting: str, *, value: str):
+        #  note to self cuz am idot
+        #  make sure to add setting in /complexity/context/settings.json
         setting = setting.lower()
         color_funcs = {
             "okcolor": self.okcolor,
