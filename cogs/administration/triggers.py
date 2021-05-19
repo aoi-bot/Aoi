@@ -73,7 +73,7 @@ class Triggers(commands.Cog):
 
     @commands.has_permissions(manage_guild=True)
     @commands.command(brief="Lists the role triggers", aliases=["roletr", "roletrigger"])
-    async def roletriggers(self, ctx: aoi.AoiContext, for_role: discord.Role = None, # noqa C901
+    async def roletriggers(self, ctx: aoi.AoiContext, for_role: discord.Role = None,  # noqa C901
                            add_or_remove: str = None):  # noqa C901
         rows = await self.db.execute_fetchall("SELECT * FROM roletriggers WHERE guild=?", (ctx.guild.id,))
         valid_rows = []

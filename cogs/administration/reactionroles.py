@@ -91,7 +91,7 @@ class ReactionRoles(commands.Cog):
 
     @commands.has_permissions(manage_roles=True)
     @commands.command(brief="Add a reaction role message, pass them in emoji - role pairs")
-    async def addrero(self, ctx: aoi.AoiContext, message: discord.Message, *, args: str):
+    async def addrero(self, ctx: aoi.AoiContext, message: discord.Message, *, args: str):  # noqa c901
         split = ctx.group_list(args.split(), 2)
         role_converter = commands.RoleConverter()
         for i in split:
@@ -119,8 +119,8 @@ class ReactionRoles(commands.Cog):
                 return await ctx.send_error("That emoji is already being used")
             self._roles[message.id][str(emoji.id) if emoji.id else emoji.name] = _ReactionRoleData(role)
             await self._db.conn.execute("insert into rero values (?,?,?,?,?,0,0)",
-                                      (ctx.guild.id, message.channel.id, message.id,
-                                       str(emoji.id) if emoji.id else emoji.name, role.id))
+                                        (ctx.guild.id, message.channel.id, message.id,
+                                         str(emoji.id) if emoji.id else emoji.name, role.id))
             await self._db.conn.commit()
             await ctx.send_ok("Added!")
 

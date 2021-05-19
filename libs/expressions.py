@@ -4,9 +4,8 @@ import re
 from dataclasses import dataclass
 from typing import List, Union
 
-from discord.ext import commands
-
 import aoi
+from discord.ext import commands
 
 logging.getLogger("aoi").info("expr:Initializing the expression evaluator")
 
@@ -41,6 +40,7 @@ def get_prime_factors(number):
 def _inlimits(number):
     if number > 100000000000:
         raise commands.BadArgument("Number must be less than 100000000000")
+
 
 _PRECEDENCE_DICT = {
     "^": _Operator(

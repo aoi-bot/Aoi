@@ -1,2 +1,2 @@
-from .slash import *
 from .colors import *
+from .slash import *

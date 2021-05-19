@@ -13,8 +13,9 @@ class Quotes(commands.Cog):
 
     @commands.command(brief="Adds a quote", aliases=["aq", "adq"])
     async def addquote(self, ctx: aoi.AoiContext, trigger: str, *, response: str):
-        rowid = (await self.bot.db.conn.execute_insert("insert into quotes (user, guild, name, content) values (?,?,?,?)",
-                                                       (ctx.author.id, ctx.guild.id, trigger, response)))[0]
+        rowid = \
+            (await self.bot.db.conn.execute_insert("insert into quotes (user, guild, name, content) values (?,?,?,?)",
+                                                   (ctx.author.id, ctx.guild.id, trigger, response)))[0]
         await self.bot.db.conn.commit()
         await ctx.send_ok(f"Added quote **#{rowid}** - **{discord.utils.escape_markdown(trigger)}** - "
                           f"**{discord.utils.escape_markdown(str(ctx.author))}**")
@@ -22,10 +23,11 @@ class Quotes(commands.Cog):
     @commands.command(brief="Recalls a quote", aliases=["q"])
     async def quote(self, ctx: aoi.AoiContext, trigger: str):
         qid, content, user = (
-            await (await self.bot.db.conn.execute("select id, content, user from quotes where guild=? and name=? "  # noqa
-                                                  "order by RANDOM() limit 1",
-                                                  (ctx.guild.id, trigger))
-                   ).fetchone())
+            await (
+                await self.bot.db.conn.execute("select id, content, user from quotes where guild=? and name=? "  # noqa
+                                               "order by RANDOM() limit 1",
+                                               (ctx.guild.id, trigger))
+            ).fetchone())
         msg = await ctx.send_json(content)
         await msg.edit(
             content=f"Quote **{qid}** by "
@@ -57,7 +59,7 @@ class Quotes(commands.Cog):
     @commands.command(brief="Search quotes", aliases=["searchq"])
     async def searchquotes(self, ctx: aoi.AoiContext, *, search_term: str):
         rows = await self.bot.db.conn.execute_fetchall("select id, name from quotes where "
-                                                     "guild=? and content like ?",
+                                                       "guild=? and content like ?",
                                                        (ctx.guild.id, f"%{search_term}%"))
         await ctx.paginate(
             (f"**{row[0]}** - **{discord.utils.escape_markdown(row[1])}**"

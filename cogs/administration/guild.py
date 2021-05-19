@@ -108,7 +108,7 @@ class Guilds(commands.Cog):
         brief="Adds an emoji",
         aliases=["ae"]
     )
-    async def addemoji(self, ctx: aoi.AoiContext, name: str, src: Union[discord.PartialEmoji, str]):
+    async def addemoji(self, ctx: aoi.AoiContext, name: str, src: Union[discord.PartialEmoji, str]): # noqa c901
         if len(name) > 32 or len(name) < 2:
             raise commands.BadArgument("Emoji name must be 2-32 characters")
         if isinstance(src, discord.PartialEmoji):
@@ -127,7 +127,7 @@ class Guilds(commands.Cog):
                             ("image/gif", "image/jpeg", "image/png"):
                         return await ctx.send_error(f"That doesn't seem to be an image")
                     buf.write(await resp.content.read())
-            except (ClientResponseError, BadHttpMessage) as e:
+            except (ClientResponseError, BadHttpMessage):
                 await ctx.send_error(f"I got an error trying to get that image."
                                      f"Try pasting the image into discord and using that link instead.")
                 raise
@@ -152,7 +152,7 @@ class Guilds(commands.Cog):
         except discord.HTTPException as e:
             return await ctx.send_error(str(e))
         await ctx.send_ok(f"Added {emoji} {emoji.name}." +
-                          (f" Image was scaled down to 1/{round(1/total_ratio, 1)} its size to make it "
+                          (f" Image was scaled down to 1/{round(1 / total_ratio, 1)} its size to make it "
                            f"small enough for an emoji"
                            if ratio else ""))
 

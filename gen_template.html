@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
     <meta content="Aoi Bot" property="og:title">
-    <meta content="Aoi is a brand-new bot, customizable enough to fit in any server. Look up information on a user, role, or server. Do math, render LaTeX. Make color palettes randomly or from an image, have server money to get roles, use global money to buy a fancy background for your profile card, and more coming soon! Make use of the fine-grained permissions to control where/how Aoi can be used. Manage your server, give everyone a role. Color roles according to a gradient (looking at you, aesthetic server owners)." property="og:description">
+    <meta content="Aoi is a brand-new bot, customizable enough to fit in any server. Look up information on a user, role, or server. Do math, render LaTeX. Make color palettes randomly or from an image, have server money to get roles, use global money to buy a fancy background for your profile card, and more coming soon! Make use of the fine-grained permissions to control where/how Aoi can be used. Manage your server, give everyone a role. Color roles according to a gradient (looking at you, aesthetic server owners)."
+          property="og:description">
     <meta content="https://aoibot.xyz/commands.html" property="og:url">
     <meta content="https://www.aoibot.xyz/assets/aoi.jpeg" property="og:image">
     <meta content="#B41AB4" data-react-helmet="true" name="theme-color">
@@ -35,6 +36,8 @@
         }
 
 
+
+
     </style>
 
     <!-- Custom styles for this page -->
@@ -57,7 +60,7 @@
 
 <main>
     <div class="d-block d-md-none mx-auto my-auto vw-100">
-        <button class="btn btn-outline-primary mx-2" data-bs-toggle="collapse" data-bs-target="#menu" type="button">
+        <button class="btn btn-outline-primary mx-2" data-bs-target="#menu" data-bs-toggle="collapse" type="button">
             <span class="material-icons">list</span>
         </button>
         <div class="collapse" id="menu">
@@ -65,7 +68,8 @@
             <a class="py-2 d-block text-center btn-primary my-2 mx-3 no-deco" href="commands.html">Commands</a>
             <a class="py-2 d-block text-center btn-primary my-2 mx-3 no-deco" href="https://github.com/aoi-bot/Aoi">Github</a>
             <a class="py-2 d-block text-center btn-primary my-2 mx-3 no-deco" href="https://discord.gg/zRvNtXFWeS">Discord</a>
-            <a class="py-2 d-block text-center btn-primary my-2 mx-3 no-deco" href="https://www.patreon.com/crazygmr101">Patreon</a>
+            <a class="py-2 d-block text-center btn-primary my-2 mx-3 no-deco"
+               href="https://www.patreon.com/crazygmr101">Patreon</a>
             <a class="py-2 d-block text-center btn-primary my-2 mx-3 no-deco"
                href="https://discord.com/api/oauth2/authorize?client_id=791265892154867724&permissions=268659776&scope=bot%20applications.commands">Invite</a>
             <div class="nav flex-column nav-pills">
@@ -80,8 +84,9 @@
     </div>
     <div class="px-5">
         <div class="d-flex align-items-start">
-            <div class="nav flex-column nav-pills me-3 overflow-auto vh-50 navbar-expand-lg d-md-flex d-none"
-                 id="v-pills-tab" role="navigation" aria-orientation="vertical">
+            <div aria-orientation="vertical"
+                 class="nav flex-column nav-pills me-3 overflow-auto vh-50 navbar-expand-lg d-md-flex d-none"
+                 id="v-pills-tab" role="navigation">
                 #TABS
             </div>
             <div class="tab-content flex-fill overflow-auto vh-50 sidenav sn-bg-4 fixed" id="v-pills-tabContent">
@@ -100,9 +105,9 @@
 </footer>
 
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
+<script crossorigin="anonymous"
         integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0"
-        crossorigin="anonymous"></script>
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script type="text/javascript">
     // initialize all the tooltips
@@ -128,6 +133,8 @@
                 document.querySelector("#menu").classList.remove("show");
             }
         ))
+
+
 </script>
 
 

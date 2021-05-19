@@ -175,7 +175,8 @@ class Help(commands.Cog):
     @commands.command(brief="Shows the permission guide")
     async def permguide(self, ctx: aoi.AoiContext):
         await ctx.send_info(f"\n"
-                            f"{self.bot.user.name if self.bot.user else ''}'s permissions are based off of a permission chain that "
+                            f"{self.bot.user.name if self.bot.user else ''}'s permissions are "
+                            f"based off of a permission chain that "
                             f"anyone can view with `{ctx.prefix}lp`. The chain is evaluated "
                             f"from 0 to the top. The permission chain can be modified by anyone with "
                             f"administrator permission in a server. `{ctx.prefix}cmds permissions` can "
@@ -192,11 +193,11 @@ class Help(commands.Cog):
                             f"Server and Global.\nGlobal currency is gained at the rate of $3/message, and can only "
                             f"be gained once every 3 minutes. Global currency is used over in "
                             f"`{ctx.prefix}cmds globalshop` to "
-                            f"buy a title for your card an over in `{ctx.prefix}profilecard` to buy a background change "
-                            f"for your profile card.\n"
+                            f"buy a title for your card an over in `{ctx.prefix}profilecard` to buy a background "
+                            f"change for your profile card.\n"
                             f"Server currency is gained at a rate set by the server staff, and is viewable with "
-                            f"`{ctx.prefix}configs`. It is used for roles and gambling - see `{ctx.prefix}cmds ServerShop` "
-                            f"and `{ctx.prefix}cmds ServerGambling`."
+                            f"`{ctx.prefix}configs`. It is used for roles and gambling - see `{ctx.prefix}cmds "
+                            f"ServerShop` and `{ctx.prefix}cmds ServerGambling`."
                             )
 
     @commands.command(

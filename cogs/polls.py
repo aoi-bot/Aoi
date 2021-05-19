@@ -1,9 +1,8 @@
 import asyncio
-from typing import Dict
 
+import aoi
 import discord
 from discord.ext import commands
-import aoi
 
 
 class Polls(commands.Cog):
@@ -38,7 +37,7 @@ class Polls(commands.Cog):
                        "7️⃣", "8️⃣", "9️⃣"]
             msg = await ctx.send(embed=discord.Embed(
                 title=poll[0],
-                description="\n".join(f"{choices[n]} {poll[n+1]}" for n in range(len(poll) - 1))
+                description="\n".join(f"{choices[n]} {poll[n + 1]}" for n in range(len(poll) - 1))
             ).set_footer(text=f"Poll by {ctx.author}" if not anon else "Anonymous poll"))
             for i in range(len(poll) - 1):
                 await msg.add_reaction(choices[i])

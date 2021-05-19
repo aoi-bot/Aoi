@@ -1,15 +1,15 @@
-from datetime import datetime
-from typing import List, Dict
-
-import discord
-from discord.ext import commands, tasks
-import aoi
-import os
-import logging
-import aiohttp
 import asyncio
+import logging
+import os
+from datetime import datetime
+from typing import Dict
 
-if os.getenv("PATREON_ID") and os.getenv("PATREON_SECRET"):
+import aiohttp
+
+import aoi
+from discord.ext import commands, tasks
+
+if os.getenv("PATREON_ID") and os.getenv("PATREON_SECRET"):  # noqa c901
     logging.getLogger("aoi").info("Loading Patreon cog definition")
 
     class Patreon(commands.Cog):
@@ -18,6 +18,7 @@ if os.getenv("PATREON_ID") and os.getenv("PATREON_SECRET"):
 
         - both PATREON_ID and PATREON_SECRET must exist to load this cog
         """
+
         def __init__(self, bot: aoi.AoiBot):
             self.bot = bot
             self.patrons: Dict[int, int] = {}
@@ -34,17 +35,18 @@ if os.getenv("PATREON_ID") and os.getenv("PATREON_SECRET"):
             await self.bot.wait_until_ready()
             async with self.lock:
                 async with aiohttp.request(
-                    "GET",
-                    f"https://api.patreon.com/oauth2/api/campaigns/{self.bot.patreon_id}/pledges",
-                    headers={
-                        "Authorization": f"Bearer {self.bot.patreon_secret}"
-                    }
+                        "GET",
+                        f"https://api.patreon.com/oauth2/api/campaigns/{self.bot.patreon_id}/pledges",
+                        headers={
+                            "Authorization": f"Bearer {self.bot.patreon_secret}"
+                        }
                 ) as req:
                     json = await req.json()
                     self.patrons = {}
                     for user in json["data"]:
                         try:
-                            self.patrons[user["relationships"]["patron"]["data"]["id"]] = user["attributes"]["amount_cents"]
+                            self.patrons[user["relationships"]["patron"]["data"]["id"]] = user["attributes"][
+                                "amount_cents"]
                         except KeyError:
                             pass
                 self.patreon_resp = json
@@ -71,8 +73,9 @@ if os.getenv("PATREON_ID") and os.getenv("PATREON_SECRET"):
                                                 "make sure you've [connected your discord]"
                                                 "(https://support.patreon.com/hc/en-us/articles/212052266-Get-my-Discord-role)"  # noqa
                                                 ", and waited at least 5 minutes."
-                    )
-                row = await (await self.bot.db.conn.execute("select * from patreon where user=?", (int(user_id),))).fetchone()  # noqa
+                                                )
+                row = await (await self.bot.db.conn.execute("select * from patreon where user=?",
+                                                            (int(user_id),))).fetchone()  # noqa
                 dt = datetime.now()
                 dtf = f"{dt.month:0>2}{dt.year}"
                 if not row:

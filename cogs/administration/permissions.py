@@ -63,7 +63,7 @@ class Permissions(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.command(brief="Disable or enable all modules in a category", aliases=["axm"])
     async def allcatmdls(self, ctx: aoi.AoiContext, category: discord.CategoryChannel,
-                          enabled: disenable()):
+                         enabled: disenable()):
         await self.db.add_permission(ctx.guild.id, f"axm {category.id} {enabled}")
         await ctx.send_ok(f"**axm <#{category.id}> {enabled}** added", trash=False)
 
@@ -80,9 +80,9 @@ class Permissions(commands.Cog):
         await ctx.send_ok(f"**aum <@{member.id}> {enabled}** added.", trash=False)
 
     # endregion
-    
+
     # region # _m commands
-    
+
     @commands.has_permissions(administrator=True)
     @commands.command(brief="Disable or enable a module in a channel", aliases=["cm"])
     async def chnlmdl(self, ctx: aoi.AoiContext, channel: discord.TextChannel,
@@ -109,7 +109,7 @@ class Permissions(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.command(brief="Disable or enable a module in a category", aliases=["xm"])
     async def catmdl(self, ctx: aoi.AoiContext, category: discord.CategoryChannel,
-                      enabled: disenable(), module: str):
+                     enabled: disenable(), module: str):
         module = self.bot.find_cog(module)[0]
         await self.db.add_permission(ctx.guild.id, f"xm {category.id} {enabled} {module}")
         await ctx.send_ok(f"**xm <#{category.id}> {enabled} {module}** added.", trash=False)
@@ -117,11 +117,11 @@ class Permissions(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.command(brief="Disable or enable a module for a user", aliases=["um"])
     async def usrmdl(self, ctx: aoi.AoiContext, member: discord.Member,
-                      enabled: disenable(), module: str):
+                     enabled: disenable(), module: str):
         module = self.bot.find_cog(module)[0]
         await self.db.add_permission(ctx.guild.id, f"um {member.id} {enabled} {module}")
         await ctx.send_ok(f"**um <@{member.id}> {enabled} {module}** added.", trash=False)
-        
+
     # endregion
 
     # region # _c commands
@@ -215,7 +215,6 @@ class Permissions(commands.Cog):
         if not user:
             return await ctx.paginate(self.bot.db.blacklisted, 20, "Blacklisted users")
         await ctx.send_info(f"ID {user} is {'' if user in self.bot.db.blacklisted else 'not '} blacklisted")
-
 
 
 # arm role on_off

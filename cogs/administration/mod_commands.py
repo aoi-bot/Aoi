@@ -127,15 +127,15 @@ class Moderation(commands.Cog):
                                                key=lambda punishment: punishment.time, reverse=True)
         if num < 1 or num > len(punishments):
             return ctx.send_error("Invalid warning number")
-        p = punishments[num-1]
+        p = punishments[num - 1]
         if "del" in ctx.flags:
             await self.bot.db.conn.execute("delete from punishments where user=? and guild=? and timestamp=?",
                                            (p.user,
-                                          p.guild,
-                                          p.time.timestamp()))
+                                            p.guild,
+                                            p.time.timestamp()))
         else:
             await self.bot.db.conn.execute("update punishments set cleared=1,cleared_by=? where user=? and guild=? "
-                                         "and timestamp=?", (ctx.author.id, p.user, p.guild, p.time.timestamp()))
+                                           "and timestamp=?", (ctx.author.id, p.user, p.guild, p.time.timestamp()))
         await self.bot.db.conn.commit()
         await ctx.send_ok(f"Cleared punishment #{num} for {member}")
 
@@ -152,7 +152,8 @@ class Moderation(commands.Cog):
 
         async def fmt(punishment: Punishment) -> str:
             _ = "~~" if punishment.cleared else ""
-            cl = f"Cleared By: {await self.bot.fetch_unknown_user(punishment.cleared_by)}\n" if punishment.cleared else ""
+            cl = f"Cleared By: {await self.bot.fetch_unknown_user(punishment.cleared_by)}\n" \
+                if punishment.cleared else ""
             action = ["banned", "kicked", "muted", "warned", "unbanned", "softbanned"][punishment.typ]
             return f"{_}{action} by {await self.bot.fetch_unknown_user(punishment.staff)}{_}\n" \
                    f"Date: {punishment.time.strftime('%x %X')}\n" \

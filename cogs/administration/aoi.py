@@ -323,7 +323,7 @@ class Bot(commands.Cog):
 
     @commands.is_owner()
     @commands.command(brief="View bot-wide configs")
-    async def botconfig(self, ctx: aoi.AoiContext, key: str = None, value: str = None):
+    async def botconfig(self, ctx: aoi.AoiContext, key: str = None, value: str = None):  # noqa c901
         if not key:
             return await ctx.embed(
                 title="Bot config categories",
@@ -338,7 +338,7 @@ class Bot(commands.Cog):
                 return await ctx.embed(
                     title=f"Bot configs for {key}",
                     description=(
-                            f"Do `{ctx.clean_prefix}botconfig category config_name config_value` to set a bot config\n" +
+                            f"Do `{ctx.clean_prefix}botconfig category config_name config_value` to set a bot config\n" +  # noqa e501
                             "\n".join(f"⋄ **{key}.{k}**: {v}" for k, v in self._config.all_keys_in(key))
                     )
                 )
@@ -351,8 +351,9 @@ class Bot(commands.Cog):
                 return await ctx.send_info(f"**{key}** is set to {self._config.get(key)}")
             except ValueError:
                 if key.split(".")[0] not in self._config.yaml:
-                    return await ctx.send_error(f"**{key}** is an invalid category. Do `{ctx.clean_prefix}botconfig` to "
-                                                f"view the valid categories.")
+                    return await ctx.send_error(
+                        f"**{key}** is an invalid category. Do `{ctx.clean_prefix}botconfig` to "
+                        f"view the valid categories.")
                 else:
                     return await ctx.send_error(f"**{key}** is an invalid key. Do `{ctx.clean_prefix}botconfig "
                                                 f"{key.split('.')[0]}` to view valid keys in that category")
@@ -372,7 +373,6 @@ class Bot(commands.Cog):
                                        f"from `{previous}`")
         except ValueError:
             return await ctx.send_error(f"An error was raised setting the key")
-
 
 
 def setup(bot: aoi.AoiBot) -> None:
