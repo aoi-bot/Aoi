@@ -58,7 +58,7 @@ class PlaceholderManager:
         return ctx.guild.name
 
     def guild_icon(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
-        return str(ctx.guild.icon_url)
+        return str(ctx.guild.icon.url if ctx.guild.icon else None)
 
     @property
     def supported(self) -> List[str]:

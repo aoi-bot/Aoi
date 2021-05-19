@@ -136,7 +136,7 @@ class Information(commands.Cog):
                               f":white_circle: {statuses['offline']} offline\n"
                               f":robot: {statuses['bot']} bots\n")
             ],
-            thumbnail=guild.icon_url,
+            thumbnail=(guild.icon.url if guild.icon else None),
             footer=f"Do `{ctx.prefix}emojis` to show server emojis."
         )
 
