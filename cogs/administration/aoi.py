@@ -131,7 +131,7 @@ class Bot(commands.Cog):
     async def die(self, ctx: aoi.AoiContext):
         await ctx.send_ok("Bye :(")
         await self.bot.db.close()
-        await self.bot.logout()
+        await self.bot.close()
 
     @commands.is_owner()
     @commands.command(
@@ -143,7 +143,8 @@ class Bot(commands.Cog):
 
     @commands.is_owner()
     @commands.command(
-        brief="List servers the bot is part of"
+        brief="List servers the bot is part of",
+        aliases=["listservers"]
     )
     async def guildlist(self, ctx: aoi.AoiContext):
         await ctx.paginate(
@@ -159,7 +160,7 @@ class Bot(commands.Cog):
     async def guildinfo(self, ctx: aoi.AoiContext, guild: int):
         guild: discord.Guild = self.bot.get_guild(guild)
         if not guild:
-            return await ctx.send_error("Im'm not in a guild with that ID")
+            return await ctx.send_error("I'm not in a guild with that ID")
         created = guild.created_at.strftime("%c")
         voice_channels = len(guild.voice_channels)
         text_channels = len(guild.text_channels)
