@@ -161,19 +161,22 @@ class Messages(commands.Cog):
         last_message: Optional[discord.Message] = None
         current_message: Optional[discord.Message]
         reached_bulk_limit = False
+        now_timestamp = discord.utils.snowflake_time(ctx.message.id)
         log = False
         if n > 100 or ("from" in ctx.flags and n > 50):
             log = True
             msg = await ctx.send("Fetching messages...")
 
         while len(messages) < n and not reached_bulk_limit:
-            async for current_message in channel.history(limit=min(100, n - len(messages)), before=last_message):
+            async for current_message in channel.history(
+                    limit=min(100, n - len(messages)), before=last_message
+            ):
                 if current_message.id == ctx.message.id:
                     continue
                 if log and current_message.id == msg.id:
                     continue
                 last_message = current_message
-                if (datetime.datetime.now() - current_message.created_at).days >= 13:
+                if (now_timestamp - discord.utils.snowflake_time(current_message.id)).days >= 13:
                     reached_bulk_limit = True
                     break
                 if "safe" in ctx.flags and current_message.pinned:
