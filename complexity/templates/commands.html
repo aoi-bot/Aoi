@@ -8,22 +8,24 @@
     </div>
 </div>
 <div class="px-5">
-    <div class="d-flex align-items-start">
-        <div class="nav flex-column nav-pills me-3 overflow-auto vh-50 navbar-expand-lg d-md-flex d-none"
-             id="v-pills-tab" role="navigation" aria-orientation="vertical">
-            {% for cog in commands %}
-            <button class="nav-link my-1 {active} text-white"
-                    data-bs-toggle="pill" data-bs-target="#v-pills-{{cog}}"
-                    type="button" role="tab" aria-controls="v-pills-{{cog}}" aria-selected="true">
-                {{cog}}
-            </button>
-            {% endfor %}
+    <div class="align-items-start">
+        <div class="container" role="navigation">
+            <div class="my-3 d-block" id="list">&nbsp;</div>
+            <h2 class="d-block">Module List</h2>
+            <div class="row">
+                {% for cog in commands %}
+                <a aria-selected="true" role="tab" type="button"
+                        class="btn btn-primary-outline nav-link my-1 text-white col-12 col-xs-6
+                        col-sm-4 col-md-3 col-lg-2" href="#{{cog}}-section">
+                    {{cog}}
+                </a>
+                {% endfor %}
+            </div>
         </div>
-        <div class="tab-content flex-fill overflow-auto vh-50 sidenav sn-bg-4 fixed" id="v-pills-tabContent">
+        <div class="container">
             {% for cog in commands %}
-            <div class="tab-pane fade my-3 mx-4 {show} {active} text-white" id="v-pills-{{cog}}"
-                 role="tabpanel" aria-labelledby="v-pills-{{cog}}-tab">
-                <h2 class="mx-2 my-2">{{cog}}</h2>
+            <div class="my-3 mx-1 text-white" id="{{cog}}-section">
+                <h2 class="mx-2 my-2">{{cog}}<sup><a class="px-2" href="#list">Top</a></sup><br/></h2>
                 <h4 class="mx-2 my-2">{{commands[cog].description}}</h4>
                 {% for command in commands[cog].commands %}
                 {{ commands[cog].commands[command] }}

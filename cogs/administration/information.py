@@ -96,7 +96,7 @@ class Information(commands.Cog):
                 ("Ansura Profile", f"https://www.ansura.xyz/profile/{member.id}")
             ],
             clr=member.color,
-            thumbnail=member.avatar.url        )
+            thumbnail=member.avatar.url)
 
     @commands.command(brief="Shows info on the current server", aliases=["sinfo"])
     async def serverinfo(self, ctx: aoi.AoiContext):
@@ -112,12 +112,12 @@ class Information(commands.Cog):
             "bot": 0,
             "offline": 0
         }
-        m: discord.Member
-        for m in guild.members:
-            if m.bot:
+        member: discord.Member
+        for member in guild.members:
+            if member.bot:
                 statuses["bot"] += 1
             else:
-                statuses[str(m.status)] += 1
+                statuses[str(member.status)] += 1
         await ctx.embed(
             title=f"Info for {guild}",
             fields=[
@@ -136,7 +136,7 @@ class Information(commands.Cog):
                               f":white_circle: {statuses['offline']} offline\n"
                               f":robot: {statuses['bot']} bots\n")
             ],
-            thumbnail=guild.icon_url,
+            thumbnail=(guild.icon.url if guild.icon else None),
             footer=f"Do `{ctx.prefix}emojis` to show server emojis."
         )
 
@@ -260,6 +260,7 @@ class Information(commands.Cog):
             else:
                 raise commands.RoleNotFound(role
                                             )
+
         def _(perm, ov):
             if ov.administrator:
                 return True
@@ -331,7 +332,7 @@ class Information(commands.Cog):
             raise commands.BadArgument("You must supply 2-20 roles.")
         if "stacked" not in ctx.flags:
             return await ctx.embed(description="\n".join(
-                (f"{n+1}. {role} - {len(role.members)}"
+                (f"{n + 1}. {role} - {len(role.members)}"
                  for n, role in enumerate(sorted(roles, key=lambda x: -len(x.members))))
                 if "sort" in ctx.flags else
                 (f"{role} - {len(role.members)}" for role in roles)
@@ -357,7 +358,7 @@ class Information(commands.Cog):
 
         await ctx.embed(
             description="\n".join(
-                (f"{n+1}. {i[0]} - {i[1]}" for n, i in enumerate(count.items()))  # noqa also what the fuck pycharm
+                (f"{n + 1}. {i[0]} - {i[1]}" for n, i in enumerate(count.items()))  # noqa also what the fuck pycharm
                 if "sort" in ctx.flags else
                 (f"{role} - {members}" for role, members in count.items())
             )

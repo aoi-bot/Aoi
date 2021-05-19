@@ -56,7 +56,7 @@
                 <tbody>
                 {% for config in guildconfig %}
                 <tr>
-                    <th scope="row" code>{{config.name}}</th>
+                    <th code scope="row">{{config.name}}</th>
                     <td>{{config.description}}</td>
                     <td>{{config.type}}</td>
                     <td code>{{config.default}}</td>
@@ -89,8 +89,8 @@
             <li>
                 <p>
                     Extended colors
-                    <a data-bs-toggle="collapse" href="#colors" role="button" aria-expanded="false"
-                       aria-controls="colors">Expand color list</a>
+                    <a aria-controls="colors" aria-expanded="false" data-bs-toggle="collapse" href="#colors"
+                       role="button">Expand color list</a>
                 </p>
                 <p>
                 <div class="collapse" id="colors">
@@ -296,6 +296,8 @@
     let collapseList = collapseElementList.map(function (collapseEl) {
         return new bootstrap.Collapse(collapseEl, {toggle: false})
     });
+
+
 
 
 

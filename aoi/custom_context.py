@@ -6,9 +6,9 @@ from types import coroutine
 from typing import List, Tuple, Union, Any, Callable, Iterable
 
 from PIL.Image import Image
-from discord.embeds import EmptyEmbed
 
 import discord
+from discord.embeds import EmptyEmbed
 from discord.ext import commands
 from disputils import disputils
 from libs.conversions import escape
@@ -152,7 +152,7 @@ class AoiContext(commands.Context):
         raise ValueError
 
     # noinspection PyDefaultArgument
-    async def embed(self, *,
+    async def embed(self, *,  # noqa c901
                     author: str = None,
                     description: str = None,
                     title: str = None,
@@ -163,7 +163,7 @@ class AoiContext(commands.Context):
                     image: Union[str, io.BufferedIOBase] = None,
                     footer: str = None,
                     not_inline: List[int] = [],
-                    trash_reaction: bool = False):
+                    trash_reaction: bool = False):  # noqa c901
         if not (await self.bot.db.guild_setting(self.guild.id)).reply_embeds:
             msg = ""
             msg += f"**{author}**\n" if author else ""
@@ -191,7 +191,8 @@ class AoiContext(commands.Context):
                     url = ""
             else:
                 f = None
-            return await self.send(re.sub(r"\[(.*?)\]\((.*?)\)", rf"\1 ({zw_sp}<\2>{zw_sp})", msg) + url, file=f) # noqa ignore the \[
+            return await self.send(re.sub(r"\[(.*?)\]\((.*?)\)", rf"\1 ({zw_sp}<\2>{zw_sp})", msg) + url,
+                                   file=f)  # noqa ignore the \[
 
         if typ and clr:
             raise ValueError("typ and clr can not be both defined")

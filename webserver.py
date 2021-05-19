@@ -1,9 +1,9 @@
 import os
+import random
 import re
 from io import BytesIO
 
 import dotenv
-import random
 import redis
 from PIL import Image, ImageDraw, ImageFont
 from sanic import Sanic, response
@@ -63,14 +63,13 @@ async def ttt(request):
         if char != "-":
             drw.text((x, y), char.upper(), font=font, fill=aoi_purple)
         else:
-            drw.text((x, y), str(i+1), font=font, fill=aoi_purple + (0x77, ))
+            drw.text((x, y), str(i + 1), font=font, fill=aoi_purple + (0x77,))
 
     io = BytesIO()
     copy.save(io, format="PNG")
     io.seek(0)
 
     return response.stream(lambda resp: resp.write(io.read()), content_type="image/png")
-
 
 
 app.run(port=8000)

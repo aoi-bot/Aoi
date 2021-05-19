@@ -1,26 +1,19 @@
 import io
 import os
-import random
-from dataclasses import dataclass
-from typing import Optional, Union, List, Dict, Tuple
+from typing import Optional, Union
 
 import PIL.Image
 import PIL.ImageDraw
 import PIL.ImageFont
 import PIL.ImageOps
 import aiohttp
-import ksoftapi
 from PIL import Image, ImageDraw
-from ksoftapi.models import LyricResult
-from ruamel.yaml import YAML
 
 import aoi
 import discord
 from discord.ext import commands
 from games import TicTacToe
-from games.rps import RPS
 from libs.minesweeper import SpoilerMinesweeper, MinesweeperError
-from libs.misc import arg_or_0_index
 
 
 def _font(size: int) -> PIL.ImageFont.ImageFont:
@@ -169,4 +162,3 @@ def setup(bot: aoi.AoiBot) -> None:
     fun = Fun(bot)
 
     bot.add_cog(fun)
-

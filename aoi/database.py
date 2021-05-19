@@ -581,7 +581,7 @@ class AoiDatabase:
     async def remove_self_role(self, guild: discord.Guild, role: Union[discord.Role, int]) -> None:
         if isinstance(role, discord.Role):
             role = role.id
-        await self.conn.execute("delete from selfrole where role=?", (role, ))
+        await self.conn.execute("delete from selfrole where role=?", (role,))
         await self.conn.commit()
 
     # endregion
@@ -791,7 +791,7 @@ class AoiDatabase:
                 self.changed_xp[guild_id].append(user_id)
         self.bot.logger.log(self.bot.TRACE, f"xp:ensure:-releasing lock")
 
-    async def add_xp(self, msg: discord.Message):
+    async def add_xp(self, msg: discord.Message):  # noqa c901
         if msg.author.bot:
             return
         if msg.author.id in self.blacklisted:

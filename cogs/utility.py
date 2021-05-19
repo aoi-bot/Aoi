@@ -349,7 +349,7 @@ class Utility(commands.Cog):
         try:
             sympy.preview(f"$${formula.strip('`')}$$", viewer="BytesIO", outputbuffer=buffer,
                           dvioptions=["-T", "tight", "-z", "0", "--truecolor", "-D 150"])
-        except RuntimeError as e:
+        except RuntimeError:
             await ctx.send_error("An error occurred while rendering.")
         result = BytesIO()
         buffer.seek(0)

@@ -58,7 +58,7 @@ class PlaceholderManager:
         return ctx.guild.name
 
     def guild_icon(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
-        return str(ctx.guild.icon_url)
+        return str(ctx.guild.icon.url if ctx.guild.icon else None)
 
     @property
     def supported(self) -> List[str]:
@@ -202,7 +202,7 @@ class AoiBot(commands.AutoShardedBot):
         except NotImplementedError:
             pass
 
-        bot = kwargs.pop('bot', True)
+        bot = kwargs.pop('bot', True)  # noqa f841
         reconnect = kwargs.pop('reconnect', True)
         self.db = AoiDatabase(self)
         self.banned_tags = os.getenv("BANNED_TAGS").split(",")
@@ -322,6 +322,7 @@ class AoiBot(commands.AutoShardedBot):
 
     def random_thumbnail(self) -> str:
         return random.choice(self.thumbnails) if self.thumbnails else self.user.avatar.url
+
     async def load_thumbnails(self):
         if os.path.exists("loaders/thumbnails.txt"):
             with open("loaders/thumbnails.txt", "r") as fp:

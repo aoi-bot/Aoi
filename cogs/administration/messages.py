@@ -153,7 +153,7 @@ class Messages(commands.Cog):
     @commands.command(brief="Clear message from a channel",
                       flags={"safe": (None, "Ignore pinned messages"),
                              "from": (discord.Member, "From a certain member")})
-    async def clear(self, ctx: aoi.AoiContext, n: int): # noqa C901
+    async def clear(self, ctx: aoi.AoiContext, n: int):  # noqa C901
         await ctx.trigger_typing()
         # fetch the messages first, in blocks
         messages: List[discord.Message] = []

@@ -39,7 +39,7 @@ class Searches(commands.Cog):
     async def lyrics(self, ctx: aoi.AoiContext, *, query: str):
         # TODO re-enable this
         return await ctx.send_error("This command has been disabled temporarily while waiting on an API key")
-        try: # noqa
+        try:  # noqa
             lyrs: List[LyricResult] = sorted(await self.bot.ksoft.music.lyrics(query),
                                              key=lambda x: -x.search_score)
         except ksoftapi.NoResults:

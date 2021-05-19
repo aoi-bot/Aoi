@@ -50,4 +50,4 @@ class SlashMixin:
             embed.set_thumbnail(url=thumbnail)
         for n, r in enumerate(fields or []):
             embed.add_field(name=r[0], value=r[1] or "None", inline=n not in not_inline)
-        msg = await ctx.channel.send(embed=embed, file=f)
+        await ctx.channel.send(embed=embed, file=f)

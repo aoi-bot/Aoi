@@ -140,6 +140,5 @@ class Currency(commands.Cog, CurrencyMixin):
         return await ctx.send_ok(f"Currency already couldn't generate in {channel.mention}")
 
 
-
 def setup(bot: aoi.AoiBot) -> None:
     bot.add_cog(Currency(bot))
