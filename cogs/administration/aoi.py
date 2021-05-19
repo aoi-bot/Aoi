@@ -131,7 +131,7 @@ class Bot(commands.Cog):
     async def die(self, ctx: aoi.AoiContext):
         await ctx.send_ok("Bye :(")
         await self.bot.db.close()
-        await self.bot.logout()
+        await self.bot.close()
 
     @commands.is_owner()
     @commands.command(
