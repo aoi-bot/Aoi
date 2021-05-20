@@ -1,7 +1,13 @@
+import sys
+
+try:
+    sys.path.append(sys.argv[0])
+except:  # noqa
+    sys.path.append(sys.argv[1])
+
 import asyncio
 import logging
 import os
-import sys
 import traceback
 
 import dotenv
