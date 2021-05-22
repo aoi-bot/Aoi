@@ -36,6 +36,7 @@ class FakeUser(discord.User):
 
 
 class PlaceholderManager:
+    # update complexity/context/placeholders.json when this is updated
     def user_name(self, ctx: Union[aoi.AoiContext, discord.Member]) -> str:  # noqa
         return ctx.author.name if isinstance(ctx, aoi.AoiContext) else ctx.name
 

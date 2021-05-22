@@ -1,0 +1,42 @@
+[
+  {
+    "name": "user_name",
+    "description": "The user's name",
+    "example": "Jimmy"
+  },
+  {
+    "name": "user_discrim",
+    "description": "The user's discriminator",
+    "example": "4456"
+  },
+  {
+    "name": "user_mention",
+    "description": "Mentions the user",
+    "example": "<span class='mention'>@Jimmy</span>"
+  },
+  {
+    "name": "user_avatar",
+    "description": "The avatar URL of the user - gif if animated, png if not",
+    "example": "https://cdn.discordapp.com/avatars/569362627932862784/0918n39182m93z089.png?size=1024"
+  },
+  {
+    "name": "user_tag",
+    "description": "The full tag of the user",
+    "example": "Jimmy#4456"
+  },
+  {
+    "name": "user_id",
+    "description": "The user's ID",
+    "example": "12908312831283127189"
+  },
+  {
+    "name": "guild_name",
+    "description": "The name of the server",
+    "example": "Bonk Gaming"
+  },
+  {
+    "name": "guild_icon",
+    "description": "The URL for the server icon",
+    "example": "https://cdn.discordapp.com/icons/523136895246615124/98n73298x7n487.png?size=1024"
+  }
+]
