@@ -16,7 +16,7 @@ $custom-borders: (
 );
 
 
-@import "../bootstrap/scss/bootstrap";
+@import "../../node_modules/bootstrap/scss/bootstrap";
 
 $theme-colors: map-merge($theme-colors, $custom-colors);
 
@@ -65,4 +65,15 @@ $theme-colors: map-merge($theme-colors, $custom-colors);
 
 pre {
   @extend code;
+}
+
+blockquote.quote {
+  border-left: 1px solid $white;
+  margin-left: 3em;
+}
+
+.mention {
+  background-color: #7289DA;
+  border-radius: 0;
+  padding: 1px;
 }
