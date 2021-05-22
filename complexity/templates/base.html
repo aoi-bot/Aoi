@@ -15,6 +15,8 @@
 
     <!-- Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.1.7/css/fork-awesome.min.css"
+          integrity="sha256-gsmEoJAws/Kd3CjuOQzLie5Q3yshhvmo7YNtBG7aaEY=" crossorigin="anonymous">
 
     <style>
         .bd-placeholder-img {
@@ -43,11 +45,9 @@
             max-width: 100%;
         }
 
-
-
-
-
-
+        nav i {
+            transform: scale(1.3);
+        }
     </style>
 
     <!-- Custom styles for this page -->
@@ -62,14 +62,22 @@
             <span class="material-icons">list</span>
         </button>
         <span class="d-md-none">{% block header %}{% endblock %}</span>
-        <a class="py-2 d-none d-md-inline-block" href="/">Home</a>
-        <a class="py-2 d-none d-md-inline-block" href="/commands">Commands</a>
-        <a class="py-2 d-none d-md-inline-block" href="/guides">Guides</a>
-        <a class="py-2 d-none d-md-inline-block" href="https://github.com/aoi-bot/Aoi">Github</a>
-        <a class="py-2 d-none d-md-inline-block" href="https://discord.gg/zRvNtXFWeS">Discord</a>
-        <a class="py-2 d-none d-md-inline-block" href="https://www.patreon.com/crazygmr101">Patreon</a>
-        <a class="py-2 d-none d-md-inline-block"
+        <a class="py-2 d-none d-md-inline-block no-deco" href="/">Home</a>
+        <a class="py-2 d-none d-md-inline-block no-deco" href="/commands">Commands</a>
+        <a class="py-2 d-none d-md-inline-block no-deco" href="/guides">Guides</a>
+        <a class="py-2 d-none d-md-inline-block no-deco"
            href="https://discord.com/api/oauth2/authorize?client_id=791265892154867724&permissions=268659776&scope=bot%20applications.commands">Invite</a>
+        <div class="btn-group">
+            <a class="btn btn-outline-dark py-2 d-none d-md-inline-block" href="https://discord.gg/zRvNtXFWeS">
+                <i class="fa fa-discord" aria-hidden="true"></i>
+            </a>
+            <a class="btn btn-outline-dark py-2 d-none d-md-inline-block" href="https://www.patreon.com/crazygmr101">
+                <i class="fa fa-patreon" aria-hidden="true"></i>
+            </a>
+            <a class="btn btn-outline-dark py-2 d-none d-md-inline-block" href="https://github.com/aoi-bot/Aoi">
+                <i class="fa fa-github" aria-hidden="true"></i>
+            </a>
+        </div>
     </nav>
 </header>
 <main>
@@ -95,6 +103,13 @@
     <script crossorigin="anonymous"
             integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0"
             src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+
     <div class="row">
         <div class="col-12 col-md">
             <h6 class="d-block mb-3 text-muted">&copy; crazygmr101 2021</h6>
