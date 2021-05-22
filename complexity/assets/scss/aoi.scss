@@ -3,6 +3,7 @@ $secondary: #52248c;
 $aoi: #1e0d2c;
 $body-bg: $aoi;
 $body-color: #fff;
+$maddie-purple: #a781e7;
 
 $custom-colors: (
         "discord": #7289DA,
@@ -59,6 +60,10 @@ $theme-colors: map-merge($theme-colors, $custom-colors);
   color: white;
 }
 
+code {
+  color: $maddie-purple;
+}
+
 [code] {
   @extend code;
 }
@@ -70,10 +75,12 @@ pre {
 blockquote.quote {
   border-left: 1px solid $white;
   margin-left: 3em;
+  padding-left: 1em;
 }
 
 .mention {
   background-color: #7289DA;
-  border-radius: 0;
-  padding: 1px;
+  border-radius: 2px;
+  padding: 2px;
+  color: $primary;
 }
