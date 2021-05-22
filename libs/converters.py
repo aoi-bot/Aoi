@@ -170,6 +170,8 @@ class AoiColor:
     async def convert(cls, ctx: typing.Union[AoiContext, SlashContext], arg: str) -> "AoiColor":
         orig = arg
         arg = arg.lower().strip("#x")
+        if arg == "maddiepurple":
+            arg = "a781e7"
         if arg.startswith("0x"):
             arg = arg
         try:
