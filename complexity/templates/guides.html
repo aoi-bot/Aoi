@@ -100,14 +100,23 @@
                 <p>
                 <div class="collapse" id="colors">
                     <div class="row">
-                        <div class="col-lg-3 col-md-6 col-12" id="color1">
+                        {% for color in webcolors %}
+                        <div class="col-lg-3 col-md-4 col-sm-6 col-12 my-2">
+                            <table>
+                                <tr>
+                                    <td rowspan="2">
+                                        <button type="button" class="btn py-2 mx-1" style="background-color:{{color}}">
+                                            &nbsp;&nbsp;&nbsp;
+                                        </button>
+                                    </td>
+                                    <td>{{color}}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{webcolors[color]}}</td>
+                                </tr>
+                            </table>
                         </div>
-                        <div class="col-lg-3 col-md-6 col-12" id="color2">
-                        </div>
-                        <div class="col-lg-3 col-md-6 col-12" id="color3">
-                        </div>
-                        <div class="col-lg-3 col-md-6 col-12" id="color4">
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </li>
@@ -297,7 +306,8 @@
         in the Triggers module. You can view the commands with <code>,cmds Triggers</code><br>
         For example, if your staff role is <span class="mention">@Staff</span>, then you can run:
         <code class="d-block">,onroleadd <span class="mention">@Staff</span> <span class="mention">#staff-channel</span>
-        Welcome to the staff team, &amp;user_mention;!</code> If you don't want to mention the role, you can also use
+            Welcome to the staff team, &amp;user_mention;!</code> If you don't want to mention the role, you can also
+        use
         its ID.
     </div>
     <div id="placeholders">
@@ -346,31 +356,6 @@
             document.getElementById('toc').innerHTML += `<a class="d-block" href="#${element.parentElement.id}">${element.innerHTML}</a>`;
             element.innerHTML += '<sup><a class="px-2" href="#toc">Top</a></sup><br/>';
         })
-
-
-    webColors = ["MediumVioletRed", "DeepPink", "PaleVioletRed", "HotPink", "LightPink", "Pink", "DarkRed", "Red",
-        "Firebrick", "Crimson", "IndianRed", "LightCoral", "Salmon", "DarkSalmon", "LightSalmon", "OrangeRed",
-        "Tomato", "DarkOrange", "Coral", "Orange", "DarkKhaki", "Gold", "Khaki", "PeachPuff", "Yellow", "PaleGoldenrod",
-        "Moccasin", "PapayaWhip", "LightGoldenrodYellow", "LemonChiffon", "LightYellow", "Maroon", "Brown", "SaddleBrown",
-        "Sienna", "Chocolate", "DarkGoldenrod", "Peru", "RosyBrown", "Goldenrod", "SandyBrown", "Tan", "Burlywood",
-        "Wheat", "NavajoWhite", "Bisque", "BlanchedAlmond", "Cornsilk", "DarkGreen", "Green", "DarkOliveGreen", "ForestGreen",
-        "SeaGreen", "Olive", "OliveDrab", "MediumSeaGreen", "LimeGreen", "Lime", "SpringGreen", "MediumSpringGreen",
-        "DarkSeaGreen", "MediumAquamarine", "YellowGreen", "LawnGreen", "Chartreuse", "LightGreen", "GreenYellow",
-        "PaleGreen", "Teal", "DarkCyan", "LightSeaGreen", "CadetBlue", "DarkTurquoise", "MediumTurquoise", "Turquoise",
-        "Aqua", "Cyan", "Aquamarine", "PaleTurquoise", "LightCyan", "Navy", "DarkBlue", "MediumBlue", "Blue", "MidnightBlue",
-        "RoyalBlue", "SteelBlue", "DodgerBlue", "DeepSkyBlue", "CornflowerBlue", "SkyBlue", "LightSkyBlue", "LightSteelBlue",
-        "LightBlue", "PowderBlue", "Indigo", "Purple", "DarkMagenta", "DarkViolet", "DarkSlateBlue", "BlueViolet", "DarkOrchid",
-        "Fuchsia", "Magenta", "SlateBlue", "MediumSlateBlue", "MediumOrchid", "MediumPurple", "Orchid", "Violet", "Plum",
-        "Thistle", "Lavender", "MistyRose", "AntiqueWhite", "Linen", "Beige", "WhiteSmoke", "LavenderBlush", "OldLace",
-        "AliceBlue", "Seashell", "GhostWhite", "Honeydew", "FloralWhite", "Azure", "MintCream", "Snow", "Ivory", "White",
-        "Black", "DarkSlateGray", "DimGray", "SlateGray", "Gray", "LightSlateGray", "DarkGray", "Silver", "LightGray",
-        "Gainsboro"]
-
-    elements = [1, 2, 3, 4].map(index => document.getElementById(`color${index}`))
-
-    for (let i = 0; i < webColors.length; i++) {
-        elements[i % 4].innerHTML += `<p><button type="button" class="btn" style="background-color:${webColors[i]}">&nbsp;&nbsp;&nbsp;</button> ${webColors[i].toLowerCase()}</p>`
-    }
 
 
     let collapseElementList = [].slice.call(document.querySelectorAll('.collapse'));
