@@ -2,7 +2,12 @@
 {% block title %}Aoi Bot - Guide{% endblock %}
 {% block header %}Guide{% endblock %}
 {% block content %}
-<div class="container">
+<style>
+    .container#main > div {
+        padding-top: 5em;
+    }
+</style>
+<div class="container" id="main">
     <div class="bd-toc py-2" id="toc">
         <h2>Table of Contents</h2>
     </div>
@@ -255,6 +260,82 @@
             </li>
         </ol>
     </div>
+
+    <div id="how-to-greetings">
+        <h2>How to: Leave and Join messages</h2>
+        <div>
+            Aoi can greet your users when they join, and send a message when they leave. All the commands are in the
+            WelcomeGoodbye module.
+            You can view these commands with <code>,cmds WelcomeGoodbye</code>
+        </div>
+        For example, to set the following messages in your <span class="mention">#general</span> channel, and have them
+        delete after 2 minutes
+        <blockquote class="quote">
+            Welcome to <b>Gaming Server</b>, <b>@jimmy</b>!
+        </blockquote>
+        <blockquote class="quote">
+            Jimmy#4452 has left us. :(
+        </blockquote>
+        Run the following commands:
+        <ul>
+            <li><code>,joinmsg Welcome to **&amp;guild_name;**, <span class="mention">&amp;user_mention;!</span></code>
+                - this sets the message
+            </li>
+            <li><code>,joinmsgchnl <span class="mention">#general</span></code> - to set the channel</li>
+            <li><code>,joinmsgdel 120</code> - 120s = 2m</li>
+            <li><code>,leavemsg &amp;user_tag; has left us :(</code> - this sets the message</li>
+            <li><code>,leavemsgchnl <span class="mention">#general</span></code> - to set the channel</li>
+            <li><code>,leavemsgdel 120</code> - 120s = 2m</li>
+        </ul>
+        Embed messages can be made at <a href="https://embed.aoibot.xyz">https://embed.aoibot.xyz</a>. Just fill out the
+        left side, and click copy on the right.
+    </div>
+    <div id="how-to-role-message">
+        <h2>How to: Role add message</h2>
+        Aoi has a feature to send a message in a designated channel when a role is added to or removed from someone.
+        This can be used to welcome someone to your staff team, or thank your new donors. These commands are located
+        in the Triggers module. You can view the commands with <code>,cmds Triggers</code><br>
+        For example, if your staff role is <span class="mention">@Staff</span>, then you can run:
+        <code class="d-block">,onroleadd <span class="mention">@Staff</span> <span class="mention">#staff-channel</span>
+        Welcome to the staff team, &amp;user_mention;!</code> If you don't want to mention the role, you can also use
+        its ID.
+    </div>
+    <div id="placeholders">
+        <h2>Placeholders</h2>
+        Placeholders can be used in many places that take a message, such as <a href="#how-to-greetings">greetings</a>.
+        <div class="d-none d-sm-none d-md-block">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">Placeholders</th>
+                    <th scope="col">Explanation</th>
+                    <th scope="col">Example</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for placeholder in placeholders %}
+                <tr>
+                    <th scope="row"><code>&amp;{{placeholder.name}};</code></th>
+                    <td>{{placeholder.description}}</td>
+                    <td>{{placeholder.example}}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="d-block d-md-none container">
+            {% for placeholder in placeholders %}
+            <div>
+                <b><code>&amp;{{placeholder.name}};</code></b>
+                <ul>
+                    <li>Example: {{placeholder.example}}</li>
+                    <li>{{placeholder.description}}</li>
+                </ul>
+            </div>
+
+            {% endfor %}
+        </div>
+    </div>
 </div>
 
 <script>
@@ -296,12 +377,6 @@
     let collapseList = collapseElementList.map(function (collapseEl) {
         return new bootstrap.Collapse(collapseEl, {toggle: false})
     });
-
-
-
-
-
-
 
 
 </script>
