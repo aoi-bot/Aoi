@@ -10792,15 +10792,21 @@ textarea.form-control-lg {
   color: white;
 }
 
+code, pre, [code] {
+  color: #a781e7;
+}
+
 blockquote.quote {
   border-left: 1px solid #fff;
   margin-left: 3em;
+  padding-left: 1em;
 }
 
 .mention {
   background-color: #7289DA;
-  border-radius: 0;
-  padding: 1px;
+  border-radius: 2px;
+  padding: 2px;
+  color: #6d30b8;
 }
 
 /*# sourceMappingURL=aoi.css.map */
