@@ -12,6 +12,7 @@ from discord.embeds import EmptyEmbed
 from discord.ext import commands
 from disputils import disputils
 from libs.conversions import escape
+from dpy_button_utils import ButtonConfirmation
 
 
 def _wrap_user(user: discord.abc.User):
@@ -51,23 +52,18 @@ class AoiContext(commands.Context):
             await message.delete()
 
     async def confirm(self, message: str, confirmed: str, denied: str):
-        conf = disputils.BotConfirmation(self, color=await self.get_color(self.INFO))
-        await conf.confirm(message)
-        if conf.confirmed:
-            await conf.update(text=self.loc(confirmed), color=await self.get_color(self.OK))
-        else:
-            await conf.update(text=self.loc(denied), color=await self.get_color(self.ERROR))
-        return conf.confirmed
+        conf = ButtonConfirmation(self, message, timeout=120, confirm_message=confirmed, cancel_message=denied)
+        return await conf.run()
+
 
     async def confirm_coro(self, message: str, confirmed: str, denied: str, coro: coroutine):
-        conf = disputils.BotConfirmation(self, color=await self.get_color(self.INFO))
-        await conf.confirm(message)
-        if conf.confirmed:
+        conf = ButtonConfirmation(self, message, timeout=120, confirm_message="...",
+                                  cancel_message=denied)
+        is_confirmed = await conf.run()
+        if is_confirmed:
             await coro
-            await conf.update(text=self.loc(confirmed), color=await self.get_color(self.OK))
-        else:
-            await conf.update(text=self.loc(denied), color=await self.get_color(self.ERROR))
-        return conf.confirmed
+            await (await self.fetch_message(conf.msg)).edit(content=confirmed)
+        return is_confirmed
 
     async def done_ping(self):
         return await self.send(f"{self.author.mention}, done! {self.message.jump_url}")

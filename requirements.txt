@@ -17,3 +17,4 @@ idna==3.1
 urllib3==1.26.4
 redis~=3.5.3
 complexity~=0.9.1
+dpy-button-utils~=1.0.1
