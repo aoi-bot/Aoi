@@ -1,6 +1,6 @@
 {
     "Bot": {
-        "description": "Commands having to do with the bot herself",
+        "description": "Commands having to do with the bot",
         "commands": {
             "stats": "\n<div class=\"card bg-dark my-1 mx-1\">\n    <div class=\"card-body\">\n        <h5 class=\"card-title\"><code>,stats</code></h5>\n        <h6 class=\"card-subtitle text-muted\">Shows bot stats</h6>\n        <div class=\"card-text\">\n           \n           <div>\n              Usage: <code>,stats </code>\n           </div>\n           \n           \n       </div>\n   </div>\n</div>\n",
             "invite": "\n<div class=\"card bg-dark my-1 mx-1\">\n    <div class=\"card-body\">\n        <h5 class=\"card-title\"><code>,invite</code></h5>\n        <h6 class=\"card-subtitle text-muted\">Gives a link to invite #BOT# to your server</h6>\n        <div class=\"card-text\">\n           \n           <div>\n              Usage: <code>,invite </code>\n           </div>\n           \n           \n       </div>\n   </div>\n</div>\n",
