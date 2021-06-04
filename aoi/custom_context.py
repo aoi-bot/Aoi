@@ -10,8 +10,8 @@ from PIL.Image import Image
 import discord
 from discord.embeds import EmptyEmbed
 from discord.ext import commands
-from disputils import disputils
 from libs.conversions import escape
+from dpy_button_utils import ButtonConfirmation, ButtonPaginator
 
 
 def _wrap_user(user: discord.abc.User):
@@ -51,26 +51,20 @@ class AoiContext(commands.Context):
             await message.delete()
 
     async def confirm(self, message: str, confirmed: str, denied: str):
-        conf = disputils.BotConfirmation(self, color=await self.get_color(self.INFO))
-        await conf.confirm(message)
-        if conf.confirmed:
-            await conf.update(text=self.loc(confirmed), color=await self.get_color(self.OK))
-        else:
-            await conf.update(text=self.loc(denied), color=await self.get_color(self.ERROR))
-        return conf.confirmed
+        conf = ButtonConfirmation(self, message, timeout=120, confirm_message=confirmed, cancel_message=denied)
+        return await conf.run()
 
     async def confirm_coro(self, message: str, confirmed: str, denied: str, coro: coroutine):
-        conf = disputils.BotConfirmation(self, color=await self.get_color(self.INFO))
-        await conf.confirm(message)
-        if conf.confirmed:
+        conf = ButtonConfirmation(self, message, timeout=120, confirm_message="...",
+                                  cancel_message=denied)
+        is_confirmed = await conf.run()
+        if is_confirmed:
             await coro
-            await conf.update(text=self.loc(confirmed), color=await self.get_color(self.OK))
-        else:
-            await conf.update(text=self.loc(denied), color=await self.get_color(self.ERROR))
-        return conf.confirmed
+            await (await self.fetch_message(conf.msg)).edit(content=confirmed)
+        return is_confirmed
 
     async def done_ping(self):
-        return await self.send(f"{self.author.mention}, done! {self.message.jump_url}")
+        return await self.send("Done!", reference=self.message, mention_author=False)
 
     async def send_info(self, message: str, *, user: discord.abc.User = None,
                         title: str = None, trash: bool = False, ping: bool = False):
@@ -291,15 +285,15 @@ class AoiContext(commands.Context):
                        num_start: int = 0):
         if numbered:
             lst = self.numbered(lst, num_start)
-        paginator = disputils.BotEmbedPaginator(self,
-                                                await self.pages(lst, n, title,
-                                                                 fmt=fmt, sep=sep,
-                                                                 thumbnails=thumbnails,
-                                                                 color=await self.get_color(self.INFO)))
+        paginator = ButtonPaginator(self,
+                                    embeds=await self.pages(lst, n, title,
+                                                            fmt=fmt, sep=sep,
+                                                            thumbnails=thumbnails,
+                                                            color=await self.get_color(self.INFO)))
         await paginator.run()
 
-    async def page_predefined(self, *embeds: List[discord.Embed]):
-        paginator = disputils.BotEmbedPaginator(self, embeds)
+    async def page_predefined(self, *embeds: discord.Embed):
+        paginator = ButtonPaginator(self, embeds=list(embeds))
         await paginator.run()
 
     async def input(self, typ: type, cancel_str: str = "cancel", ch: Callable = None, err=None, check_author=True,

@@ -12,8 +12,8 @@ discord~=1.0.1
 ksoftapi==0.4.1
 ruamel.yaml
 setuptools==56.2.0
-discord-py-slash-command~=1.0.9.5
 idna==3.1
 urllib3==1.26.5
 redis~=3.5.3
 complexity~=0.9.1
+dpy-button-utils~=1.0.1
