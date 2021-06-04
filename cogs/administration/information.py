@@ -45,15 +45,15 @@ class Information(commands.Cog):
             else:
                 raise commands.BadArgument("Channel not in server")
         if isinstance(obj, discord.Message):
-            chan: discord.TextChannel = obj.channel
+            channel: discord.TextChannel = obj.channel
             author: discord.Member = obj.author
-            if chan.guild.id not in [tc.id for tc in ctx.guild.text_channels]:
+            if channel.id not in [tc.id for tc in ctx.guild.text_channels]:
                 raise commands.BadArgument("Message not in server")
             return await ctx.embed(
                 title=f"Info for message",
                 fields=[
                     ("ID", obj.id),
-                    ("Channel", f"{chan} | {chan.mention}"),
+                    ("Channel", f"{channel} | {channel.mention}"),
                     ("Author", f"{author} | {author.mention}"),
                     ("Sent at", obj.created_at.strftime('%c'))
                 ]
