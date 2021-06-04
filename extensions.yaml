@@ -32,6 +32,5 @@
     "cogs.administration.aoi": "Bot"
 "Hidden":
     "cogs.errorhandler": "ErrorHandler"
-    "cogs.slash": "Slash"
     "cogs.patreon": "Patreon"
     "cogs.tbhk": "TBHK"
