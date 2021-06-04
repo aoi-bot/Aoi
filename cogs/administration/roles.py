@@ -99,40 +99,6 @@ class Roles(commands.Cog):
 
     @commands.bot_has_permissions(manage_roles=True)
     @commands.has_permissions(manage_roles=True)
-    @commands.command(brief="Moves roles to a position",
-                      aliases=["mr"])
-    async def moverole(self, ctx: aoi.AoiContext, position: int, roles: Greedy[discord.Role]):
-        raise commands.DisabledCommand()
-        if not roles:
-            raise commands.BadArgument("I need to know what role(s) to move!")
-        roles: List[discord.Role] = list(roles)
-
-        for role in roles:
-            if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
-                raise aoi.RoleHierarchyError(f"{role.mention} must be below your highest role in order for "
-                                             f"you to move it.")
-            if role >= ctx.me.top_role:
-                raise aoi.RoleHierarchyError(f"{role.mention} must be above my highest role for me to move it.")
-        if not await ctx.confirm(f"Move {' '.join(r.name for r in roles)} to position {position}?",
-                                 "Moving roles...",
-                                 "Role move cancelled"):
-            return
-
-        n = 0
-
-        async def do_op():
-            nonlocal n
-            for r in roles:
-                await r.edit(position=position)
-
-        await ctx.trigger_typing()
-        if len(roles) > 3:
-            await ctx.send_info(f"Moving {len(roles)} roles. Will take at least {len(roles)}s")
-        await self.bot.create_task(ctx, do_op(), lambda: f"{n}/{(len(roles))}")
-        await ctx.send_ok(f"Moved {' '.join('`' + r.name + '`' for r in roles)}", ping=len(roles) > 10)
-
-    @commands.bot_has_permissions(manage_roles=True)
-    @commands.has_permissions(manage_roles=True)
     @commands.command(brief="Deletes one or more roles",
                       aliases=["dr"])
     async def deleterole(self, ctx: aoi.AoiContext, roles: Greedy[discord.Role]):
