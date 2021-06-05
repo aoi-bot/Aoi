@@ -20,6 +20,8 @@ try:
     os.chdir(os.path.dirname(sys.argv[0]))
 except FileNotFoundError:
     pass
+except OSError:  # fuck windows
+    pass
 
 logging.addLevelName(7, "TRACE")
 
