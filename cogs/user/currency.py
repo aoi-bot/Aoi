@@ -2,7 +2,6 @@ import io
 from typing import Optional
 
 import PIL
-import PIL.Image as Im
 import PIL.ImageDraw as Dw
 import PIL.ImageFont as Fn
 

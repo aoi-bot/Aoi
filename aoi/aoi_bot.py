@@ -435,7 +435,7 @@ class AoiBot(commands.AutoShardedBot):
             await self.logger.critical(f"Error in DB cache flush: {e}")
         try:
             await self.close()
-        except Exception as e:
+        except Exception:
             pass
         exit(0)
 

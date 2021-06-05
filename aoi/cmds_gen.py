@@ -57,7 +57,7 @@ def friendly_signature(command: commands.Command, bot: AoiBot) -> str:
                 {param.name}</span>""")  # noqa
         if param.default is not inspect.Parameter.empty:
             defaults[param.name] = param.default
-    result = " ".join(signature_string), defaults
+    " ".join(signature_string), defaults
     return " ".join(signature_string)
 
 
