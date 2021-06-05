@@ -438,4 +438,3 @@ class AoiBot(commands.AutoShardedBot):
         except Exception:
             pass
         exit(0)
-

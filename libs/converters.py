@@ -167,7 +167,7 @@ class AoiColor:
         self.b = b
 
     @classmethod
-    async def convert(cls, ctx: typing.Union[AoiContext, SlashContext], arg: str) -> "AoiColor":
+    async def convert(cls, ctx: typing.Union[AoiContext, SlashContext], arg: str) -> "AoiColor":  # noqa C901
         orig = arg
         arg = arg.lower().strip("#x")
         if arg == "maddiepurple":
