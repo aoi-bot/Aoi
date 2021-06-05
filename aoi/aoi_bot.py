@@ -429,5 +429,13 @@ class AoiBot(commands.AutoShardedBot):
         asyncio.get_event_loop().create_task(self._handle_sigterm())
 
     async def _handle_sigterm(self):
-        await self.db.cache_flush()
-        await self.close()
+        try:
+            await self.db.cache_flush()
+        except Exception as e:
+            await self.logger.critical(f"Error in DB cache flush: {e}")
+        try:
+            await self.close()
+        except Exception as e:
+            pass
+        exit(0)
+
