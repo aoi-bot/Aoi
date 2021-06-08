@@ -176,6 +176,9 @@ class AoiBot(commands.AutoShardedBot):
         if await self.check_slowmode(message):
             return
 
+        if not message.guild:
+            return
+
         # handle aliases and transform message if needed
         message = await self.handle_aliases(message)
 
