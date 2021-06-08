@@ -38,7 +38,7 @@ class Moderation(commands.Cog):
             add_field(name="User", value=str(member)). \
             add_field(name="ID", value=str(member.id)). \
             add_field(name="Staff Member", value=ctx.author.mention). \
-            set_thumbnail(url=member.avatar_url)
+            set_thumbnail(url=member.avatar.url)
 
     @property
     def description(self) -> str:
