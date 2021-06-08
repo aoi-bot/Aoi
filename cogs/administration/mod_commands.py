@@ -142,7 +142,7 @@ class Moderation(commands.Cog):
     @commands.command(brief="Views the punishment logs for a user")
     async def logs(self, ctx: aoi.AoiContext, member: discord.Member = None):
         member = member or ctx.author
-        if member.id != ctx.author.id and not ctx.author.permissions_in(ctx.channel).kick_members:
+        if member.id != ctx.author.id and not ctx.channel.permissions_for(ctx.author).kick_members:
             return await ctx.send_error("You need the kick members permission to see logs from other people")
         punishments: List[Punishment] = sorted(await self.bot.db.lookup_punishments(member.id),
                                                key=lambda punishment: punishment.time, reverse=True)
