@@ -1,4 +1,7 @@
+import multiprocessing
 import sys
+
+from dashboard import Dashboard
 
 try:
     sys.path.append(sys.argv[0])
@@ -19,6 +22,8 @@ from discord.ext import commands
 try:
     os.chdir(os.path.dirname(sys.argv[0]))
 except FileNotFoundError:
+    pass
+except OSError:  # fuck windows
     pass
 
 logging.addLevelName(7, "TRACE")
@@ -125,12 +130,30 @@ async def permission_check(ctx: aoi.AoiContext):  # noqa: C901
     return True
 
 
-try:
-    bot.logger.info(f"Starting Aoi Bot with PID {os.getpid()}")
-    bot.run(os.getenv("TOKEN"))
-except Exception as error:
-    traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
-    exit(1)
+dashboard = Dashboard(bot)
+
+
+def bot_process():
+    try:
+        bot.logger.info(f"Starting Aoi Bot with PID {os.getpid()}")
+        bot.run(os.getenv("TOKEN"))
+    except Exception as error:
+        traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+        exit(1)
+
+
+def dashboard_process():
+    dashboard.run()
+
+
+_bot_proc = multiprocessing.Process(target=bot_process)
+_dash_proc = multiprocessing.Process(target=dashboard_process)
+
+_bot_proc.start()
+_dash_proc.start()
+
+_bot_proc.join()
+_dash_proc.kill()
 
 if bot.is_restarting:
     os.execl(sys.executable, sys.executable, *sys.argv)

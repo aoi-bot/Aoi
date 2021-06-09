@@ -37,7 +37,7 @@ class Bot(commands.Cog):
 
     @property
     def description(self):
-        return "Commands having to do with the bot herself"
+        return "Commands having to do with the bot"
 
     @tasks.loop(minutes=1)
     async def redis_loop(self):

@@ -971,7 +971,6 @@ class AoiDatabase:
                 await self.conn.execute("INSERT INTO guild_settings (Guild) values (?)", (guild,))
             except sqlite3.IntegrityError:
                 self.bot.logger.warning(f"Passing IntegrityError for guild {guild}")
-                pass
             await self.conn.commit()
             self.guild_settings[guild] = _GuildSetting(
                 ok_color=0x00aa00,
