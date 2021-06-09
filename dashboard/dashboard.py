@@ -14,8 +14,3 @@ class Dashboard:
     def run(self):
         c = 0
         self.bot.logger.info("dash:Starting")
-        while True:
-            c += 1
-            self.bot.logger.info(f"dash:{c}")
-            time.sleep(1)
-            time.sleep(0)
