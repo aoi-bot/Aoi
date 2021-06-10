@@ -239,7 +239,7 @@ class Information(commands.Cog):
         perms = member.permissions_in(channel)
         await ctx.embed(
             title=f"Permissions for {member} in {channel}",
-            thumbnail=member.avatar_url,
+            thumbnail=member.avatar.url,
             description="```diff\n" +
                         "\n".join(
                             f"{'+' if perm[1] or perms.administrator else '-'} "
