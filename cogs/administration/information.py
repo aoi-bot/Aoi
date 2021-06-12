@@ -236,7 +236,7 @@ class Information(commands.Cog):
                           channel: Optional[Union[discord.TextChannel, discord.VoiceChannel]] = None):
         channel = channel or ctx.channel
         member = member or ctx.author
-        perms = member.permissions_in(channel)
+        perms = channel.permissions_for(member)
         await ctx.embed(
             title=f"Permissions for {member} in {channel}",
             thumbnail=member.avatar.url,
@@ -258,8 +258,7 @@ class Information(commands.Cog):
             if role == "@everyone" or role == "everyone":
                 role = ctx.guild.get_role(ctx.guild.id)
             else:
-                raise commands.RoleNotFound(role
-                                            )
+                raise commands.RoleNotFound(role)
 
         def _(perm, ov):
             if ov.administrator:
