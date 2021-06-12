@@ -154,7 +154,7 @@ class Profile(commands.Cog):
         global_level, global_rem = _level(global_xp)
         server_level, server_rem = _level(server_xp)
         avatar_buf = io.BytesIO()
-        await member.avatar_url_as(format="png").save(avatar_buf)
+        await member.avatar.save(avatar_buf)
         avatar_buf.seek(0)
         img = self.background.copy()
         avatar_img = Im.open(avatar_buf)
