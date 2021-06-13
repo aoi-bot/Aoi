@@ -7,7 +7,7 @@ import PIL.ImageFont as Fn
 
 import aoi
 import discord
-from aoi.mixins.currency import CurrencyMixin
+from cog_helpers.currency import CurrencyService
 from discord.ext import commands
 from libs.converters import disenable
 
@@ -50,9 +50,9 @@ def _font(size: int) -> PIL.ImageFont.ImageFont:
         "assets/merged.ttf", size=size)
 
 
-class Currency(commands.Cog, CurrencyMixin):
+class Currency(commands.Cog, CurrencyService):
     def __init__(self, bot: aoi.AoiBot):
-        CurrencyMixin.__init__(self, bot)
+        CurrencyService.__init__(self, bot)
         self.bot = bot
         self.fp = open("assets/wallet.png", "rb")
         self.background: PIL.Image.Image = PIL.Image.open(self.fp)

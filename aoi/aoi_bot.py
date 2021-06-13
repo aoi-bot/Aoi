@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import asyncio
+import importlib
 import json
 import logging
 import os
 import random
 import re
-import signal
 import subprocess
 from datetime import datetime, timedelta
 from typing import Dict, Optional, List, Union, TYPE_CHECKING, Awaitable, Any, Callable, Tuple
@@ -306,7 +306,7 @@ class AoiBot(commands.AutoShardedBot):
             for path, cog_name in extensions[grp_name].items():
                 try:
                     self.logger.info(f"cog:Loading {grp_name}:{cog_name} from {path}")
-                    super(AoiBot, self).load_extension(path)
+                    super(AoiBot, self).load_extension(f"cogs.{path}")
                 except discord.ClientException as e:
                     self.logger.critical(f"An error occurred while loading {path}")
                     self.logger.critical(e.__str__().split(":")[-1].strip())

@@ -7,15 +7,16 @@ from PIL import ImageDraw
 
 import aoi
 import discord
+from cog_helpers.colors import ColorService
 from discord.ext import commands
 from discord.ext.commands import Greedy
 from libs import conversions
-from libs.colors import rgb_gradient, hls_gradient
 from libs.converters import AoiColor, rolename
 
 
-class Roles(commands.Cog):
+class Roles(commands.Cog, ColorService):
     def __init__(self, bot: aoi.AoiBot):
+        super(ColorService).__init__()
         self.bot = bot
 
     @property
@@ -142,7 +143,7 @@ class Roles(commands.Cog):
         for role in roles:
             self._check_role(ctx, role)
         num = len(roles)
-        colors = hls_gradient(color1, color2, num) if hls else rgb_gradient(color1, color2, num)
+        colors = self.hls_gradient(color1, color2, num) if hls else self.rgb_gradient(color1, color2, num)
         img = Image.new("RGB", (240, 48))
         await ctx.trigger_typing()
         img_draw = ImageDraw.Draw(img)
@@ -153,7 +154,7 @@ class Roles(commands.Cog):
             nonlocal n
             for idx, clr in enumerate(colors):
                 await asyncio.sleep(0.5)
-                await roles[idx].edit(color=AoiColor(*clr).to_discord_color())
+                await roles[idx].edit(colour=AoiColor(*clr).to_discord_color())
                 img_draw.rectangle([
                     (idx * 240 / num, 0),
                     ((idx + 1) * 240 / num, 48)

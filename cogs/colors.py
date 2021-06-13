@@ -8,12 +8,13 @@ from PIL.ImageOps import grayscale, colorize
 
 import aoi
 import discord
+from cog_helpers.colors import ColorService
 from discord.ext import commands
 from discord.ext.commands import Greedy
 from libs.converters import AoiColor, FuzzyAoiColor
 
 
-class Colors(commands.Cog, aoi.ColorCogMixin):
+class Colors(commands.Cog, ColorService):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
         super(Colors, self).__init__()

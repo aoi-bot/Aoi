@@ -3,12 +3,11 @@ import random
 from typing import Dict, Tuple, List, Optional
 
 import discord
+from aoi import AoiBot, AoiContext
 from libs.conversions import escape
-from ..aoi_bot import AoiBot
-from ..custom_context import AoiContext
 
 
-class CurrencyMixin:
+class CurrencyService:
     def __init__(self, bot: AoiBot):
         self.bot = bot
         self.active_catches: Dict[discord.TextChannel, List[Tuple[discord.Message, int]]] = {}
