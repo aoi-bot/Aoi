@@ -10,8 +10,8 @@ class HelpCogService:
     def get_command_signature(self, cmd: Command, ctx: AoiContext):
 
         return f"`{ctx.clean_prefix}{cmd.name} " + (
-            cmd.usage or
-            f"{re.sub(r'[<>]', '', cmd.signature) if cmd.signature else ''}{' [flags]' if cmd.flags else ''}") + "`"
+                cmd.usage or
+                f"{re.sub(r'[<>]', '', cmd.signature) if cmd.signature else ''}{' [flags]' if cmd.flags else ''}") + "`"
 
     def format_flag(self, flag_tup: Tuple[str, Tuple[Optional[type], str]]) -> str:
         if flag_tup[1][0]:

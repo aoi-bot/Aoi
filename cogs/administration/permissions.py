@@ -7,6 +7,7 @@ from libs.converters import disenable
 from libs.misc import null_safe
 
 
+# TODO help refactor
 class Permissions(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot

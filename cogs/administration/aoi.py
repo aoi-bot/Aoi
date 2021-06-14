@@ -14,6 +14,8 @@ from discord.ext import commands, tasks
 from libs.conversions import dhm_notation, hms_notation, maybe_pluralize, sql_trim
 
 
+# TODO help refactor
+
 class Bot(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot

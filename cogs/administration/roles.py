@@ -14,6 +14,8 @@ from libs import conversions
 from libs.converters import AoiColor, rolename
 
 
+# TODO help refactor
+
 class Roles(commands.Cog, ColorService):
     def __init__(self, bot: aoi.AoiBot):
         super(ColorService).__init__()

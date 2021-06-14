@@ -13,6 +13,8 @@ class _ReactionRoleData:
     role: discord.Role
 
 
+# TODO help refactor
+
 class ReactionRoles(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot

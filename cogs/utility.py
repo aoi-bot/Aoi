@@ -10,7 +10,7 @@ from PIL import Image
 from PIL import ImageOps
 
 import aoi
-from discord.ext import commands, tasks
+from discord.ext import commands
 from libs.converters import integer, allowed_strings, dtime
 from libs.expressions import evaluate, get_prime_factors
 from wrappers import gmaps as gmaps

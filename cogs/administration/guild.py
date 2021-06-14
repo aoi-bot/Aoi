@@ -145,7 +145,7 @@ class Guilds(commands.Cog):
         addemoji emoji_name emoji.com/my_awesome_emoji.png
         """
     )
-    async def addemoji(self, ctx: aoi.AoiContext, name: str, src: Union[discord.PartialEmoji, str]): # noqa c901
+    async def addemoji(self, ctx: aoi.AoiContext, name: str, src: Union[discord.PartialEmoji, str]):  # noqa c901
         if len(name) > 32 or len(name) < 2:
             raise commands.BadArgument("Emoji name must be 2-32 characters")
         if isinstance(src, discord.PartialEmoji):

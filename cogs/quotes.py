@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 
 
+# TODO help refactor
 class Quotes(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot

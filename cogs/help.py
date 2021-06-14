@@ -1,5 +1,5 @@
 import inspect
-from typing import Optional, Tuple, List
+from typing import List
 
 import aoi
 import discord
@@ -145,9 +145,9 @@ class Help(commands.Cog, HelpCogService):
                   ) + "\n") if p else '') +
                 ("You are missing permissions needed to turn this command\n" if not await _can_run(cmd, ctx) else '') +
                 ("Examples:\n" + LINQ(cmd.description.splitlines())
-                         .select(lambda x: x.strip())
-                         .select(lambda x: f"⋄ `{ctx.clean_prefix}{x}`")
-                         .join("\n") + "\n" if cmd.description else "") +
+                 .select(lambda x: x.strip())
+                 .select(lambda x: f"⋄ `{ctx.clean_prefix}{x}`")
+                 .join("\n") + "\n" if cmd.description else "") +
                 (("Aliases:" + ", ".join([f"`{a}`" for a in cmd.aliases])) if cmd.aliases else "") +
                 (f"\nAliases are pointing at this command, run `{ctx.clean_prefix}aliases {command}` to view them\n"
                  if await self.bot.rev_alias(ctx, command) else "") +
