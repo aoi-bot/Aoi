@@ -42,7 +42,11 @@ class Utility(commands.Cog):
     # region # NASA
 
     @commands.command(
-        brief="Get a LANDSAT-8 image of a lat/long"
+        brief="Get a LANDSAT-8 image of a lat/long",
+        description="""
+        landsat 15.6 176.7
+        landsat Chicago
+        """
     )
     @commands.cooldown(1, 60, type=commands.BucketType.user)
     async def landsat(self, ctx: aoi.AoiContext, coords: gmaps.LocationCoordinates,
@@ -65,7 +69,10 @@ class Utility(commands.Cog):
 
     # @commands.cooldown(1, 360, type=commands.BucketType.user)
     @commands.command(
-        brief="Gets the astronomy picture of the day"
+        brief="Gets the astronomy picture of the day",
+        description="""
+        apod 12/25/2005
+        """
     )
     async def apod(self, ctx: aoi.AoiContext, *, date: dtime() = None):
         if not date:
@@ -101,26 +108,6 @@ class Utility(commands.Cog):
     # region # wx
 
     @commands.command(
-        brief="A map of the amount of rain from the current storm"
-    )
-    async def stormrain(self, ctx: aoi.AoiContext, location: gmaps.LocationCoordinates):
-        res = await self.wx.lookup_grid(location.lat, location.long)
-        radar = res.radar_station[-3:]
-        await ctx.embed(
-            image=f"https://radar.weather.gov/ridge/lite/NTP/{radar}_0.png"
-        )
-
-    @commands.command(
-        brief="A map of the amount of rain from the last hour"
-    )
-    async def hourrain(self, ctx: aoi.AoiContext, location: gmaps.LocationCoordinates):
-        res = await self.wx.lookup_grid(location.lat, location.long)
-        radar = res.radar_station[-3:]
-        await ctx.embed(
-            image=f"https://radar.weather.gov/ridge/lite/N1P/{radar}_0.png"
-        )
-
-    @commands.command(
         brief="Look up a looping radar"
     )
     async def radarloop(self, ctx: aoi.AoiContext, location: gmaps.LocationCoordinates):
@@ -129,10 +116,10 @@ class Utility(commands.Cog):
             image=f"https://radar.weather.gov/ridge/lite/{res.radar_station}_loop.gif"
         )
 
-    @commands.command(
-        brief="Look up a current satellite image",
-        aliases=["radar"]
-    )
+    # @commands.command(
+    #     brief="Look up a current satellite image",
+    #     aliases=["radar"]
+    # )
     async def satellite(self, ctx: aoi.AoiContext,
                         location: gmaps.LocationCoordinates):
         res = await self.wx.lookup_grid(location.lat,
@@ -164,7 +151,7 @@ class Utility(commands.Cog):
                         buf = io.BytesIO()
                         buf.write(await resp.content.read())
                         buf.seek(0)
-                        imgs.append(Image.open(buf).convert("RGBA"))
+                        imgs.append(Image.open(buf, "png").convert("RGBA"))
         composite = reduce(lambda i1, i2: Image.alpha_composite(i1, i2), imgs)
         self.sat_cache[radar] = (datetime.now(), composite)
         buf = io.BytesIO()
@@ -174,7 +161,11 @@ class Utility(commands.Cog):
         )
 
     @commands.command(
-        brief="View the raw data for a lat/long"
+        brief="View the raw data for a lat/long",
+        description="""
+        wxraw Chicago
+        wxraw 124 123.6
+        """
     )
     async def wxraw(self, ctx: aoi.AoiContext, *,
                     location: gmaps.LocationCoordinates):
@@ -194,10 +185,14 @@ class Utility(commands.Cog):
 
     @commands.cooldown(1, 60, type=commands.BucketType.user)
     @commands.command(
-        brief="Look up an hourly forecast"
+        brief="Look up an hourly forecast",
+        description="""
+        wxhourly Chicago
+        """
     )
     async def wxhourly(self, ctx: aoi.AoiContext, *, location: gmaps.LocationCoordinates):
-        conditions = (await self.wx.lookup_hourly(location))
+        async with ctx.typing():
+            conditions = (await self.wx.lookup_hourly(location))
         await ctx.paginate(
             fmt=f"Resolved Address: {location.location or location}```%s```\n",
             lst=[cond.line() for cond in conditions],
@@ -211,7 +206,10 @@ class Utility(commands.Cog):
     # region # Utility
 
     @commands.command(
-        brief="Get basic geolocation data on an address"
+        brief="Get basic geolocation data on an address",
+        description="""
+        geolookup 111 W Aoi Way, Hanakoville, TBHK
+        """
     )
     async def geolookup(self, ctx: aoi.AoiContext, *, address):
         result = (await self.gmap.lookup_address(address))[0]
@@ -227,49 +225,6 @@ class Utility(commands.Cog):
                         ] if result.geometry.northeast else []),
             not_inline=[0, 1, 2]
         )
-
-    @tasks.loop(hours=1)
-    async def _currency_update(self):
-        async with aiohttp.ClientSession() as sess:
-            async with sess.get("https://api.exchangeratesapi.io/latest?base=USD") as resp:
-                self.cur_rates = {k: v for k, v in sorted((await resp.json())["rates"].items(), key=lambda x: x[0])}
-
-    def _convert(self, amount: float, from_unit: str, to_unit: str):
-        return amount / self.cur_rates[from_unit] * self.cur_rates[to_unit]
-
-    @commands.command(brief="Convert currency", enabled=False)
-    async def currency(self, ctx: aoi.AoiContext, amount: float, from_unit: str, to_unit: str):
-        from_unit = from_unit.upper()
-        to_unit = to_unit.upper()
-        if from_unit not in self.cur_rates:
-            return await ctx.send_error(f"Unknown currency unit {from_unit}. Allowed units: " +
-                                        " ".join(self.cur_rates.keys()))
-        if to_unit not in self.cur_rates:
-            return await ctx.send_error(f"Unknown currency unit {to_unit}. Allowed units: " +
-                                        " ".join(self.cur_rates.keys()))
-
-        converted = self._convert(amount, from_unit, to_unit)
-
-        await ctx.send_ok(f"**{amount:.2f}** {from_unit} = **{converted:.2f}** {to_unit}")
-
-    @commands.command(brief="Shows the current exchange rates, with an optional base", aliases=["exchange"])
-    async def exchangerates(self, ctx: aoi.AoiContext, base: str = "usd"):
-        def _(val):
-            int_part = int(val)
-            float_part = f"{val - int_part:.6f}"[2:]
-            return f"{int_part:>5}.{float_part}"
-
-        base = base.upper()
-        if base not in self.cur_rates:
-            return await ctx.send_error(f"Unknown currency unit {base}. Allowed units: " +
-                                        " ".join(self.cur_rates.keys()))
-        await ctx.embed(title=f"Currency exchange rates from {base}",
-                        description="```c\n" +
-                                    "\n".join(f"1 {base} = {_(self._convert(1, base, unit))} {unit} | "  # noqa
-                                              f"1 {unit} = {_(self._convert(1, unit, base))} {base}"  # noqa
-                                              for unit in self.cur_rates.keys() if unit != base) +
-                                    "```"
-                        )
 
     @commands.command(
         brief="Find the prime factorization of a number",
@@ -293,9 +248,9 @@ class Utility(commands.Cog):
             f"{number} is {'not' if len(get_prime_factors(number).keys()) > 1 else ''} prime"
         )
 
-    @commands.command(
-        brief="Evaluates an expression"
-    )
+    # @commands.command(
+    #     brief="Evaluates an expression"
+    # )
     async def calc(self, ctx: aoi.AoiContext, *, expr: str):
         try:
             res = await evaluate(expr)

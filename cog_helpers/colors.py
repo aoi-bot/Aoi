@@ -1,8 +1,7 @@
 import colorsys
 import io
 
-from PIL import ImageDraw
-from PIL.Image import Image
+from PIL import ImageDraw, Image
 
 from discord.ext import commands
 from libs.converters import AoiColor

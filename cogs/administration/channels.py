@@ -43,7 +43,7 @@ class Channels(commands.Cog):
     @commands.cooldown(rate=1, per=30, type=commands.BucketType.member)
     @commands.has_permissions(manage_channels=True)
     @commands.command(
-        brief="Toggles if a channel is NSFW"
+        brief="Toggles if a channel is NSFW. Defaults to the current channel"
     )
     async def nsfw(self, ctx: aoi.AoiContext, channel: discord.TextChannel = None):
         channel = channel or ctx.channel
@@ -53,8 +53,12 @@ class Channels(commands.Cog):
     @commands.cooldown(rate=1, per=30, type=commands.BucketType.member)
     @commands.has_permissions(manage_channels=True)
     @commands.command(
-        brief="Change slowmode on a channel",
-        aliases=["slmd"]
+        brief="Change slowmode on the current channel. 0 to clear.",
+        aliases=["slmd"],
+        description="""
+        slowmode 3s
+        slowmode 0
+        """
     )
     async def slowmode(self, ctx: aoi.AoiContext, time: t_delta()):
         time: timedelta = time
@@ -83,7 +87,7 @@ class Channels(commands.Cog):
         manage_permissions=True
     )
     @commands.command(
-        brief="Mutes a user in a channel"
+        brief="Mutes a user in a channel. Defaults to the current channel."
     )
     async def chanmute(self, ctx: aoi.AoiContext, member: discord.Member, channel: discord.TextChannel = None):
         channel = channel or ctx.channel
@@ -96,7 +100,7 @@ class Channels(commands.Cog):
         manage_permissions=True
     )
     @commands.command(
-        brief="Attempts to unmute a user in a channel",
+        brief="Attempts to unmute a user in a channel. Defaults to the current channel.",
         aliases=["unchanmute"]
     )
     async def remchanmute(self, ctx: aoi.AoiContext, member: discord.Member, channel: discord.TextChannel = None):
@@ -115,7 +119,7 @@ class Channels(commands.Cog):
         manage_permissions=True
     )
     @commands.command(
-        brief="Attempts to lock a user out of a channel"
+        brief="Attempts to lock a user out of a channel. Defaults to the current channel."
     )
     async def lockout(self, ctx: aoi.AoiContext, member: discord.Member, channel: discord.TextChannel = None):
         channel = channel or ctx.channel
@@ -128,7 +132,7 @@ class Channels(commands.Cog):
         manage_permissions=True
     )
     @commands.command(
-        brief="Attempts to reverse a member-level lockout/lockin",
+        brief="Attempts to reverse a member-level lockout/lockin. Defaults to the current channel.",
         aliases=["unlockout", "unlockin", "lockrem"]
     )
     async def remlock(self, ctx: aoi.AoiContext, member: discord.Member, channel: discord.TextChannel = None):
@@ -149,7 +153,7 @@ class Channels(commands.Cog):
         manage_permissions=True
     )
     @commands.command(
-        brief="Attempts to force to let a user see a channel"
+        brief="Attempts to force to let a user see a channel. Defaults to the current channel."
     )
     async def lockin(self, ctx: aoi.AoiContext, member: discord.Member, channel: discord.TextChannel = None):
         channel = channel or ctx.channel

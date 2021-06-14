@@ -100,7 +100,7 @@ else:
 
 
 def setup(bot: aoi.AoiBot) -> None:
-    bot.add_cog(Patreon(bot))
     if not bot.patreon_id or not bot.patreon_secret:
         bot.logger.warn("patreon:Not loading cog")
         bot.logger.warn("patreon: both PATREON_ID and PATREON_CAMPAIGN must be present in .env")
+    bot.add_cog(Patreon(bot))

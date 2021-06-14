@@ -48,7 +48,11 @@ class Guilds(commands.Cog):
     @commands.bot_has_permissions(manage_guild=True)
     @commands.has_permissions(manage_guild=True)
     @commands.command(aliases=["guildreg", "serverreg"],
-                      brief="Sets the server's voice region")
+                      brief="Sets the server's voice region",
+                      description="""
+                      serverregion us east
+                      serverregion us-east
+                      """)
     async def serverregion(self, ctx: aoi.AoiContext, *, region: str):
         region = region.lower().replace(" ", "-").replace("_", "-")
         if region not in map(str, discord.VoiceRegion):
@@ -65,7 +69,12 @@ class Guilds(commands.Cog):
     @commands.bot_has_permissions(manage_guild=True)
     @commands.has_permissions(manage_guild=True)
     @commands.command(aliases=["voicereg", "vcreg"],
-                      brief="Sets a voice channel's region")
+                      brief="Sets a voice channel's region. Defaults to the voice channel you're in",
+                      description="""
+                      vcregion us-east
+                      vcregion 128312312313 us-east
+                      vcregion "General VC" us-east
+                      """)
     async def vcregion(self, ctx: aoi.AoiContext, channel: Optional[discord.VoiceChannel], *, region: str):
         if not channel:
             if ctx.author.voice:
@@ -100,7 +109,8 @@ class Guilds(commands.Cog):
     @commands.has_permissions(manage_emojis=True)
     @commands.command(
         brief="Deletes up to 10 emojis",
-        aliases=["de"]
+        aliases=["de"],
+        usage="emoji1 emoji2 ..."
     )
     async def delemoji(self, ctx: aoi.AoiContext, emojis: commands.Greedy[Union[discord.Emoji, discord.PartialEmoji]]):
         e: discord.Emoji
@@ -129,7 +139,11 @@ class Guilds(commands.Cog):
     @commands.has_permissions(manage_emojis=True)
     @commands.command(
         brief="Adds an emoji",
-        aliases=["ae"]
+        aliases=["ae"],
+        description="""
+        addemoji emoji_name :emoji:
+        addemoji emoji_name emoji.com/my_awesome_emoji.png
+        """
     )
     async def addemoji(self, ctx: aoi.AoiContext, name: str, src: Union[discord.PartialEmoji, str]): # noqa c901
         if len(name) > 32 or len(name) < 2:

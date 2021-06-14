@@ -174,7 +174,7 @@ class GuildSettings(commands.Cog):
                 await ctx.send_info("There are no aliases set for this server.")
         else:
             if ctx.guild.id in self.bot.aliases and self.bot.aliases[ctx.guild.id]:
-                found = self.bot.rev_alias(ctx, command)
+                found = await self.bot.rev_alias(ctx, command)
                 if not found:
                     await ctx.send_info(f"There are no aliases for `{command}`")
                 else:
