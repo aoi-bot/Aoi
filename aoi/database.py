@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 import datetime
 import sqlite3
-from dataclasses import dataclass
 from typing import Dict, Optional, List, TYPE_CHECKING, Union, Tuple
 
 import aiosqlite
@@ -11,6 +10,8 @@ from aiosqlite import Connection
 
 import discord
 from discord.ext import tasks, commands
+from aoi.database_models import GuildSettingModel, PunishmentModel, \
+    TimedPunishmentModel, RoleShopItemModel, PunishmentTypeModel, AoiMessageModel
 
 if TYPE_CHECKING:
     import aoi
@@ -198,64 +199,7 @@ ALTER TABLE punishments ADD COLUMN cleared_by INTEGER DEFAULT 0;
 }
 
 
-@dataclass
-class _GuildSetting:
-    ok_color: int
-    error_color: int
-    info_color: int
-    perm_errors: bool
-    currency_img: str
-    currency_chance: int
-    currency_max: int
-    currency_min: int
-    currency_gen_channels: List[int]
-    delete_on_ban: bool
-    reply_embeds: bool
 
-
-@dataclass(frozen=True)
-class _RoleShopItem:
-    type: str
-    data: str
-    cost: int
-
-
-@dataclass(frozen=True)
-class Punishment:
-    user: int
-    guild: int
-    staff: int
-    typ: int
-    reason: str
-    time: datetime.datetime
-    cleared: int
-    cleared_by: int
-
-
-class PunishmentType:
-    BAN = 0
-    KICK = 1
-    MUTE = 2
-    WARN = 3
-    UNBAN = 4
-    SOFTBAN = 5
-
-
-@dataclass()
-class TimedPunishment:
-    _id: int
-    guild: int
-    role: int
-    end: int
-    ismute: bool
-    user: int
-
-
-@dataclass()
-class _Message:
-    message: str
-    channel: int
-    delete: int
 
 
 class AoiDatabase:
@@ -264,7 +208,7 @@ class AoiDatabase:
         self.conn: Optional[Connection] = None
         self.bot = bot
 
-        self.guild_settings: Dict[int, _GuildSetting] = {}
+        self.guild_settings: Dict[int, GuildSettingModel] = {}
         self.prefixes: Dict[int, str] = {}
         self.perm_chains: Dict[int, List[str]] = {}
 
@@ -280,7 +224,7 @@ class AoiDatabase:
         self.changed_xp: Dict[int, List[int]] = {}
         self.global_currency: Dict[int, int] = {}
         self.changed_global_currency: List[int] = []
-        self.messages: Dict[int, Tuple[_Message, _Message]] = {}
+        self.messages: Dict[int, Tuple[AoiMessageModel, AoiMessageModel]] = {}
         self.global_xp: Dict[int, int] = {}
         self.guild_currency: Dict[int, Dict[int, int]] = {}
         self.changed_guild_currency: Dict[int, List[int]] = {}
@@ -297,7 +241,7 @@ class AoiDatabase:
         self.backgrounds: Dict[int, str] = {}
         self.changed_global_users: List[int] = []
 
-        self.guild_shop: Dict[int, List[_RoleShopItem]] = {}
+        self.guild_shop: Dict[int, List[RoleShopItemModel]] = {}
 
         self.blacklisted: List[int] = []
 
@@ -328,15 +272,15 @@ class AoiDatabase:
         rows = await cursor.fetchall()
         await cursor.close()
         for r in rows:
-            self.guild_settings[r[0]] = _GuildSetting(int(r[1], 16),
-                                                      int(r[2], 16),
-                                                      int(r[3], 16),
-                                                      r[5], r[6],
-                                                      int(r[7]),
-                                                      int(r[8]),
-                                                      int(r[9]),
-                                                      [int(x) for x in r[10].split(",")] if r[10] else [],
-                                                      r[11] == 1, r[12] == 1)
+            self.guild_settings[r[0]] = GuildSettingModel(int(r[1], 16),
+                                                          int(r[2], 16),
+                                                          int(r[3], 16),
+                                                          r[5], r[6],
+                                                          int(r[7]),
+                                                          int(r[8]),
+                                                          int(r[9]),
+                                                          [int(x) for x in r[10].split(",")] if r[10] else [],
+                                                          r[11] == 1, r[12] == 1)
             self.prefixes[r[0]] = r[4]
         cursor = await self.conn.execute("SELECT * from permissions")
         rows = await cursor.fetchall()
@@ -353,8 +297,8 @@ class AoiDatabase:
         await cursor.close()
         for r in rows:
             self.messages[r[0]] = (
-                _Message(*r[1:4]),
-                _Message(*r[4:7])
+                AoiMessageModel(*r[1:4]),
+                AoiMessageModel(*r[4:7])
             )
 
         # load guilds that dont exist in the database
@@ -393,7 +337,7 @@ class AoiDatabase:
         for r in rows:
             if r[0] not in self.guild_shop:
                 self.guild_shop[r[0]] = []
-            self.guild_shop[r[0]].append(_RoleShopItem(*r[1:]))
+            self.guild_shop[r[0]].append(RoleShopItemModel(*r[1:]))
 
         cursor = await self.conn.execute("SELECT * from user_global")
         rows = await cursor.fetchall()
@@ -595,14 +539,14 @@ class AoiDatabase:
                 if guild.id not in self.changed_guild_shop:
                     self.changed_guild_shop.append(guild.id)
 
-    async def get_guild_shop(self, guild: discord.Guild) -> List[_RoleShopItem]:
+    async def get_guild_shop(self, guild: discord.Guild) -> List[RoleShopItemModel]:
         await self.ensure_guild_shop(guild)
         return self.guild_shop[guild.id]
 
     async def add_guild_shop_item(self, guild: discord.Guild, typ: str, data: str, cost: int) -> None:
         await self.ensure_guild_shop(guild)
         async with self.guild_shop_lock:
-            self.guild_shop[guild.id].append(_RoleShopItem(typ, data, cost))
+            self.guild_shop[guild.id].append(RoleShopItemModel(typ, data, cost))
             if guild.id not in self.changed_guild_shop:
                 self.changed_guild_shop.append(guild.id)
 
@@ -830,11 +774,11 @@ class AoiDatabase:
 
     # region # Moderation
 
-    async def lookup_punishments(self, user: int) -> List[Punishment]:
+    async def lookup_punishments(self, user: int) -> List[PunishmentModel]:
         cursor = await self.conn.execute("SELECT * from punishments where user=?", (user,))
         punishments = await cursor.fetchall()
         return [
-            Punishment(
+            PunishmentModel(
                 *p[:5],
                 time=datetime.datetime.fromtimestamp(p[5]),
                 cleared=p[6],
@@ -853,16 +797,16 @@ class AoiDatabase:
         await self.conn.commit()
 
     async def add_user_ban(self, user: int, ctx: aoi.AoiContext, reason: str = None):
-        await self.add_punishment(user, ctx.guild.id, ctx.author.id, PunishmentType.BAN, reason)
+        await self.add_punishment(user, ctx.guild.id, ctx.author.id, PunishmentTypeModel.BAN, reason)
 
     async def add_user_mute(self, user: int, ctx: aoi.AoiContext, reason: str = None):
-        await self.add_punishment(user, ctx.guild.id, ctx.author.id, PunishmentType.MUTE, reason)
+        await self.add_punishment(user, ctx.guild.id, ctx.author.id, PunishmentTypeModel.MUTE, reason)
 
     async def add_user_warn(self, user: int, ctx: aoi.AoiContext, reason: str = None):
-        await self.add_punishment(user, ctx.guild.id, ctx.author.id, PunishmentType.WARN, reason)
+        await self.add_punishment(user, ctx.guild.id, ctx.author.id, PunishmentTypeModel.WARN, reason)
 
     async def add_user_kick(self, user: int, ctx: aoi.AoiContext, reason: str = None):
-        await self.add_punishment(user, ctx.guild.id, ctx.author.id, PunishmentType.KICK, reason)
+        await self.add_punishment(user, ctx.guild.id, ctx.author.id, PunishmentTypeModel.KICK, reason)
 
     async def get_warnp(self, guild: int, warns: int) -> Optional[str]:
         rows = list(await self.conn.execute_fetchall("select action from warnpunish where guild=? and level=?",
@@ -895,21 +839,21 @@ class AoiDatabase:
         await self.conn.execute("delete from punishments where id=?", (_id,))
         await self.conn.commit()
 
-    async def load_backing_punishments(self) -> Dict[int, List[TimedPunishment]]:
+    async def load_backing_punishments(self) -> Dict[int, List[TimedPunishmentModel]]:
         rows = await self.conn.execute_fetchall("select * from punishments")
         punishments = {}
         for r in rows:
             _id, guild, role, end, ismute, user = *r[0:4], r[4] == 1, r[5]  # noqa
             if guild not in punishments:
                 punishments[guild] = []
-            punishments[guild].append(TimedPunishment(_id, guild, role, end, ismute, user))
+            punishments[guild].append(TimedPunishmentModel(_id, guild, role, end, ismute, user))
         return punishments
 
     # endregion
 
     # region # Config
 
-    async def _auto_messages(self, guild: int) -> Tuple[_Message, _Message]:
+    async def _auto_messages(self, guild: int) -> Tuple[AoiMessageModel, AoiMessageModel]:
         if guild not in self.messages:
             async with self.messages_lock:
                 try:
@@ -926,15 +870,15 @@ class AoiDatabase:
                     pass
                 await self.conn.commit()
                 self.messages[guild] = (
-                    _Message("&user_name; has joined the server", 0, 0),
-                    _Message("&user_name; has left the server", 0, 0)
+                    AoiMessageModel("&user_name; has joined the server", 0, 0),
+                    AoiMessageModel("&user_name; has left the server", 0, 0)
                 )
         return self.messages[guild]
 
-    async def get_welcome_message(self, guild: int) -> _Message:
+    async def get_welcome_message(self, guild: int) -> AoiMessageModel:
         return (await self._auto_messages(guild))[0]
 
-    async def get_goodbye_message(self, guild: int) -> _Message:
+    async def get_goodbye_message(self, guild: int) -> AoiMessageModel:
         return (await self._auto_messages(guild))[1]
 
     async def set_welcome_message(self, guild: int, *,
@@ -965,14 +909,14 @@ class AoiDatabase:
             if guild not in self.changed_messages:
                 self.changed_messages.append(guild)
 
-    async def guild_setting(self, guild: int) -> _GuildSetting:
+    async def guild_setting(self, guild: int) -> GuildSettingModel:
         if guild not in self.guild_settings:
             try:
                 await self.conn.execute("INSERT INTO guild_settings (Guild) values (?)", (guild,))
             except sqlite3.IntegrityError:
                 self.bot.logger.warning(f"Passing IntegrityError for guild {guild}")
             await self.conn.commit()
-            self.guild_settings[guild] = _GuildSetting(
+            self.guild_settings[guild] = GuildSettingModel(
                 ok_color=0x00aa00,
                 error_color=0xaa0000,
                 info_color=0x0000aa,

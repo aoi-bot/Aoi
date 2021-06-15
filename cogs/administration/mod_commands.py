@@ -4,7 +4,7 @@ from typing import List, Union, Optional, Dict
 
 import aoi
 import discord
-from aoi.database import Punishment, PunishmentType, TimedPunishment
+from aoi.database import PunishmentModel, PunishmentTypeModel, TimedPunishmentModel
 from discord.ext import commands
 
 
@@ -16,7 +16,7 @@ def _soft_check_role(ctx: aoi.AoiContext, member: discord.Member, action: str = 
 class Moderation(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
-        self.timed_punishments: Dict[int, List[TimedPunishment]] = {}
+        self.timed_punishments: Dict[int, List[TimedPunishmentModel]] = {}
         bot.loop.create_task(self._init())
 
     async def _init(self):
@@ -51,7 +51,7 @@ class Moderation(commands.Cog):
         self._check_role(ctx, member, "kick")
         dm_sent = await self._dm(member, discord.Embed(title=f"Kicked from {ctx.guild}", description=reason))
         await member.kick(reason=f"{reason} | {ctx.author.id} {ctx.author}")
-        await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentType.KICK, reason,
+        await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentTypeModel.KICK, reason,
                                                    extra="DM could not be sent" if not dm_sent else ""))
         await self.bot.db.add_user_kick(member.id, ctx, reason)
 
@@ -61,7 +61,7 @@ class Moderation(commands.Cog):
         self._check_role(ctx, member, "ban")
         dm_sent = await self._dm(member, discord.Embed(title=f"Banned from {ctx.guild}", description=reason))
         await member.ban(reason=f"{reason} | {ctx.author.id} {ctx.author}")
-        await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentType.BAN, reason,
+        await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentTypeModel.BAN, reason,
                                                    extra="DM could not be sent" if not dm_sent else ""))
         await self.bot.db.add_user_ban(member.id, ctx, reason)
 
@@ -72,9 +72,9 @@ class Moderation(commands.Cog):
         dm_sent = await self._dm(member, discord.Embed(title=f"Softbanned from {ctx.guild}", description=reason))
         await member.ban(reason=f"{reason} | {ctx.author.id} {ctx.author} | Softban")
         await ctx.guild.unban(member, reason=f"Softban")
-        await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentType.SOFTBAN, reason,
+        await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentTypeModel.SOFTBAN, reason,
                                                    extra="DM could not be sent" if not dm_sent else ""))
-        await self.bot.db.add_punishment(member.id, ctx.guild.id, ctx.author.id, PunishmentType.SOFTBAN, reason)
+        await self.bot.db.add_punishment(member.id, ctx.guild.id, ctx.author.id, PunishmentTypeModel.SOFTBAN, reason)
 
     @commands.has_permissions(ban_members=True)
     @commands.command(brief="Unbans a member from the server")
@@ -91,19 +91,19 @@ class Moderation(commands.Cog):
             return await ctx.send_error(f"User ID {user} not banned from this server")
         user = await self.bot.fetch_unknown_user(user)
         await ctx.guild.unban(found.user, reason=f"{reason} | {ctx.author.id} {ctx.author}")
-        await ctx.send(embed=self.get_action_embed(ctx, user, PunishmentType.UNBAN, reason))
-        await self.bot.db.add_punishment(user.id, ctx.guild.id, ctx.author.id, PunishmentType.UNBAN, reason)
+        await ctx.send(embed=self.get_action_embed(ctx, user, PunishmentTypeModel.UNBAN, reason))
+        await self.bot.db.add_punishment(user.id, ctx.guild.id, ctx.author.id, PunishmentTypeModel.UNBAN, reason)
 
     @commands.has_permissions(kick_members=True)
     @commands.command(brief="Warns a member")
     async def warn(self, ctx: aoi.AoiContext, member: discord.Member, *, reason: str = "No reason provided"):
         self._check_role(ctx, member, "warn")
         dm_sent = await self._dm(member, discord.Embed(title=f"Warning from {ctx.guild}", description=reason))
-        msg = await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentType.WARN, reason,
+        msg = await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentTypeModel.WARN, reason,
                                                          extra="DM could not be sent" if not dm_sent else ""))
         await self.bot.db.add_user_warn(member.id, ctx, reason)
 
-        punishments = [x for x in (await self.bot.db.lookup_punishments(member.id)) if x.typ == PunishmentType.WARN]
+        punishments = [x for x in (await self.bot.db.lookup_punishments(member.id)) if x.typ == PunishmentTypeModel.WARN]
         punishment = await self.bot.db.get_warnp(ctx.guild.id, len(punishments))
 
         await asyncio.sleep(0.01)  # make sure timestamps differ enough
@@ -123,8 +123,8 @@ class Moderation(commands.Cog):
     @commands.command(brief="Clears a warning for a user", aliases=["pclear"],
                       flags={"del": [None, "Completely delete the warning"]})
     async def punishmentclear(self, ctx: aoi.AoiContext, member: discord.Member, num: int = 1):
-        punishments: List[Punishment] = sorted(await self.bot.db.lookup_punishments(member.id),
-                                               key=lambda punishment: punishment.time, reverse=True)
+        punishments: List[PunishmentModel] = sorted(await self.bot.db.lookup_punishments(member.id),
+                                                    key=lambda punishment: punishment.time, reverse=True)
         if num < 1 or num > len(punishments):
             return ctx.send_error("Invalid warning number")
         p = punishments[num - 1]
@@ -144,13 +144,13 @@ class Moderation(commands.Cog):
         member = member or ctx.author
         if member.id != ctx.author.id and not ctx.channel.permissions_for(ctx.author).kick_members:
             return await ctx.send_error("You need the kick members permission to see logs from other people")
-        punishments: List[Punishment] = sorted(await self.bot.db.lookup_punishments(member.id),
-                                               key=lambda punishment: punishment.time, reverse=True)
+        punishments: List[PunishmentModel] = sorted(await self.bot.db.lookup_punishments(member.id),
+                                                    key=lambda punishment: punishment.time, reverse=True)
 
         if not punishments:
             await ctx.send_info(f"{member} has no punishments")
 
-        async def fmt(punishment: Punishment) -> str:
+        async def fmt(punishment: PunishmentModel) -> str:
             _ = "~~" if punishment.cleared else ""
             cl = f"Cleared By: {await self.bot.fetch_unknown_user(punishment.cleared_by)}\n" \
                 if punishment.cleared else ""
