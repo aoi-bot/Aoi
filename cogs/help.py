@@ -136,7 +136,9 @@ class Help(commands.Cog, HelpCogService):
             return await ctx.send(
                 f"__`{cmd.name}`__\n"
                 f"Usage: `{self.get_command_signature(cmd, ctx)}`\n"
-                f"Description: {cmd.brief.replace('#BOT#', self.bot.user.name if self.bot.user else '')}\n"
+                # *prays the pep8 gods won't strike me down for this 145 character line*
+                # Just let me have my f-strings D:
+                f"Description: {cmd.brief.replace('#BOT#', self.bot.user.name if self.bot.user else '').replace('{prefix}', ctx.clean_prefix)}\n"  # noqa E501
                 f"Module: {cmd.cog.qualified_name}\n" +
                 (("Flags:\n" + "\n".join(map(str, map(self.format_flag, flags.items()))) + "\n") if flags else "") +
                 (("User permissions needed: " +
@@ -158,7 +160,8 @@ class Help(commands.Cog, HelpCogService):
             title=cmd.name,
             fields=[
                        ("Usage", f"`{self.get_command_signature(cmd, ctx)}`"),
-                       ("Description", cmd.brief.replace("#BOT#", self.bot.user.name if self.bot.user else '')),
+                       ("Description", cmd.brief.replace("#BOT#", self.bot.user.name if self.bot.user else '')
+                                                .replace("{prefix}", ctx.clean_prefix)),
                        ("Module", cmd.cog.qualified_name)
                    ] + (
                        [("Flags", "\n".join(map(str, map(self.format_flag, flags.items()))))]

@@ -103,7 +103,9 @@ class Moderation(commands.Cog):
                                                          extra="DM could not be sent" if not dm_sent else ""))
         await self.bot.db.add_user_warn(member.id, ctx, reason)
 
-        punishments = [x for x in (await self.bot.db.lookup_punishments(member.id)) if x.typ == PunishmentTypeModel.WARN]
+        punishments = [x for x in
+                       (await self.bot.db.lookup_punishments(member.id))
+                       if x.typ == PunishmentTypeModel.WARN]
         punishment = await self.bot.db.get_warnp(ctx.guild.id, len(punishments))
 
         await asyncio.sleep(0.01)  # make sure timestamps differ enough

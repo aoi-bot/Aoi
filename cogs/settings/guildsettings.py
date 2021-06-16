@@ -42,7 +42,7 @@ class GuildSettings(commands.Cog):
         return await ctx.send_ok(f"Prefix set to `{escape(prefix, ctx)}`")
 
     @commands.has_permissions(manage_guild=True)
-    @commands.command(brief="Sets a server config.",
+    @commands.command(brief="Sets a server config. Do `{prefix}config` to list the possible configs",
                       description="""
                       config
                       config config_name value

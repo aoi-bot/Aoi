@@ -27,13 +27,16 @@ class GuildSettingModel:
         self.reply_embeds = reply_embeds
 
     @property
-    def ok_color(self): return self.colors.ok
+    def ok_color(self):
+        return self.colors.ok
 
     @property
-    def error_color(self): return self.colors.error
+    def error_color(self):
+        return self.colors.error
 
     @property
-    def info_color(self): return self.colors.info
+    def info_color(self):
+        return self.colors.info
 
     @classmethod
     def from_row(cls, row: Row):
