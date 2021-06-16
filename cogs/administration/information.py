@@ -15,8 +15,17 @@ class Information(commands.Cog):
         return "Get information about parts of your server"
 
     @commands.guild_only()
-    @commands.command(brief="Shows info on a channel, role, member, emoji, or message")
-    async def info(self, ctx: aoi.AoiContext,  # noqa: C901
+    @commands.command(brief="Shows info on a channel, role, member, emoji, or message",
+                      description="""
+                      info @Role of Gamers
+                      info #general
+                      info General VC
+                      info https://discord.com/channels/213/12312/712129
+                      info :emoji:
+                      info @member
+                      """
+                      )
+    async def info(self, ctx: aoi.AoiContext, *,  # noqa: C901
                    obj: Union[
                        discord.Role,
                        discord.TextChannel,
@@ -61,7 +70,7 @@ class Information(commands.Cog):
         if isinstance(obj, (discord.Emoji, discord.PartialEmoji)):
             return await self.emojiinfo(ctx, obj)
 
-    @commands.command(brief="Shows a user's avatar", aliases=["av", "pfp"])
+    @commands.command(brief="Shows a user's avatar. Defaults to showing your own.", aliases=["av", "pfp"])
     async def avatar(self, ctx: aoi.AoiContext, member: Optional[discord.Member] = None):
         member = member or ctx.author
         await ctx.embed(
@@ -228,7 +237,7 @@ class Information(commands.Cog):
         )
 
     @commands.command(
-        brief="Shows your or a member's permissions in a channel",
+        brief="Shows your or a member's permissions in a channel. Defaults to the current channel.",
         aliases=["perms"]
     )
     async def permissions(self, ctx: aoi.AoiContext,
@@ -249,7 +258,8 @@ class Information(commands.Cog):
         )
 
     @commands.command(
-        brief="Shows a role's permissions, optionally in a channel",
+        brief="Shows a role's permissions, optionally in a channel. Defaults to showing the role's server-wide "
+              "permissions",
         aliases=["rperms", "roleperms"]
     )
     async def rolepermissions(self, ctx: aoi.AoiContext, role: Union[discord.Role, str],

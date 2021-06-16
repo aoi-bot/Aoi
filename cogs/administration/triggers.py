@@ -9,6 +9,8 @@ from discord.ext import commands
 from discord.ext.commands import RoleConverter
 
 
+# TODO help refactor
+
 class Triggers(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot

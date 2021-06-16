@@ -1,1 +1,1 @@
-from .api import Imgur
+from .api import *

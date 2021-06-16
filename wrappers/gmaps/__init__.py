@@ -1,2 +1,2 @@
-from .api import GeoLocation
+from .api import *
 from .helpers import *

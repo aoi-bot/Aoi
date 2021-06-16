@@ -8,12 +8,13 @@ from PIL.ImageOps import grayscale, colorize
 
 import aoi
 import discord
+from cog_helpers.colors import ColorService
 from discord.ext import commands
 from discord.ext.commands import Greedy
 from libs.converters import AoiColor, FuzzyAoiColor
 
 
-class Colors(commands.Cog, aoi.ColorCogMixin):
+class Colors(commands.Cog, ColorService):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
         super(Colors, self).__init__()
@@ -27,7 +28,8 @@ class Colors(commands.Cog, aoi.ColorCogMixin):
         await ctx.embed(title=str(color),
                         image=self._color_buf(color))
 
-    @commands.command(brief="Shows a color palette")
+    @commands.command(brief="Shows a color palette",
+                      usage="color1 color2 ...")
     async def colors(self, ctx: aoi.AoiContext, clrs: Greedy[FuzzyAoiColor]):
         valid_colors = [color for color in clrs if not color.attempt]
         invalid_colors = [color.attempt for color in clrs if color.attempt]
@@ -54,24 +56,28 @@ class Colors(commands.Cog, aoi.ColorCogMixin):
                         )
 
     @commands.command(brief="Shows a random color palette, sort by hue, random, or brightness",
-                      aliases=["rancolor", "ranclr"])
-    async def randomcolors(self, ctx: aoi.AoiContext, num: Optional[int] = 4, sort: str = "hue"):
+                      aliases=["rancolor", "ranclr"],
+                      description="""
+                      randomcolors 15 hue
+                      randomcolors brightness
+                      """)
+    async def randomcolors(self, ctx: aoi.AoiContext, number_of_colors: Optional[int] = 4, sort_by: str = "hue"):
         clrs: List[discord.Colour] = []
-        if num > 250 or num < 2:
+        if number_of_colors > 250 or number_of_colors < 2:
             raise commands.BadArgument("Number of colors must be 2-250")
-        for i in range(num):
+        for i in range(number_of_colors):
             clrs.append(discord.Colour(
                 random.randint(0, 0xff) * 0x10000 +
                 random.randint(0, 0xff) * 0x100 +
                 random.randint(0, 0xff)
             ))
-        if sort == "hue":
+        if sort_by == "hue":
             clrs.sort(key=lambda x: colorsys.rgb_to_hsv(*x.to_rgb())[0])
-        if sort in ("brightness", "bright"):
+        if sort_by in ("brightness", "bright"):
             clrs.sort(key=lambda x: colorsys.rgb_to_hls(*x.to_rgb())[1])
-        rows = num // 10 + 1
-        cols = 10 if rows > 1 else num
-        if not num % 10:
+        rows = number_of_colors // 10 + 1
+        cols = 10 if rows > 1 else number_of_colors
+        if not number_of_colors % 10:
             rows -= 1
         img = Image.new("RGB", (120 * cols, rows * 120))
         img_draw = ImageDraw.Draw(img)
@@ -92,54 +98,51 @@ class Colors(commands.Cog, aoi.ColorCogMixin):
     @commands.command(
         brief="Makes an RGB gradient between colors. Number of colors is optional, defaults to 4 and must be "
               "between 3 and 60.",
-        aliases=["grad"]
+        aliases=["grad"],
+        flags={"rgb": (None, "Make an RGB gradient instead")},
+        description="""
+        gradient red green 5
+        gradient red green --rgb
+        gradient red green 6 --rgb
+        """
     )
-    async def gradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor, num: int = 4):
-        buf, colors = self._gradient_buf(color1, color2, num, False)
-        await ctx.embed(title="Gradient",
-                        description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in colors),
-                        image=buf)
-
-    @commands.command(
-        brief="Makes an HLS gradient between RGB colors. Number of colors is optional, defaults to 4 and must be "
-              "between 3 and 60.",
-        aliases=["hgrad"]
-    )
-    async def hgradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor, num: int = 4):
-        buf, colors = self._gradient_buf(color1, color2, num, True)
+    async def gradient(self, ctx: aoi.AoiContext, color1: AoiColor, color2: AoiColor,
+                       number_of_colors: Optional[int] = 4):
+        buf, colors = self._gradient_buf(color1, color2, number_of_colors, "rgb" not in ctx.flags)
         await ctx.embed(title="Gradient",
                         description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in colors),
                         image=buf)
 
     @commands.max_concurrency(1, commands.BucketType.user)
     @commands.command(
-        brief="Shows the adaptive color palette for an image. 2-10 colors, defaults to 6."
+        brief="Shows the adaptive color palette for an image. 2-10 colors, defaults to 6. The image must be attached "
+              "with the command as a file"
     )
-    async def adaptive(self, ctx: aoi.AoiContext, num_colors: int = 6):
+    async def adaptive(self, ctx: aoi.AoiContext, number_of_colors: int = 6):
         if not ctx.message.attachments or len(ctx.message.attachments) == 0:
             return await ctx.send_error("I need an image! Attach it with your command as a file.")
         attachment: discord.Attachment = ctx.message.attachments[0]
         if not self._is_image(attachment.filename):
             return await ctx.send_error("Invalid image type. Give me a jpg, jpeg, or png")
-        if not (2 <= num_colors <= 12):
+        if not (2 <= number_of_colors <= 12):
             return await ctx.send_error("Number of colors must be between 2 and 10, inclusive")
         buf = io.BytesIO()
         buf.seek(0)
         await ctx.trigger_typing()
         await attachment.save(buf)
         im: Image = Image.open(buf).convert("RGB")
-        paletted: Image = im.convert("P", palette=Image.ADAPTIVE, colors=num_colors)
+        paletted: Image = im.convert("P", palette=Image.ADAPTIVE, colors=number_of_colors)
         palette = paletted.getpalette()
         color_counts = sorted(paletted.getcolors(), reverse=True)
         colors = list()
-        for i in range(num_colors):
+        for i in range(number_of_colors):
             palette_index = color_counts[i][1]
             dominant_color = palette[palette_index * 3:palette_index * 3 + 3]
             colors.append(tuple(dominant_color))
         colors.sort(key=lambda x: colorsys.rgb_to_hsv(*x)[0])
-        im = im.resize((60 * num_colors, int(60 * num_colors * im.size[1] / im.size[0])), Image.ANTIALIAS)
+        im = im.resize((60 * number_of_colors, int(60 * number_of_colors * im.size[1] / im.size[0])), Image.ANTIALIAS)
 
-        palette = Image.new('RGB', (60 * num_colors, 60 + im.size[1]))
+        palette = Image.new('RGB', (60 * number_of_colors, 60 + im.size[1]))
         palette.paste(im, (0, 60))
         draw = ImageDraw.Draw(palette)
 
@@ -159,14 +162,14 @@ class Colors(commands.Cog, aoi.ColorCogMixin):
 
     @commands.max_concurrency(1, commands.BucketType.user)
     @commands.command(
-        brief="Split-tones an image"
+        brief="Split-tones an image. The image must be passed as an attachment"
     )
-    async def duotone(self, ctx: aoi.AoiContext, black: AoiColor, white: AoiColor,
-                      mid: Union[AoiColor, str] = None, black_point: int = 0, white_point: int = 255,
+    async def duotone(self, ctx: aoi.AoiContext, dark_color: AoiColor, light_color: AoiColor,
+                      midpoint_color: Union[AoiColor, str] = None, black_point: int = 0, white_point: int = 255,
                       mid_point: int = 127):
-        if isinstance(mid, str):
-            if mid.lower() == "none":
-                mid = None
+        if isinstance(midpoint_color, str):
+            if midpoint_color.lower() == "none":
+                midpoint_color = None
             else:
                 raise commands.BadArgument("mid must be a color or None")
         if not ctx.message.attachments or len(ctx.message.attachments) == 0:
@@ -180,7 +183,8 @@ class Colors(commands.Cog, aoi.ColorCogMixin):
         await attachment.save(buf)
         im: Image = Image.open(buf).convert("RGB")
         gs = grayscale(im)
-        duo = colorize(gs, black.to_rgb(), white.to_rgb(), mid.to_rgb() if mid else None,
+        duo = colorize(gs, dark_color.to_rgb(), light_color.to_rgb(),
+                       midpoint_color.to_rgb() if midpoint_color else None,
                        black_point, white_point, mid_point)
         duo = Image.composite(duo, Image.new("RGB", duo.size, (0x00, 0x00, 0x00)), gs)
         buf.close()
@@ -192,7 +196,7 @@ class Colors(commands.Cog, aoi.ColorCogMixin):
 
     @commands.max_concurrency(1, commands.BucketType.user)
     @commands.command(
-        brief="Shows an image histogram"
+        brief="Shows an image histogram. You must attach the image as an attachment"
     )
     async def histogram(self, ctx: aoi.AoiContext):
         if not ctx.message.attachments or len(ctx.message.attachments) == 0:

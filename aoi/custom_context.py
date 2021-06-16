@@ -6,12 +6,12 @@ from types import coroutine
 from typing import List, Tuple, Union, Any, Callable, Iterable
 
 from PIL.Image import Image
+from dpy_button_utils import ButtonConfirmation, ButtonPaginator
 
 import discord
 from discord.embeds import EmptyEmbed
 from discord.ext import commands
 from libs.conversions import escape
-from dpy_button_utils import ButtonConfirmation, ButtonPaginator
 
 
 def _wrap_user(user: discord.abc.User):

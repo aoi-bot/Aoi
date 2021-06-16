@@ -1,2 +1,3 @@
-from .base import Game
-from .ttt import TicTacToe
+from .base import *
+from .rps import *
+from .ttt import *

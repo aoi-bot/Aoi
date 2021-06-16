@@ -1,9 +1,11 @@
 import inspect
-from typing import Optional, Tuple, List
+from typing import List
 
 import aoi
 import discord
+from cog_helpers.help import HelpCogService
 from discord.ext import commands
+from libs.linq import LINQ
 
 
 async def _can_run(_c: commands.Command, ctx: aoi.AoiContext):
@@ -21,7 +23,7 @@ async def _can_run(_c: commands.Command, ctx: aoi.AoiContext):
         return True
 
 
-class Help(commands.Cog):
+class Help(commands.Cog, HelpCogService):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
 
@@ -50,7 +52,12 @@ class Help(commands.Cog):
 
     @commands.command(brief="Lists commands within a module", name="commands",
                       aliases=["cmds"],
-                      flags={"all": (None, "Include the commands you can't use")})
+                      flags={"all": (None, "Include the commands you can't use")},
+                      description="""
+                      cmds
+                      cmds Roles
+                      cmds Roles --all
+                      """)
     async def cmds(self, ctx: aoi.AoiContext, module: str):
         flags = ctx.flags
         cog: commands.Cog = self.bot.get_cog(self.bot.find_cog(module, check_description=True)[0])
@@ -87,7 +94,11 @@ class Help(commands.Cog):
             thumbnail=self.bot.random_thumbnail()
         )
 
-    @commands.command(brief="Shows help for a command", aliases=["h"])
+    @commands.command(brief="Shows help for a command", aliases=["h"],
+                      description="""
+                      help
+                      help command_name
+                      """)
     async def help(self, ctx: aoi.AoiContext, command: str = None):
         if not command:
             return await ctx.embed(title="Help",
@@ -121,37 +132,41 @@ class Help(commands.Cog):
         p = self.bot.permissions_needed_for(cmd.name)
         flags = cmd.flags
 
-        def format_flag(flag_tup: Tuple[str, Tuple[Optional[type], str]]):
-            if flag_tup[1][0]:
-                return f"◆`--{flag_tup[0]} <{flag_tup[1][0].__name__}>` - {flag_tup[1][1]}"
-            else:
-                return f"◆`--{flag_tup[0]}` - {flag_tup[1][1]}"
-
         if not await ctx.using_embeds():
             return await ctx.send(
                 f"__`{cmd.name}`__\n"
-                f"Usage: `{ctx.prefix}{cmd.name} {cmd.signature or ''}{' [flags]' if flags else ''}`\n"
-                f"Description: {cmd.brief.replace('#BOT#', self.bot.user.name if self.bot.user else '')}\n"
+                f"Usage: `{self.get_command_signature(cmd, ctx)}`\n"
+                # *prays the pep8 gods won't strike me down for this 145 character line*
+                # Just let me have my f-strings D:
+                f"Description: {cmd.brief.replace('#BOT#', self.bot.user.name if self.bot.user else '').replace('{prefix}', ctx.clean_prefix)}\n"  # noqa E501
                 f"Module: {cmd.cog.qualified_name}\n" +
+                (("Flags:\n" + "\n".join(map(str, map(self.format_flag, flags.items()))) + "\n") if flags else "") +
                 (("User permissions needed: " +
                   ", ".join(
                       " ".join(map(lambda x: x.title(), x.split("_"))) for x in p
                   ) + "\n") if p else '') +
                 ("You are missing permissions needed to turn this command\n" if not await _can_run(cmd, ctx) else '') +
-                (("Flags:\n" + "\n".join(map(str, map(format_flag, flags.items()))) + "\n") if flags else "") +
+                ("Examples:\n" + LINQ(cmd.description.splitlines())
+                 .select(lambda x: x.strip())
+                 .select(lambda x: f"⋄ `{ctx.clean_prefix}{x}`")
+                 .join("\n") + "\n" if cmd.description else "") +
                 (("Aliases:" + ", ".join([f"`{a}`" for a in cmd.aliases])) if cmd.aliases else "") +
                 (f"\nAliases are pointing at this command, run `{ctx.clean_prefix}aliases {command}` to view them\n"
-                 if self.bot.rev_alias(ctx, command) else "") +
-                "\n<> indicate required parameters, [] indicate optional parameters"
+                 if await self.bot.rev_alias(ctx, command) else "") +
+                "\n[] indicates an optional parameter"
             )
 
         await ctx.embed(
             title=cmd.name,
             fields=[
-                       ("Usage", f"`{cmd.name} {cmd.signature or ''}" + (" [flags]`" if flags else "`")),
-                       ("Description", cmd.brief.replace("#BOT#", self.bot.user.name if self.bot.user else '')),
+                       ("Usage", f"`{self.get_command_signature(cmd, ctx)}`"),
+                       ("Description", cmd.brief.replace("#BOT#", self.bot.user.name if self.bot.user else '')
+                                                .replace("{prefix}", ctx.clean_prefix)),
                        ("Module", cmd.cog.qualified_name)
                    ] + (
+                       [("Flags", "\n".join(map(str, map(self.format_flag, flags.items()))))]
+                       if flags else []
+                   ) + (
                        [("User permissions needed",
                          ", ".join(
                              " ".join(map(lambda x: x.title(), x.split("_"))) for x in p
@@ -161,51 +176,27 @@ class Help(commands.Cog):
                        [("Missing Permissions", "You are missing the permissions to run this command")]
                        if not await _can_run(cmd, ctx) else []
                    ) + (
-                       [("Flags", "\n".join(map(str, map(format_flag, flags.items()))))]
-                       if flags else []
+                       [("Examples",
+                         LINQ(cmd.description.splitlines())
+                         .select(lambda x: x.strip())
+                         .select(lambda x: f"⋄ `{ctx.clean_prefix}{x}`")
+                         .join("\n"))]
+                       if cmd.description else []
                    ) + (
                        [("Aliases", ", ".join([f"`{a}`" for a in cmd.aliases]))]
                        if cmd.aliases else []
                    ),
             thumbnail=self.bot.random_thumbnail(),
-            footer="<> indicate required parameters, [] indicate optional parameters",
+            footer="[] indicates an optional parameter",
             not_inline=[0, 1, 2, 3, 4]
         )
-
-    @commands.command(brief="Shows the permission guide")
-    async def permguide(self, ctx: aoi.AoiContext):
-        await ctx.send_info(f"\n"
-                            f"{self.bot.user.name if self.bot.user else ''}'s permissions are "
-                            f"based off of a permission chain that "
-                            f"anyone can view with `{ctx.prefix}lp`. The chain is evaluated "
-                            f"from 0 to the top. The permission chain can be modified by anyone with "
-                            f"administrator permission in a server. `{ctx.prefix}cmds permissions` can "
-                            f"be used to view view a list of the permission commands\n"
-                            f"The chain can be reset to the default with {ctx.prefix}rp"
-                            )
-
-    @commands.command(
-        brief="Shows the currency guide"
-    )
-    async def currencyguide(self, ctx: aoi.AoiContext):
-        await ctx.send_info(f"\n"
-                            f"There are two types of currency in {self.bot.user.name if self.bot.user else ''}: "
-                            f"Server and Global.\nGlobal currency is gained at the rate of $3/message, and can only "
-                            f"be gained once every 3 minutes. Global currency is used over in "
-                            f"`{ctx.prefix}cmds globalshop` to "
-                            f"buy a title for your card an over in `{ctx.prefix}profilecard` to buy a background "
-                            f"change for your profile card.\n"
-                            f"Server currency is gained at a rate set by the server staff, and is viewable with "
-                            f"`{ctx.prefix}configs`. It is used for roles and gambling - see `{ctx.prefix}cmds "
-                            f"ServerShop` and `{ctx.prefix}cmds ServerGambling`."
-                            )
 
     @commands.command(
         brief="Searches through the help commands"
     )
-    async def helpsearch(self, ctx: aoi.AoiContext, *, text: str):
+    async def helpsearch(self, ctx: aoi.AoiContext, *, text_to_find: str):
         cmds: List[commands.Command] = []
-        tokenized = text.lower().split(" ")
+        tokenized = text_to_find.lower().split(" ")
         cmd: commands.Command
         for cmd in self.bot.walk_commands():
             searchable_string = f"{cmd.name} {' '.join(cmd.aliases)} {cmd.usage} {cmd.description} {cmd.brief}".lower()

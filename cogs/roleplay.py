@@ -62,7 +62,8 @@ def setup(bot: aoi.AoiBot) -> None:
             cmd = commands.Command(
                 name=key,
                 func=exec_multi_rp_command if fun.roleplay_responses[key].multi else exec_single_rp_command,
-                brief=f"{key} someone" if fun.roleplay_responses[key].multi else f"{key} roleplay command"
+                brief=f"{key} someone" if fun.roleplay_responses[key].multi else f"{key} roleplay command",
+                usage="@member" if fun.roleplay_responses[key].multi else None
             )
 
             cmd.cog = fun

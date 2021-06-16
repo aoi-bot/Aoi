@@ -19,9 +19,14 @@ class Messages(commands.Cog):
 
     @commands.has_permissions(manage_messages=True)
     @commands.command(
-        brief="Lists the users who have not reacted to a message"
+        brief="Lists the users who have not reacted to a message",
+        description="""
+        noreactions https://discord.com/channels/213/12312/712129
+        """
     )
     async def noreactions(self, ctx: aoi.AoiContext, msg: discord.Message):
+        if msg.channel.id not in [tc.id for tc in ctx.guild.text_channels]:
+            raise commands.BadArgument("Message not in server")
         m: discord.Member
         r: discord.Reaction
         lst: List[int] = []
@@ -39,9 +44,14 @@ class Messages(commands.Cog):
 
     @commands.has_permissions(manage_messages=True)
     @commands.command(
-        brief="Lists the users who have reacted to a message"
+        brief="Lists the users who have reacted to a message",
+        description="""
+        reactions https://discord.com/channels/213/12312/712129
+        """
     )
     async def reactions(self, ctx: aoi.AoiContext, msg: discord.Message):
+        if msg.channel.id not in [tc.id for tc in ctx.guild.text_channels]:
+            raise commands.BadArgument("Message not in server")
         m: discord.Member
         r: discord.Reaction
         lst: List[int] = []
@@ -68,7 +78,7 @@ class Messages(commands.Cog):
     @commands.command(
         brief="Edit a message from #BOT#. Use [this site](https://embed.aoibot.xyz/) to make embeds."
     )
-    async def edit(self, ctx: aoi.AoiContext, message: discord.Message, *, msg: str):
+    async def edit(self, ctx: aoi.AoiContext, message_id: discord.Message, *, msg: str):
         if ctx.author:
             msg = self.bot.placeholders.replace(ctx.author, msg)
         try:
@@ -86,7 +96,7 @@ class Messages(commands.Cog):
         else:
             content = None
         if len(msg.keys()) < 2:  # no embed here:
-            return await message.edit(content=content)
+            return await message_id.edit(content=content)
         thumbnail = msg.pop("thumbnail", None) if msg else None
         image = msg.pop("image", None) if msg else None
         msg["description"] = msg.get("description", "_ _")
@@ -95,13 +105,13 @@ class Messages(commands.Cog):
             embed.set_thumbnail(url=thumbnail)
         if image:
             embed.set_image(url=image)
-        await message.edit(
+        await message_id.edit(
             content=content,
             embed=embed
         )
 
     @commands.has_permissions(manage_messages=True)
-    @commands.command(brief="Delete a message")
+    @commands.command(brief="Delete a message, after an optional number of seconds.")
     async def delete(self, ctx: aoi.AoiContext, message: discord.Message, delay: int = 0):
         await message.delete(delay=delay)
 

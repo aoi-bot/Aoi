@@ -1,13 +1,21 @@
+import json
+import re
+
 import aoi
 from discord.ext import commands
 from libs import conversions
 from libs.conversions import escape
 from libs.converters import AoiColor, disenable
+from libs.linq import LINQ
 
 
 class GuildSettings(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
+
+        # load guildconfig stuff from /complexity/context/guildconfig.json
+        with open("complexity/context/guildconfig.json") as fp:
+            self.guild_configs = json.load(fp)
 
     @property
     def description(self):
@@ -34,10 +42,27 @@ class GuildSettings(commands.Cog):
         return await ctx.send_ok(f"Prefix set to `{escape(prefix, ctx)}`")
 
     @commands.has_permissions(manage_guild=True)
-    @commands.command(brief="Set server config")
-    async def config(self, ctx: aoi.AoiContext, setting: str, *, value: str):  # noqa c901
+    @commands.command(brief="Sets a server config. Do `{prefix}config` to list the possible configs",
+                      description="""
+                      config
+                      config config_name value
+                      """)
+    async def config(self, ctx: aoi.AoiContext, setting: str = None, *, value: str = None):  # noqa c901
         #  note to self cuz am idot
-        #  make sure to add setting in /complexity/context/settings.json
+        #  make sure to add setting in /complexity/context/guildconfig.json
+        if not setting:
+            # view possible configs
+            config_list = re.sub(r"<.*?>", "",
+                                 LINQ(self.guild_configs)
+                                 .select(lambda config: f"⋄ `{config['name']}` - {config['description']}")
+                                 .join("\n"))
+            if await ctx.using_embeds():
+                return await ctx.embed(title="Config list", description=config_list)
+            else:
+                return await ctx.send(f"**Config list**\n"
+                                      f"{config_list}")
+        if not value:
+            return await ctx.send_error("You must pass a value")
         setting = setting.lower()
         color_funcs = {
             "okcolor": self.okcolor,
@@ -99,7 +124,6 @@ class GuildSettings(commands.Cog):
                 return await ctx.send_error("Currency generation chance must be a number between 0 and 100")
             await self.bot.db.set_currency_gen(ctx.guild.id, chance=v)
             return await ctx.send_ok(f"Currency generation chance set to {v}%")
-        await ctx.send_error("Invalid config")
 
     @commands.command(brief="Lists current configs for the server.")
     async def configs(self, ctx: aoi.AoiContext):
@@ -174,7 +198,7 @@ class GuildSettings(commands.Cog):
                 await ctx.send_info("There are no aliases set for this server.")
         else:
             if ctx.guild.id in self.bot.aliases and self.bot.aliases[ctx.guild.id]:
-                found = self.bot.rev_alias(ctx, command)
+                found = await self.bot.rev_alias(ctx, command)
                 if not found:
                     await ctx.send_info(f"There are no aliases for `{command}`")
                 else:

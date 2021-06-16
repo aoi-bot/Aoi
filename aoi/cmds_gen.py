@@ -112,7 +112,7 @@ async def gen_card(command: commands.Command, bot: AoiBot) -> str:
        </div>
    </div>
 </div>
-"""
+""".replace("#BOT#", "Aoi").replace("{prefix}", ",")
 
 
 module_active = False
