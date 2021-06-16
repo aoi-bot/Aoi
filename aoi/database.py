@@ -9,9 +9,9 @@ import aiosqlite
 from aiosqlite import Connection
 
 import discord
-from discord.ext import tasks, commands
 from aoi.database_models import GuildSettingModel, PunishmentModel, \
     TimedPunishmentModel, RoleShopItemModel, PunishmentTypeModel, AoiMessageModel
+from discord.ext import tasks, commands
 
 if TYPE_CHECKING:
     import aoi
@@ -199,9 +199,6 @@ ALTER TABLE punishments ADD COLUMN cleared_by INTEGER DEFAULT 0;
 }
 
 
-
-
-
 class AoiDatabase:
     # region # Database core
     def __init__(self, bot: aoi.AoiBot):
@@ -272,15 +269,7 @@ class AoiDatabase:
         rows = await cursor.fetchall()
         await cursor.close()
         for r in rows:
-            self.guild_settings[r[0]] = GuildSettingModel(int(r[1], 16),
-                                                          int(r[2], 16),
-                                                          int(r[3], 16),
-                                                          r[5], r[6],
-                                                          int(r[7]),
-                                                          int(r[8]),
-                                                          int(r[9]),
-                                                          [int(x) for x in r[10].split(",")] if r[10] else [],
-                                                          r[11] == 1, r[12] == 1)
+            self.guild_settings[r[0]] = GuildSettingModel.from_row(r)
             self.prefixes[r[0]] = r[4]
         cursor = await self.conn.execute("SELECT * from permissions")
         rows = await cursor.fetchall()
@@ -916,19 +905,7 @@ class AoiDatabase:
             except sqlite3.IntegrityError:
                 self.bot.logger.warning(f"Passing IntegrityError for guild {guild}")
             await self.conn.commit()
-            self.guild_settings[guild] = GuildSettingModel(
-                ok_color=0x00aa00,
-                error_color=0xaa0000,
-                info_color=0x0000aa,
-                perm_errors=True,
-                currency_img='',
-                currency_chance=4,
-                currency_min=8,
-                currency_max=10,
-                currency_gen_channels=[],
-                delete_on_ban=False,
-                reply_embeds=True
-            )
+            self.guild_settings[guild] = GuildSettingModel()
             self.prefixes[guild] = ","
         return self.guild_settings[guild]
 

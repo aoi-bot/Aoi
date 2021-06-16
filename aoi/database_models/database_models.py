@@ -3,19 +3,8 @@ from datetime import datetime
 from typing import List
 
 
-@dataclass
-class GuildSettingModel:
-    ok_color: int
-    error_color: int
-    info_color: int
-    perm_errors: bool
-    currency_img: str
-    currency_chance: int
-    currency_max: int
-    currency_min: int
-    currency_gen_channels: List[int]
-    delete_on_ban: bool
-    reply_embeds: bool
+
+
 
 
 @dataclass(frozen=True)
