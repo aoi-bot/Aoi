@@ -153,21 +153,24 @@ class Guilds(commands.Cog):
                 return await ctx.send_error("Must be a custom emoji")
             src = str(src.url)
         buf = io.BytesIO()
-        async with aiohttp.ClientSession() as sess:
-            try:
-                async with sess.get(src) as resp:
-                    if resp.status != 200:
-                        return await ctx.send_error(f"Server responded with a {resp.status}")
-                    if "Content-Type" in resp.headers:
-                        typ = resp.headers["Content-Type"].split("/")[-1]
-                    if "Content-Type" not in resp.headers or resp.headers["Content-Type"] not in \
-                            ("image/gif", "image/jpeg", "image/png"):
-                        return await ctx.send_error(f"That doesn't seem to be an image")
-                    buf.write(await resp.content.read())
-            except (ClientResponseError, BadHttpMessage):
-                await ctx.send_error(f"I got an error trying to get that image."
-                                     f"Try pasting the image into discord and using that link instead.")
-                raise
+        try:
+            async with aiohttp.ClientSession() as sess:
+                try:
+                    async with sess.get(src) as resp:
+                        if resp.status != 200:
+                            return await ctx.send_error(f"Server responded with a {resp.status}")
+                        if "Content-Type" in resp.headers:
+                            typ = resp.headers["Content-Type"].split("/")[-1]
+                        if "Content-Type" not in resp.headers or resp.headers["Content-Type"] not in \
+                                ("image/gif", "image/jpeg", "image/png"):
+                            return await ctx.send_error(f"That doesn't seem to be an image")
+                        buf.write(await resp.content.read())
+                except (ClientResponseError, BadHttpMessage):
+                    await ctx.send_error(f"I got an error trying to get that image."
+                                         f"Try pasting the image into discord and using that link instead.")
+                    raise
+        except aiohttp.InvalidURL:
+            return await ctx.send_info(f"`{src}` is an invalid URL")
         buf.seek(0)
         ratio = 0
         total_ratio = 1
