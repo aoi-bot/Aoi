@@ -46,6 +46,20 @@ class Permissions(commands.Cog):
             self.db.clear_permissions(ctx.guild.id)
         )
 
+    @commands.has_permissions(administrator=True)
+    @commands.command(brief="Remove a permission from the list", aliases=["rmp"])
+    async def removeperm(self, ctx: aoi.AoiContext, permission: int):
+        perms = await self.db.get_permissions(ctx.guild.id)
+        if permission < 1 or permission > len(perms) - 1:
+            return await ctx.send_error("Invalid permission number")
+        tok = perms.pop(permission).split()
+        if tok[0] in ["acm", "cm"]:
+            tok[1] = f"<#{tok[1]}>"
+        if tok[0] in ["arm"]:
+            tok[1] = f"<@&{tok[1]}>"
+        await ctx.send_ok("Removed " + " ".join(tok))
+        await self.db.set_permissions(ctx.guild.id, perms)
+
     # region # a_m commands
 
     @commands.has_permissions(administrator=True)
