@@ -34,7 +34,8 @@ class Moderation(commands.Cog):
     def get_action_embed(self, ctx: aoi.AoiContext, member: Union[discord.Member, discord.User],
                          typ: int, reason: str = None, extra: str = None) -> discord.Embed:
         action = ["banned", "kicked", "muted", "warned", "unbanned", "soft-banned"][typ]
-        return discord.Embed(title=f"User {action}", timestamp=datetime.now(), description=f"{reason}\n\n{extra}"). \
+        return discord.Embed(title=f"User {action}", timestamp=datetime.now(),
+                             description=f"Reason: {reason}\n\n{extra or ''}"). \
             add_field(name="User", value=str(member)). \
             add_field(name="ID", value=str(member.id)). \
             add_field(name="Staff Member", value=ctx.author.mention). \
@@ -57,12 +58,20 @@ class Moderation(commands.Cog):
 
     @commands.has_permissions(ban_members=True)
     @commands.command(brief="Bans a member from the server")
-    async def ban(self, ctx: aoi.AoiContext, member: discord.Member, *, reason: str = None):
-        self._check_role(ctx, member, "ban")
-        dm_sent = await self._dm(member, discord.Embed(title=f"Banned from {ctx.guild}", description=reason))
-        await member.ban(reason=f"{reason} | {ctx.author.id} {ctx.author}")
-        await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentTypeModel.BAN, reason,
-                                                   extra="DM could not be sent" if not dm_sent else ""))
+    async def ban(self, ctx: aoi.AoiContext, member: Union[discord.Member, int], *, reason: str = None):
+        if isinstance(member, int):
+            try:
+                member = await self.bot.fetch_unknown_user(member)
+            except discord.NotFound:
+                return await ctx.send_error(f"There isn't an existing user with an ID of {member}")
+            await ctx.guild.ban(member)
+            await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentTypeModel.BAN, reason))
+        else:
+            self._check_role(ctx, member, "ban")
+            dm_sent = await self._dm(member, discord.Embed(title=f"Banned from {ctx.guild}", description=reason))
+            await member.ban(reason=f"{reason} | {ctx.author.id} {ctx.author}")
+            await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentTypeModel.BAN, reason,
+                                                       extra="DM could not be sent" if not dm_sent else ""))
         await self.bot.db.add_user_ban(member.id, ctx, reason)
 
     @commands.has_permissions(ban_members=True)

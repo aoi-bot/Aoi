@@ -152,7 +152,9 @@ class AoiBot(commands.AutoShardedBot):
         if user_id in self.fetched_users:
             if (datetime.now() - self.fetched_users[user_id][1]).seconds > 3600:
                 del self.fetched_users[user_id]
-                self.fetched_users[user_id] = (await self.fetch_user(user_id), datetime.now())
+        self.fetched_users[user_id] = (await self.fetch_user(user_id), datetime.now())
+        return self.fetched_users[user_id][0]
+
 
     @tasks.loop(minutes=20)
     async def status_loop(self):
