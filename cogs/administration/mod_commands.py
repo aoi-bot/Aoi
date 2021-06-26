@@ -142,12 +142,15 @@ class Moderation(commands.Cog):
         await ctx.send_ok(f"Cleared punishment #{num} for {member}")
 
     @commands.command(brief="Views the punishment logs for a user")
-    async def logs(self, ctx: aoi.AoiContext, member: discord.Member = None):
+    async def logs(self, ctx: aoi.AoiContext, member: Union[discord.Member, int] = None):
         member = member or ctx.author
-        if member.id != ctx.author.id and not ctx.channel.permissions_for(ctx.author).kick_members:
+        if (isinstance(member, int) or member.id != ctx.author.id) and \
+                not ctx.channel.permissions_for(ctx.author).kick_members:
             return await ctx.send_error("You need the kick members permission to see logs from other people")
-        punishments: List[PunishmentModel] = sorted(await self.bot.db.lookup_punishments(member.id),
-                                                    key=lambda punishment: punishment.time, reverse=True)
+        punishments: List[PunishmentModel] = sorted(
+            await self.bot.db.lookup_punishments(member.id if isinstance(member, discord.Member) else member),
+            key=lambda punishment: punishment.time, reverse=True
+        )
 
         if not punishments:
             await ctx.send_info(f"{member} has no punishments")
