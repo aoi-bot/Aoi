@@ -5,6 +5,7 @@ import json
 from typing import TYPE_CHECKING, Tuple, Callable, Dict, Union
 
 from discord.ext import commands
+from libs.linq import LINQ
 
 if TYPE_CHECKING:
     from .aoi_bot import AoiBot
@@ -78,6 +79,7 @@ def permissions_badge(permission: str) -> str:
 async def gen_card(command: commands.Command, bot: AoiBot) -> str:
     aliases = ""
     flags = ""
+    examples = ""
     if command.aliases:
         if len(command.aliases) == 1:
             aliases = f"""<div>Alias: <code>,{command.aliases[0]}</code></div>"""
@@ -92,6 +94,11 @@ async def gen_card(command: commands.Command, bot: AoiBot) -> str:
             else:
                 flags += f"<li><code>--{name} [{flag[0].__name__.lower()}]</code> {flag[1]}"
         flags += "</ul></div>"
+    if command.description:
+        examples = "<div>Examples:<ul>" + \
+                   LINQ(command.description.splitlines()) \
+                       .select(lambda x: f"<li><code>,{x}</code>").join("\n") + \
+                   "</ul></div>"
     p = bot.permissions_needed_for(command.name)
     permissions = ("<div>User Permissions Needed: " +
                    (" ".join([permissions_badge(x) for x in p]) if p else "") + "</div>") \
@@ -109,6 +116,7 @@ async def gen_card(command: commands.Command, bot: AoiBot) -> str:
            </div>
            {flags}
            {permissions}
+           {examples}
        </div>
    </div>
 </div>

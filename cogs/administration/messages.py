@@ -71,8 +71,9 @@ class Messages(commands.Cog):
     @commands.command(
         brief="Send a message with #BOT#. Use [this site](https://embed.aoibot.xyz/) to make embeds."
     )
-    async def say(self, ctx: aoi.AoiContext, *, msg: str):
-        await ctx.send_json(msg)
+    async def say(self, ctx: aoi.AoiContext, channel: Optional[discord.TextChannel], *, msg: str):
+        channel = channel or ctx.channel
+        await self.bot.send_json_to_channel(channel.id, msg, member=ctx.author)
 
     @commands.has_permissions(manage_messages=True)
     @commands.command(
