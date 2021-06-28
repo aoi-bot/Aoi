@@ -7,6 +7,7 @@ from PIL import ImageDraw
 
 import aoi
 import discord
+from cog_helpers.admin import AdminService
 from cog_helpers.colors import ColorService
 from discord.ext import commands
 from discord.ext.commands import Greedy
@@ -16,9 +17,9 @@ from libs.converters import AoiColor, rolename
 
 # TODO help refactor
 
-class Roles(commands.Cog, ColorService):
+class Roles(AdminService, commands.Cog, ColorService):
     def __init__(self, bot: aoi.AoiBot):
-        super(ColorService).__init__()
+        super().__init__(bot.config.get("api.port"))
         self.bot = bot
 
     @property
@@ -422,20 +423,21 @@ class Roles(commands.Cog, ColorService):
 
         # remove invalid self-roles
         lost_roles = []
-        for r in await self.bot.db.get_self_roles(ctx.guild):
+        for r in await self.get_self_roles(ctx.guild):
             if not ctx.guild.get_role(r):
                 lost_roles.append(r)
         if lost_roles:
             await ctx.trigger_typing()
         for r in lost_roles:
-            await self.bot.db.remove_self_role(ctx.guild, r)
+            await self.remove_self_role(ctx.guild, r)
 
-        if not await self.bot.db.get_self_roles(ctx.guild):
+        roles = await self.get_self_roles(ctx.guild)
+        if not roles:
             return await ctx.send_error(f"{ctx.guild} has no self-assignable roles")
 
         await ctx.send_info("Self-assignable roles on this server\n" +
                             "\n".join(
-                                f"<@&{i}>" for i in await self.bot.db.get_self_roles(ctx.guild)
+                                f"<@&{i}>" for i in roles
                             ))
 
     @commands.has_permissions(manage_roles=True)

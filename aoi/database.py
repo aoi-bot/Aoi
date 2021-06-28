@@ -5,6 +5,7 @@ import datetime
 import sqlite3
 from typing import Dict, Optional, List, TYPE_CHECKING, Union, Tuple
 
+import aiohttp
 import aiosqlite
 from aiosqlite import Connection
 
@@ -121,6 +122,7 @@ CREATE TABLE IF NOT EXISTS "selfrole" (
   "guild" INTEGER NOT NULL,
   "role" INTEGER NOT NULL
 );;
+CREATE INDEX IF NOT EXISTS idx_sr ON selfrole(guild, role);;
 CREATE TABLE IF NOT EXISTS "roletriggers" (
   "guild" INTEGER NOT NULL,
   "role" INTEGER NOT NULL,
@@ -204,6 +206,7 @@ class AoiDatabase:
     def __init__(self, bot: aoi.AoiBot):
         self.conn: Optional[Connection] = None
         self.bot = bot
+        self.port = self.bot.config.get("api.port")
 
         self.guild_settings: Dict[int, GuildSettingModel] = {}
         self.prefixes: Dict[int, str] = {}
@@ -248,7 +251,7 @@ class AoiDatabase:
             1.0, 60.0, commands.BucketType.user)
 
     async def perform_migrations(self):
-        version = (await (await self.conn.execute("pragma user_version")).fetchone())[0]
+        version = (await (await self.conn.execute_orig("pragma user_version")).fetchone())[0]
         self.bot.logger.info(f"database:Version {version} found")
         for i in sorted(MIGRATIONS.keys()):
             if i > version:
@@ -258,11 +261,25 @@ class AoiDatabase:
                 await self.conn.commit()
 
     async def load(self):  # noqa: C901
+        # wait for api to be loaded
+        # TODO remove this
+        while True:
+            await asyncio.sleep(0.1)
+            try:
+                self.bot.logger.info("database:pinging API")
+                async with aiohttp.ClientSession() as sess:
+                    async with sess.get(f"http://127.0.0.1:{self.port}/ping") as resp:
+                        pass
+            except aiohttp.ClientConnectionError:
+                pass
+            else:
+                break
+
         self.bot.logger.info("database:Connecting to database")
         self.conn = await aiosqlite.connect("database.db")
+
         [await self.conn.execute(_) for _ in SQL_STRING.split(";;")]
         await self.conn.commit()
-        await self.perform_migrations()
 
         self.bot.logger.info("database:Loading database into memory")
         cursor = await self.conn.execute("SELECT * from guild_settings")
@@ -359,6 +376,16 @@ class AoiDatabase:
             for m in i.members:
                 await self.ensure_user_entry(m)
 
+        # monkey patch execute for now so that the bot can execute queries directly
+        async def execute(query: str, parameters=None):
+            async with aiohttp.ClientSession() as sess:
+                async with sess.post(f"http://127.0.0.1:{self.port}/aux",
+                                     json={"query": query, "params": list(parameters or [])}) as resp:
+                    pass
+
+        self.conn.execute_orig = self.conn.execute
+        self.conn.execute = execute
+
         self._cache_flush_loop.start()
 
     async def close(self):
@@ -377,7 +404,7 @@ class AoiDatabase:
                 for u in users:
                     xp = self.xp[guild][u]
                     self.bot.logger.log(self.bot.TRACE, f"xp:flush:-checking user {self.bot.get_user(u)}")
-                    a = await self.conn.execute("SELECT * from xp where guild = ? and user=?", (guild, u))
+                    a = await self.conn.execute_orig("SELECT * from xp where guild = ? and user=?", (guild, u))
                     if not await a.fetchall():
                         self.bot.logger.log(self.bot.TRACE, f"xp:flush:-adding user {self.bot.get_user(u)}")
                         await self.conn.execute("INSERT INTO xp (user, guild, xp) values (?,?,?)", (u, guild, 0))
@@ -388,7 +415,7 @@ class AoiDatabase:
         self.bot.logger.log(self.bot.TRACE, "xp:flush:released")
         async with self.global_currency_lock:
             for u in self.changed_global_currency:
-                a = await self.conn.execute("SELECT * from global_currency where user=?",
+                a = await self.conn.execute_orig("SELECT * from global_currency where user=?",
                                             (u,))
                 if not await a.fetchall():
                     await self.conn.execute("insert into global_currency (user, amount) "
@@ -399,7 +426,7 @@ class AoiDatabase:
             self.changed_global_currency = []
         async with self.title_lock:
             for u in self.changed_global_users:
-                a = await self.conn.execute("select * from user_global where user=?", (u,))
+                a = await self.conn.execute_orig("select * from user_global where user=?", (u,))
                 if not await a.fetchall():
                     await self.conn.execute("insert into user_global (user, title, badges, owned_titles, owned_badges,"
                                             "background) "
@@ -419,7 +446,7 @@ class AoiDatabase:
                 for u in users:
                     currency = self.guild_currency[guild][u]
                     self.bot.logger.log(self.bot.TRACE, f"guild_cur:flush:-checking user {self.bot.get_user(u)}")
-                    a = await self.conn.execute("SELECT * from guild_currency where guild = ? and user=?",
+                    a = await self.conn.execute_orig("SELECT * from guild_currency where guild = ? and user=?",
                                                 (guild, u))
                     if not await a.fetchall():
                         self.bot.logger.log(self.bot.TRACE, f"guild_cur:flush:-adding user {self.bot.get_user(u)}")
@@ -432,7 +459,7 @@ class AoiDatabase:
             self.changed_guild_currency = {}
         async with self.currency_gain_lock:
             for g in self.changed_currency_gains:
-                a = await self.conn.execute("SELECT * from currency_gains where guild=?",
+                a = await self.conn.execute_orig("SELECT * from currency_gains where guild=?",
                                             (g,))
                 if not await a.fetchall():
                     await self.conn.execute("insert into currency_gains (guild, gain) "
@@ -475,7 +502,7 @@ class AoiDatabase:
         elif role.id not in self.auto_roles[guild.id]:
             self.auto_roles[guild.id].append(role.id)
         # immediately write to database
-        a = await self.conn.execute("select * from autorole where guild=?", (guild.id,))
+        a = await self.conn.execute_orig("select * from autorole where guild=?", (guild.id,))
         if not await a.fetchall():
             await self.conn.execute("insert into autorole (guild, roles) values (?,?)",
                                     (guild.id, ",".join(map(str, self.auto_roles[guild.id]))))
@@ -488,7 +515,7 @@ class AoiDatabase:
         if guild.id in self.auto_roles and role in self.auto_roles[guild.id]:
             self.auto_roles[guild.id].remove(role)
         # immediately write to database
-        a = await self.conn.execute("select * from autorole where guild=?", (guild.id,))
+        a = await self.conn.execute_orig("select * from autorole where guild=?", (guild.id,))
         if not await a.fetchall():
             await self.conn.execute("insert into autorole (guild, roles) values (?,?)",
                                     (guild.id, ",".join(map(str, self.auto_roles[guild.id]))))
@@ -502,20 +529,27 @@ class AoiDatabase:
     # region # Self roles
 
     async def get_self_roles(self, guild: discord.Guild) -> List[int]:
-        return [a[0] for a in
-                await self.conn.execute_fetchall(f"select role from selfrole where guild=?", (guild.id,))]
+        async with aiohttp.ClientSession() as sess:
+            async with sess.get(f"http://127.0.0.1:{self.port}/self-roles/{guild.id}") as resp:
+                return (await resp.json())["results"]
 
-    async def add_self_role(self, guild: discord.Guild, role: discord.Role) -> None:
-        if role.id in await self.get_self_roles(guild):
-            return
-        await self.conn.execute("insert into selfrole (guild, role) values (?,?)", (guild.id, role.id))
-        await self.conn.commit()
+    async def add_self_role(self, guild: discord.Guild, role: discord.Role) -> bool:
+        async with aiohttp.ClientSession() as sess:
+            async with sess.put(
+                    f"http://127.0.0.1:{self.port}/self-roles/{guild.id}",
+                    json={'role': role.id}
+            ) as resp:
+                return (await resp.json())["results"]
 
     async def remove_self_role(self, guild: discord.Guild, role: Union[discord.Role, int]) -> None:
         if isinstance(role, discord.Role):
             role = role.id
-        await self.conn.execute("delete from selfrole where role=?", (role,))
-        await self.conn.commit()
+        async with aiohttp.ClientSession() as sess:
+            async with sess.delete(
+                    f"http://127.0.0.1:{self.port}/self-roles/{guild.id}",
+                    json={'role': role}
+            ) as resp:
+                return (await resp.json())["results"]
 
     # endregion
 

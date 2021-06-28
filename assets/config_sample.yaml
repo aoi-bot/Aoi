@@ -1,3 +1,6 @@
 ---
 admin:
   max_autorole: 10
+
+api:
+  port: 7878

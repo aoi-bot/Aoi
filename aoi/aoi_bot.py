@@ -79,6 +79,7 @@ class AoiBot(commands.AutoShardedBot):
         self.TRACE = 7
         for logger in [
             "aoi",
+            "api",
             "discord.client",
             "discord.gateway",
             "discord.http",
@@ -154,7 +155,6 @@ class AoiBot(commands.AutoShardedBot):
                 del self.fetched_users[user_id]
         self.fetched_users[user_id] = (await self.fetch_user(user_id), datetime.now())
         return self.fetched_users[user_id][0]
-
 
     @tasks.loop(minutes=20)
     async def status_loop(self):

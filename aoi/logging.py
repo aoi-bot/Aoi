@@ -30,6 +30,7 @@ styles = {
 }
 names = {
     "aoi": Fore.BLUE,
+    "api": Fore.GREEN,
     "discord.client": Fore.GREEN,
     "discord.gateway": Fore.MAGENTA,
     "discord.ext.commands.core": Fore.YELLOW,

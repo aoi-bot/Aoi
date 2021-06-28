@@ -2,6 +2,7 @@ import multiprocessing
 import sys
 
 from dashboard import Dashboard
+from database_api import app
 
 try:
     sys.path.append(sys.argv[0])
@@ -146,14 +147,21 @@ def dashboard_process():
     dashboard.run()
 
 
+def api_process():
+    app.run(port=bot.config.get("api.port"))
+
+
+_api_proc = multiprocessing.Process(target=api_process)
 _bot_proc = multiprocessing.Process(target=bot_process)
 _dash_proc = multiprocessing.Process(target=dashboard_process)
 
+_api_proc.start()
 _bot_proc.start()
 _dash_proc.start()
 
 _bot_proc.join()
 _dash_proc.kill()
+_api_proc.kill()
 
 if bot.is_restarting:
     os.execl(sys.executable, sys.executable, *sys.argv)
