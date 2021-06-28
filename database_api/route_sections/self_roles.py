@@ -14,38 +14,45 @@ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEM
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+
 from flask import Flask, request
-from sqlalchemy.engine import Engine
+from sqlalchemy.engine import Connection
 from sqlalchemy.orm import Session
 
-from database_api.core import SelfRole
 
-
-def setup(app: Flask, engine: Engine, session: Session):
+def setup(app: Flask, connection: Connection, session: Session):
     @app.get('/self-roles/<int:guild_id>')
     def get_self_assignable_roles(guild_id):
-        roles = [res.role for res in session.query(SelfRole).where(SelfRole.guild == guild_id).all()]
+        res = connection.execute("select role from selfrole where guild=?", (guild_id,))
+        res = [r["role"] for r in res.fetchall()]
         return {
-            "results": roles
+            "results": res
         }
 
     @app.put('/self-roles/<int:guild_id>')
     def add_self_assignable_role(guild_id):
         role_id = request.json["role"]
-        roles = [res.role for res in session.query(SelfRole).where(SelfRole.guild == guild_id).all()]
+        roles = get_self_assignable_roles(guild_id)["results"]
         if role_id in roles:
             return {"results": False}
-        session.add(SelfRole(guild=guild_id, role=role_id))
+        session.execute("insert into selfrole (guild, role) values (:guild,:role)",
+                        {
+                            "guild": guild_id,
+                            "role": role_id
+                        })
         session.commit()
         return {"results": True}
 
     @app.delete('/self-roles/<int:guild_id>')
     def delete_self_assignable_role(guild_id):
         role_id = request.json["role"]
-        roles = [res.role for res in session.query(SelfRole).where(SelfRole.guild == guild_id).all()]
+        roles = get_self_assignable_roles(guild_id)["results"]
         if role_id not in roles:
             return {"results": False}
-        inst = session.query(SelfRole).filter_by(guild=guild_id, role=role_id).one()
-        session.delete(inst)
+        session.execute("delete from selfrole where guild=:guild and role=:role",
+                        {
+                            "guild": guild_id,
+                            "role": role_id
+                        })
         session.commit()
         return {"results": True}

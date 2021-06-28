@@ -27,7 +27,7 @@ from flask import Flask, request
 from sqlalchemy import event
 import logging
 
-from .route_sections import self_roles
+from .route_sections import self_roles, messages
 
 app = Flask(__name__)
 logger = logging.getLogger("api")
@@ -72,3 +72,4 @@ def ping():
 
 
 self_roles.setup(app, engine, session)
+messages.setup(app, engine, session)
