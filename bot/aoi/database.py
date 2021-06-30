@@ -376,10 +376,8 @@ class AoiDatabase:
 
         # monkey patch execute for now so that the bot can execute queries directly
         async def execute(query: str, parameters=None):
-            async with aiohttp.ClientSession() as sess:
-                async with sess.post(f"http://127.0.0.1:{self.port}/aux",
-                                     json={"query": query, "params": list(parameters or [])}) as resp:
-                    pass
+            await self.bot.route_manager.r("aux").post(
+                json={"query": query, "params": list(parameters or [])})
 
         self.conn.execute_orig = self.conn.execute
         self.conn.execute = execute

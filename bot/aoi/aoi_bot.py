@@ -86,7 +86,7 @@ class AoiBot(commands.AutoShardedBot):
             "discord.http",
             "discord.ext.commands.core"
         ]:
-            logging.getLogger(logger).setLevel(logging.DEBUG if logger == "aoi" else logging.INFO)
+            logging.getLogger(logger).setLevel(logging.DEBUG if logger in ["aoi", "api", "werkzeug"] else logging.INFO)
             logging.getLogger(logger).addHandler(aoi.LoggingHandler())
         self.secret = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(128))
         self.logger = logging.getLogger("aoi")

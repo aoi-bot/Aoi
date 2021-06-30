@@ -1,9 +1,12 @@
 import multiprocessing
 import sys
 
+from flask.logging import default_handler
+
+import database
+from bot.aoi import Formatter, LoggingHandler
 from dashboard import Dashboard
 from database import app
-import database
 
 try:
     sys.path.append(sys.argv[0])
@@ -47,8 +50,11 @@ bot = aoi.AoiBot(command_prefix=get_prefix, help_command=None,
                  chunk_members_on_startup=True)
 
 bot.load_extensions()
-
+default_handler.setFormatter(Formatter)
+logging.getLogger("werkzeug").setLevel(logging.INFO)
+logging.getLogger("werkzeug").addHandler(LoggingHandler())
 database.api.secret = bot.secret
+
 
 @bot.check
 async def permission_check(ctx: aoi.AoiContext):  # noqa: C901

@@ -31,6 +31,7 @@ styles = {
 names = {
     "aoi": Fore.BLUE,
     "api": Fore.GREEN,
+    "werkzeug": Fore.GREEN,
     "discord.client": Fore.GREEN,
     "discord.gateway": Fore.MAGENTA,
     "discord.ext.commands.core": Fore.YELLOW,
@@ -38,9 +39,8 @@ names = {
 }
 
 
-class LoggingHandler(logging.StreamHandler):
-
-    def emit(self, record: logging.LogRecord) -> None:
+class Formatter(logging.Formatter):
+    def format(self, record):
         name = record.name
         level = record.levelno  # noqa F841
         level_name = record.levelname
@@ -58,9 +58,15 @@ class LoggingHandler(logging.StreamHandler):
 
         message %= record.args
 
-        print(f"{colors2[level_name]}{styles[level_name]}{level_name:>8}{Style.RESET_ALL}"
-              f" "
-              f"{Style.BRIGHT}{names[name]}{name}{Style.RESET_ALL} " +
-              (f"» {Style.BRIGHT}{Fore.LIGHTBLUE_EX}{sub}{Style.RESET_ALL} " if sub else '') +
-              f"» "
-              f"{colors[level_name]}{message}{Style.RESET_ALL}")
+        return (f"{colors2[level_name]}{styles[level_name]}{level_name:>8}{Style.RESET_ALL}"
+                f" "
+                f"{Style.BRIGHT}{names[name]}{name}{Style.RESET_ALL} " +
+                (f"» {Style.BRIGHT}{Fore.LIGHTBLUE_EX}{sub}{Style.RESET_ALL} " if sub else '') +
+                f"» "
+                f"{colors[level_name]}{message}{Style.RESET_ALL}")
+
+
+class LoggingHandler(logging.StreamHandler):
+
+    def emit(self, record: logging.LogRecord) -> None:
+        print(Formatter().format(record))
