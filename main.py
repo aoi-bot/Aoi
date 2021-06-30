@@ -16,7 +16,7 @@ import traceback
 
 import dotenv
 
-import aoi
+from bot import aoi
 import discord
 from discord.ext import commands
 

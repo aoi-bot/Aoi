@@ -6,7 +6,7 @@ from typing import List, Optional, TYPE_CHECKING
 from discord.ext import commands
 
 if TYPE_CHECKING:
-    import aoi
+    from bot import aoi
 
 
 def try_convert_coord(arg: str):

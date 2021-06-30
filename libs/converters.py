@@ -14,7 +14,7 @@ from discord.ext import commands
 from discord.ext.commands import BadArgument
 
 if typing.TYPE_CHECKING:
-    from aoi.custom_context import AoiContext
+    from bot.aoi import AoiContext
 
 
 def allowed_strings(*values, preserve_case: bool = False) -> typing.Callable[[str], str]:

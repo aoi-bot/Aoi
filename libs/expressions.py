@@ -4,7 +4,7 @@ import re
 from dataclasses import dataclass
 from typing import List, Union
 
-import aoi
+from bot import aoi
 from discord.ext import commands
 
 logging.getLogger("aoi").info("expr:Initializing the expression evaluator")

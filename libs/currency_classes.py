@@ -3,9 +3,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    import aoi
+    from bot import aoi
 
-from aoi.errors import CurrencyError
+from bot.aoi import CurrencyError
 
 
 class CurrencyLock:

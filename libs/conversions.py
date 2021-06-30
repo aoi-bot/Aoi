@@ -8,7 +8,7 @@ import discord
 from libs.converters import AoiColor
 
 if TYPE_CHECKING:
-    from aoi import AoiContext
+    from bot.aoi import AoiContext
 
 num_list = "zero,one,two,three,four,five,six,seven,eight,nine".split(",")
 
