@@ -16,8 +16,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 """
 from typing import List, Union, Final, Optional
 
-import aiohttp
-
 import discord
 from bot.aoi import AoiMessageModel
 
@@ -40,58 +38,48 @@ Missing: Final = _Missing()
 
 
 class AdminService:
-    def __init__(self, port):
-        self.port = port
+    def __init__(self, bot):
+        self.bot = bot
 
     async def get_self_roles(self, guild: discord.Guild) -> List[int]:
-        async with aiohttp.ClientSession() as sess:
-            async with sess.get(f"http://127.0.0.1:{self.port}/self-roles/{guild.id}") as resp:
-                return (await resp.json())["results"]
+        return (await self.bot.route_manager.r("self-roles/?", (guild.id,)).get())["results"]
 
     async def add_self_role(self, guild: discord.Guild, role: discord.Role) -> bool:
-        async with aiohttp.ClientSession() as sess:
-            async with sess.put(
-                    f"http://127.0.0.1:{self.port}/self-roles/{guild.id}",
-                    json={'role': role.id}
-            ) as resp:
-                return (await resp.json())["results"]
+        return (
+            await self.bot.route_manager.r("self-roles/?", (guild.id,)).put(json={"role": role.id})
+        )["results"]
 
     async def remove_self_role(self, guild: discord.Guild, role: Union[discord.Role, int]) -> None:
         if isinstance(role, discord.Role):
             role = role.id
-        async with aiohttp.ClientSession() as sess:
-            async with sess.delete(
-                    f"http://127.0.0.1:{self.port}/self-roles/{guild.id}",
-                    json={'role': role}
-            ) as resp:
-                return (await resp.json())["results"]
+        return (
+            await self.bot.route_manager.r("self-roles/?", (guild.id,)).delete(json={"role": role})
+        )["results"]
 
     async def get_welcome_message(self, guild: int) -> AoiMessageModel:
-        async with aiohttp.ClientSession() as sess:
-            async with sess.get(f"http://127.0.0.1:{self.port}/messages/greet/{guild}") as resp:
-                return AoiMessageModel(*(await resp.json())["results"])
+        return AoiMessageModel(*(
+            await self.bot.route_manager.r("messages/greet/?", (guild,)).get()
+        )["results"])
 
     async def get_goodbye_message(self, guild: int) -> AoiMessageModel:
-        async with aiohttp.ClientSession() as sess:
-            async with sess.get(f"http://127.0.0.1:{self.port}/messages/leave/{guild}") as resp:
-                return AoiMessageModel(*(await resp.json())["results"])
+        return AoiMessageModel(*(
+            await self.bot.route_manager.r("messages/leave/?", (guild,)).get()
+        )["results"])
 
     async def set_welcome_message(self, guild: int, *, channel: Optional[discord.TextChannel] = Missing,
                                   delete_after: int = None, message: str = None):
-        async with aiohttp.ClientSession() as sess:
-            await sess.patch(f"http://127.0.0.1:{self.port}/messages/greet/{guild}",
-                             json={
-                                 "message": message,
-                                 "channel": channel.id if channel else (0 if channel != Missing else None),
-                                 "delete": delete_after
-                             })
+        await self.bot.route_manager.r("messages/greet/?", (guild,)).patch(
+            json={
+                "message": message,
+                "channel": channel.id if channel else (0 if channel != Missing else None),
+                "delete": delete_after
+            })
 
     async def set_goodbye_message(self, guild: int, *, channel: Optional[discord.TextChannel] = Missing,
                                   delete_after: int = None, message: str = None):
-        async with aiohttp.ClientSession() as sess:
-            await sess.patch(f"http://127.0.0.1:{self.port}/messages/leave/{guild}",
-                             json={
-                                 "message": message,
-                                 "channel": channel.id if channel else (0 if channel != Missing else None),
-                                 "delete": delete_after
-                             })
+        await self.bot.route_manager.r("messages/leave/?", (guild,)).patch(
+            json={
+                "message": message,
+                "channel": channel.id if channel else (0 if channel != Missing else None),
+                "delete": delete_after
+            })

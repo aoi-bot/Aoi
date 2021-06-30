@@ -19,7 +19,7 @@ from libs.converters import AoiColor, rolename
 
 class Roles(AdminService, commands.Cog, ColorService):
     def __init__(self, bot: aoi.AoiBot):
-        super().__init__(bot.config.get("api.port"))
+        super().__init__(bot)
         self.bot = bot
 
     @property
@@ -447,7 +447,7 @@ class Roles(AdminService, commands.Cog, ColorService):
     )
     async def addselfrole(self, ctx: aoi.AoiContext, *, role: discord.Role):
         self._soft_check_role(ctx, role, "add")
-        await self.bot.db.add_self_role(ctx.guild, role)
+        await self.add_self_role(ctx.guild, role)
         await ctx.send_ok(f"{role.mention} added to self-assignable roles")
 
     @commands.has_permissions(manage_roles=True)
@@ -456,7 +456,7 @@ class Roles(AdminService, commands.Cog, ColorService):
         aliases=["rsr", "rsrole"]
     )
     async def removeselfrole(self, ctx: aoi.AoiContext, *, role: discord.Role):
-        await self.bot.db.remove_self_role(ctx.guild, role)
+        await self.remove_self_role(ctx.guild, role)
         await ctx.send_ok(f"{role.mention} removed from self-assignable roles")
 
     @commands.command(

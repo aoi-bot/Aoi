@@ -10,7 +10,7 @@ from discord.ext import commands
 
 class WelcomeGoodbye(AdminService, commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
-        super().__init__(bot.config.get("api.port"))
+        super().__init__(bot)
         self.bot = bot
 
     @property

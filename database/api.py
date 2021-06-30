@@ -23,7 +23,7 @@ from .core import *
 if TYPE_CHECKING:
     pass
 
-from flask import Flask, request
+from flask import Flask, request, Response
 from sqlalchemy import event
 import logging
 
@@ -31,6 +31,13 @@ from .route_sections import self_roles, messages
 
 app = Flask(__name__)
 logger = logging.getLogger("api")
+secret = None
+
+
+@app.before_request
+def check_headers():
+    if request.headers.get("Authorization") != secret:
+        return Response({}, status=401, content_type="application/json")
 
 
 @event.listens_for(engine, "connect")

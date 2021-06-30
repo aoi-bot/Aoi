@@ -267,9 +267,7 @@ class AoiDatabase:
             await asyncio.sleep(0.1)
             try:
                 self.bot.logger.info("database:pinging API")
-                async with aiohttp.ClientSession() as sess:
-                    async with sess.get(f"http://127.0.0.1:{self.port}/ping") as resp:
-                        pass
+                await self.bot.route_manager.r("ping").get()
             except aiohttp.ClientConnectionError:
                 pass
             else:

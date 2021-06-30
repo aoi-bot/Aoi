@@ -2,7 +2,8 @@ import multiprocessing
 import sys
 
 from dashboard import Dashboard
-from database_api import app
+from database import app
+import database
 
 try:
     sys.path.append(sys.argv[0])
@@ -47,6 +48,7 @@ bot = aoi.AoiBot(command_prefix=get_prefix, help_command=None,
 
 bot.load_extensions()
 
+database.api.secret = bot.secret
 
 @bot.check
 async def permission_check(ctx: aoi.AoiContext):  # noqa: C901

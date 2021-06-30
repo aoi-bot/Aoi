@@ -6,6 +6,7 @@ import logging
 import os
 import random
 import re
+import string
 import subprocess
 from datetime import datetime, timedelta
 from typing import Dict, Optional, List, Union, TYPE_CHECKING, Awaitable, Any, Callable, Tuple
@@ -14,6 +15,7 @@ import aiohttp.client_exceptions
 import ksoftapi
 from ruamel.yaml import YAML
 
+from .route import AoiRouteManager
 from .. import aoi
 import discord
 # import pixivapi
@@ -86,7 +88,10 @@ class AoiBot(commands.AutoShardedBot):
         ]:
             logging.getLogger(logger).setLevel(logging.DEBUG if logger == "aoi" else logging.INFO)
             logging.getLogger(logger).addHandler(aoi.LoggingHandler())
+        self.secret = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(128))
         self.logger = logging.getLogger("aoi")
+        self.logger.info(f"API Secret: {self.secret}")
+        self.route_manager = AoiRouteManager(self)
         self.config = ConfigHandler()
         self.db: Optional[AoiDatabase] = None
         self.prefixes: Dict[int, str] = {}
