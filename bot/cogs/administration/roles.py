@@ -463,20 +463,20 @@ class Roles(AdminService, commands.Cog, ColorService):
         brief="Adds a self-assignable role to you"
     )
     async def addrole(self, ctx: aoi.AoiContext, *, role: discord.Role):
-        if not await self.bot.db.get_self_roles(ctx.guild):
+        if not await self.get_self_roles(ctx.guild):
             return await ctx.send_error(f"{ctx.guild} has no self-assignable roles")
         self._soft_check_role(ctx, role, "add")
         # remove invalid self-roles
         lost_roles = []
-        for r in await self.bot.db.get_self_roles(ctx.guild):
+        for r in await self.get_self_roles(ctx.guild):
             if not ctx.guild.get_role(r):
                 lost_roles.append(r)
         if lost_roles:
             await ctx.trigger_typing()
         for r in lost_roles:
-            await self.bot.db.remove_self_role(ctx.guild, r)
+            await self.remove_self_role(ctx.guild, r)
 
-        if role.id not in await self.bot.db.get_self_roles(ctx.guild):
+        if role.id not in await self.get_self_roles(ctx.guild):
             return await ctx.send_error(f"{role.mention} is not self-assignable")
 
         if role.id in [r.id for r in ctx.author.roles]:
@@ -489,20 +489,20 @@ class Roles(AdminService, commands.Cog, ColorService):
         brief="Removes a self-assignable role from you"
     )
     async def removerole(self, ctx: aoi.AoiContext, *, role: discord.Role):
-        if not await self.bot.db.get_self_roles(ctx.guild):
+        if not await self.get_self_roles(ctx.guild):
             return await ctx.send_error(f"{ctx.guild} has no self-assignable roles")
         self._soft_check_role(ctx, role, "remove")
         # remove invalid self-roles
         lost_roles = []
-        for r in await self.bot.db.get_self_roles(ctx.guild):
+        for r in await self.get_self_roles(ctx.guild):
             if not ctx.guild.get_role(r):
                 lost_roles.append(r)
         if lost_roles:
             await ctx.trigger_typing()
         for r in lost_roles:
-            await self.bot.db.remove_self_role(ctx.guild, r)
+            await self.remove_self_role(ctx.guild, r)
 
-        if role.id not in await self.bot.db.get_self_roles(ctx.guild):
+        if role.id not in await self.get_self_roles(ctx.guild):
             return await ctx.send_error(f"{role.mention} is not self-assignable")
 
         if role.id not in [r.id for r in ctx.author.roles]:

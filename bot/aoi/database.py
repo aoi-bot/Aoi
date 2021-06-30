@@ -522,33 +522,6 @@ class AoiDatabase:
 
     # endregion
 
-    # region # Self roles
-
-    async def get_self_roles(self, guild: discord.Guild) -> List[int]:
-        async with aiohttp.ClientSession() as sess:
-            async with sess.get(f"http://127.0.0.1:{self.port}/self-roles/{guild.id}") as resp:
-                return (await resp.json())["results"]
-
-    async def add_self_role(self, guild: discord.Guild, role: discord.Role) -> bool:
-        async with aiohttp.ClientSession() as sess:
-            async with sess.put(
-                    f"http://127.0.0.1:{self.port}/self-roles/{guild.id}",
-                    json={'role': role.id}
-            ) as resp:
-                return (await resp.json())["results"]
-
-    async def remove_self_role(self, guild: discord.Guild, role: Union[discord.Role, int]) -> None:
-        if isinstance(role, discord.Role):
-            role = role.id
-        async with aiohttp.ClientSession() as sess:
-            async with sess.delete(
-                    f"http://127.0.0.1:{self.port}/self-roles/{guild.id}",
-                    json={'role': role}
-            ) as resp:
-                return (await resp.json())["results"]
-
-    # endregion
-
     # region # Guild shop
 
     async def ensure_guild_shop(self, guild: discord.Guild) -> None:
