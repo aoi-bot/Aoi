@@ -103,6 +103,18 @@ class Fun(commands.Cog):
                     image=(await resp.json())["url"]
                 )
 
+    @commands.command(brief="Gets a random anime quote from the AnimeChan API")
+    @commands.cooldown(1, 5, commands.BucketType.user) # cooldown so there isn't too many requests from the same user
+    async def animequote(self, ctx: aoi.AoiContext):
+        async with aiohttp.ClientSession() as sess:
+            async with sess.get("https://animechan.vercel.app/api/random") as resp:
+                if resp.status == 200:
+                    quote = (await resp.json())["quote"]
+                    char = (await resp.json())["character"]
+                    anime = (await resp.json())["anime"]
+                    await ctx.embed(description=f"{quote}\n~ {char}", footer=f"Anime: {anime}")
+                else:
+                    await ctx.send_error(f"API returned code: `{resp.status}`. Try again later...")
 
 def setup(bot: aoi.AoiBot) -> None:
     fun = Fun(bot)
