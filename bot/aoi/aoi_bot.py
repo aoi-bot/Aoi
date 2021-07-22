@@ -161,7 +161,7 @@ class AoiBot(commands.AutoShardedBot):
 
     @tasks.loop(minutes=20)
     async def status_loop(self):
-        await self.change_presence(activity=discord.Game(f",help | {len(self.guilds)} servers"))
+        await self.change_presence(activity=discord.Game(f",help | {len(self.guilds)} servers | New support server in ,help"))
 
     def create_task(self,
                     ctx: commands.Context,
