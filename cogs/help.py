@@ -114,7 +114,7 @@ class Help(commands.Cog, HelpCogService):
                                                      f"view the guides or check out the [online guides]"
                                                      f"(https://www.aoibot.xyz/guides.html)"),
                                     ("Support Server", f"Still need help? Join our [support "
-                                                       f"server](https://discord.gg/zRvNtXFWeS)"),
+                                                       f"server](https://discord.gg/6VusqNUr9V)"),
                                     ("Command List",
                                      f"View {self.bot.user.name if self.bot.user else ''}'s [command list]"
                                      f"(https://www.aoibot.xyz/commands.html)"),
