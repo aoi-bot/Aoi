@@ -490,38 +490,6 @@ class AoiDatabase:
 
     # endregion
 
-    # region # Auto roles
-
-    async def add_auto_role(self, guild: discord.Guild, role: discord.Role):
-        if guild.id not in self.auto_roles:
-            self.auto_roles[guild.id] = [role.id]
-        elif role.id not in self.auto_roles[guild.id]:
-            self.auto_roles[guild.id].append(role.id)
-        # immediately write to database
-        a = await self.conn.execute_orig("select * from autorole where guild=?", (guild.id,))
-        if not await a.fetchall():
-            await self.conn.execute("insert into autorole (guild, roles) values (?,?)",
-                                    (guild.id, ",".join(map(str, self.auto_roles[guild.id]))))
-        else:
-            await self.conn.execute("update autorole set roles=? where guild=?",
-                                    (",".join(map(str, self.auto_roles[guild.id])), guild.id))
-        await self.conn.commit()
-
-    async def del_auto_role(self, guild: discord.Guild, role: int):
-        if guild.id in self.auto_roles and role in self.auto_roles[guild.id]:
-            self.auto_roles[guild.id].remove(role)
-        # immediately write to database
-        a = await self.conn.execute_orig("select * from autorole where guild=?", (guild.id,))
-        if not await a.fetchall():
-            await self.conn.execute("insert into autorole (guild, roles) values (?,?)",
-                                    (guild.id, ",".join(map(str, self.auto_roles[guild.id]))))
-        else:
-            await self.conn.execute("update autorole set roles=? where guild=?",
-                                    (",".join(map(str, self.auto_roles[guild.id])), guild.id))
-        await self.conn.commit()
-
-    # endregion
-
     # region # Guild shop
 
     async def ensure_guild_shop(self, guild: discord.Guild) -> None:

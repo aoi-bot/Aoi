@@ -227,13 +227,13 @@ class Roles(AdminService, commands.Cog, ColorService):
         aliases=["aarole"]
     )
     async def addautorole(self, ctx: aoi.AoiContext, role: discord.Role):
-        if (ctx.guild.id in self.bot.db.auto_roles) and \
-                len(self.bot.db.auto_roles[ctx.guild.id]) >= self.bot.config.get("admin.max_autorole"):  # noqa
+        roles = await self.get_auto_roles(ctx.guild)
+        if len(roles) >= self.bot.config.get("admin.max_autorole"):  # noqa
             return await ctx.send_error(
                 f"You are only allowed to have {self.bot.config.get('admin.max_autorole')} autoroles per server. "  # noqa
                 f"You can list the current autoroles with `{ctx.prefix}larole` and delete one with "
                 f"`{ctx.prefix}darole`")
-        await self.bot.db.add_auto_role(ctx.guild, role)
+        await self.add_auto_role(ctx.guild, role)
         await ctx.send_ok(f"{role.mention} added to the list of automatically assigned roles on this server. You can "
                           f"view the list with `{ctx.prefix}larole`")
 
@@ -252,11 +252,12 @@ class Roles(AdminService, commands.Cog, ColorService):
         if isinstance(role, discord.Role):
             role = role.id
             was_role = True
-        if ctx.guild.id not in self.bot.db.auto_roles or role not in self.bot.db.auto_roles[ctx.guild.id]:
+        roles = await self.get_auto_roles(ctx.guild)
+        if not roles or role not in roles:
             return await ctx.send_error(f"{'<@&' if was_role else ''}{role}{'>' if was_role else ''} is not in the "
                                         f"list if automatically assigned roles in this server. You can "
                                         f"view the list with `{ctx.prefix}larole`")
-        await self.bot.db.del_auto_role(ctx.guild, role)
+        await self.remove_auto_role(ctx.guild, role)
         await ctx.send_ok(f"{'<@&' if was_role else ''}{role}{'>' if was_role else ''} deleted from the list of "
                           f"automatically assigned roles")
 
@@ -266,25 +267,26 @@ class Roles(AdminService, commands.Cog, ColorService):
         aliases=["larole"]
     )
     async def listautoroles(self, ctx: aoi.AoiContext):
-        if ctx.guild.id not in self.bot.db.auto_roles or not self.bot.db.auto_roles[ctx.guild.id]:
+        roles = await self.get_auto_roles(ctx.guild)
+        if not roles:
             return await ctx.send_info("There are no automatically assigned roles on this server.")
 
         # remove invalid roles from the auto role list
         lost_roles = []
-        for r in self.bot.db.auto_roles[ctx.guild.id]:
+        for r in roles:
             if not ctx.guild.get_role(r):
                 lost_roles.append(r)
         if lost_roles:
             await ctx.trigger_typing()
         for r in lost_roles:
-            await self.bot.db.del_auto_role(ctx.guild, r)
+            await self.remove_auto_role(ctx.guild, r)
 
-        if ctx.guild.id not in self.bot.db.auto_roles or not self.bot.db.auto_roles[ctx.guild.id]:
+        if not roles:
             return await ctx.send_info("There are no automatically assigned roles on this server.")
 
         await ctx.send_info("Automatically assigned roles on this server\n" +
                             "\n".join(
-                                f"<@&{i}>" for i in self.bot.db.auto_roles[ctx.guild.id]
+                                f"<@&{i}>" for i in roles
                             ))
 
     @commands.command(

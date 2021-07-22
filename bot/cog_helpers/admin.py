@@ -41,6 +41,19 @@ class AdminService:
     def __init__(self, bot):
         self.bot = bot
 
+    async def get_auto_roles(self, guild: discord.Guild) -> List[int]:
+        return (await self.bot.route_manager.r("auto-roles/?", (guild.id, )).get())["results"]
+
+    async def add_auto_role(self, guild: discord.Guild, role: discord.Role) -> bool:
+        return (
+            await self.bot.route_manager.r("auto-roles/?", (guild.id, )).put(json={"role": role.id})
+        )["results"]
+
+    async def remove_auto_role(self, guild: discord.Guild, role: int) -> bool:
+        return (
+            await self.bot.route_manager.r("auto-roles/?", (guild.id, )).delete(json={"role": role})
+        )["results"]
+
     async def get_self_roles(self, guild: discord.Guild) -> List[int]:
         return (await self.bot.route_manager.r("self-roles/?", (guild.id,)).get())["results"]
 
