@@ -143,8 +143,6 @@ dashboard = Dashboard(bot)
 
 loop = asyncio.get_event_loop()
 
-
-
 try:
     bot.logger.info(f"Starting Aoi Bot with PID {os.getpid()}")
     loop.create_task(bot.start(os.getenv("TOKEN")))
@@ -161,16 +159,12 @@ def api_process():
     app.run(port=bot.config.get("api.port"))
 
 
+_bot_proc = threading.Thread(target=loop.run_forever)
 _api_proc = threading.Thread(target=api_process, daemon=True)
 _dash_proc = threading.Thread(target=dashboard_process, daemon=True)
 
-bot.db_proc = _api_proc
-bot.dash_proc = _dash_proc
-
-_bot_proc = threading.Thread(target=loop.run_forever)
-
-_api_proc.start()
 _bot_proc.start()
+_api_proc.start()
 _dash_proc.start()
 
 _bot_proc.join()
