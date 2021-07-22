@@ -1,3 +1,4 @@
+import asyncio
 import os
 import subprocess
 from datetime import datetime
@@ -8,9 +9,10 @@ import aiosqlite
 import psutil
 import redis
 
-from bot import aoi
 import discord
+from bot import aoi
 from discord.ext import commands, tasks
+from libs import converters, conversions
 from libs.conversions import dhm_notation, hms_notation, maybe_pluralize, sql_trim
 
 
@@ -267,12 +269,28 @@ class Bot(commands.Cog):
 
     @commands.is_owner()
     @commands.command(brief="Restart Aoi")
-    async def restart(self, ctx: aoi.AoiContext):
+    async def restart(self, ctx: aoi.AoiContext, delay: int = 0):
+        if delay:
+            await ctx.send(f"Restart scheduled in {conversions.hms_notation(delay)}")
+        self.bot.status_loop.stop()
+        status = 2
+        while delay > 0:
+            delay -= 1
+            if delay > 60 and status != 1:
+                await self.bot.change_presence(activity=discord.Game("Restart scheduled"),
+                                               status=discord.Status.idle)
+                status = 1
+            elif status != 0:
+                await self.bot.change_presence(activity=discord.Game("Restarting in <1m"),
+                                               status=discord.Status.dnd)
+                status = 0
+            await asyncio.sleep(1)
         self.bot.is_restarting = True
         self.bot.restart_response_channel = ctx.channel.id
         await self.bot.db.cache_flush()
         await ctx.send_ok("Attempting to restart. See you on the other side!")
-        await self.bot.close()
+        await self.bot.loop.stop()
+        await self.bot.loop.close()
 
     @commands.is_owner()
     @commands.command(brief="Reload a shard - **Might have strange side effects**")

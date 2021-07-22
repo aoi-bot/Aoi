@@ -1,5 +1,5 @@
-import multiprocessing
 import sys
+import threading
 
 from flask.logging import default_handler
 
@@ -141,14 +141,16 @@ async def permission_check(ctx: aoi.AoiContext):  # noqa: C901
 
 dashboard = Dashboard(bot)
 
+loop = asyncio.get_event_loop()
 
-def bot_process():
-    try:
-        bot.logger.info(f"Starting Aoi Bot with PID {os.getpid()}")
-        bot.run(os.getenv("TOKEN"))
-    except Exception as error:
-        traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
-        exit(1)
+
+
+try:
+    bot.logger.info(f"Starting Aoi Bot with PID {os.getpid()}")
+    loop.create_task(bot.start(os.getenv("TOKEN")))
+except Exception as error:
+    traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+    exit(1)
 
 
 def dashboard_process():
@@ -159,17 +161,19 @@ def api_process():
     app.run(port=bot.config.get("api.port"))
 
 
-_api_proc = multiprocessing.Process(target=api_process)
-_bot_proc = multiprocessing.Process(target=bot_process)
-_dash_proc = multiprocessing.Process(target=dashboard_process)
+_api_proc = threading.Thread(target=api_process, daemon=True)
+_dash_proc = threading.Thread(target=dashboard_process, daemon=True)
+
+bot.db_proc = _api_proc
+bot.dash_proc = _dash_proc
+
+_bot_proc = threading.Thread(target=loop.run_forever)
 
 _api_proc.start()
 _bot_proc.start()
 _dash_proc.start()
 
 _bot_proc.join()
-_dash_proc.kill()
-_api_proc.kill()
 
 if bot.is_restarting:
     os.execl(sys.executable, sys.executable, *sys.argv)
