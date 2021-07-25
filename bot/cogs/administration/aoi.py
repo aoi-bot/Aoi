@@ -289,8 +289,8 @@ class Bot(commands.Cog):
         self.bot.restart_response_channel = ctx.channel.id
         await self.bot.db.cache_flush()
         await ctx.send_ok("Attempting to restart. See you on the other side!")
-        await self.bot.loop.stop()
-        await self.bot.loop.close()
+        self.bot.loop.stop()
+        self.bot.loop.close()
 
     @commands.is_owner()
     @commands.command(brief="Reload a shard - **Might have strange side effects**")
