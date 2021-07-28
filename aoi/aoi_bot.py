@@ -12,7 +12,6 @@ from typing import Dict, Optional, List, Union, TYPE_CHECKING, Awaitable, Any, C
 
 import aiohttp.client_exceptions
 import ksoftapi
-from discord_slash import SlashCommand
 from ruamel.yaml import YAML
 
 import aoi
@@ -115,7 +114,6 @@ class AoiBot(commands.AutoShardedBot):
         self.commands_ran = {}
         self.ksoft: Optional[ksoftapi.Client] = None
         self.fetched_users: Dict[int, Tuple[discord.User, datetime]] = {}
-        self.slash: Optional[SlashCommand] = None
         self.is_restarting = False
         self.thumbnails: List[str] = []
         self.twitter_bearer = ""

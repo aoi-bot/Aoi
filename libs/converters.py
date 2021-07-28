@@ -8,7 +8,6 @@ import typing
 
 import dateparser
 import webcolors
-from discord_slash import SlashContext
 
 import discord
 from discord.ext import commands
