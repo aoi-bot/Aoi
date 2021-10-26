@@ -117,8 +117,7 @@ class Bot(commands.Cog):
         permissions_int = 268659776
         invite_url = f"https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=" \
                      f"{permissions_int}&scope=bot"
-        await ctx.send_info(f"Invite me to your server [without slash commands]({invite_url}) or "
-                            f"[with slash commands]({invite_url}%20applications.commands)")
+        await ctx.send_info(f"Invite me to your server [here]({invite_url})")
 
     @commands.command(
         brief="Shows #BOT#'s latency to discord"
