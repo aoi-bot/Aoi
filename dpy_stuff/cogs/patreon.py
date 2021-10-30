@@ -7,7 +7,7 @@ from typing import Dict
 import aiohttp
 from discord.ext import commands, tasks
 
-import bot
+from aoi import bot
 
 if os.getenv("PATREON_ID") and os.getenv("PATREON_SECRET"):  # noqa c901
     logging.getLogger("aoi").info("Loading Patreon cog definition")

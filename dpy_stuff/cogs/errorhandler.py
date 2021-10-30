@@ -4,7 +4,7 @@ import traceback
 import discord
 from discord.ext import commands
 
-import bot
+from aoi import bot
 
 
 def _(s: str):

@@ -7,10 +7,10 @@ from discord.ext import commands
 from discord.ext.commands import Greedy
 from PIL import Image, ImageDraw
 
-import bot
+from aoi import bot
 from dpy_stuff.cog_helpers.colors import ColorService
-from libs import conversions
-from libs.converters import AoiColor, rolename
+from aoi.libs import conversions
+from aoi.libs.converters import AoiColor, rolename
 
 # TODO help refactor
 

@@ -5,9 +5,9 @@ from typing import Dict, List, Optional, Union
 import discord
 from discord.ext import commands
 
-import bot
-from bot.database import (PunishmentModel, PunishmentTypeModel,
-                          TimedPunishmentModel)
+from aoi import bot
+from aoi.bot import (PunishmentModel, PunishmentTypeModel,
+                     TimedPunishmentModel)
 
 
 def _soft_check_role(ctx: bot.AoiContext, member: discord.Member, action: str = "edit"):

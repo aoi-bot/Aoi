@@ -4,9 +4,9 @@ from typing import Dict
 import discord
 from discord.ext import commands
 
-import bot
-from libs.conversions import dhms_notation, hms_notation
-from libs.converters import t_delta
+from aoi import bot
+from aoi.libs.conversions import dhms_notation, hms_notation
+from aoi.libs.converters import t_delta
 
 
 class Channels(commands.Cog):

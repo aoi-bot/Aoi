@@ -7,9 +7,9 @@ import PIL.ImageDraw as Dw
 import PIL.ImageFont as Fn
 from discord.ext import commands
 
-import bot
+from aoi import bot
 from dpy_stuff.cog_helpers.currency import CurrencyService
-from libs.converters import disenable
+from aoi.libs.converters import disenable
 
 
 def _cur_string(cur: int):

@@ -21,7 +21,9 @@ from pathlib import Path
 
 import dotenv
 
-from bot.logging import LoggingHandler
+from aoi.bot import injected
+from aoi.bot.injected import ColorService
+from aoi.bot.logging import LoggingHandler
 
 if os.getenv("CUSTOM_LOGGER", ""):
     logging.setLoggerClass(LoggingHandler)
@@ -29,7 +31,7 @@ if os.getenv("CUSTOM_LOGGER", ""):
 import hikari  # noqa E402
 import tanjun  # noqa E402
 
-from bot import AoiDatabase, injected  # noqa 402
+from aoi.bot import AoiDatabase, HelpClient  # noqa 402
 
 dotenv.load_dotenv()
 
@@ -38,11 +40,11 @@ aoi = hikari.GatewayBot(token, intents=hikari.Intents.ALL)
 client = tanjun.Client.from_gateway_bot(
     aoi, declare_global_commands=int(os.getenv("GUILD", 0)) or True
 ).load_modules(
-    *Path("./modules/message_commands").glob("**/*.py"),
-    *Path("./modules/slash_commands").glob("**/*.py"),
+    *Path("aoi/modules/message_commands").glob("**/*.py"),
+    *Path("aoi/modules/slash_commands").glob("**/*.py"),
 )
 aoi_database = AoiDatabase(aoi)
-
+help_client = HelpClient()
 
 @aoi.listen(hikari.StartedEvent)
 async def on_ready(_: hikari.StartedEvent):
@@ -64,7 +66,11 @@ async def get_prefix(ctx: tanjun.abc.MessageContext):
         injected.EmbedCreator, injected.EmbedCreator(aoi_database)
     )
     .set_type_dependency(AoiDatabase, aoi_database)
+    .set_type_dependency(ColorService, ColorService())
+    .set_type_dependency(HelpClient, help_client)
     .set_prefix_getter(get_prefix)
 )
+
+print(help_client.descriptions)
 
 aoi.run()

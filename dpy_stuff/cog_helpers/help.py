@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 
 from discord.ext.commands import Command
 
-from bot import AoiContext
+from aoi.bot import AoiContext
 
 
 # noinspection PyMethodMayBeStatic

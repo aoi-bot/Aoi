@@ -3,9 +3,8 @@ from typing import Dict, List, Optional, Union
 import discord
 from discord.ext import commands
 
-import bot
-from libs import conversions
-from libs import misc as m
+from aoi import bot
+from aoi.libs import misc as m, conversions
 
 
 class Information(commands.Cog):

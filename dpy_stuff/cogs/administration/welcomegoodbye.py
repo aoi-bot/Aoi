@@ -3,7 +3,8 @@ from typing import Optional, Union
 import discord
 from discord.ext import commands
 
-import bot
+from aoi import bot
+
 
 # TODO help refactor
 

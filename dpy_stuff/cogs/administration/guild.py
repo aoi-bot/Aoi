@@ -8,7 +8,7 @@ from aiohttp.http_exceptions import BadHttpMessage
 from discord.ext import commands
 from PIL import Image
 
-import bot
+from aoi import bot
 
 
 class Guilds(commands.Cog):

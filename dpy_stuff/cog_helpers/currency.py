@@ -4,8 +4,8 @@ from typing import Dict, List, Optional, Tuple
 
 import discord
 
-from bot import AoiBot, AoiContext
-from libs.conversions import escape
+from aoi.bot import AoiBot, AoiContext
+from aoi.libs.conversions import escape
 
 
 class CurrencyService:

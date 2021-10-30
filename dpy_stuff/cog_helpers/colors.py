@@ -4,7 +4,7 @@ import io
 from discord.ext import commands
 from PIL import Image, ImageDraw
 
-from libs.converters import AoiColor
+from aoi.libs.converters import AoiColor
 
 
 # noinspection PyMethodMayBeStatic

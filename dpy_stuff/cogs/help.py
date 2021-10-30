@@ -4,9 +4,9 @@ from typing import List
 import discord
 from discord.ext import commands
 
-import bot
+from aoi import bot
 from dpy_stuff.cog_helpers.help import HelpCogService
-from libs.linq import LINQ
+from aoi.libs.linq import LINQ
 
 
 async def _can_run(_c: commands.Command, ctx: bot.AoiContext):

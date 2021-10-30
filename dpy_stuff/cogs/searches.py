@@ -5,8 +5,8 @@ import ksoftapi
 from discord.ext import commands
 from ksoftapi.models import LyricResult
 
-import bot
-from libs.misc import arg_or_0_index
+from aoi import bot
+from aoi.libs.misc import arg_or_0_index
 
 
 class Searches(commands.Cog):

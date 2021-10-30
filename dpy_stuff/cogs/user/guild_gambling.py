@@ -2,8 +2,8 @@ import random
 
 from discord.ext import commands
 
-import bot
-from games.rps import RPS
+from aoi import bot
+from aoi.games import RPS
 
 
 class ServerGambling(commands.Cog):

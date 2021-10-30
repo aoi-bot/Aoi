@@ -2,7 +2,8 @@ import asyncio
 
 from discord.ext import commands
 
-import bot
+from aoi import bot
+
 
 # TODO help refactor
 

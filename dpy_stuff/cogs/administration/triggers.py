@@ -5,8 +5,8 @@ from aiosqlite import Connection
 from discord.ext import commands
 from discord.ext.commands import RoleConverter
 
-import bot
-from bot.triggers import Trigger
+from aoi import bot
+from aoi.bot.triggers import Trigger
 
 # TODO help refactor
 

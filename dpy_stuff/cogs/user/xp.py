@@ -9,7 +9,7 @@ import PIL.ImageDraw
 import PIL.ImageFont
 from discord.ext import commands
 
-import bot
+from aoi import bot
 
 # xp levelling functions
 lvl_list = [0] + [8 * lvl + 40 for lvl in range(100000)]

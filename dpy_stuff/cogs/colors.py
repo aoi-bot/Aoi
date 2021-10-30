@@ -9,9 +9,9 @@ from discord.ext.commands import Greedy
 from PIL import Image, ImageDraw
 from PIL.ImageOps import colorize, grayscale
 
-import bot
+from aoi import bot
 from dpy_stuff.cog_helpers.colors import ColorService
-from libs.converters import AoiColor, FuzzyAoiColor
+from aoi.libs.converters import AoiColor, FuzzyAoiColor
 
 
 class Colors(commands.Cog, ColorService):

@@ -1,8 +1,8 @@
 import discord
 from discord.ext import commands
 
-import bot
-from libs.currency_classes import CurrencyLock
+from aoi import bot
+from aoi.libs.currency_classes import CurrencyLock
 
 
 class GlobalShop(commands.Cog):

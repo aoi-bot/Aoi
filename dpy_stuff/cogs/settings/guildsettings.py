@@ -3,11 +3,11 @@ import re
 
 from discord.ext import commands
 
-import bot
-from libs import conversions
-from libs.conversions import escape
-from libs.converters import AoiColor, disenable
-from libs.linq import LINQ
+from aoi import bot
+from aoi.libs import conversions
+from aoi.libs.conversions import escape
+from aoi.libs.converters import AoiColor, disenable
+from aoi.libs.linq import LINQ
 
 
 class GuildSettings(commands.Cog):

@@ -7,7 +7,7 @@ from typing import List, Optional, Union
 import discord
 from discord.ext import commands
 
-import bot
+from aoi import bot
 
 
 class Messages(commands.Cog):

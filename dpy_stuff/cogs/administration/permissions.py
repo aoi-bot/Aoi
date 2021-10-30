@@ -3,9 +3,9 @@ from typing import Optional, Union
 import discord
 from discord.ext import commands
 
-import bot
-from libs.converters import disenable
-from libs.misc import null_safe
+from aoi import bot
+from aoi.libs.converters import disenable
+from aoi.libs.misc import null_safe
 
 
 # TODO help refactor

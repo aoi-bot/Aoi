@@ -12,7 +12,7 @@ import PIL.ImageDraw as Dw
 import PIL.ImageFont as Fn
 from discord.ext import commands
 
-import bot
+from aoi import bot
 
 lvl_list = [0] + [8 * lvl + 40 for lvl in range(100000)]
 ttl_lvl_list = list(itertools.accumulate(lvl_list))

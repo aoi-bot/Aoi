@@ -4,9 +4,9 @@ from typing import Dict, List, Optional, Union
 import discord
 from discord.ext import commands
 
-import bot
-from bot import AoiDatabase
-from libs.converters import partial_emoji_convert
+from aoi import bot
+from aoi.bot import AoiDatabase
+from aoi.libs.converters import partial_emoji_convert
 
 
 @dataclass()

@@ -15,7 +15,7 @@ import discord
 import dotenv
 from discord.ext import commands
 
-import bot
+from aoi import bot
 
 try:
     os.chdir(os.path.dirname(sys.argv[0]))
