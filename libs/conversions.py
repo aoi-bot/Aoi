@@ -5,10 +5,11 @@ from datetime import timedelta
 from typing import TYPE_CHECKING, Union
 
 import discord
+
 from libs.converters import AoiColor
 
 if TYPE_CHECKING:
-    from aoi import AoiContext
+    from bot import AoiContext
 
 num_list = "zero,one,two,three,four,five,six,seven,eight,nine".split(",")
 
@@ -28,9 +29,13 @@ def hex_color_to_string(color: int) -> str:
 def dhm_notation(td: timedelta, sep="", full=False):
     hours = td.seconds // 3600
     minutes = (td.seconds % 3600) // 60
-    return sep.join([f"{td.days}{'days' if full else 'd'}",
-                     f"{hours}{'hours' if full else 'h'}",
-                     f"{minutes}{'minutes' if full else 'm'}"])
+    return sep.join(
+        [
+            f"{td.days}{'days' if full else 'd'}",
+            f"{hours}{'hours' if full else 'h'}",
+            f"{minutes}{'minutes' if full else 'm'}",
+        ]
+    )
 
 
 def hms_notation(seconds: Union[int, timedelta]):
@@ -64,7 +69,7 @@ def escape(text: str, ctx: Union[AoiContext, discord.Message]):
         text = text.replace(mention, f"@{role.name}" if role else mention)
     user_mentions = re.findall(r"<@!?\d{17,21}>", text)
     for mention in user_mentions:
-        user = ctx.guild.get_member(int(mention.replace('!', '')[2:-1]))
+        user = ctx.guild.get_member(int(mention.replace("!", "")[2:-1]))
         text = text.replace(mention, f"@{user.name}" if user else mention)
     channel_mentions = re.findall(r"<#\d{17,21}>", text)
     for mention in channel_mentions:

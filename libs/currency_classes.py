@@ -3,22 +3,24 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    import aoi
+    import bot
 
-from aoi.errors import CurrencyError
+from bot.errors import CurrencyError
 
 
 class CurrencyLock:
-    def __init__(self,
-                 ctx: aoi.AoiContext,
-                 amount: int,
-                 is_global: bool,
-                 success: str,
-                 error: Optional[str] = "An error occurred, and your currency was not affected."):
+    def __init__(
+        self,
+        ctx: bot.AoiContext,
+        amount: int,
+        is_global: bool,
+        success: str,
+        error: Optional[str] = "An error occurred, and your currency was not affected.",
+    ):
         self.ctx = ctx
         self.amount = amount
         self.is_global = is_global
-        self.bot: aoi.AoiBot = ctx.bot
+        self.bot: bot.AoiBot = ctx.bot
         self.success = success
         self.error = error
 
@@ -26,15 +28,19 @@ class CurrencyLock:
         if self.is_global:
             await self.bot.db.ensure_global_currency_entry(self.ctx.author)
             if await self.bot.db.get_global_currency(self.ctx.author) < self.amount:
-                raise CurrencyError(amount_has=await self.bot.db.get_global_currency(self.ctx.author),
-                                    amount_needed=self.amount,
-                                    is_global=True)
+                raise CurrencyError(
+                    amount_has=await self.bot.db.get_global_currency(self.ctx.author),
+                    amount_needed=self.amount,
+                    is_global=True,
+                )
         else:
             await self.bot.db.ensure_guild_currency_entry(self.ctx.author)
             if await self.bot.db.get_guild_currency(self.ctx.author) < self.amount:
-                raise CurrencyError(amount_has=await self.bot.db.get_guild_currency(self.ctx.author),
-                                    amount_needed=self.amount,
-                                    is_global=False)
+                raise CurrencyError(
+                    amount_has=await self.bot.db.get_guild_currency(self.ctx.author),
+                    amount_needed=self.amount,
+                    is_global=False,
+                )
         if self.is_global:
             await self.bot.db.award_global_currency(self.ctx.author, -self.amount)
         else:

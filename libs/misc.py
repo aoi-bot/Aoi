@@ -1,4 +1,4 @@
-from typing import Any, List, Union, Iterable, Callable, TypeVar
+from typing import Any, Callable, Iterable, List, TypeVar, Union
 
 
 def arrows_from_direction(direction: str):
@@ -12,7 +12,7 @@ def arrows_from_direction(direction: str):
         "S": "↑",
         "SW": "↗",
         "W": "→",
-        "NW": "↘"
+        "NW": "↘",
     }[direction.upper()]
 
 

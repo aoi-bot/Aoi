@@ -7,17 +7,18 @@ import re
 import typing
 
 import dateparser
-import webcolors
-
 import discord
+import webcolors
 from discord.ext import commands
 from discord.ext.commands import BadArgument
 
 if typing.TYPE_CHECKING:
-    from aoi.custom_context import AoiContext
+    from bot.custom_context import AoiContext
 
 
-def allowed_strings(*values, preserve_case: bool = False) -> typing.Callable[[str], str]:
+def allowed_strings(
+    *values, preserve_case: bool = False
+) -> typing.Callable[[str], str]:
     def converter(arg: str) -> str:
         if not preserve_case:
             arg = arg.lower()
@@ -54,26 +55,18 @@ def integer(*, max_digits=10, force_positive=False) -> typing.Callable[[str], in
         try:
             n = int(arg)
         except ValueError:
-            raise commands.BadArgument(
-                f"`{arg}` is not a valid integer"
-            )
+            raise commands.BadArgument(f"`{arg}` is not a valid integer")
         if math.log(abs(n), 10) > max_digits:
-            raise commands.BadArgument(
-                f"`{arg}` must be less than {max_digits} digits"
-            )
+            raise commands.BadArgument(f"`{arg}` must be less than {max_digits} digits")
         if abs(n) != n and force_positive:
-            raise commands.BadArgument(
-                f"`{arg}` must be a positive integer"
-            )
+            raise commands.BadArgument(f"`{arg}` must be a positive integer")
         try:
             _n = float(n)
         except ValueError:
             pass
         # noinspection PyUnboundLocalVariable
         if n != _n:
-            raise commands.BadArgument(
-                f"`{arg}` is not a valid integer"
-            )
+            raise commands.BadArgument(f"`{arg}` is not a valid integer")
         return n
 
     return converter
@@ -100,12 +93,14 @@ def latlong() -> typing.Callable[[str], float]:
 
 def dtime() -> typing.Callable[[str], datetime.datetime]:
     def converter(arg: str) -> datetime.datetime:
-        n = dateparser.parse(arg,
-                             [
-                                 "%m/%d/%y",
-                                 "%m-%d-%y",
-                                 "%-m-%-d-%Y",
-                             ])
+        n = dateparser.parse(
+            arg,
+            [
+                "%m/%d/%y",
+                "%m-%d-%y",
+                "%-m-%-d-%Y",
+            ],
+        )
         if not n:
             raise commands.BadArgument("Invalid date")
         return n
@@ -151,7 +146,9 @@ def t_delta() -> typing.Callable[[str], datetime.timedelta]:
             if not match:
                 raise BadArgument(f"`{arg}` is not a valid duration string.")
 
-            duration_dict = {unit: int(amount) for unit, amount in match.groupdict(default=0).items()}
+            duration_dict = {
+                unit: int(amount) for unit, amount in match.groupdict(default=0).items()
+            }
             delta = datetime.timedelta(**duration_dict)
 
         return delta
@@ -166,7 +163,9 @@ class AoiColor:
         self.b = b
 
     @classmethod
-    async def convert(cls, ctx: typing.Union[AoiContext, SlashContext], arg: str) -> "AoiColor":  # noqa C901
+    async def convert(
+        cls, ctx: typing.Union[AoiContext, SlashContext], arg: str
+    ) -> "AoiColor":  # noqa C901
         orig = arg
         arg = arg.lower().strip("#x")
         if arg == "maddiepurple":
@@ -186,7 +185,9 @@ class AoiColor:
                 raise commands.BadColourArgument(orig)
         elif len(arg) == 3:
             try:
-                clr = webcolors.html5_parse_simple_color("#" + ''.join(f"{c}{c}" for c in arg))
+                clr = webcolors.html5_parse_simple_color(
+                    "#" + "".join(f"{c}{c}" for c in arg)
+                )
                 return cls(clr.red, clr.green, clr.blue)
             except ValueError:
                 raise commands.BadColourArgument(orig)
@@ -229,7 +230,9 @@ class FuzzyAoiColor(AoiColor):
                 return cls(0, 0, 0, attempt=orig)
         elif len(arg) == 3:
             try:
-                clr = webcolors.html5_parse_simple_color("#" + ''.join(f"{c}{c}" for c in arg))
+                clr = webcolors.html5_parse_simple_color(
+                    "#" + "".join(f"{c}{c}" for c in arg)
+                )
                 return cls(clr.red, clr.green, clr.blue)
             except ValueError:
                 return cls(0, 0, 0, attempt=orig)
@@ -237,14 +240,15 @@ class FuzzyAoiColor(AoiColor):
 
 
 async def partial_emoji_convert(ctx: AoiContext, arg: str) -> discord.PartialEmoji:
-    match = re.match(r'<(a?):([a-zA-Z0-9_]+):([0-9]+)>$', arg)
+    match = re.match(r"<(a?):([a-zA-Z0-9_]+):([0-9]+)>$", arg)
 
     if match:
         emoji_animated = bool(match.group(1))
         emoji_name = match.group(2)
         emoji_id = int(match.group(3))
 
-        return discord.PartialEmoji.with_state(ctx.bot._connection, animated=emoji_animated, name=emoji_name,
-                                               id=emoji_id)
+        return discord.PartialEmoji.with_state(
+            ctx.bot._connection, animated=emoji_animated, name=emoji_name, id=emoji_id
+        )
 
     return discord.PartialEmoji.with_state(ctx.bot._connection, name=arg)

@@ -1,159 +1,70 @@
-import multiprocessing
-import sys
+"""
+Copyright 2021 crazygmr101
 
-from dashboard import Dashboard
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+documentation files (the "Software"), to deal in the Software without restriction, including without limitation the 
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit 
+persons to whom the Software is furnished to do so, subject to the following conditions:
 
-try:
-    sys.path.append(sys.argv[0])
-except:  # noqa
-    sys.path.append(sys.argv[1])
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the 
+Software.
 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR 
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
 import asyncio
 import logging
 import os
-import traceback
+from pathlib import Path
 
 import dotenv
 
-import aoi
-import discord
-from discord.ext import commands
+from bot.logging import LoggingHandler
 
-try:
-    os.chdir(os.path.dirname(sys.argv[0]))
-except FileNotFoundError:
-    pass
-except OSError:  # fuck windows
-    pass
+if os.getenv("CUSTOM_LOGGER", ""):
+    logging.setLoggerClass(LoggingHandler)
 
-logging.addLevelName(7, "TRACE")
+import hikari  # noqa E402
+import tanjun  # noqa E402
 
-dotenv.load_dotenv(".env")
+from bot import AoiDatabase, injected  # noqa 402
 
+dotenv.load_dotenv()
 
-def get_prefix(_bot: aoi.AoiBot, message: discord.Message):
-    if not message.guild:
-        return commands.when_mentioned_or(",")(_bot, message)
-    if message.guild.id not in _bot.db.prefixes:
-        asyncio.create_task(_bot.db.guild_setting(message.guild.id))
-        return commands.when_mentioned_or(",")(_bot, message)
-    return commands.when_mentioned_or(_bot.db.prefixes[message.guild.id])(_bot, message)
+assert (token := os.getenv("TOKEN"))
+aoi = hikari.GatewayBot(token, intents=hikari.Intents.ALL)
+client = tanjun.Client.from_gateway_bot(
+    aoi, declare_global_commands=int(os.getenv("GUILD", 0)) or True
+).load_modules(
+    *Path("./modules/message_commands").glob("**/*.py"),
+    *Path("./modules/slash_commands").glob("**/*.py"),
+)
+aoi_database = AoiDatabase(aoi)
 
 
-bot = aoi.AoiBot(command_prefix=get_prefix, help_command=None,
-                 intents=discord.Intents.all(), fetch_offline_users=True,
-                 chunk_members_on_startup=True)
-
-bot.load_extensions()
+@aoi.listen(hikari.StartedEvent)
+async def on_ready(_: hikari.StartedEvent):
+    await aoi_database.load()
 
 
-@bot.check
-async def permission_check(ctx: aoi.AoiContext):  # noqa: C901
-    if not ctx.guild:
-        return True
-    can_use = True
-    current_n = 0
-
-    if ctx.author.id in ctx.bot.db.blacklisted:
-        return
-
-    def update_use(can: bool, _n: int):
-        nonlocal current_n
-        nonlocal can_use
-        can_use = can
-        if not can:
-            current_n = _n
-
-    if ctx.command.name == 'help':
-        return True
-
-    if ctx.command.cog.qualified_name == "Permissions":
-        return True
-    perms = await bot.db.get_permissions(ctx.guild.id)
-    roles = [r.id for r in ctx.author.roles]
-    channel = ctx.channel.id
-    category = ctx.channel.category.id if ctx.channel.category else 0
-    command_name = ctx.command.name.lower()
-    cog_name = ctx.command.cog.qualified_name.lower()
-    user = ctx.author.id
-    for n, i in enumerate(perms):
-        tok = i.split()
-
-        if tok[0] == "asm":
-            update_use(tok[1] == "enable", n)
-        if tok[0] == "acm":
-            if channel == int(tok[1]):
-                update_use(tok[2] == "enable", n)
-        if tok[0] == "arm" and int(tok[1]) in roles:
-            update_use(tok[1] == "enable", n)
-        if tok[0] == "axm" and int(tok[1]) == category:
-            update_use(tok[2] == "enable", n)
-        if tok[0] == "aum" and int(tok[1]) == user:
-            update_use(tok[2] == "enable", n)
-
-        if tok[0] == "cm":
-            if ctx.channel.id == int(tok[1]) and \
-                    cog_name.lower() == tok[3].lower():
-                update_use(tok[2] == "enable", n)
-        if tok[0] == "sm":
-            if cog_name.lower() == tok[2].lower():
-                update_use(tok[1] == "enable", n)
-        if tok[0] == "xm":
-            if cog_name.lower() == tok[3].lower() and category == int(tok[1]):
-                update_use(tok[2] == "enable", n)
-        if tok[0] == "rm":
-            if cog_name.lower() == tok[3].lower() and int(tok[1]) in roles:
-                update_use(tok[2] == "enable", n)
-        if tok[0] == "um":
-            if cog_name.lower() == tok[3].lower() and int(tok[1]) == user:
-                update_use(tok[2] == "enable", n)
-
-        if tok[0] == "cc":
-            if ctx.channel.id == int(tok[1]) and \
-                    command_name.lower() == tok[3].lower():
-                update_use(tok[2] == "enable", n)
-        if tok[0] == "sc":
-            if command_name.lower() == tok[2].lower():
-                update_use(tok[1] == "enable", n)
-        if tok[0] == "xc":
-            if command_name.lower() == tok[3].lower() and category == int(tok[1]):
-                update_use(tok[2] == "enable", n)
-        if tok[0] == "rc":
-            if command_name.lower() == tok[3].lower() and int(tok[1]) in roles:
-                update_use(tok[2] == "enable", n)
-        if tok[0] == "rc":
-            if command_name.lower() == tok[3].lower() and int(tok[1]) == user:
-                update_use(tok[2] == "enable", n)
-    if not can_use:
-        raise aoi.PermissionFailed(f"Permission #{current_n} - {perms[current_n]} "
-                                   f"is disallowing you from this command")
-    return True
+async def get_prefix(ctx: tanjun.abc.MessageContext):
+    if ctx.guild_id and ctx.guild_id not in aoi_database.prefixes:
+        asyncio.create_task(aoi_database.guild_setting(ctx.guild_id))
+    return [
+        aoi_database.prefixes.get(ctx.guild_id, ","),
+        f"<@{aoi.get_me().id}>",
+        f"<@!{aoi.get_me().id}>",
+    ]
 
 
-dashboard = Dashboard(bot)
+(
+    client.set_type_dependency(
+        injected.EmbedCreator, injected.EmbedCreator(aoi_database)
+    )
+    .set_type_dependency(AoiDatabase, aoi_database)
+    .set_prefix_getter(get_prefix)
+)
 
-
-def bot_process():
-    try:
-        bot.logger.info(f"Starting Aoi Bot with PID {os.getpid()}")
-        bot.run(os.getenv("TOKEN"))
-    except Exception as error:
-        traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
-        exit(1)
-
-
-def dashboard_process():
-    dashboard.run()
-
-
-_bot_proc = multiprocessing.Process(target=bot_process)
-_dash_proc = multiprocessing.Process(target=dashboard_process)
-
-_bot_proc.start()
-_dash_proc.start()
-
-_bot_proc.join()
-_dash_proc.kill()
-
-if bot.is_restarting:
-    os.execl(sys.executable, sys.executable, *sys.argv)
+aoi.run()

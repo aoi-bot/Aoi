@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import itertools
-from typing import TypeVar, Iterable, Any, Callable, List, Generic, Optional
+from typing import Any, Callable, Generic, Iterable, List, Optional, TypeVar
 
 T = TypeVar("T")
 
@@ -111,7 +111,11 @@ class LINQ(Generic[T], Iterable):
                 return element
         raise IndexError
 
-    def first_or_default(self, function: Optional[Callable[[T], bool]] = None, default: Optional[Any] = None):
+    def first_or_default(
+        self,
+        function: Optional[Callable[[T], bool]] = None,
+        default: Optional[Any] = None,
+    ):
         try:
             return self.first(function)
         except IndexError:
@@ -136,7 +140,11 @@ class LINQ(Generic[T], Iterable):
         else:
             raise IndexError
 
-    def last_or_default(self, function: Optional[Callable[[T], bool]] = None, default: Optional[Any] = None):
+    def last_or_default(
+        self,
+        function: Optional[Callable[[T], bool]] = None,
+        default: Optional[Any] = None,
+    ):
         try:
             return self.last(function)
         except IndexError:
