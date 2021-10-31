@@ -7,6 +7,8 @@ import tanjun
 async def avatar(
     ctx: Union[tanjun.abc.MessageContext, tanjun.SlashContext], member: hikari.Member
 ):
+    if not member:
+        member = ctx.member
 
     color = hikari.Color.of(0x000000)
     for role in member.get_roles():
@@ -14,7 +16,7 @@ async def avatar(
             color = role.color
 
     await ctx.respond(
-        embed=hikari.Embed(title=f"{member}'s Avatar", color=color).set_image(
-            member.avatar_url
-        )
+        embed=hikari.Embed(title=f"{member}'s Avatar", color=color)
+        .set_image(member.avatar_url)
+        .set_footer(text=f"ID: {member.id}")
     )
