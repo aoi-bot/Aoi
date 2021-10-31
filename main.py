@@ -25,6 +25,7 @@ from aoi.bot import injected
 from aoi.bot.injected import ColorService
 from aoi.bot.logging import LoggingHandler
 
+
 if os.getenv("CUSTOM_LOGGER", ""):
     logging.setLoggerClass(LoggingHandler)
 
