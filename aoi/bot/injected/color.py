@@ -52,6 +52,7 @@ class ColorService:
             )
         buf = io.BytesIO()
         img.save(buf, format="PNG")
+        buf.seek(0)
         return buf, colors
 
     @staticmethod

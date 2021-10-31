@@ -75,7 +75,7 @@ class AoiColor:
                 clr = webcolors.html5_parse_simple_color(f"#{arg}")
                 return cls(clr.red, clr.green, clr.blue)
             except ValueError:
-                raise commands.BadColourArgument(orig)
+                raise ValueError(orig)
         elif len(arg) == 3:
             try:
                 clr = webcolors.html5_parse_simple_color(
