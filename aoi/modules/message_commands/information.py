@@ -23,11 +23,12 @@ import hikari
 
 component = tanjun.Component(name="information")
 
+
 @component.with_command
 @tanjun.with_greedy_argument("member", converters=(tanjun.to_member,), default=None)
 @with_description("Show a user's avatar")
 @tanjun.with_parser
-@tanjun.as_message_command("avatar")
+@tanjun.as_message_command("avatar", "av")
 async def avatar(ctx: tanjun.abc.MessageContext, member: Optional[hikari.Member]):
     await impl.avatar(ctx, member)
 
