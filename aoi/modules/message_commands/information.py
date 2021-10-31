@@ -33,6 +33,15 @@ async def avatar(ctx: tanjun.abc.MessageContext, member: Optional[hikari.Member]
     await impl.avatar(ctx, member)
 
 
+@component.with_command
+@tanjun.with_argument("role", converters=(tanjun.to_role,), default=None)
+@with_description("Reveal some info for a role")
+@tanjun.with_parser
+@tanjun.as_message_command("roleinfo")
+async def roleinfo(ctx: tanjun.abc.MessageContext, role: hikari.Role):
+    await impl.roleinfo(ctx, role)
+
+
 @tanjun.as_loader
 def load(client: tanjun.Client):
     client.add_component(component.copy())
