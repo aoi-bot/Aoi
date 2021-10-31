@@ -54,6 +54,7 @@ async def random_colors(
 @tanjun.with_argument("color2", converters=(AoiColor.convert, ))
 @tanjun.with_argument("color1", converters=(AoiColor.convert, ))
 @tanjun.with_option("rgb", "--rgb", converters=(bool, ), default=False, empty_value=True)
+@with_description("Make a gradient between colors")
 @tanjun.with_parser
 @tanjun.as_message_command("gradient")
 async def gradient(
