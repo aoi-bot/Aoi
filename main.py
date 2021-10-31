@@ -46,6 +46,7 @@ client = tanjun.Client.from_gateway_bot(
 aoi_database = AoiDatabase(aoi)
 help_client = HelpClient()
 
+
 @aoi.listen(hikari.StartedEvent)
 async def on_ready(_: hikari.StartedEvent):
     await aoi_database.load()
@@ -65,10 +66,10 @@ async def get_prefix(ctx: tanjun.abc.MessageContext):
     client.set_type_dependency(
         injected.EmbedCreator, injected.EmbedCreator(aoi_database)
     )
-    .set_type_dependency(AoiDatabase, aoi_database)
-    .set_type_dependency(ColorService, ColorService())
-    .set_type_dependency(HelpClient, help_client)
-    .set_prefix_getter(get_prefix)
+        .set_type_dependency(AoiDatabase, aoi_database)
+        .set_type_dependency(ColorService, ColorService())
+        .set_type_dependency(HelpClient, help_client)
+        .set_prefix_getter(get_prefix)
 )
 
 print(help_client.descriptions)

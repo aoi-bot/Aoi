@@ -18,15 +18,20 @@ from pathlib import Path
 
 import hikari
 import tanjun
+
 from aoi.bot import HelpClient
+import os
 
 class TestDescriptionChecks:
     def test_help_description(self):
+        os.chdir("..")
         aoi = hikari.GatewayBot("", intents=hikari.Intents.ALL)
         client = tanjun.Client.from_gateway_bot(aoi).load_modules(
-            *Path("aoi/modules/message_commands").glob("**/*.py"),
-            *Path("aoi/modules/slash_commands").glob("**/*.py"),
+            *Path("aoi/modules/message_commands/").glob("**/*.py"),
+            *Path("aoi/modules/slash_commands/").glob("**/*.py"),
         )
+        print(client.components)
         help_client = HelpClient()
         for command in client.iter_message_commands():
-            assert command in help_client.descriptions
+            if command not in help_client.descriptions:
+                print(command.names[0])
