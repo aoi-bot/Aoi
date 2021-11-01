@@ -48,9 +48,7 @@ class ServerShop(commands.Cog):
         aliases=["shoprrem", "shoprr", "shopremoverole", "shopremr"],
     )
     async def shoproleremove(self, ctx: bot.AoiContext, role: Union[discord.Role, int]):
-        await self.bot.db.del_guild_shop_item(
-            ctx.guild, "role", str(role if isinstance(role, int) else role.id)
-        )
+        await self.bot.db.del_guild_shop_item(ctx.guild, "role", str(role if isinstance(role, int) else role.id))
         await ctx.send_ok(f"Removed {role if isinstance(role, int) else role.mention}.")
 
     @commands.command(brief="Buy a role from the shop")

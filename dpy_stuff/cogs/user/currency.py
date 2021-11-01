@@ -40,9 +40,7 @@ def _fit(w, h, text, size, draw, *, w_pad=5, h_pad=5):
 
 
 def _center_and_fit(x, y, x2, y2, text, size, draw, *, w_pad=5, h_pad=5):
-    w, h, sz = _fit(
-        abs(x - x2), abs(y - y2), text, size, draw, w_pad=w_pad, h_pad=h_pad
-    )
+    w, h, sz = _fit(abs(x - x2), abs(y - y2), text, size, draw, w_pad=w_pad, h_pad=h_pad)
     x, y = _center(x, y, x2, y2, w, h)
     return x, y, w, h, sz
 
@@ -65,9 +63,7 @@ class Currency(commands.Cog, CurrencyService):
 
     @commands.is_owner()
     @commands.command(brief="Give or take currency globally")
-    async def award_g(
-        self, ctx: bot.AoiContext, member: Optional[discord.Member], amount: int
-    ):
+    async def award_g(self, ctx: bot.AoiContext, member: Optional[discord.Member], amount: int):
         member = member or ctx.author
         await self.bot.db.award_global_currency(member, amount)
         await ctx.send_info(
@@ -141,28 +137,14 @@ class Currency(commands.Cog, CurrencyService):
     ):
         channel = channel or ctx.channel
         if state.lower() == "enable":
-            if (
-                channel.id
-                not in (
-                    await self.bot.db.guild_setting(ctx.guild.id)
-                ).currency_gen_channels
-            ):
+            if channel.id not in (await self.bot.db.guild_setting(ctx.guild.id)).currency_gen_channels:
                 await self.bot.db.add_currency_channel(channel)
-                return await ctx.send_ok(
-                    f"Currency will now generate in {channel.mention}"
-                )
-            return await ctx.send_ok(
-                f"Currency can already generate in {channel.mention}"
-            )
-        if (
-            channel.id
-            in (await self.bot.db.guild_setting(ctx.guild.id)).currency_gen_channels
-        ):
+                return await ctx.send_ok(f"Currency will now generate in {channel.mention}")
+            return await ctx.send_ok(f"Currency can already generate in {channel.mention}")
+        if channel.id in (await self.bot.db.guild_setting(ctx.guild.id)).currency_gen_channels:
             await self.bot.db.remove_currency_channel(channel)
             return await ctx.send_ok(f"Currency will not generate in {channel.mention}")
-        return await ctx.send_ok(
-            f"Currency already couldn't generate in {channel.mention}"
-        )
+        return await ctx.send_ok(f"Currency already couldn't generate in {channel.mention}")
 
 
 def setup(bot: bot.AoiBot) -> None:

@@ -9,12 +9,7 @@ from aoi import bot
 
 def _(s: str):
     for k, v in {"colour": "color"}.items():
-        s = (
-            s.replace(k, v)
-            .replace(k.title(), v.title())
-            .replace(k.lower(), v.lower())
-            .replace(k.upper(), v.upper())
-        )
+        s = s.replace(k, v).replace(k.title(), v.title()).replace(k.lower(), v.lower()).replace(k.upper(), v.upper())
     return s
 
 
@@ -53,9 +48,7 @@ class ErrorHandler(commands.Cog):
             await ctx.send_error(_(str(error)))
         elif isinstance(error, commands.NoPrivateMessage):
             try:
-                await ctx.author.send(
-                    f"{ctx.command} can not be used in Private Messages."
-                )
+                await ctx.author.send(f"{ctx.command} can not be used in Private Messages.")
             except discord.HTTPException:
                 pass
         elif isinstance(error, bot.CurrencyError):
@@ -70,39 +63,26 @@ class ErrorHandler(commands.Cog):
                 await ctx.send_error(str(error))
         elif isinstance(error, discord.Forbidden):
             await ctx.send_error("I don't have the permissions for that")
-        elif isinstance(
-            error, (commands.BadArgument, commands.MissingRequiredArgument)
-        ):
+        elif isinstance(error, (commands.BadArgument, commands.MissingRequiredArgument)):
             await ctx.send_error(_(str(error)))
         elif isinstance(error, bot.DomainError):
             await ctx.send_error(
-                f"Domain Error - the value supplied was outside of the "
-                f"valid input range of `{error.token}`"
+                f"Domain Error - the value supplied was outside of the " f"valid input range of `{error.token}`"
             )
         elif isinstance(error, bot.CalculationSyntaxError):
-            await ctx.send_error(
-                f"Syntax Error - An error occured while parsing the expression"
-            )
+            await ctx.send_error(f"Syntax Error - An error occured while parsing the expression")
         elif isinstance(error, bot.MathError):
-            await ctx.send_error(
-                f"Math Error - An error occured while evaluating the expression"
-            )
+            await ctx.send_error(f"Math Error - An error occured while evaluating the expression")
         elif isinstance(error, commands.errors.FlagError):
             await ctx.send_error(
                 f"Flag `{error.attempted}` is an invalid flag and must be one of "
                 + " ".join(f"`{flag}`" for flag in error.supported)
             )
         elif isinstance(error, commands.CommandOnCooldown):
-            await ctx.send_error(
-                f"You are on cooldown. Try again in {round(error.retry_after)}s"
-            )
+            await ctx.send_error(f"You are on cooldown. Try again in {round(error.retry_after)}s")
         else:
-            print(
-                "Ignoring exception in command {}:".format(ctx.command), file=sys.stderr
-            )
-            traceback.print_exception(
-                type(error), error, error.__traceback__, file=sys.stderr
-            )
+            print("Ignoring exception in command {}:".format(ctx.command), file=sys.stderr)
+            traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
 
 
 def setup(bot: bot.AoiBot) -> None:

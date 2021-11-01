@@ -35,9 +35,7 @@ async def modules_reload(ctx: tanjun.abc.MessageContext, foo: int):
 
 
 @hooks.with_on_parser_error
-async def on_parser_error(
-    ctx: tanjun.abc.MessageContext, error: tanjun.errors.ParserError
-) -> None:
+async def on_parser_error(ctx: tanjun.abc.MessageContext, error: tanjun.errors.ParserError) -> None:
     embed_creator: EmbedCreator = ctx.client.metadata["_embed"]
     if isinstance(error, tanjun.errors.ConversionError):
         await ctx.respond(
@@ -70,7 +68,7 @@ async def on_parser_error(
 
 @hooks.with_post_execution
 async def post_exec(ctx: tanjun.abc.Context):
-    logger = logging.getLogger(f"cmd")
+    logger = logging.getLogger("cmd")
     executed = datetime.now(tz=ctx.created_at.tzinfo) - ctx.created_at
     executed_str = f"{executed.total_seconds():>7.3f}s"
     message = (

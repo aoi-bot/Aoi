@@ -21,9 +21,7 @@ import tanjun
 async def poll(ctx: tanjun.abc.MessageContext, content: str):
     split = content.split(";;")
     if len(split) == 1:
-        msg = await ctx.respond(
-            embed=hikari.Embed(title=split[0]).set_footer(text=f"Poll by {ctx.author}")
-        )
+        msg = await ctx.respond(embed=hikari.Embed(title=split[0]).set_footer(text=f"Poll by {ctx.author}"))
         await msg.add_reaction("👍")
         await msg.add_reaction("👎")
     else:
@@ -31,9 +29,7 @@ async def poll(ctx: tanjun.abc.MessageContext, content: str):
         msg = await ctx.respond(
             embed=hikari.Embed(
                 title=split[0],
-                description="\n".join(
-                    f"{choices[n]} {split[n + 1]}" for n in range(len(split) - 1)
-                ),
+                description="\n".join(f"{choices[n]} {split[n + 1]}" for n in range(len(split) - 1)),
             ).set_footer(text=f"Poll by {ctx.author}")
         )
         for i in range(len(split) - 1):

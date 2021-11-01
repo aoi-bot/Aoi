@@ -27,24 +27,18 @@ class GuildSettings(commands.Cog):
         await ctx.send_ok("Color changed!")
 
     async def infocolor(self, ctx: bot.AoiContext, color: AoiColor):
-        await self.bot.db.set_info_color(
-            ctx.guild.id, conversions.color_to_string(color)
-        )
+        await self.bot.db.set_info_color(ctx.guild.id, conversions.color_to_string(color))
         await ctx.send_ok("Color changed!")
 
     async def errorcolor(self, ctx: bot.AoiContext, color: AoiColor):
-        await self.bot.db.set_error_color(
-            ctx.guild.id, conversions.color_to_string(color)
-        )
+        await self.bot.db.set_error_color(ctx.guild.id, conversions.color_to_string(color))
         await ctx.send_ok("Color changed!")
 
     @commands.has_permissions(manage_guild=True)
     @commands.command(brief="Set #BOT#'s prefix")
     async def prefix(self, ctx: bot.AoiContext, *, prefix: str = None):
         if not prefix:
-            return await ctx.send_ok(
-                f"Prefix is set to `{escape(self.bot.db.prefixes[ctx.guild.id], ctx)}`"
-            )
+            return await ctx.send_ok(f"Prefix is set to `{escape(self.bot.db.prefixes[ctx.guild.id], ctx)}`")
         await self.bot.db.set_prefix(ctx.guild.id, prefix)
         return await ctx.send_ok(f"Prefix set to `{escape(prefix, ctx)}`")
 
@@ -56,9 +50,7 @@ class GuildSettings(commands.Cog):
                       config config_name value
                       """,
     )
-    async def config(
-        self, ctx: bot.AoiContext, setting: str = None, *, value: str = None
-    ):  # noqa c901
+    async def config(self, ctx: bot.AoiContext, setting: str = None, *, value: str = None):  # noqa c901
         #  note to self cuz am idot
         #  make sure to add setting in /complexity/context/guildconfig.json
         if not setting:
@@ -67,9 +59,7 @@ class GuildSettings(commands.Cog):
                 r"<.*?>",
                 "",
                 LINQ(self.guild_configs)
-                .select(
-                    lambda config: f"⋄ `{config['name']}` - {config['description']}"
-                )
+                .select(lambda config: f"⋄ `{config['name']}` - {config['description']}")
                 .join("\n"),
             )
             if await ctx.using_embeds():
@@ -100,20 +90,14 @@ class GuildSettings(commands.Cog):
                 if v < 0 or v > 50:
                     return await ctx.send_error("Gain value must be between 0 and 50")
                 await self.bot.db.set_currency_gain(ctx.guild, v)
-                return await ctx.send_ok(
-                    f"Currency gain " + ("turned off" if not v else f"set to {v}/3min")
-                )
+                return await ctx.send_ok(f"Currency gain " + ("turned off" if not v else f"set to {v}/3min"))
             except ValueError:
-                return await ctx.send_error(
-                    "Gain value must be a number between 0 and 50"
-                )
+                return await ctx.send_error("Gain value must be a number between 0 and 50")
         if setting == "embeds":
             value = disenable()(value)
             await self.bot.db.set_reply_embeds(ctx.guild.id, value == "enable")
             return await ctx.send_ok(
-                f"Normal responses will now "
-                + ("" if value == "enable" else "not ")
-                + "be in an embed"
+                f"Normal responses will now " + ("" if value == "enable" else "not ") + "be in an embed"
             )
         if setting == "currencymin":
             try:
@@ -121,9 +105,7 @@ class GuildSettings(commands.Cog):
                 if v < 0:
                     return await ctx.send_error("Value must be above 0")
                 if v > (await self.bot.db.guild_setting(ctx.guild.id)).currency_max:
-                    return await ctx.send_error(
-                        "Minimum currency generation value cannot be above maximum"
-                    )
+                    return await ctx.send_error("Minimum currency generation value cannot be above maximum")
             except ValueError:
                 return await ctx.send_error("Value must be a number above 0")
             await self.bot.db.set_currency_gen(ctx.guild.id, min_amt=v)
@@ -134,9 +116,7 @@ class GuildSettings(commands.Cog):
                 if v < 0:
                     return await ctx.send_error("Value must be above 0")
                 if v < (await self.bot.db.guild_setting(ctx.guild.id)).currency_min:
-                    return await ctx.send_error(
-                        "Minimum currency generation value cannot be below minimum"
-                    )
+                    return await ctx.send_error("Minimum currency generation value cannot be below minimum")
             except ValueError:
                 return await ctx.send_error("Value must be a number above 0")
             await self.bot.db.set_currency_gen(ctx.guild.id, max_amt=v)
@@ -145,13 +125,9 @@ class GuildSettings(commands.Cog):
             try:
                 v = int(value)
                 if v < 0 or v > 100:
-                    return await ctx.send_error(
-                        "Currency generation chance must be between 0 and 100"
-                    )
+                    return await ctx.send_error("Currency generation chance must be between 0 and 100")
             except ValueError:
-                return await ctx.send_error(
-                    "Currency generation chance must be a number between 0 and 100"
-                )
+                return await ctx.send_error("Currency generation chance must be a number between 0 and 100")
             await self.bot.db.set_currency_gen(ctx.guild.id, chance=v)
             return await ctx.send_ok(f"Currency generation chance set to {v}%")
 
@@ -198,8 +174,7 @@ class GuildSettings(commands.Cog):
                 f"**${colors.currency_min}** and **${colors.currency_max}**\n"
                 f"Currency Generates on: "
                 + (
-                    "\n"
-                    + ("\n ⋄".join(f"<#{c}>" for c in colors.currency_gen_channels))
+                    "\n" + ("\n ⋄".join(f"<#{c}>" for c in colors.currency_gen_channels))
                     if colors.currency_gen_channels
                     else "No channels"
                 )
@@ -208,34 +183,24 @@ class GuildSettings(commands.Cog):
 
     @commands.has_permissions(administrator=True)
     @commands.command(brief="Set an alias for a command")
-    async def alias(
-        self, ctx: bot.AoiContext, alias_from: str, *, alias_to: str = None
-    ):
+    async def alias(self, ctx: bot.AoiContext, alias_from: str, *, alias_to: str = None):
         guild_id = ctx.guild.id
         if guild_id not in self.bot.aliases:
             if not alias_to:
                 return await ctx.send_error(f"`{alias_from}` isn't aliased to anything")
-            await self.bot.db.conn.execute(
-                "insert into alias values (?,?,?)", (guild_id, alias_from, alias_to)
-            )
+            await self.bot.db.conn.execute("insert into alias values (?,?,?)", (guild_id, alias_from, alias_to))
             await self.bot.db.conn.commit()
             self.bot.aliases[guild_id] = {alias_from: alias_to}
         else:
-            await self.bot.db.conn.execute(
-                "delete from alias where guild=? and 'from'=?", (guild_id, alias_from)
-            )
+            await self.bot.db.conn.execute("delete from alias where guild=? and 'from'=?", (guild_id, alias_from))
             if alias_to:
-                await self.bot.db.conn.execute(
-                    "insert into alias values (?,?,?)", (guild_id, alias_from, alias_to)
-                )
+                await self.bot.db.conn.execute("insert into alias values (?,?,?)", (guild_id, alias_from, alias_to))
                 self.bot.aliases[guild_id][alias_from] = alias_to
             else:
                 del self.bot.aliases[guild_id][alias_from]
             await self.bot.db.conn.commit()
         await ctx.send_ok(
-            f"`{alias_from}` aliased to `{alias_to}`"
-            if alias_to
-            else f"`{alias_from}` no longer aliased."
+            f"`{alias_from}` aliased to `{alias_to}`" if alias_to else f"`{alias_from}` no longer aliased."
         )
 
     @commands.command(brief="Lists server aliases")
@@ -245,9 +210,7 @@ class GuildSettings(commands.Cog):
                 await ctx.paginate(
                     [
                         f"`{alias_from}` ⇒ `{alias_to}`"
-                        for alias_from, alias_to in self.bot.aliases[
-                            ctx.guild.id
-                        ].items()
+                        for alias_from, alias_to in self.bot.aliases[ctx.guild.id].items()
                     ],
                     20,
                     "Command aliases",
@@ -261,10 +224,7 @@ class GuildSettings(commands.Cog):
                     await ctx.send_info(f"There are no aliases for `{command}`")
                 else:
                     await ctx.paginate(
-                        [
-                            f"`{alias_from}` ⇒ `{alias_to}`"
-                            for alias_from, alias_to in found
-                        ],
+                        [f"`{alias_from}` ⇒ `{alias_to}`" for alias_from, alias_to in found],
                         20,
                         f"Command aliases for {command}",
                     )

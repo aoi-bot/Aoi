@@ -12,9 +12,7 @@ class SpoilerMinesweeper:
     def __init__(self, height: int = 10, width: int = 10, bombs: int = 10):  # noqa C901
         self.board = [[0 for _ in range(width)] for _ in range(height)]
         if bombs > height * width:
-            raise MinesweeperError(
-                "Number of bombs cannot be bigger than the number of squares"
-            )
+            raise MinesweeperError("Number of bombs cannot be bigger than the number of squares")
         placed = 0
         while placed < bombs:
             h = random.randint(0, height - 1)
@@ -29,12 +27,7 @@ class SpoilerMinesweeper:
                 # count the bombs around a square
                 for dx in (-1, 0, 1):
                     for dy in (-1, 0, 1):
-                        if (
-                            h + dx < 0
-                            or w + dy < 0
-                            or h + dx >= height
-                            or w + dy >= width
-                        ):
+                        if h + dx < 0 or w + dy < 0 or h + dx >= height or w + dy >= width:
                             continue
                         if not dx and not dy:
                             continue
@@ -45,12 +38,7 @@ class SpoilerMinesweeper:
         return "\n".join(["".join(map(self._str, row)) for row in self.board])
 
     def discord_str(self, spoilers: bool = True):
-        d_str = "\n".join(
-            [
-                "".join(map(lambda x: self._discord_str(x, spoilers), row))
-                for row in self.board
-            ]
-        )
+        d_str = "\n".join(["".join(map(lambda x: self._discord_str(x, spoilers), row)) for row in self.board])
         if len(d_str) >= 2000:
             raise MinesweeperError("Board to big to send through discord")
         return d_str

@@ -26,9 +26,7 @@ class GlobalShop(commands.Cog):
             f"Add `{title}` for ${amount:,}?",
             f"`{title}` added for ${amount:,}.",
             f"`{title}` not added.",
-            self.bot.db.conn.execute(
-                "insert into title_shop (title, cost) values (?,?)", (title, amount)
-            ),
+            self.bot.db.conn.execute("insert into title_shop (title, cost) values (?,?)", (title, amount)),
         )
         await self.bot.db.conn.commit()
 
@@ -37,9 +35,7 @@ class GlobalShop(commands.Cog):
         await ctx.paginate(
             [
                 f"**{r[0]} - ${r[2]:,}**\n{r[1]}\n"
-                for r in await (
-                    await self.bot.db.conn.execute("select * from title_shop")
-                ).fetchall()
+                for r in await (await self.bot.db.conn.execute("select * from title_shop")).fetchall()
             ],
             title="Title Shop",
             n=10,
@@ -49,15 +45,10 @@ class GlobalShop(commands.Cog):
     @commands.command(brief="Buys a title")
     async def buytitle(self, ctx: bot.AoiContext, num: int):
         await self.bot.db.ensure_user_entry(ctx.author)
-        r = await (
-            await self.bot.db.conn.execute(
-                "select * from title_shop where id=?", (num,)
-            )
-        ).fetchone()
+        r = await (await self.bot.db.conn.execute("select * from title_shop where id=?", (num,))).fetchone()
         if not r:
             return await ctx.send_error(
-                f"Title with ID `{num}` does not exist. Do `{ctx.prefix}titleshop` to list "
-                f"the available titles"
+                f"Title with ID `{num}` does not exist. Do `{ctx.prefix}titleshop` to list " f"the available titles"
             )
 
         amt = r[2]
@@ -85,10 +76,7 @@ class GlobalShop(commands.Cog):
     @commands.command(brief="Lists your titles")
     async def mytitles(self, ctx: bot.AoiContext):
         await ctx.paginate(
-            [
-                f"**{n}** - {v}\n"
-                for n, v in enumerate(self.bot.db.owned_titles[ctx.author.id])
-            ],
+            [f"**{n}** - {v}\n" for n, v in enumerate(self.bot.db.owned_titles[ctx.author.id])],
             title="Owned titles",
             n=10,
             fmt=f"%s\n\nDo `{ctx.prefix}equiptitle n` to set your profile title.",
@@ -101,8 +89,7 @@ class GlobalShop(commands.Cog):
             await ctx.send_ok("Title equipped!")
         except IndexError:
             await ctx.send_error(
-                f"You don't own a title with that index. Do `{ctx.prefix}mytitles` to "
-                f"view your titles"
+                f"You don't own a title with that index. Do `{ctx.prefix}mytitles` to " f"view your titles"
             )
 
 

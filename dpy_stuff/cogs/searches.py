@@ -40,23 +40,15 @@ class Searches(commands.Cog):
     @commands.command(brief="Look up the lyrics for a song")
     async def lyrics(self, ctx: bot.AoiContext, *, query: str):
         # TODO re-enable this
-        return await ctx.send_error(
-            "This command has been disabled temporarily while waiting on an API key"
-        )
+        return await ctx.send_error("This command has been disabled temporarily while waiting on an API key")
         try:  # noqa
-            lyrs: List[LyricResult] = sorted(
-                await self.bot.ksoft.music.lyrics(query), key=lambda x: -x.search_score
-            )
+            lyrs: List[LyricResult] = sorted(await self.bot.ksoft.music.lyrics(query), key=lambda x: -x.search_score)
         except ksoftapi.NoResults:
             return await ctx.send_error("No results found.")
 
         if len(lyrs) > 1:
             await ctx.send_ok(
-                f"\n"
-                + "\n".join(
-                    f"{n + 1} - {res.name} - {res.artist}"
-                    for n, res in enumerate(lyrs[:10])
-                )
+                f"\n" + "\n".join(f"{n + 1} - {res.name} - {res.artist}" for n, res in enumerate(lyrs[:10]))
             )
             n = await ctx.input(int, ch=lambda x: 1 <= x <= min(10, len(lyrs))) - 1
             if n is None:

@@ -69,9 +69,7 @@ class Help(commands.Cog, HelpCogService):
     )
     async def cmds(self, ctx: bot.AoiContext, module: str):
         flags = ctx.flags
-        cog: commands.Cog = self.bot.get_cog(
-            self.bot.find_cog(module, check_description=True)[0]
-        )
+        cog: commands.Cog = self.bot.get_cog(self.bot.find_cog(module, check_description=True)[0])
         c: commands.Command
         yes = ":white_check_mark:"
         no = ":x:"
@@ -128,13 +126,11 @@ class Help(commands.Cog, HelpCogService):
                     ),
                     (
                         "Module Commands",
-                        f"`{ctx.clean_prefix}commands module_name` "
-                        f"to view commands in a module",
+                        f"`{ctx.clean_prefix}commands module_name` " f"to view commands in a module",
                     ),
                     (
                         "Command Help",
-                        f"`{ctx.clean_prefix}help command_name` to "
-                        f"view help for a command",
+                        f"`{ctx.clean_prefix}help command_name` to " f"view help for a command",
                     ),
                     (
                         "Other Guides",
@@ -144,8 +140,7 @@ class Help(commands.Cog, HelpCogService):
                     ),
                     (
                         "Support Server",
-                        f"Still need help? Join our [support "
-                        f"server](https://discord.gg/6VusqNUr9V)",
+                        f"Still need help? Join our [support " f"server](https://discord.gg/6VusqNUr9V)",
                     ),
                     (
                         "Command List",
@@ -157,8 +152,7 @@ class Help(commands.Cog, HelpCogService):
                     [
                         (
                             "Voting",
-                            f"Vote for Aoi [here]"
-                            f"(https://top.gg/bot/791265892154867724)",
+                            f"Vote for Aoi [here]" f"(https://top.gg/bot/791265892154867724)",
                         )
                     ]
                     if self.bot.user.id == 791265892154867724
@@ -181,31 +175,17 @@ class Help(commands.Cog, HelpCogService):
                 # Just let me have my f-strings D:
                 f"Description: {cmd.brief.replace('#BOT#', self.bot.user.name if self.bot.user else '').replace('{prefix}', ctx.clean_prefix)}\n"  # noqa E501
                 f"Module: {cmd.cog.qualified_name}\n"
-                + (
-                    (
-                        "Flags:\n"
-                        + "\n".join(map(str, map(self.format_flag, flags.items())))
-                        + "\n"
-                    )
-                    if flags
-                    else ""
-                )
+                + (("Flags:\n" + "\n".join(map(str, map(self.format_flag, flags.items()))) + "\n") if flags else "")
                 + (
                     (
                         "User permissions needed: "
-                        + ", ".join(
-                            " ".join(map(lambda x: x.title(), x.split("_"))) for x in p
-                        )
+                        + ", ".join(" ".join(map(lambda x: x.title(), x.split("_"))) for x in p)
                         + "\n"
                     )
                     if p
                     else ""
                 )
-                + (
-                    "You are missing permissions needed to turn this command\n"
-                    if not await _can_run(cmd, ctx)
-                    else ""
-                )
+                + ("You are missing permissions needed to turn this command\n" if not await _can_run(cmd, ctx) else "")
                 + (
                     "Examples:\n"
                     + LINQ(cmd.description.splitlines())
@@ -216,11 +196,7 @@ class Help(commands.Cog, HelpCogService):
                     if cmd.description
                     else ""
                 )
-                + (
-                    ("Aliases:" + ", ".join([f"`{a}`" for a in cmd.aliases]))
-                    if cmd.aliases
-                    else ""
-                )
+                + (("Aliases:" + ", ".join([f"`{a}`" for a in cmd.aliases])) if cmd.aliases else "")
                 + (
                     f"\nAliases are pointing at this command, run `{ctx.clean_prefix}aliases {command}` to view them\n"
                     if await self.bot.rev_alias(ctx, command)
@@ -235,24 +211,18 @@ class Help(commands.Cog, HelpCogService):
                 ("Usage", f"`{self.get_command_signature(cmd, ctx)}`"),
                 (
                     "Description",
-                    cmd.brief.replace(
-                        "#BOT#", self.bot.user.name if self.bot.user else ""
-                    ).replace("{prefix}", ctx.clean_prefix),
+                    cmd.brief.replace("#BOT#", self.bot.user.name if self.bot.user else "").replace(
+                        "{prefix}", ctx.clean_prefix
+                    ),
                 ),
                 ("Module", cmd.cog.qualified_name),
             ]
-            + (
-                [("Flags", "\n".join(map(str, map(self.format_flag, flags.items()))))]
-                if flags
-                else []
-            )
+            + ([("Flags", "\n".join(map(str, map(self.format_flag, flags.items()))))] if flags else [])
             + (
                 [
                     (
                         "User permissions needed",
-                        ", ".join(
-                            " ".join(map(lambda x: x.title(), x.split("_"))) for x in p
-                        ),
+                        ", ".join(" ".join(map(lambda x: x.title(), x.split("_"))) for x in p),
                     )
                 ]
                 if p
@@ -283,11 +253,7 @@ class Help(commands.Cog, HelpCogService):
                 if cmd.description
                 else []
             )
-            + (
-                [("Aliases", ", ".join([f"`{a}`" for a in cmd.aliases]))]
-                if cmd.aliases
-                else []
-            ),
+            + ([("Aliases", ", ".join([f"`{a}`" for a in cmd.aliases]))] if cmd.aliases else []),
             thumbnail=self.bot.random_thumbnail(),
             footer="[] indicates an optional parameter",
             not_inline=[0, 1, 2, 3, 4],

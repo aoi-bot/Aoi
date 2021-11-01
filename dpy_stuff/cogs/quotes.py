@@ -31,16 +31,14 @@ class Quotes(commands.Cog):
     async def quote(self, ctx: bot.AoiContext, trigger: str):
         qid, content, user = await (
             await self.bot.db.conn.execute(
-                "select id, content, user from quotes where guild=? and name=? "  # noqa
-                "order by RANDOM() limit 1",
+                "select id, content, user from quotes where guild=? and name=? " "order by RANDOM() limit 1",  # noqa
                 (ctx.guild.id, trigger),
             )
         ).fetchone()
         msg = await ctx.send_json(content)
         await msg.edit(
             content=f"Quote **{qid}** by "
-            f"**{discord.utils.escape_markdown(str(await self.bot.fetch_unknown_user(user)))}**\n"
-            + msg.content
+            f"**{discord.utils.escape_markdown(str(await self.bot.fetch_unknown_user(user)))}**\n" + msg.content
         )
 
     @commands.command(brief="Lists all quotes", aliases=["luq"])
@@ -61,14 +59,10 @@ class Quotes(commands.Cog):
     @commands.command(brief="Delete a quote", aliases=["delq"])
     async def deletequote(self, ctx: bot.AoiContext, quote: int):
         qid, user, guild = await (
-            await self.bot.db.conn.execute(
-                "select id, user, guild from quotes where id=?", (quote,)
-            )
+            await self.bot.db.conn.execute("select id, user, guild from quotes where id=?", (quote,))
         ).fetchone()
         if user != ctx.author.id and not ctx.author.guild_permissions.administrator:
-            return ctx.send_error(
-                "You must be administrator to delete quotes that aren't yours."
-            )
+            return ctx.send_error("You must be administrator to delete quotes that aren't yours.")
         await self.bot.db.conn.execute("delete from quotes where id=?", (qid,))
         await self.bot.db.conn.commit()
 
@@ -79,10 +73,7 @@ class Quotes(commands.Cog):
             (ctx.guild.id, f"%{search_term}%"),
         )
         await ctx.paginate(
-            (
-                f"**{row[0]}** - **{discord.utils.escape_markdown(row[1])}**"
-                for row in rows
-            ),
+            (f"**{row[0]}** - **{discord.utils.escape_markdown(row[1])}**" for row in rows),
             30,
             "Quote Search",
         )

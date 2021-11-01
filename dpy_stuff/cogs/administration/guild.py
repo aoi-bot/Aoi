@@ -38,9 +38,7 @@ class Guilds(commands.Cog):
     )
     async def serveravatar(self, ctx: bot.AoiContext, *, url: str = None):
         if not url:
-            return await ctx.send(
-                ctx.guild.icon.url if ctx.guild.icon else "No server icon set"
-            )
+            return await ctx.send(ctx.guild.icon.url if ctx.guild.icon else "No server icon set")
         async with aiohttp.ClientSession() as sess:
             async with sess.get(url) as resp:
                 await ctx.confirm_coro(
@@ -64,13 +62,10 @@ class Guilds(commands.Cog):
         region = region.lower().replace(" ", "-").replace("_", "-")
         if region not in map(str, discord.VoiceRegion):
             raise commands.BadArgument(
-                f"Region `{region}` invalid. Do `{ctx.prefix}regions` "
-                f"to view a list of supported regions"
+                f"Region `{region}` invalid. Do `{ctx.prefix}regions` " f"to view a list of supported regions"
             )
         if "vip" in region and "VIP_REGIONS" not in ctx.guild.features:
-            return await ctx.send_error(
-                f"Region `{region}` is a VIP region and cannot be used for this server"
-            )
+            return await ctx.send_error(f"Region `{region}` is a VIP region and cannot be used for this server")
         reg = discord.VoiceRegion.try_value(region)
         await ctx.confirm_coro(
             f"Set server region to `{reg}`?",
@@ -103,18 +98,13 @@ class Guilds(commands.Cog):
                 if voice_state.channel:
                     channel = voice_state.channel
                 else:
-                    return await ctx.send_error(
-                        "Join a voice channel or add a voice channel ID to the command"
-                    )
+                    return await ctx.send_error("Join a voice channel or add a voice channel ID to the command")
         if region not in map(str, discord.VoiceRegion):
             raise commands.BadArgument(
-                f"Region `{region}` invalid. Do `{ctx.prefix}regions` "
-                f"to view a list of supported regions"
+                f"Region `{region}` invalid. Do `{ctx.prefix}regions` " f"to view a list of supported regions"
             )
         if "vip" in region and "VIP_REGIONS" not in ctx.guild.features:
-            return await ctx.send_error(
-                f"Region `{region}` is a VIP region and cannot be used for this server"
-            )
+            return await ctx.send_error(f"Region `{region}` is a VIP region and cannot be used for this server")
         reg = discord.VoiceRegion.try_value(region)
         await ctx.confirm_coro(
             f"Set {channel.name} region to `{reg}`?",
@@ -139,9 +129,7 @@ class Guilds(commands.Cog):
 
     @commands.bot_has_permissions(manage_emojis=True)
     @commands.has_permissions(manage_emojis=True)
-    @commands.command(
-        brief="Deletes up to 10 emojis", aliases=["de"], usage="emoji1 emoji2 ..."
-    )
+    @commands.command(brief="Deletes up to 10 emojis", aliases=["de"], usage="emoji1 emoji2 ...")
     async def delemoji(
         self,
         ctx: bot.AoiContext,
@@ -181,9 +169,7 @@ class Guilds(commands.Cog):
         addemoji emoji_name emoji.com/my_awesome_emoji.png
         """,
     )
-    async def addemoji(
-        self, ctx: bot.AoiContext, name: str, src: Union[discord.PartialEmoji, str]
-    ):  # noqa c901
+    async def addemoji(self, ctx: bot.AoiContext, name: str, src: Union[discord.PartialEmoji, str]):  # noqa c901
         if len(name) > 32 or len(name) < 2:
             raise commands.BadArgument("Emoji name must be 2-32 characters")
         if isinstance(src, discord.PartialEmoji):
@@ -196,17 +182,15 @@ class Guilds(commands.Cog):
                 try:
                     async with sess.get(src) as resp:
                         if resp.status != 200:
-                            return await ctx.send_error(
-                                f"Server responded with a {resp.status}"
-                            )
+                            return await ctx.send_error(f"Server responded with a {resp.status}")
                         if "Content-Type" in resp.headers:
                             typ = resp.headers["Content-Type"].split("/")[-1]
-                        if "Content-Type" not in resp.headers or resp.headers[
-                            "Content-Type"
-                        ] not in ("image/gif", "image/jpeg", "image/png"):
-                            return await ctx.send_error(
-                                f"That doesn't seem to be an image"
-                            )
+                        if "Content-Type" not in resp.headers or resp.headers["Content-Type"] not in (
+                            "image/gif",
+                            "image/jpeg",
+                            "image/png",
+                        ):
+                            return await ctx.send_error(f"That doesn't seem to be an image")
                         buf.write(await resp.content.read())
                 except (ClientResponseError, BadHttpMessage):
                     await ctx.send_error(
@@ -226,9 +210,7 @@ class Guilds(commands.Cog):
             image: Image.Image = Image.open(buf)
             image.load()
             current_size = image.size
-            image = image.resize(
-                (int(current_size[0] * ratio), int(current_size[1] * ratio))
-            )
+            image = image.resize((int(current_size[0] * ratio), int(current_size[1] * ratio)))
             buf2 = io.BytesIO()
             image.save(buf2, format="PNG")
             print(buf2.__sizeof__())

@@ -31,9 +31,7 @@ class Bot(commands.Cog):
         self.shard_times: Dict[int, datetime] = {}
         self.shard_statuses: Dict[int, bool] = {}
         self.shard_server_counts: Dict[int, int] = {}
-        self.redis = redis.Redis(
-            host="localhost", port=6379, db=0, decode_responses=True
-        )
+        self.redis = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
 
     @property
     def _config(self):
@@ -48,10 +46,7 @@ class Bot(commands.Cog):
         await self.bot.wait_until_ready()
         self.redis.set(
             "aoi-members",
-            sum(
-                guild.member_count if hasattr(guild, "_member_count") else 0
-                for guild in self.bot.guilds
-            ),
+            sum(guild.member_count if hasattr(guild, "_member_count") else 0 for guild in self.bot.guilds),
         )
         self.redis.set("aoi-guilds", len(self.bot.guilds))
 
@@ -89,9 +84,7 @@ class Bot(commands.Cog):
         self.shard_server_counts = {}
         for guild in self.bot.guilds:
             shard_id = (guild.id >> 22) % self.bot.shard_count
-            self.shard_server_counts[shard_id] = (
-                self.shard_server_counts.get(shard_id, 0) + 1
-            )
+            self.shard_server_counts[shard_id] = self.shard_server_counts.get(shard_id, 0) + 1
 
     @commands.command(brief="Shows bot stats")
     async def stats(self, ctx: bot.AoiContext):
@@ -204,12 +197,7 @@ class Bot(commands.Cog):
     async def commandstats(self, ctx: bot.AoiContext):
         await ctx.embed(
             description="\n".join(
-                [
-                    f"**{a[0]}**: {a[1]} usages"
-                    for a in sorted(self.bot.commands_ran.items(), key=lambda x: -x[1])[
-                        :10
-                    ]
-                ]
+                [f"**{a[0]}**: {a[1]} usages" for a in sorted(self.bot.commands_ran.items(), key=lambda x: -x[1])[:10]]
             ),
             not_inline=list(range(10)),
         )
@@ -225,9 +213,7 @@ class Bot(commands.Cog):
         except discord.InvalidArgument:
             return await ctx.send_error("URL must be a direct image link.")
         except discord.HTTPException as e:
-            return await ctx.send_error(
-                f"An error occurred while setting my avatar: {e}"
-            )
+            return await ctx.send_error(f"An error occurred while setting my avatar: {e}")
 
     @commands.is_owner()
     @commands.command(brief="Sets #BOT#'s name", aliases=["newname"])
@@ -235,13 +221,9 @@ class Bot(commands.Cog):
         if len(name) < 2 or len(name) > 32:
             return await ctx.send_error("Username must be between 2 and 32 characters")
         if any(substr in name for substr in ["@", "#", ":", "```"]):
-            return await ctx.send_error(
-                "Usernames cannot contain @, #, \\`\\`\\`, or :"
-            )
+            return await ctx.send_error("Usernames cannot contain @, #, \\`\\`\\`, or :")
         if name in ["discordtag", "everyone", "here"]:
-            return await ctx.send_error(
-                "Usernames cannot be `discordtag`, `everyone`, or `here`"
-            )
+            return await ctx.send_error("Usernames cannot be `discordtag`, `everyone`, or `here`")
         try:
             await self.bot.user.edit(username=name)
             await ctx.send_ok("Username set!")
@@ -270,14 +252,10 @@ class Bot(commands.Cog):
     @commands.is_owner()
     @commands.command(brief="Update Aoi from Github")
     async def update(self, ctx: bot.AoiContext):
-        process = subprocess.Popen(
-            ["git", "pull", "--recurse-submodules"], stdout=subprocess.PIPE
-        )
+        process = subprocess.Popen(["git", "pull", "--recurse-submodules"], stdout=subprocess.PIPE)
         output = process.communicate()[0]
         await ctx.send(f"Output: ```{str(output[:1800], 'utf-8')}```")
-        process = subprocess.Popen(
-            ["git", "describe", "--tags"], stdout=subprocess.PIPE
-        )
+        process = subprocess.Popen(["git", "describe", "--tags"], stdout=subprocess.PIPE)
         output = process.communicate()[0]
         await ctx.send(f"Updated to {str(output, 'utf-8')}")
 
@@ -305,10 +283,7 @@ class Bot(commands.Cog):
         await ctx.send_info(
             self.bot.placeholders.replace(
                 ctx,
-                "\n"
-                + "\n".join(
-                    f"`&\u200b{p};` - &{p};" for p in self.bot.placeholders.supported
-                ),
+                "\n" + "\n".join(f"`&\u200b{p};` - &{p};" for p in self.bot.placeholders.supported),
             )
         )
 
@@ -316,9 +291,7 @@ class Bot(commands.Cog):
     @commands.command(brief="Runs an SQL command")
     async def sqlexec(self, ctx: bot.AoiContext, *, sql):
         sql = sql_trim(sql)
-        await ctx.embed(
-            description=f"```sql\n{sql}\n```", footer="Type yes to run or cancel"
-        )
+        await ctx.embed(description=f"```sql\n{sql}\n```", footer="Type yes to run or cancel")
         resp = await ctx.input(str, ch=lambda m: m.lower() in ("cancel", "yes"))
         if resp == "yes":
             try:
@@ -341,9 +314,7 @@ class Bot(commands.Cog):
             # TODO this breaks ```sql formatted code blocks... :thonk:... maybe remove a beginning `select`?
             rows = await self.bot.db.conn.execute_fetchall(f"select {sql}")
             await self.bot.db.conn.commit()
-            await ctx.paginate(
-                ["|".join(map(str, row)) for row in rows] if rows else ["None"], 20, sql
-            )
+            await ctx.paginate(["|".join(map(str, row)) for row in rows] if rows else ["None"], 20, sql)
         except (aiosqlite.Error, aiosqlite.Warning) as e:
             await ctx.send_error(
                 f"An error occurred while running the SQL command. If this was a complex "
@@ -362,9 +333,7 @@ class Bot(commands.Cog):
                       botconfig category config_name config_value
                       """,
     )
-    async def botconfig(
-        self, ctx: bot.AoiContext, key: str = None, value: str = None
-    ):  # noqa c901
+    async def botconfig(self, ctx: bot.AoiContext, key: str = None, value: str = None):  # noqa c901
         if not key:
             return await ctx.embed(
                 title="Bot config categories",
@@ -380,10 +349,7 @@ class Bot(commands.Cog):
                     title=f"Bot configs for {key}",
                     description=(
                         f"Do `{ctx.clean_prefix}botconfig category config_name config_value` to set a bot config\n"
-                        + "\n".join(  # noqa e501
-                            f"⋄ **{key}.{k}**: {v}"
-                            for k, v in self._config.all_keys_in(key)
-                        )
+                        + "\n".join(f"⋄ **{key}.{k}**: {v}" for k, v in self._config.all_keys_in(key))  # noqa e501
                     ),
                 )
             except ValueError:
@@ -394,9 +360,7 @@ class Bot(commands.Cog):
         if not value:
             key = key.lower()
             try:
-                return await ctx.send_info(
-                    f"**{key}** is set to {self._config.get(key)}"
-                )
+                return await ctx.send_info(f"**{key}** is set to {self._config.get(key)}")
             except ValueError:
                 if key.split(".")[0] not in self._config.yaml:
                     return await ctx.send_error(
@@ -424,10 +388,7 @@ class Bot(commands.Cog):
                 )
         try:
             self._config.set(key, value)
-            return await ctx.send_info(
-                f"**{key}** was changed to `{self._config.get(key)}`"
-                f"from `{previous}`"
-            )
+            return await ctx.send_info(f"**{key}** was changed to `{self._config.get(key)}`" f"from `{previous}`")
         except ValueError:
             return await ctx.send_error(f"An error was raised setting the key")
 

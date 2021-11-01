@@ -142,8 +142,7 @@ def _infix_to_postfix(infix: List[Union[str, float]]):  # noqa: C901
             elif (
                 (not stack)
                 or stack[-1] == "("
-                or _PRECEDENCE_DICT[current].precedence
-                > _PRECEDENCE_DICT[stack[-1]].precedence
+                or _PRECEDENCE_DICT[current].precedence > _PRECEDENCE_DICT[stack[-1]].precedence
             ):
                 stack.append(current)
             else:
@@ -153,10 +152,7 @@ def _infix_to_postfix(infix: List[Union[str, float]]):  # noqa: C901
                     if stack[-1] == "(":
                         stack.append(current)
                         break
-                    if (
-                        _PRECEDENCE_DICT[current].precedence
-                        < _PRECEDENCE_DICT[stack[-1]].precedence
-                    ):
+                    if _PRECEDENCE_DICT[current].precedence < _PRECEDENCE_DICT[stack[-1]].precedence:
                         break
                     postfix.append(stack.pop())
                 stack.append(current)
@@ -179,9 +175,7 @@ async def evaluate(expression: str):
             elif token in _CONSTANTS:
                 stack.append(_CONSTANTS[token])
             else:
-                operands = [
-                    stack.pop() for n in range(_PRECEDENCE_DICT[token].arguments)
-                ]
+                operands = [stack.pop() for n in range(_PRECEDENCE_DICT[token].arguments)]
                 stack.append(_PRECEDENCE_DICT[token].func(*reversed(operands)))
         except ValueError as err:
             if str(err) == "math domain error":

@@ -9,7 +9,7 @@ from discord.ext import commands
 from aoi.libs.linq import LINQ
 
 if TYPE_CHECKING:
-    from .aoi_bot import AoiBot
+    from aoi.bot.aoi_bot import AoiBot
 
 
 def type_string(annotation) -> str:
@@ -87,9 +87,7 @@ async def gen_card(command: commands.Command, bot: AoiBot) -> str:
         if len(command.aliases) == 1:
             aliases = f"""<div>Alias: <code>,{command.aliases[0]}</code></div>"""
         else:
-            aliases_joined = ", ".join(
-                f"<code>,{alias}</code>" for alias in command.aliases
-            )
+            aliases_joined = ", ".join(f"<code>,{alias}</code>" for alias in command.aliases)
             aliases = f"""<div>Aliases: {aliases_joined}</div>"""
     if command.flags:
         flags = "<div>Flags:<ul>"
@@ -97,25 +95,17 @@ async def gen_card(command: commands.Command, bot: AoiBot) -> str:
             if not flag[0]:
                 flags += f"<li><code>--{name}</code> {flag[1]}"
             else:
-                flags += (
-                    f"<li><code>--{name} [{flag[0].__name__.lower()}]</code> {flag[1]}"
-                )
+                flags += f"<li><code>--{name} [{flag[0].__name__.lower()}]</code> {flag[1]}"
         flags += "</ul></div>"
     if command.description:
         examples = (
             "<div>Examples:<ul>"
-            + LINQ(command.description.splitlines())
-            .select(lambda x: f"<li><code>,{x}</code>")
-            .join("\n")
+            + LINQ(command.description.splitlines()).select(lambda x: f"<li><code>,{x}</code>").join("\n")
             + "</ul></div>"
         )
     p = bot.permissions_needed_for(command.name)
     permissions = (
-        (
-            "<div>User Permissions Needed: "
-            + (" ".join([permissions_badge(x) for x in p]) if p else "")
-            + "</div>"
-        )
+        ("<div>User Permissions Needed: " + (" ".join([permissions_badge(x) for x in p]) if p else "") + "</div>")
         if p
         else ""
     )

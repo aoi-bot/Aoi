@@ -42,11 +42,7 @@ class EmbedCreator:
             await ctx.respond(content)
         else:
             await ctx.respond(
-                embed=await (
-                    [self.ok_embed, self.info_embed, self.error_embed][typ](
-                        ctx, description=content
-                    )
-                )
+                embed=await ([self.ok_embed, self.info_embed, self.error_embed][typ](ctx, description=content))
             )
 
     async def ok_embed(

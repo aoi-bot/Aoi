@@ -11,9 +11,7 @@ from aoi.bot import PunishmentModel, PunishmentTypeModel, TimedPunishmentModel
 
 def _soft_check_role(ctx: bot.AoiContext, member: discord.Member, action: str = "edit"):
     if member.top_role >= ctx.me.top_role:
-        raise bot.RoleHierarchyError(
-            f"I can't {action} someone with a role higher than or equal to mine"
-        )
+        raise bot.RoleHierarchyError(f"I can't {action} someone with a role higher than or equal to mine")
 
 
 class Moderation(commands.Cog):
@@ -26,20 +24,11 @@ class Moderation(commands.Cog):
         await self.bot.wait_until_ready()
         self.timed_punishments = await self.bot.db.load_backing_punishments()
 
-    def _check_role(
-        self, ctx: bot.AoiContext, member: discord.Member, action: str = "edit"
-    ):
-        if (
-            member.top_role >= ctx.author.top_role
-            and ctx.guild.owner_id != ctx.author.id
-        ):
-            raise bot.RoleHierarchyError(
-                f"You can't {action} someone with a role higher than yours"
-            )
+    def _check_role(self, ctx: bot.AoiContext, member: discord.Member, action: str = "edit"):
+        if member.top_role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
+            raise bot.RoleHierarchyError(f"You can't {action} someone with a role higher than yours")
         if member.top_role >= ctx.me.top_role:
-            raise bot.RoleHierarchyError(
-                f"I can't {action} someone with a role higher than mine"
-            )
+            raise bot.RoleHierarchyError(f"I can't {action} someone with a role higher than mine")
         if member.id == ctx.guild.owner_id:
             raise bot.RoleHierarchyError(f"We can't {action} the server owner")
 
@@ -71,13 +60,9 @@ class Moderation(commands.Cog):
     @commands.bot_has_permissions(kick_members=True)
     @commands.has_permissions(kick_members=True)
     @commands.command(brief="Kicks a member from the server")
-    async def kick(
-        self, ctx: bot.AoiContext, member: discord.Member, *, reason: str = None
-    ):
+    async def kick(self, ctx: bot.AoiContext, member: discord.Member, *, reason: str = None):
         self._check_role(ctx, member, "kick")
-        dm_sent = await self._dm(
-            member, discord.Embed(title=f"Kicked from {ctx.guild}", description=reason)
-        )
+        dm_sent = await self._dm(member, discord.Embed(title=f"Kicked from {ctx.guild}", description=reason))
         await member.kick(reason=f"{reason} | {ctx.author.id} {ctx.author}")
         await ctx.send(
             embed=self.get_action_embed(
@@ -103,15 +88,9 @@ class Moderation(commands.Cog):
             try:
                 member = await self.bot.fetch_unknown_user(member)
             except discord.NotFound:
-                return await ctx.send_error(
-                    f"There isn't an existing user with an ID of {member}"
-                )
+                return await ctx.send_error(f"There isn't an existing user with an ID of {member}")
             await ctx.guild.ban(member)
-            await ctx.send(
-                embed=self.get_action_embed(
-                    ctx, member, PunishmentTypeModel.BAN, reason
-                )
-            )
+            await ctx.send(embed=self.get_action_embed(ctx, member, PunishmentTypeModel.BAN, reason))
         else:
             self._check_role(ctx, member, "ban")
             dm_sent = await self._dm(
@@ -132,9 +111,7 @@ class Moderation(commands.Cog):
 
     @commands.has_permissions(ban_members=True)
     @commands.command(brief="Softbans a member from the server")
-    async def softban(
-        self, ctx: bot.AoiContext, member: discord.Member, *, reason: str = None
-    ):
+    async def softban(self, ctx: bot.AoiContext, member: discord.Member, *, reason: str = None):
         self._check_role(ctx, member, "softban")
         dm_sent = await self._dm(
             member,
@@ -151,15 +128,11 @@ class Moderation(commands.Cog):
                 extra="DM could not be sent" if not dm_sent else "",
             )
         )
-        await self.bot.db.add_punishment(
-            member.id, ctx.guild.id, ctx.author.id, PunishmentTypeModel.SOFTBAN, reason
-        )
+        await self.bot.db.add_punishment(member.id, ctx.guild.id, ctx.author.id, PunishmentTypeModel.SOFTBAN, reason)
 
     @commands.has_permissions(ban_members=True)
     @commands.command(brief="Unbans a member from the server")
-    async def unban(
-        self, ctx: bot.AoiContext, user: Union[discord.User, int], *, reason: str = None
-    ):
+    async def unban(self, ctx: bot.AoiContext, user: Union[discord.User, int], *, reason: str = None):
         if isinstance(user, discord.User):
             user = user.id
         entries: List[discord.guild.BanEntry] = await ctx.guild.bans()
@@ -171,15 +144,9 @@ class Moderation(commands.Cog):
         else:
             return await ctx.send_error(f"User ID {user} not banned from this server")
         user = await self.bot.fetch_unknown_user(user)
-        await ctx.guild.unban(
-            found.user, reason=f"{reason} | {ctx.author.id} {ctx.author}"
-        )
-        await ctx.send(
-            embed=self.get_action_embed(ctx, user, PunishmentTypeModel.UNBAN, reason)
-        )
-        await self.bot.db.add_punishment(
-            user.id, ctx.guild.id, ctx.author.id, PunishmentTypeModel.UNBAN, reason
-        )
+        await ctx.guild.unban(found.user, reason=f"{reason} | {ctx.author.id} {ctx.author}")
+        await ctx.send(embed=self.get_action_embed(ctx, user, PunishmentTypeModel.UNBAN, reason))
+        await self.bot.db.add_punishment(user.id, ctx.guild.id, ctx.author.id, PunishmentTypeModel.UNBAN, reason)
 
     @commands.has_permissions(kick_members=True)
     @commands.command(brief="Warns a member")
@@ -191,9 +158,7 @@ class Moderation(commands.Cog):
         reason: str = "No reason provided",
     ):
         self._check_role(ctx, member, "warn")
-        dm_sent = await self._dm(
-            member, discord.Embed(title=f"Warning from {ctx.guild}", description=reason)
-        )
+        dm_sent = await self._dm(member, discord.Embed(title=f"Warning from {ctx.guild}", description=reason))
         msg = await ctx.send(
             embed=self.get_action_embed(
                 ctx,
@@ -206,9 +171,7 @@ class Moderation(commands.Cog):
         await self.bot.db.add_user_warn(member.id, ctx, reason)
 
         punishments = [
-            x
-            for x in (await self.bot.db.lookup_punishments(member.id))
-            if x.typ == PunishmentTypeModel.WARN
+            x for x in (await self.bot.db.lookup_punishments(member.id)) if x.typ == PunishmentTypeModel.WARN
         ]
         punishment = await self.bot.db.get_warnp(ctx.guild.id, len(punishments))
 
@@ -221,11 +184,7 @@ class Moderation(commands.Cog):
             )
             await member.kick(reason="Automod")
             await self.bot.db.add_user_kick(member.id, ctx, "Automod")
-            await msg.edit(
-                embed=msg.embeds[0].add_field(
-                    name="Automod Kicked", value=f"{len(punishments)} warns"
-                )
-            )
+            await msg.edit(embed=msg.embeds[0].add_field(name="Automod Kicked", value=f"{len(punishments)} warns"))
         elif punishment == "ban":
             await self._dm(
                 member,
@@ -233,11 +192,7 @@ class Moderation(commands.Cog):
             )
             await member.ban(reason="Automod")
             await self.bot.db.add_user_ban(member.id, ctx, "Automod")
-            await msg.edit(
-                embed=msg.embeds[0].add_field(
-                    name="Automod Banned", value=f"{len(punishments)} warns"
-                )
-            )
+            await msg.edit(embed=msg.embeds[0].add_field(name="Automod Banned", value=f"{len(punishments)} warns"))
 
     @commands.has_permissions(ban_members=True)
     @commands.command(
@@ -245,9 +200,7 @@ class Moderation(commands.Cog):
         aliases=["pclear"],
         flags={"del": [None, "Completely delete the warning"]},
     )
-    async def punishmentclear(
-        self, ctx: bot.AoiContext, member: discord.Member, num: int = 1
-    ):
+    async def punishmentclear(self, ctx: bot.AoiContext, member: discord.Member, num: int = 1):
         punishments: List[PunishmentModel] = sorted(
             await self.bot.db.lookup_punishments(member.id),
             key=lambda punishment: punishment.time,
@@ -263,28 +216,21 @@ class Moderation(commands.Cog):
             )
         else:
             await self.bot.db.conn.execute(
-                "update punishments set cleared=1,cleared_by=? where user=? and guild=? "
-                "and timestamp=?",
+                "update punishments set cleared=1,cleared_by=? where user=? and guild=? " "and timestamp=?",
                 (ctx.author.id, p.user, p.guild, p.time.timestamp()),
             )
         await self.bot.db.conn.commit()
         await ctx.send_ok(f"Cleared punishment #{num} for {member}")
 
     @commands.command(brief="Views the punishment logs for a user")
-    async def logs(
-        self, ctx: bot.AoiContext, member: Union[discord.Member, int] = None
-    ):
+    async def logs(self, ctx: bot.AoiContext, member: Union[discord.Member, int] = None):
         member = member or ctx.author
-        if (
-            isinstance(member, int) or member.id != ctx.author.id
-        ) and not ctx.channel.permissions_for(ctx.author).kick_members:
-            return await ctx.send_error(
-                "You need the kick members permission to see logs from other people"
-            )
+        if (isinstance(member, int) or member.id != ctx.author.id) and not ctx.channel.permissions_for(
+            ctx.author
+        ).kick_members:
+            return await ctx.send_error("You need the kick members permission to see logs from other people")
         punishments: List[PunishmentModel] = sorted(
-            await self.bot.db.lookup_punishments(
-                member.id if isinstance(member, discord.Member) else member
-            ),
+            await self.bot.db.lookup_punishments(member.id if isinstance(member, discord.Member) else member),
             key=lambda punishment: punishment.time,
             reverse=True,
         )
@@ -299,9 +245,7 @@ class Moderation(commands.Cog):
                 if punishment.cleared
                 else ""
             )
-            action = ["banned", "kicked", "muted", "warned", "unbanned", "softbanned"][
-                punishment.typ
-            ]
+            action = ["banned", "kicked", "muted", "warned", "unbanned", "softbanned"][punishment.typ]
             return (
                 f"{_}{action} by {await self.bot.fetch_unknown_user(punishment.staff)}{_}\n"
                 f"Date: {punishment.time.strftime('%x %X')}\n"
@@ -332,9 +276,7 @@ class Moderation(commands.Cog):
     async def warnpl(self, ctx: bot.AoiContext):
         punishments = await self.bot.db.get_all_warnp(ctx.guild.id)
         if punishments:
-            await ctx.paginate(
-                [f"{n}: {p}" for n, p in punishments], title="Warn Punishments", n=20
-            )
+            await ctx.paginate([f"{n}: {p}" for n, p in punishments], title="Warn Punishments", n=20)
         else:
             await ctx.send_info("No warning punishments for this server")
 

@@ -126,8 +126,7 @@ async def permission_check(ctx: bot.AoiContext):  # noqa: C901
                 update_use(tok[2] == "enable", n)
     if not can_use:
         raise bot.PermissionFailed(
-            f"Permission #{current_n} - {perms[current_n]} "
-            f"is disallowing you from this command"
+            f"Permission #{current_n} - {perms[current_n]} " f"is disallowing you from this command"
         )
     return True
 
@@ -140,9 +139,7 @@ def bot_process():
         bot.logger.info(f"Starting Aoi Bot with PID {os.getpid()}")
         bot.run(os.getenv("TOKEN"))
     except Exception as error:
-        traceback.print_exception(
-            type(error), error, error.__traceback__, file=sys.stderr
-        )
+        traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
         exit(1)
 
 

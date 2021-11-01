@@ -79,9 +79,7 @@ class Information(commands.Cog):
         brief="Shows a user's avatar. Defaults to showing your own.",
         aliases=["av", "pfp"],
     )
-    async def avatar(
-        self, ctx: bot.AoiContext, member: Optional[discord.Member] = None
-    ):
+    async def avatar(self, ctx: bot.AoiContext, member: Optional[discord.Member] = None):
         member = member or ctx.author
         await ctx.embed(
             image=member.avatar.url,
@@ -106,19 +104,11 @@ class Information(commands.Cog):
                 ("Joined Discord", created_at),
                 (
                     f"Hoisted Roles ({len(hoisted_roles)}) ",
-                    " ".join([r.mention for r in hoisted_roles[:-6:-1]])
-                    if hoisted_roles
-                    else "None",
+                    " ".join([r.mention for r in hoisted_roles[:-6:-1]]) if hoisted_roles else "None",
                 ),
                 (
                     f"Normal Roles ({len(normal_roles)})",
-                    " ".join(
-                        [
-                            r.mention
-                            for r in normal_roles[:-6:-1]
-                            if r.id not in [x.id for x in hoisted_roles]
-                        ]
-                    )
+                    " ".join([r.mention for r in normal_roles[:-6:-1] if r.id not in [x.id for x in hoisted_roles]])
                     if len(normal_roles) > 1
                     else "None",
                 ),
@@ -221,23 +211,17 @@ class Information(commands.Cog):
                 ("Created at", channel.created_at.strftime("%c")),
                 (
                     "Slowmode",
-                    f"{channel.slowmode_delay}s"
-                    if channel.slowmode_delay
-                    else "No Slowmode",
+                    f"{channel.slowmode_delay}s" if channel.slowmode_delay else "No Slowmode",
                 ),
             ],
         )
 
     @commands.command(brief="Shows info on an emoji", aliases=["einfo"])
-    async def emojiinfo(
-        self, ctx: bot.AoiContext, emoji: Union[discord.Emoji, discord.PartialEmoji]
-    ):
+    async def emojiinfo(self, ctx: bot.AoiContext, emoji: Union[discord.Emoji, discord.PartialEmoji]):
         def _(typ):
             return f"https://cdn.discordapp.com/emojis/{emoji.id}.{typ}?v=1"
 
-        if isinstance(emoji, discord.PartialEmoji) and (
-            not emoji.is_custom_emoji() or emoji.is_unicode_emoji()
-        ):
+        if isinstance(emoji, discord.PartialEmoji) and (not emoji.is_custom_emoji() or emoji.is_unicode_emoji()):
             return await ctx.send_error("Emoji must be a custom emoji")
         await ctx.embed(
             title=f"Info for {emoji}",
@@ -247,10 +231,7 @@ class Information(commands.Cog):
                 ("Animated", emoji.animated),
                 (
                     "Links",
-                    f"[jpeg]({_('jpeg')}) "
-                    f"[png]({_('png')}) "
-                    f"[gif]({_('gif')}) "
-                    f"[webp]({_('webp')}) ",
+                    f"[jpeg]({_('jpeg')}) " f"[png]({_('png')}) " f"[gif]({_('gif')}) " f"[webp]({_('webp')}) ",
                 ),
                 (
                     "Usage",
@@ -290,8 +271,7 @@ class Information(commands.Cog):
             thumbnail=member.avatar.url,
             description="```diff\n"
             + "\n".join(
-                f"{'+' if perm[1] or perms.administrator else '-'} "
-                f"{conversions.camel_to_title(perm[0])}"
+                f"{'+' if perm[1] or perms.administrator else '-'} " f"{conversions.camel_to_title(perm[0])}"
                 for perm in perms
             )
             + "```",
@@ -330,24 +310,18 @@ class Information(commands.Cog):
                 title=f"Server permissions for {role}",
                 description="```diff\n"
                 + "\n".join(
-                    f"{'+' if perm[1] or perms.administrator else '-'} "
-                    f"{conversions.camel_to_title(perm[0])}"
+                    f"{'+' if perm[1] or perms.administrator else '-'} " f"{conversions.camel_to_title(perm[0])}"
                     for perm in perms
                 )
                 + "```",
             )
         overwrite: discord.PermissionOverwrite = channel.overwrites_for(role)
         if not overwrite:
-            return await ctx.send_info(
-                f"No permission overwrites in {channel} for {role}"
-            )
+            return await ctx.send_info(f"No permission overwrites in {channel} for {role}")
         return await ctx.embed(
             title=f"Permission overwrite for {role} in {channel}",
             description="```diff\n"
-            + "\n".join(
-                f"{_(perm, overwrite)} " f"{conversions.camel_to_title(perm[0])}"
-                for perm in overwrite
-            )
+            + "\n".join(f"{_(perm, overwrite)} " f"{conversions.camel_to_title(perm[0])}" for perm in overwrite)
             + "```",
         )
 
@@ -377,16 +351,13 @@ class Information(commands.Cog):
         flags={
             "stacked": [
                 None,
-                "Only count the highest of the roles if someone has multiple. "
-                "Respect discord role order",
+                "Only count the highest of the roles if someone has multiple. " "Respect discord role order",
             ],
             "sort": [None, "Sort roles by member count"],
         },
         aliases=["rcompare"],
     )
-    async def rolecompare(
-        self, ctx: bot.AoiContext, roles: commands.Greedy[discord.Role]
-    ):
+    async def rolecompare(self, ctx: bot.AoiContext, roles: commands.Greedy[discord.Role]):
         if len(roles) < 2 or len(roles) > 20:
             raise commands.BadArgument("You must supply 2-20 roles.")
         if "stacked" not in ctx.flags:
@@ -394,9 +365,7 @@ class Information(commands.Cog):
                 description="\n".join(
                     (
                         f"{n + 1}. {role} - {len(role.members)}"
-                        for n, role in enumerate(
-                            sorted(roles, key=lambda x: -len(x.members))
-                        )
+                        for n, role in enumerate(sorted(roles, key=lambda x: -len(x.members)))
                     )
                     if "sort" in ctx.flags
                     else (f"{role} - {len(role.members)}" for role in roles)
@@ -414,19 +383,13 @@ class Information(commands.Cog):
                     elif role.position > members[member].position:
                         members[member] = role
 
-        count: Dict[discord.Role, int] = {
-            role: m.count(members.values(), lambda x: x.id == role.id) for role in roles
-        }
+        count: Dict[discord.Role, int] = {role: m.count(members.values(), lambda x: x.id == role.id) for role in roles}
         if "sort" in ctx.flags:
-            count = dict(
-                sorted(count.items(), key=lambda i: -i[1])
-            )  # noqa what the fuck pycharm
+            count = dict(sorted(count.items(), key=lambda i: -i[1]))  # noqa what the fuck pycharm
 
         await ctx.embed(
             description="\n".join(
-                (
-                    f"{n + 1}. {i[0]} - {i[1]}" for n, i in enumerate(count.items())
-                )  # noqa also what the fuck pycharm
+                (f"{n + 1}. {i[0]} - {i[1]}" for n, i in enumerate(count.items()))  # noqa also what the fuck pycharm
                 if "sort" in ctx.flags
                 else (f"{role} - {members}" for role, members in count.items())
             )

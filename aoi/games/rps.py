@@ -31,14 +31,9 @@ class RPS(Game):
         phrase = ""
         for i in range(self.turns):
             await self.ctx.send(
-                f"{phrase}\n**Round {i + 1}**\nInput R P or S\n\n"
-                f"**Current Score**\n{self.score(comp, user)}\n"
+                f"{phrase}\n**Round {i + 1}**\nInput R P or S\n\n" f"**Current Score**\n{self.score(comp, user)}\n"
             )
-            choice = (
-                await self.ctx.input(
-                    str, "cancel", lambda x: x[0].lower() in ["r", "p", "s"]
-                )
-            )[0]
+            choice = (await self.ctx.input(str, "cancel", lambda x: x[0].lower() in ["r", "p", "s"]))[0]
             if not choice:
                 break
             compch = random.choice(["r", "p", "s"])

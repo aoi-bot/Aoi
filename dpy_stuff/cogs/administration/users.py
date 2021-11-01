@@ -18,20 +18,14 @@ class Users(commands.Cog):
     @commands.has_permissions(manage_nicknames=True)
     @commands.bot_has_permissions(manage_nicknames=True)
     @commands.command(brief="Set a member's nickname")
-    async def setnick(
-        self, ctx: bot.AoiContext, member: discord.Member, *, nickname: str
-    ):
+    async def setnick(self, ctx: bot.AoiContext, member: discord.Member, *, nickname: str):
         if member.top_role >= ctx.author.top_role:
-            raise bot.RoleHierarchyError(
-                "You can't change the nickname of a person with a role higher than yours!"
-            )
+            raise bot.RoleHierarchyError("You can't change the nickname of a person with a role higher than yours!")
         if member.id == ctx.me.id:
             await ctx.me.edit(nick=nickname)
         else:
             if member.top_role >= ctx.me.top_role:
-                raise bot.RoleHierarchyError(
-                    "I can't change the nickname of a person with a role higher than mine!"
-                )
+                raise bot.RoleHierarchyError("I can't change the nickname of a person with a role higher than mine!")
             await member.edit(nick=nickname)
         await ctx.send_ok(f"{member.mention}'s nickname set to {nickname}")
 

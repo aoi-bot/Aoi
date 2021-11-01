@@ -20,9 +20,7 @@ import aoi.modules.impl.fun as impl
 from aoi.bot import injected
 
 component = tanjun.Component(name="fun-slash")
-fun_group = component.with_slash_command(
-    tanjun.SlashCommandGroup("fun", "Fun and games :D")
-)
+fun_group = component.with_slash_command(tanjun.SlashCommandGroup("fun", "Fun and games :D"))
 
 
 @fun_group.with_command
@@ -35,9 +33,7 @@ fun_group = component.with_slash_command(
     choices={"Yes": "yes", "No": "no"},
     default="no",
 )
-@tanjun.with_str_slash_option(
-    "spoilers", "Use spoilers?", choices={"Yes": "yes", "No": "no"}, default="yes"
-)
+@tanjun.with_str_slash_option("spoilers", "Use spoilers?", choices={"Yes": "yes", "No": "no"}, default="yes")
 @tanjun.as_slash_command("minesweeper", "Make a spoiler (or not) minesweeper game")
 async def minesweeper(
     ctx: tanjun.abc.SlashContext,
@@ -48,9 +44,7 @@ async def minesweeper(
     spoilers: str,
     _embed: injected.EmbedCreator = tanjun.injected(type=injected.EmbedCreator),
 ):
-    await impl.minesweeper(
-        ctx, height, width, bombs, raw == "yes", spoilers == "yes", _embed
-    )
+    await impl.minesweeper(ctx, height, width, bombs, raw == "yes", spoilers == "yes", _embed)
 
 
 @tanjun.as_loader

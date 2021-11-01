@@ -20,9 +20,7 @@ import aoi.modules.impl.utility as impl
 from aoi.bot import injected
 
 component = tanjun.Component(name="utility-slash")
-utility_group = component.with_slash_command(
-    tanjun.SlashCommandGroup("utility", "Various utility commands")
-)
+utility_group = component.with_slash_command(tanjun.SlashCommandGroup("utility", "Various utility commands"))
 
 
 @utility_group.with_command

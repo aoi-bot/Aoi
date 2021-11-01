@@ -45,12 +45,8 @@ class ServerGambling(commands.Cog):
             return await ctx.send_error("You don't have enough currency.")
         if bet < 5:
             return await ctx.send_error("You must bet at least 5.")
-        await ctx.send_info(
-            f"You got **{ht}**. You {'win' if ht[0] == h_or_t.lower()[0] else 'lose'} ${bet:,}"
-        )
-        await self.bot.db.award_guild_currency(
-            ctx.author, bet if ht[0] == h_or_t.lower()[0] else -bet
-        )
+        await ctx.send_info(f"You got **{ht}**. You {'win' if ht[0] == h_or_t.lower()[0] else 'lose'} ${bet:,}")
+        await self.bot.db.award_guild_currency(ctx.author, bet if ht[0] == h_or_t.lower()[0] else -bet)
 
     @commands.command(brief="100 - 10x bet, >90 - x4 bet, >66 - x2 bet", aliases=["br"])
     async def betroll(self, ctx: bot.AoiContext, bet: int):
@@ -67,9 +63,7 @@ class ServerGambling(commands.Cog):
             win = bet * 2
         else:
             win = 0
-        await ctx.send_info(
-            f"You got a {r}. {'Better luck next time?' if not win else 'You won ' + str(win) + '!'}"
-        )
+        await ctx.send_info(f"You got a {r}. {'Better luck next time?' if not win else 'You won ' + str(win) + '!'}")
         await self.bot.db.award_guild_currency(ctx.author, win - bet)
 
     @commands.command(
@@ -85,16 +79,12 @@ class ServerGambling(commands.Cog):
             if bet < 5:
                 return await ctx.send_error("You must bet more than $5")
             if bet > await self.bot.db.get_guild_currency(ctx.author):
-                return await ctx.send_error(
-                    f"You only have ${self.bot.db.get_guild_currency(ctx.author)}"
-                )
+                return await ctx.send_error(f"You only have ${self.bot.db.get_guild_currency(ctx.author)}")
             await self.bot.db.award_guild_currency(ctx.author, -bet)  # hold
             try:
                 res = await RPS(ctx, turns).play()
                 if res == 0:
-                    return await self.bot.db.award_guild_currency(
-                        ctx.author, int(1.95 * bet)
-                    )
+                    return await self.bot.db.award_guild_currency(ctx.author, int(1.95 * bet))
                 if res == 1:
                     return await self.bot.db.award_guild_currency(ctx.author, bet)
                 return

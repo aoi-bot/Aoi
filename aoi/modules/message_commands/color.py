@@ -19,9 +19,9 @@ from collections.abc import Sequence
 import tanjun
 
 import aoi.modules.impl.color as impl
+from aoi.bot import with_description, AoiDatabase
 from aoi.bot.injected import EmbedCreator, ColorService
 from aoi.libs.converters import FuzzyAoiColor, AoiColor
-from aoi.bot import with_description, AoiDatabase
 
 component = tanjun.Component(name="color")
 
@@ -31,9 +31,7 @@ component = tanjun.Component(name="color")
 @tanjun.with_parser
 @with_description("Show a color palette made up of supplied colors")
 @tanjun.as_message_command("colors", "color")
-async def color_palette(
-    ctx: tanjun.abc.MessageContext, color_list: Sequence[FuzzyAoiColor]
-):
+async def color_palette(ctx: tanjun.abc.MessageContext, color_list: Sequence[FuzzyAoiColor]):
     await impl.color_palette(ctx, color_list)
 
 

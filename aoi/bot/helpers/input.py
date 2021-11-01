@@ -61,7 +61,7 @@ class InputHelper:
     ) -> tuple[_T, hikari.User]:
         ...
 
-    async def input(
+    async def input(  # noqa: C901 too complex
         self,
         typ: typing.Type[_T],
         /,
@@ -76,18 +76,13 @@ class InputHelper:
     ):
         def check(event: hikari.MessageCreateEvent):
             return (
-                (
-                    event.author_id == self._ctx.author.id
-                    and event.channel_id == self._ctx.channel_id
-                )
+                (event.author_id == self._ctx.author.id and event.channel_id == self._ctx.channel_id)
                 or not check_author
             ) and not event.author.is_bot
 
         while True:
             try:
-                inp: hikari.MessageCreateEvent = await self._bot.wait_for(
-                    hikari.MessageCreateEvent, 60, check
-                )
+                inp: hikari.MessageCreateEvent = await self._bot.wait_for(hikari.MessageCreateEvent, 60, check)
                 if del_response:
                     try:
                         await inp.message.delete()
@@ -106,7 +101,5 @@ class InputHelper:
                     + ("" if not cancel_str else f" or type `{cancel_str}` to quit")
                 )
             except asyncio.TimeoutError:
-                await self._ctx.respond(
-                    "You took too long to respond ): Try to start over"
-                )
+                await self._ctx.respond("You took too long to respond ): Try to start over")
                 return (None, None) if return_author else None

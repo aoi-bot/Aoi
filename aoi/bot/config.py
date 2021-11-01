@@ -8,9 +8,7 @@ from ruamel.yaml import YAML, os
 class ConfigHandler:
     def __init__(self):
         if not os.path.isfile("assets/config.yaml"):
-            with open("assets/config_sample.yaml") as sample, open(
-                "assets/config.yaml", "w"
-            ) as config:
+            with open("assets/config_sample.yaml") as sample, open("assets/config.yaml", "w") as config:
                 config.write(sample.read())
         with open("assets/config.yaml") as config:
             self.yaml = YAML().load(config)

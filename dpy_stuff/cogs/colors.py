@@ -30,26 +30,18 @@ class Colors(commands.Cog, ColorService):
     )
     async def adaptive(self, ctx: bot.AoiContext, number_of_colors: int = 6):
         if not ctx.message.attachments or len(ctx.message.attachments) == 0:
-            return await ctx.send_error(
-                "I need an image! Attach it with your command as a file."
-            )
+            return await ctx.send_error("I need an image! Attach it with your command as a file.")
         attachment: discord.Attachment = ctx.message.attachments[0]
         if not self._is_image(attachment.filename):
-            return await ctx.send_error(
-                "Invalid image type. Give me a jpg, jpeg, or png"
-            )
+            return await ctx.send_error("Invalid image type. Give me a jpg, jpeg, or png")
         if not (2 <= number_of_colors <= 12):
-            return await ctx.send_error(
-                "Number of colors must be between 2 and 10, inclusive"
-            )
+            return await ctx.send_error("Number of colors must be between 2 and 10, inclusive")
         buf = io.BytesIO()
         buf.seek(0)
         await ctx.trigger_typing()
         await attachment.save(buf)
         im: Image = Image.open(buf).convert("RGB")
-        paletted: Image = im.convert(
-            "P", palette=Image.ADAPTIVE, colors=number_of_colors
-        )
+        paletted: Image = im.convert("P", palette=Image.ADAPTIVE, colors=number_of_colors)
         palette = paletted.getpalette()
         color_counts = sorted(paletted.getcolors(), reverse=True)
         colors = list()
@@ -85,9 +77,7 @@ class Colors(commands.Cog, ColorService):
         )
 
     @commands.max_concurrency(1, commands.BucketType.user)
-    @commands.command(
-        brief="Split-tones an image. The image must be passed as an attachment"
-    )
+    @commands.command(brief="Split-tones an image. The image must be passed as an attachment")
     async def duotone(
         self,
         ctx: bot.AoiContext,
@@ -104,14 +94,10 @@ class Colors(commands.Cog, ColorService):
             else:
                 raise commands.BadArgument("mid must be a color or None")
         if not ctx.message.attachments or len(ctx.message.attachments) == 0:
-            return await ctx.send_error(
-                "I need an image! Attach it with your command as a file."
-            )
+            return await ctx.send_error("I need an image! Attach it with your command as a file.")
         attachment: discord.Attachment = ctx.message.attachments[0]
         if not self._is_image(attachment.filename):
-            return await ctx.send_error(
-                "Invalid image type. Give me a jpg, jpeg, or png"
-            )
+            return await ctx.send_error("Invalid image type. Give me a jpg, jpeg, or png")
         buf = io.BytesIO()
         buf.seek(0)
         await ctx.trigger_typing()
@@ -134,19 +120,13 @@ class Colors(commands.Cog, ColorService):
         await ctx.embed(image=buf)
 
     @commands.max_concurrency(1, commands.BucketType.user)
-    @commands.command(
-        brief="Shows an image histogram. You must attach the image as an attachment"
-    )
+    @commands.command(brief="Shows an image histogram. You must attach the image as an attachment")
     async def histogram(self, ctx: bot.AoiContext):
         if not ctx.message.attachments or len(ctx.message.attachments) == 0:
-            return await ctx.send_error(
-                "I need an image! Attach it with your command as a file."
-            )
+            return await ctx.send_error("I need an image! Attach it with your command as a file.")
         attachment: discord.Attachment = ctx.message.attachments[0]
         if not self._is_image(attachment.filename):
-            return await ctx.send_error(
-                "Invalid image type. Give me a jpg, jpeg, or png"
-            )
+            return await ctx.send_error("Invalid image type. Give me a jpg, jpeg, or png")
         buf = io.BytesIO()
         buf.seek(0)
         await ctx.trigger_typing()

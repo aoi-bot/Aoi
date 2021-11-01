@@ -37,7 +37,7 @@ async def color_palette(
     valid_colors = [color for color in colors if not color.attempt]
     invalid_colors = [color.attempt for color in colors if color.attempt]
     if not valid_colors and invalid_colors:
-        return await ctx.respond(f"No valid colors were supplied")
+        return await ctx.respond("No valid colors were supplied")
     if not valid_colors:
         return
     img = PIL.Image.new("RGB", (120 * len(valid_colors), 120))
@@ -51,14 +51,9 @@ async def color_palette(
         embed=hikari.Embed(
             title="Color palette",
             description=" ".join(
-                "#" + "".join(hex(channel)[2:].rjust(2, "0") for channel in c.to_rgb())
-                for c in valid_colors
+                "#" + "".join(hex(channel)[2:].rjust(2, "0") for channel in c.to_rgb()) for c in valid_colors
             )
-            + (
-                "\nUnknown Colors: " + ", ".join(invalid_colors)
-                if invalid_colors
-                else ""
-            ),
+            + ("\nUnknown Colors: " + ", ".join(invalid_colors) if invalid_colors else ""),
         ).set_image(buf)
     )
 
@@ -105,8 +100,7 @@ async def random_colors(
     await ctx.respond(
         embed=hikari.Embed(
             title="Color Palette",
-            description=" ".join(map(str, colors[:50]))
-            + ("..." if len(colors) >= 50 else ""),
+            description=" ".join(map(str, colors[:50])) + ("..." if len(colors) >= 50 else ""),
             color=(await _database.guild_setting(ctx.guild_id)).info_color,
         ).set_image(buf)
     )
@@ -125,8 +119,6 @@ async def gradient(
     await ctx.respond(
         embed=hikari.Embed(
             title="Gradient",
-            description=" ".join(
-                "#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in colors
-            ),
+            description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in colors),
         ).set_image(buf)
     )

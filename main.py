@@ -37,9 +37,7 @@ dotenv.load_dotenv()
 
 assert (token := os.getenv("TOKEN"))
 aoi = hikari.GatewayBot(token, intents=hikari.Intents.ALL)
-client = tanjun.Client.from_gateway_bot(
-    aoi, declare_global_commands=int(os.getenv("GUILD", 0)) or True
-).load_modules(
+client = tanjun.Client.from_gateway_bot(aoi, declare_global_commands=int(os.getenv("GUILD", 0)) or True).load_modules(
     *Path("aoi/modules/message_commands").glob("**/*.py"),
     *Path("aoi/modules/slash_commands").glob("**/*.py"),
     *Path("aoi/modules/hooks").glob("**/*.py"),

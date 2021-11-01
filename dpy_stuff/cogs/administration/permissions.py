@@ -70,19 +70,13 @@ class Permissions(commands.Cog):
         await ctx.send_ok(f"`asm {enabled}` added", trash=False)
 
     @commands.has_permissions(administrator=True)
-    @commands.command(
-        brief="Disable or enable all modules in a channel", aliases=["acm"]
-    )
-    async def allchnlmdls(
-        self, ctx: bot.AoiContext, channel: discord.TextChannel, enabled: disenable()
-    ):
+    @commands.command(brief="Disable or enable all modules in a channel", aliases=["acm"])
+    async def allchnlmdls(self, ctx: bot.AoiContext, channel: discord.TextChannel, enabled: disenable()):
         await self.db.add_permission(ctx.guild.id, f"acm {channel.id} {enabled}")
         await ctx.send_ok(f"**acm <#{channel.id}> {enabled}** added", trash=False)
 
     @commands.has_permissions(administrator=True)
-    @commands.command(
-        brief="Disable or enable all modules in a category", aliases=["axm"]
-    )
+    @commands.command(brief="Disable or enable all modules in a category", aliases=["axm"])
     async def allcatmdls(
         self,
         ctx: bot.AoiContext,
@@ -93,22 +87,14 @@ class Permissions(commands.Cog):
         await ctx.send_ok(f"**axm <#{category.id}> {enabled}** added", trash=False)
 
     @commands.has_permissions(administrator=True)
-    @commands.command(
-        brief="Disable or enable all commands for a role", aliases=["arm"]
-    )
-    async def allrolemdls(
-        self, ctx: bot.AoiContext, role: discord.Role, enabled: disenable()
-    ):
+    @commands.command(brief="Disable or enable all commands for a role", aliases=["arm"])
+    async def allrolemdls(self, ctx: bot.AoiContext, role: discord.Role, enabled: disenable()):
         await self.db.add_permission(ctx.guild.id, f"arm {role.id} {enabled}")
         await ctx.send_ok(f"**arm <@&{role.id}> {enabled}** added.", trash=False)
 
     @commands.has_permissions(administrator=True)
-    @commands.command(
-        brief="Disable or enable all commands for a user", aliases=["aum"]
-    )
-    async def allusrmdls(
-        self, ctx: bot.AoiContext, member: discord.Member, enabled: disenable()
-    ):
+    @commands.command(brief="Disable or enable all commands for a user", aliases=["aum"])
+    async def allusrmdls(self, ctx: bot.AoiContext, member: discord.Member, enabled: disenable()):
         await self.db.add_permission(ctx.guild.id, f"aum {member.id} {enabled}")
         await ctx.send_ok(f"**aum <@{member.id}> {enabled}** added.", trash=False)
 
@@ -126,12 +112,8 @@ class Permissions(commands.Cog):
         module: str,
     ):
         module = self.bot.find_cog(module)[0]
-        await self.db.add_permission(
-            ctx.guild.id, f"cm {channel.id} {enabled} {module}"
-        )
-        await ctx.send_ok(
-            f"**cm <#{channel.id}> {enabled} {module}** added.", trash=False
-        )
+        await self.db.add_permission(ctx.guild.id, f"cm {channel.id} {enabled} {module}")
+        await ctx.send_ok(f"**cm <#{channel.id}> {enabled} {module}** added.", trash=False)
 
     @commands.has_permissions(administrator=True)
     @commands.command(brief="Disable or enable a module server-wide", aliases=["sm"])
@@ -142,9 +124,7 @@ class Permissions(commands.Cog):
 
     @commands.has_permissions(administrator=True)
     @commands.command(brief="Disable or enable a module for a role", aliases=["rm"])
-    async def rolemdl(
-        self, ctx: bot.AoiContext, role: discord.Role, enabled: disenable(), module: str
-    ):
+    async def rolemdl(self, ctx: bot.AoiContext, role: discord.Role, enabled: disenable(), module: str):
         module = self.bot.find_cog(module)[0]
         await self.db.add_permission(ctx.guild.id, f"rm {role.id} {enabled} {module}")
         await ctx.send_ok(f"**rm <&{role.id}> {enabled} {module}** added.", trash=False)
@@ -159,12 +139,8 @@ class Permissions(commands.Cog):
         module: str,
     ):
         module = self.bot.find_cog(module)[0]
-        await self.db.add_permission(
-            ctx.guild.id, f"xm {category.id} {enabled} {module}"
-        )
-        await ctx.send_ok(
-            f"**xm <#{category.id}> {enabled} {module}** added.", trash=False
-        )
+        await self.db.add_permission(ctx.guild.id, f"xm {category.id} {enabled} {module}")
+        await ctx.send_ok(f"**xm <#{category.id}> {enabled} {module}** added.", trash=False)
 
     @commands.has_permissions(administrator=True)
     @commands.command(brief="Disable or enable a module for a user", aliases=["um"])
@@ -177,9 +153,7 @@ class Permissions(commands.Cog):
     ):
         module = self.bot.find_cog(module)[0]
         await self.db.add_permission(ctx.guild.id, f"um {member.id} {enabled} {module}")
-        await ctx.send_ok(
-            f"**um <@{member.id}> {enabled} {module}** added.", trash=False
-        )
+        await ctx.send_ok(f"**um <@{member.id}> {enabled} {module}** added.", trash=False)
 
     # endregion
 
@@ -207,9 +181,7 @@ class Permissions(commands.Cog):
         if not cmd:
             raise commands.BadArgument(f"Command {command} not found")
         await self.db.add_permission(ctx.guild.id, f"rc {role.id} {enabled} {command}")
-        await ctx.send_ok(
-            f"**rc <&{role.id}> {enabled} {command}** added.", trash=False
-        )
+        await ctx.send_ok(f"**rc <&{role.id}> {enabled} {command}** added.", trash=False)
 
     @commands.has_permissions(administrator=True)
     @commands.command(brief="Disable or enable a command in a channel", aliases=["cc"])
@@ -223,17 +195,11 @@ class Permissions(commands.Cog):
         cmd = self.bot.get_command(command.lower())
         if not cmd:
             raise commands.BadArgument(f"Command {command} not found")
-        await self.db.add_permission(
-            ctx.guild.id, f"cc {channel.id} {enabled} {command}"
-        )
-        await ctx.send_ok(
-            f"**cc <#{channel.id}> {enabled} {command}** added.", trash=False
-        )
+        await self.db.add_permission(ctx.guild.id, f"cc {channel.id} {enabled} {command}")
+        await ctx.send_ok(f"**cc <#{channel.id}> {enabled} {command}** added.", trash=False)
 
     @commands.has_permissions(administrator=True)
-    @commands.command(
-        brief="Disable or enable a command for a category", aliases=["xc"]
-    )
+    @commands.command(brief="Disable or enable a command for a category", aliases=["xc"])
     async def catcmd(
         self,
         ctx: bot.AoiContext,
@@ -244,12 +210,8 @@ class Permissions(commands.Cog):
         cmd = self.bot.get_command(command.lower())
         if not cmd:
             raise commands.BadArgument(f"Command {command} not found")
-        await self.db.add_permission(
-            ctx.guild.id, f"xc {category.id} {enabled} {command}"
-        )
-        await ctx.send_ok(
-            f"**xc <#{category.id}> {enabled} {command}** added.", trash=False
-        )
+        await self.db.add_permission(ctx.guild.id, f"xc {category.id} {enabled} {command}")
+        await ctx.send_ok(f"**xc <#{category.id}> {enabled} {command}** added.", trash=False)
 
     @commands.has_permissions(administrator=True)
     @commands.command(brief="Disable or enable a command for a user", aliases=["uc"])
@@ -263,12 +225,8 @@ class Permissions(commands.Cog):
         cmd = self.bot.get_command(command.lower())
         if not cmd:
             raise commands.BadArgument(f"Command {command} not found")
-        await self.db.add_permission(
-            ctx.guild.id, f"uc {member.id} {enabled} {command}"
-        )
-        await ctx.send_ok(
-            f"**uc <@{member.id}> {enabled} {command}** added.", trash=False
-        )
+        await self.db.add_permission(ctx.guild.id, f"uc {member.id} {enabled} {command}")
+        await ctx.send_ok(f"**uc <@{member.id}> {enabled} {command}** added.", trash=False)
 
     # endregion
 
@@ -316,9 +274,7 @@ class Permissions(commands.Cog):
     async def blacklistcheck(self, ctx: bot.AoiContext, user: int = None):
         if not user:
             return await ctx.paginate(self.bot.db.blacklisted, 20, "Blacklisted users")
-        await ctx.send_info(
-            f"ID {user} is {'' if user in self.bot.db.blacklisted else 'not '} blacklisted"
-        )
+        await ctx.send_info(f"ID {user} is {'' if user in self.bot.db.blacklisted else 'not '} blacklisted")
 
 
 # arm role on_off

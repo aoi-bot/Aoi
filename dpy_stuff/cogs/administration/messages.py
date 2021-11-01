@@ -69,19 +69,13 @@ class Messages(commands.Cog):
         )
 
     @commands.has_permissions(manage_messages=True)
-    @commands.command(
-        brief="Send a message with #BOT#. Use [this site](https://embed.aoibot.xyz/) to make embeds."
-    )
-    async def say(
-        self, ctx: bot.AoiContext, channel: Optional[discord.TextChannel], *, msg: str
-    ):
+    @commands.command(brief="Send a message with #BOT#. Use [this site](https://embed.aoibot.xyz/) to make embeds.")
+    async def say(self, ctx: bot.AoiContext, channel: Optional[discord.TextChannel], *, msg: str):
         channel = channel or ctx.channel
         await self.bot.send_json_to_channel(channel.id, msg, member=ctx.author)
 
     @commands.has_permissions(manage_messages=True)
-    @commands.command(
-        brief="Edit a message from #BOT#. Use [this site](https://embed.aoibot.xyz/) to make embeds."
-    )
+    @commands.command(brief="Edit a message from #BOT#. Use [this site](https://embed.aoibot.xyz/) to make embeds.")
     async def edit(self, ctx: bot.AoiContext, message_id: discord.Message, *, msg: str):
         if ctx.author:
             msg = self.bot.placeholders.replace(ctx.author, msg)
@@ -109,16 +103,12 @@ class Messages(commands.Cog):
 
     @commands.has_permissions(manage_messages=True)
     @commands.command(brief="Delete a message, after an optional number of seconds.")
-    async def delete(
-        self, ctx: bot.AoiContext, message: discord.Message, delay: int = 0
-    ):
+    async def delete(self, ctx: bot.AoiContext, message: discord.Message, delay: int = 0):
         await message.delete(delay=delay)
 
     @commands.has_permissions(manage_messages=True)
     @commands.cooldown(1, 30, commands.BucketType.channel)
-    @commands.command(
-        brief="Saves chat in a txt file. Limit can be a message to stop at or a number of messages"
-    )
+    @commands.command(brief="Saves chat in a txt file. Limit can be a message to stop at or a number of messages")
     async def savechat(
         self,
         ctx: bot.AoiContext,
@@ -131,13 +121,9 @@ class Messages(commands.Cog):
         # fetch the messages first, in blocks
         current_message: Optional[discord.Message]
         if isinstance(limit, int):
-            messages: List[discord.Message] = (
-                await channel.history(limit=min(limit, 1000)).flatten()
-            )[::-1]
+            messages: List[discord.Message] = (await channel.history(limit=min(limit, 1000)).flatten())[::-1]
         else:
-            messages: List[discord.Message] = (
-                await channel.history(limit=1000, after=limit).flatten()
-            )[::-1]
+            messages: List[discord.Message] = (await channel.history(limit=1000, after=limit).flatten())[::-1]
         buf = io.StringIO()
         buf.write(
             f"Channel save of {channel.name} [{channel.id}] triggered by {ctx.author} [{ctx.author.id}] on "
@@ -162,11 +148,7 @@ class Messages(commands.Cog):
                 buf.write(f" [BOT]")
             content = " " + m.content
             buf.write(f":{content.splitlines(keepends=False)[0]}\n")
-            buf.write(
-                "\n".join(
-                    f"      {line}" for line in content.splitlines(keepends=False)[1:]
-                )
-            )
+            buf.write("\n".join(f"      {line}" for line in content.splitlines(keepends=False)[1:]))
         buf.seek(0)
         await ctx.send(
             content=f"Saved {len(messages)} in {(datetime.datetime.now() - time).seconds} s",
@@ -198,24 +180,19 @@ class Messages(commands.Cog):
             msg = await ctx.send("Fetching messages...")
 
         while len(messages) < n and not reached_bulk_limit:
-            async for current_message in channel.history(
-                limit=min(100, n - len(messages)), before=last_message
-            ):
+            async for current_message in channel.history(limit=min(100, n - len(messages)), before=last_message):
                 if current_message.id == ctx.message.id:
                     continue
                 if log and current_message.id == msg.id:
                     continue
                 last_message = current_message
-                if (
-                    now_timestamp - discord.utils.snowflake_time(current_message.id)
-                ).days >= 13:
+                if (now_timestamp - discord.utils.snowflake_time(current_message.id)).days >= 13:
                     reached_bulk_limit = True
                     break
                 if "safe" in ctx.flags and current_message.pinned:
                     continue
                 if "from" not in ctx.flags or (
-                    "from" in ctx.flags
-                    and ctx.flags["from"].id == current_message.author.id
+                    "from" in ctx.flags and ctx.flags["from"].id == current_message.author.id
                 ):
                     messages.append(current_message)
             if log:
@@ -223,10 +200,7 @@ class Messages(commands.Cog):
             if len(messages) < n and not reached_bulk_limit:
                 await asyncio.sleep(1)
 
-        to_delete = [
-            messages[i * 100 : (i + 1) * 100]
-            for i in range((len(messages) + 100 - 1) // 100)
-        ]
+        to_delete = [messages[i * 100 : (i + 1) * 100] for i in range((len(messages) + 100 - 1) // 100)]
 
         for n, row in enumerate(to_delete):
             if log:
@@ -239,8 +213,7 @@ class Messages(commands.Cog):
             await self.bot.http.delete_messages(
                 ctx.channel.id,
                 message_ids=[m.id for m in row],
-                reason=f"Bulk | {n + 1}/{len(to_delete)} | "
-                f"{ctx.author} ({ctx.author.id})",
+                reason=f"Bulk | {n + 1}/{len(to_delete)} | " f"{ctx.author} ({ctx.author.id})",
             )
             await asyncio.sleep(1)
 

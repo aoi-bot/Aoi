@@ -38,9 +38,7 @@ class Triggers(commands.Cog):
             if typ == "add":
                 await self._append_roleadd_trigger(guild, role, channel, message, False)
             else:
-                await self._append_roleremove_trigger(
-                    guild, role, channel, message, False
-                )
+                await self._append_roleremove_trigger(guild, role, channel, message, False)
 
     @commands.has_permissions(manage_guild=True)
     @commands.command(brief="Set a trigger for a role addition", aliases=["onra"])
@@ -52,12 +50,8 @@ class Triggers(commands.Cog):
         *,
         message: str,
     ):
-        await self._append_roleadd_trigger(
-            ctx.guild.id, role.id, channel.id, message, True
-        )
-        await ctx.send_ok(
-            f"Message will be sent in {channel.mention} when {role.mention} is added."
-        )
+        await self._append_roleadd_trigger(ctx.guild.id, role.id, channel.id, message, True)
+        await ctx.send_ok(f"Message will be sent in {channel.mention} when {role.mention} is added.")
 
     @commands.has_permissions(manage_guild=True)
     @commands.command(brief="Set a trigger for a role removal", aliases=["onrr"])
@@ -69,12 +63,8 @@ class Triggers(commands.Cog):
         *,
         message: str,
     ):
-        await self._append_roleremove_trigger(
-            ctx.guild.id, role.id, channel.id, message, True
-        )
-        await ctx.send_ok(
-            f"Message will be sent in {channel.mention} when {role.mention} is removed."
-        )
+        await self._append_roleremove_trigger(ctx.guild.id, role.id, channel.id, message, True)
+        await ctx.send_ok(f"Message will be sent in {channel.mention} when {role.mention} is removed.")
 
     @commands.has_permissions(manage_guild=True)
     @commands.command(brief="Remove a trigger", aliases=["remtr"])
@@ -88,38 +78,27 @@ class Triggers(commands.Cog):
         if trigger_type in ["addrole", "removerole"]:
             role: discord.Role = await RoleConverter().convert(ctx, arg)
             if trigger_type == "addrole":
-                if (
-                    ctx.guild.id not in self.role_add_triggers
-                    or role.id not in self.role_add_triggers[ctx.guild.id]
-                ):
-                    return await ctx.send_error(
-                        f"There isn't an addrole trigger for {role.mention}"
-                    )
+                if ctx.guild.id not in self.role_add_triggers or role.id not in self.role_add_triggers[ctx.guild.id]:
+                    return await ctx.send_error(f"There isn't an addrole trigger for {role.mention}")
                 await self._remove_roleadd_trigger(ctx.guild.id, role.id)
             else:
                 if (
                     ctx.guild.id not in self.role_remove_triggers
                     or role.id not in self.role_remove_triggers[ctx.guild.id]
                 ):
-                    return await ctx.send_error(
-                        f"There isn't an removerole trigger for {role.mention}"
-                    )
+                    return await ctx.send_error(f"There isn't an removerole trigger for {role.mention}")
                 await self._remove_roleremove_trigger(ctx.guild.id, role.id)
             await ctx.send_ok(f"Trigger for {role.mention} removed.")
 
     @commands.has_permissions(manage_guild=True)
-    @commands.command(
-        brief="Lists the role triggers", aliases=["roletr", "roletrigger"]
-    )
+    @commands.command(brief="Lists the role triggers", aliases=["roletr", "roletrigger"])
     async def roletriggers(
         self,
         ctx: bot.AoiContext,
         for_role: discord.Role = None,  # noqa C901
         add_or_remove: str = None,
     ):  # noqa C901
-        rows = await self.db.execute_fetchall(
-            "SELECT * FROM roletriggers WHERE guild=?", (ctx.guild.id,)
-        )
+        rows = await self.db.execute_fetchall("SELECT * FROM roletriggers WHERE guild=?", (ctx.guild.id,))
         valid_rows = []
         lost_rows = []
 
@@ -153,20 +132,12 @@ class Triggers(commands.Cog):
 
             def fmt(r: int):
                 add = f"Message sent in <#{adds[r]}> when added\n" if r in adds else ""
-                remove = (
-                    f"Message sent in <#{removes[r]}> when removed\n"
-                    if r in removes
-                    else ""
-                )
+                remove = f"Message sent in <#{removes[r]}> when removed\n" if r in removes else ""
                 return f"<@&{r}>\n{add}{remove}"
 
-            return await ctx.paginate(
-                [fmt(r) for r in union], 10, f"Role Triggers for {ctx.guild}"
-            )
+            return await ctx.paginate([fmt(r) for r in union], 10, f"Role Triggers for {ctx.guild}")
         if not add_or_remove or add_or_remove not in ["add", "remove"]:
-            return await ctx.send_error(
-                "`add` or `remove` must be supplied when looking up a role trigger message"
-            )
+            return await ctx.send_error("`add` or `remove` must be supplied when looking up a role trigger message")
         row = await (
             await self.db.execute(
                 "SELECT * FROM roletriggers WHERE guild=? AND type=? AND role=?",
@@ -174,12 +145,9 @@ class Triggers(commands.Cog):
             )
         ).fetchone()
         if not row:
-            return await ctx.send_error(
-                f"No trigger found for {for_role.mention} {add_or_remove}"
-            )
+            return await ctx.send_error(f"No trigger found for {for_role.mention} {add_or_remove}")
         await ctx.embed(
-            description=f"Send in <#{row[2]}> on {for_role.mention} {add_or_remove}\n\n"
-            f"```{row[3][:1800]}```"
+            description=f"Send in <#{row[2]}> on {for_role.mention} {add_or_remove}\n\n" f"```{row[3][:1800]}```"
         )
 
     @commands.Cog.listener()
@@ -190,18 +158,14 @@ class Triggers(commands.Cog):
             if before.guild.id not in self.role_remove_triggers:
                 return
             if remove_set[0].id in self.role_remove_triggers[before.guild.id]:
-                await self.role_remove_triggers[before.guild.id][remove_set[0].id].run(
-                    before
-                )
+                await self.role_remove_triggers[before.guild.id][remove_set[0].id].run(before)
         if add_set:
             if before.guild.id not in self.role_add_triggers:
                 return
             if add_set[0].id in self.role_add_triggers[before.guild.id]:
                 await self.role_add_triggers[before.guild.id][add_set[0].id].run(before)
 
-    async def _append_roleadd_trigger(
-        self, guild: int, role: int, channel: int, message: str, write: bool = False
-    ):
+    async def _append_roleadd_trigger(self, guild: int, role: int, channel: int, message: str, write: bool = False):
         async def send_coro(member: discord.Member):
             await self.bot.send_json_to_channel(
                 self.bot.get_guild(guild).get_channel(channel).id,  # paranoia go brrr
@@ -224,9 +188,7 @@ class Triggers(commands.Cog):
             )
             await self.db.commit()
 
-    async def _append_roleremove_trigger(
-        self, guild: int, role: int, channel: int, message: str, write: bool = False
-    ):
+    async def _append_roleremove_trigger(self, guild: int, role: int, channel: int, message: str, write: bool = False):
         async def send_coro(member: discord.Member):
             await self.bot.send_json_to_channel(
                 self.bot.get_guild(guild).get_channel(channel).id,  # paranoia go brrr

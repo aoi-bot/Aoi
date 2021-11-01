@@ -21,3 +21,9 @@ import nox
 def lint(session):
     session.install("black")
     session.run("black", ".")
+
+
+@nox.session
+def flake8(session):
+    session.install("flake8")
+    session.run("flake8", "aoi/")
