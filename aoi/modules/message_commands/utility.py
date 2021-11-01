@@ -17,7 +17,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 import tanjun
 
 import aoi.modules.impl.utility as impl
-from aoi import AoiMessageContext
+from aoi import AoiMessageContext, with_description
 from aoi.bot import injected
 
 component = tanjun.Component(name="utility")
@@ -27,6 +27,7 @@ component = tanjun.Component(name="utility")
 @tanjun.with_argument("base1", converters=(str,))
 @tanjun.with_argument("base2", converters=(str,))
 @tanjun.with_argument("value", converters=(str,))
+@with_description("Convert a number between bases")
 @tanjun.with_parser
 @tanjun.as_message_command("baseconvert", "bconv")
 async def baseconvert(

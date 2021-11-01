@@ -26,20 +26,11 @@ component = tanjun.Component(name="events")
 tanjun_client: typing.Optional[tanjun.Client] = None
 
 
-@component.with_command
-@tanjun.with_owner_check
-@tanjun.with_argument("foo", converters=(int,))
-@tanjun.with_parser
-@tanjun.as_message_command("foo")
-async def modules_reload(ctx: tanjun.abc.MessageContext, foo: int):
-    await ctx.respond(foo)
-
-
 @component.with_listener(hikari.StartedEvent)
 async def bot_started(event: hikari.StartedEvent, help_client: HelpClient = tanjun.injected(type=HelpClient)):
     logger = logging.getLogger("check.commands")
     for command in tanjun_client.iter_message_commands():
-        if command not in help_client.descriptions:
+        if not help_client.get_help_for(command) and help_client.is_visible(command):
             logger.warning(
                 f"Command {command.component.name}.{typing.cast(list[str], command.names)[0]} has no help description"
             )
