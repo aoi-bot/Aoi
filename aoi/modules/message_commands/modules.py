@@ -16,6 +16,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 """
 import tanjun
 
+from aoi import AoiMessageContext
 from aoi.bot.injected import EmbedCreator
 from aoi.modules.impl import modules as impl
 
@@ -24,7 +25,7 @@ component = tanjun.Component(name="modules")
 
 @component.with_command
 @tanjun.as_message_command_group("modules")
-async def modules(ctx: tanjun.abc.MessageContext):
+async def modules(ctx: AoiMessageContext):
     await impl.list_modules(ctx)
 
 
@@ -32,7 +33,7 @@ async def modules(ctx: tanjun.abc.MessageContext):
 @tanjun.with_owner_check
 @tanjun.as_message_command("list")
 async def modules_list(
-    ctx: tanjun.abc.MessageContext,
+    ctx: AoiMessageContext,
     _embed: EmbedCreator = tanjun.injected(type=EmbedCreator),
 ):
     await impl.list_modules(ctx, _embed)
@@ -44,7 +45,7 @@ async def modules_list(
 @tanjun.with_parser
 @tanjun.as_message_command("reload")
 async def modules_reload(
-    ctx: tanjun.abc.MessageContext,
+    ctx: AoiMessageContext,
     module: str,
     _embed: EmbedCreator = tanjun.injected(type=EmbedCreator),
 ):

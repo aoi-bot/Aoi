@@ -14,16 +14,25 @@ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEM
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-import nox
+# TODO find a better way to do what I'm about to do
+import abc
+
+import tanjun
+
+from .helpers import EmbedBuilder
 
 
-@nox.session
-def black(session):
-    session.install("black")
-    session.run("black", ".")
+class AoiContextMixin(tanjun.abc.Context, abc.ABC):
+    def get_builder(self) -> EmbedBuilder:
+        return EmbedBuilder(self)
+
+    def send_builder(self, builder: EmbedBuilder):
+        await self.respond(embed=await builder.build())
 
 
-@nox.session
-def flake8(session):
-    session.install("flake8")
-    session.run("flake8", "aoi/")
+class AoiMessageContext(tanjun.MessageContext, AoiContextMixin):
+    ...
+
+
+class AoiSlashContext(tanjun.SlashContext, AoiContextMixin):
+    ...

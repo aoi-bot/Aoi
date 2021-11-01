@@ -17,27 +17,27 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 import colorsys
 import io
 import random
-import typing
 from collections.abc import Sequence
 
 import PIL.Image
 import PIL.ImageDraw
 import hikari
-import tanjun
 
+from aoi import AoiContextMixin
 from aoi.bot import AoiDatabase
 from aoi.bot.injected import EmbedCreator, ColorService
 from aoi.libs.converters import FuzzyAoiColor, AoiColor
 
 
 async def color_palette(
-    ctx: typing.Union[tanjun.abc.MessageContext, tanjun.abc.SlashContext],
+    ctx: AoiContextMixin,
     colors: Sequence[FuzzyAoiColor],
 ):
     valid_colors = [color for color in colors if not color.attempt]
     invalid_colors = [color.attempt for color in colors if color.attempt]
     if not valid_colors and invalid_colors:
-        return await ctx.respond("No valid colors were supplied")
+        await ctx.get_builder().as_error().with_description("No valid colors were supplied").send()
+        return
     if not valid_colors:
         return
     img = PIL.Image.new("RGB", (120 * len(valid_colors), 120))
@@ -47,19 +47,14 @@ async def color_palette(
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     buf.seek(0)
-    await ctx.respond(
-        embed=hikari.Embed(
-            title="Color palette",
-            description=" ".join(
-                "#" + "".join(hex(channel)[2:].rjust(2, "0") for channel in c.to_rgb()) for c in valid_colors
-            )
-            + ("\nUnknown Colors: " + ", ".join(invalid_colors) if invalid_colors else ""),
-        ).set_image(buf)
-    )
+    await ctx.get_builder().with_title("Color Palette").with_description(
+        " ".join("#" + "".join(hex(channel)[2:].rjust(2, "0") for channel in c.to_rgb()) for c in valid_colors)
+        + ("\nUnknown Colors: " + ", ".join(invalid_colors) if invalid_colors else "")
+    ).with_image(buf).send()
 
 
 async def random_colors(
-    ctx: tanjun.abc.MessageContext,
+    ctx: AoiContextMixin,
     number_of_colors: int,
     sort_by: str,
     _embed: EmbedCreator,
@@ -67,7 +62,9 @@ async def random_colors(
 ):
     colors: list[hikari.Color] = []
     if number_of_colors > 250 or number_of_colors < 2:
-        await _embed.error_embed(ctx, description="Number of colors must be 2-250")
+        await ctx.get_builder().as_error().with_description(
+            "Number of colors must be between 2 and 250, inclusive"
+        ).send()
         return
     for i in range(number_of_colors):
         colors.append(
@@ -97,17 +94,13 @@ async def random_colors(
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     buf.seek(0)
-    await ctx.respond(
-        embed=hikari.Embed(
-            title="Color Palette",
-            description=" ".join(map(str, colors[:50])) + ("..." if len(colors) >= 50 else ""),
-            color=(await _database.guild_setting(ctx.guild_id)).info_color,
-        ).set_image(buf)
-    )
+    await ctx.get_builder().with_title("Color Palette").with_description(
+        " ".join(map(str, colors[:50])) + ("..." if len(colors) >= 50 else "")
+    ).with_image(buf).send()
 
 
 async def gradient(
-    ctx: tanjun.abc.MessageContext,
+    ctx: AoiContextMixin,
     color1: AoiColor,
     color2: AoiColor,
     number_of_colors: int,
@@ -116,9 +109,6 @@ async def gradient(
     _colors: ColorService,
 ):
     buf, colors = _colors.gradient_buffer(color1, color2, number_of_colors, not rgb)
-    await ctx.respond(
-        embed=hikari.Embed(
-            title="Gradient",
-            description=" ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in colors),
-        ).set_image(buf)
-    )
+    await ctx.get_builder().with_title("Gradient").with_description(
+        " ".join("#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in colors)
+    ).with_image(buf).send()

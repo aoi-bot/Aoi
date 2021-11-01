@@ -17,11 +17,13 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 import asyncio
 import logging
 import os
+import typing
 from pathlib import Path
 
 import dotenv
 
 from aoi.bot import injected
+from aoi.bot.contexts import AoiMessageContext
 from aoi.bot.injected import ColorService
 from aoi.bot.logging import LoggingHandler
 
@@ -37,7 +39,9 @@ dotenv.load_dotenv()
 
 assert (token := os.getenv("TOKEN"))
 aoi = hikari.GatewayBot(token, intents=hikari.Intents.ALL)
-client = tanjun.Client.from_gateway_bot(aoi, declare_global_commands=int(os.getenv("GUILD", 0)) or True).load_modules(
+tanjun_client = tanjun.Client.from_gateway_bot(
+    aoi, declare_global_commands=int(os.getenv("GUILD", 0)) or True
+).load_modules(
     *Path("aoi/modules/message_commands").glob("**/*.py"),
     *Path("aoi/modules/slash_commands").glob("**/*.py"),
     *Path("aoi/modules/hooks").glob("**/*.py"),
@@ -47,12 +51,36 @@ help_client = HelpClient()
 embed_creator = injected.EmbedCreator(aoi_database)
 
 # TODO remove this once tanjun implements dependency injection in hooks
-client.metadata["_embed"] = embed_creator
+tanjun_client.metadata["_embed"] = embed_creator
+tanjun_client.metadata["database"] = aoi_database
 
 
 @aoi.listen(hikari.StartedEvent)
 async def on_ready(_: hikari.StartedEvent):
     await aoi_database.load()
+
+
+def message_ctx_maker(
+    client: tanjun.abc.Client,
+    injection_client: tanjun.InjectorClient,
+    content: str,
+    message: hikari.Message,
+    *,
+    command: typing.Optional[tanjun.abc.MessageCommand] = None,
+    component: typing.Optional[tanjun.abc.Component] = None,
+    triggering_name: str = "",
+    triggering_prefix: str = "",
+) -> AoiMessageContext:
+    return AoiMessageContext(
+        client,
+        injection_client,
+        content,
+        message,
+        command=command,
+        component=component,
+        triggering_name=triggering_name,
+        triggering_prefix=triggering_prefix,
+    )
 
 
 async def get_prefix(ctx: tanjun.abc.MessageContext):
@@ -66,11 +94,12 @@ async def get_prefix(ctx: tanjun.abc.MessageContext):
 
 
 (
-    client.set_type_dependency(injected.EmbedCreator, embed_creator)
+    tanjun_client.set_type_dependency(injected.EmbedCreator, embed_creator)
     .set_type_dependency(AoiDatabase, aoi_database)
     .set_type_dependency(ColorService, ColorService())
     .set_type_dependency(HelpClient, help_client)
     .set_prefix_getter(get_prefix)
+    .set_message_ctx_maker(message_ctx_maker)
 )
 
 print(help_client.descriptions)

@@ -17,6 +17,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 import tanjun
 
 import aoi.modules.impl.utility as impl
+from aoi import AoiMessageContext
 from aoi.bot import injected
 
 component = tanjun.Component(name="utility")
@@ -29,7 +30,7 @@ component = tanjun.Component(name="utility")
 @tanjun.with_parser
 @tanjun.as_message_command("baseconvert", "bconv")
 async def baseconvert(
-    ctx: tanjun.abc.MessageContext,
+    ctx: AoiMessageContext,
     base1: str,
     base2: str,
     value: str,

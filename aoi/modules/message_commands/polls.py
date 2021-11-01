@@ -17,6 +17,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 import tanjun
 
 import aoi.modules.impl.poll as impl
+from aoi import AoiMessageContext
 
 component = tanjun.Component(name="polls")
 
@@ -25,7 +26,7 @@ component = tanjun.Component(name="polls")
 @tanjun.with_greedy_argument("content")
 @tanjun.with_parser
 @tanjun.as_message_command("poll")
-async def poll(ctx: tanjun.abc.MessageContext, content: str):
+async def poll(ctx: AoiMessageContext, content: str):
     await impl.poll(ctx, content)
 
 

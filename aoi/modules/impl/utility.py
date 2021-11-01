@@ -14,15 +14,13 @@ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEM
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-import typing
 
-import tanjun
-
+from aoi import AoiContextMixin
 from aoi.bot import injected
 
 
 async def baseconvert(
-    ctx: typing.Union[tanjun.abc.MessageContext, tanjun.abc.SlashContext],
+    ctx: AoiContextMixin,
     base1: str,
     base2: str,
     value: str,
@@ -31,12 +29,13 @@ async def baseconvert(
     try:
         dec = int(value, {"hex": 16, "dec": 10, "bin": 2, "oct": 8}[base1])
     except ValueError:
-        await _embed.send(ctx, _embed.ERROR, f"{value} is not a valid {base1} number")
+        await ctx.get_builder().as_error().with_description(f"{value} is not a valid {base1} number").send()
         return
     conv = {"hex": hex, "dec": int, "bin": bin, "oct": oct}[base2](dec)
     if base2 == "dec":
-        return await _embed.send(ctx, _embed.OK, f"\n{base1} `{value}` is {base2} `{conv:,}`")
-    return await _embed.send(ctx, _embed.OK, f"\n{base1} `{value}` is {base2} `{conv}`")
+        await ctx.get_builder().with_description(f"\n{base1} `{value}` is {base2} `{conv:,}`").send()
+    else:
+        await ctx.get_builder().with_description(f"\n{base1} `{value}` is {base2} `{conv}`").send()
 
 
 # TODO add pfact
