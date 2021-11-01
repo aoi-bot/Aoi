@@ -25,7 +25,6 @@ from aoi.bot import injected
 from aoi.bot.injected import ColorService
 from aoi.bot.logging import LoggingHandler
 
-
 if os.getenv("CUSTOM_LOGGER", ""):
     logging.setLoggerClass(LoggingHandler)
 
@@ -43,9 +42,14 @@ client = tanjun.Client.from_gateway_bot(
 ).load_modules(
     *Path("aoi/modules/message_commands").glob("**/*.py"),
     *Path("aoi/modules/slash_commands").glob("**/*.py"),
+    *Path("aoi/modules/hooks").glob("**/*.py"),
 )
 aoi_database = AoiDatabase(aoi)
 help_client = HelpClient()
+embed_creator = injected.EmbedCreator(aoi_database)
+
+# TODO remove this once tanjun implements dependency injection in hooks
+client.metadata["_embed"] = embed_creator
 
 
 @aoi.listen(hikari.StartedEvent)
@@ -64,13 +68,11 @@ async def get_prefix(ctx: tanjun.abc.MessageContext):
 
 
 (
-    client.set_type_dependency(
-        injected.EmbedCreator, injected.EmbedCreator(aoi_database)
-    )
-        .set_type_dependency(AoiDatabase, aoi_database)
-        .set_type_dependency(ColorService, ColorService())
-        .set_type_dependency(HelpClient, help_client)
-        .set_prefix_getter(get_prefix)
+    client.set_type_dependency(injected.EmbedCreator, embed_creator)
+    .set_type_dependency(AoiDatabase, aoi_database)
+    .set_type_dependency(ColorService, ColorService())
+    .set_type_dependency(HelpClient, help_client)
+    .set_prefix_getter(get_prefix)
 )
 
 print(help_client.descriptions)
