@@ -16,7 +16,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 """
 import io
 import typing
-from textwrap import dedent
 
 import PIL.Image
 import PIL.ImageDraw
@@ -26,6 +25,7 @@ import aiohttp
 import hikari
 import tanjun
 
+from aoi import AoiContextMixin
 from aoi.bot import injected
 from aoi.libs.minesweeper import MinesweeperError, SpoilerMinesweeper
 
@@ -42,22 +42,24 @@ av_mask_draw.ellipse((430, 384, 430 + 83, 384 + 83), fill=255)
 
 
 async def anime_quote(
-    ctx: typing.Union[tanjun.abc.SlashContext, tanjun.abc.MessageContext],
+    ctx: AoiContextMixin,
     _embed: injected.EmbedCreator,
 ):
     async with aiohttp.ClientSession() as sess:
         async with sess.get("https://animechan.vercel.app/api/random") as resp:
             if resp.status == 200:
                 master_resp = await resp.json()
-                await ctx.respond(
-                    f"> {master_resp['quote']}" f"~ {master_resp['character']}" f"Anime: {master_resp['anime']}"
-                )
+                await ctx.get_builder().with_description(
+                    f"> {master_resp['quote']}\n~ {master_resp['character']}\nAnime: {master_resp['anime']}"
+                ).send()
             else:
-                await ctx.respond(f"API returned code: `{resp.status}`. Try again later...")
+                await ctx.get_builder().with_description(
+                    f"API returned code: `{resp.status}`. Try again later..."
+                ).as_error().send()
 
 
 async def minesweeper(
-    ctx: typing.Union[tanjun.abc.SlashContext, tanjun.abc.MessageContext],
+    ctx: AoiContextMixin,
     height: int,
     width: int,
     bombs: int,
@@ -70,13 +72,13 @@ async def minesweeper(
             ("```%s```" if raw else "%s") % SpoilerMinesweeper(height, width, bombs).discord_str(no_spoiler)
         )
     except MinesweeperError as e:
-        await ctx.respond(embed=_embed.error_embed(ctx, description=str(e)))
+        await ctx.get_builder().as_error().with_description(str(e)).send()
 
 
-async def waifu(ctx: typing.Union[tanjun.abc.SlashContext, tanjun.abc.MessageContext]):
+async def waifu(ctx: AoiContextMixin):
     async with aiohttp.ClientSession() as sess:
         async with sess.get("https://api.waifu.pics/sfw/waifu") as resp:
-            await ctx.respond(embed=hikari.Embed(title="A waifu").set_image((await resp.json())["url"]))
+            await ctx.get_builder().with_image((await resp.json())["url"]).send()
 
 
 async def simp(

@@ -19,6 +19,7 @@ from collections.abc import Sequence
 import tanjun
 
 import aoi.modules.impl.color as impl
+from aoi import AoiMessageContext
 from aoi.bot import with_description, AoiDatabase
 from aoi.bot.injected import EmbedCreator, ColorService
 from aoi.libs.converters import FuzzyAoiColor, AoiColor
@@ -31,7 +32,7 @@ component = tanjun.Component(name="color")
 @tanjun.with_parser
 @with_description("Show a color palette made up of supplied colors")
 @tanjun.as_message_command("colors", "color")
-async def color_palette(ctx: tanjun.abc.MessageContext, color_list: Sequence[FuzzyAoiColor]):
+async def color_palette(ctx: AoiMessageContext, color_list: Sequence[FuzzyAoiColor]):
     await impl.color_palette(ctx, color_list)
 
 
@@ -42,7 +43,7 @@ async def color_palette(ctx: tanjun.abc.MessageContext, color_list: Sequence[Fuz
 @tanjun.with_parser
 @tanjun.as_message_command("randomcolors", "ranclr")
 async def random_colors(
-    ctx: tanjun.abc.MessageContext,
+    ctx: AoiMessageContext,
     number_of_colors: int,
     sort_by: str,
     _embed: EmbedCreator = tanjun.injected(type=EmbedCreator),
@@ -60,7 +61,7 @@ async def random_colors(
 @tanjun.with_parser
 @tanjun.as_message_command("gradient")
 async def gradient(
-    ctx: tanjun.abc.MessageContext,
+    ctx: AoiMessageContext,
     color1: AoiColor,
     color2: AoiColor,
     number_of_colors: int,

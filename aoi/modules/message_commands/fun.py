@@ -20,6 +20,7 @@ import hikari
 import tanjun
 
 import aoi.modules.impl.fun as impl
+from aoi import AoiMessageContext
 from aoi.bot import injected
 
 component = tanjun.Component(name="fun")
@@ -41,7 +42,7 @@ component = tanjun.Component(name="fun")
 @tanjun.with_parser
 @tanjun.as_message_command("minesweeper", "mines")
 async def minesweeper(
-    ctx: tanjun.abc.MessageContext,
+    ctx: AoiMessageContext,
     height: int,
     width: int,
     bombs: int,
@@ -56,7 +57,7 @@ async def minesweeper(
 @tanjun.with_greedy_argument("member", converters=(tanjun.to_member,), default=None)
 @tanjun.with_parser
 @tanjun.as_message_command("simp")
-async def simp(ctx: tanjun.abc.MessageContext, member: typing.Optional[hikari.Member]):
+async def simp(ctx: AoiMessageContext, member: typing.Optional[hikari.Member]):
     await impl.simp(ctx, member)
 
 
@@ -67,7 +68,7 @@ async def simp(ctx: tanjun.abc.MessageContext, member: typing.Optional[hikari.Me
 @tanjun.as_message_command("animequote")
 # TODO this needs a cooldown once tanjun implements - dpy was 1/5s/user
 async def anime_quote(
-    ctx: tanjun.abc.MessageContext,
+    ctx: AoiMessageContext,
     _embed: injected.EmbedCreator = tanjun.injected(type=injected.EmbedCreator),
 ):
     await impl.anime_quote(ctx, _embed)
@@ -75,7 +76,7 @@ async def anime_quote(
 
 @component.with_command
 @tanjun.as_message_command("waifu")
-async def waifu(ctx: tanjun.abc.MessageContext):
+async def waifu(ctx: AoiMessageContext):
     await impl.waifu(ctx)
 
 
