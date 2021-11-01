@@ -11,8 +11,7 @@ import redis
 from discord.ext import commands, tasks
 
 from aoi import bot
-from aoi.libs.conversions import (dhm_notation, hms_notation, maybe_pluralize,
-                                  sql_trim)
+from aoi.libs.conversions import dhm_notation, hms_notation, maybe_pluralize, sql_trim
 
 # TODO help refactor
 

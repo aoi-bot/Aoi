@@ -31,7 +31,10 @@ async def modules(ctx: tanjun.abc.MessageContext):
 @modules.with_command
 @tanjun.with_owner_check
 @tanjun.as_message_command("list")
-async def modules_list(ctx: tanjun.abc.MessageContext, _embed: EmbedCreator = tanjun.injected(type=EmbedCreator)):
+async def modules_list(
+    ctx: tanjun.abc.MessageContext,
+    _embed: EmbedCreator = tanjun.injected(type=EmbedCreator),
+):
     await impl.list_modules(ctx, _embed)
 
 
@@ -40,8 +43,11 @@ async def modules_list(ctx: tanjun.abc.MessageContext, _embed: EmbedCreator = ta
 @tanjun.with_greedy_argument("module")
 @tanjun.with_parser
 @tanjun.as_message_command("reload")
-async def modules_reload(ctx: tanjun.abc.MessageContext, module: str,
-                         _embed: EmbedCreator = tanjun.injected(type=EmbedCreator)):
+async def modules_reload(
+    ctx: tanjun.abc.MessageContext,
+    module: str,
+    _embed: EmbedCreator = tanjun.injected(type=EmbedCreator),
+):
     await impl.reload_module(ctx, module, _embed)
 
 

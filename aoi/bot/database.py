@@ -12,9 +12,14 @@ import hikari
 from aiosqlite import Connection
 from discord.ext import commands, tasks
 
-from aoi.bot.database_models import (AoiMessageModel, GuildSettingModel,
-                                     PunishmentModel, PunishmentTypeModel,
-                                     RoleShopItemModel, TimedPunishmentModel)
+from aoi.bot.database_models import (
+    AoiMessageModel,
+    GuildSettingModel,
+    PunishmentModel,
+    PunishmentTypeModel,
+    RoleShopItemModel,
+    TimedPunishmentModel,
+)
 
 if TYPE_CHECKING:
     from aoi import bot

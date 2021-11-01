@@ -22,6 +22,7 @@ import tanjun
 from aoi.bot import HelpClient
 import os
 
+
 class TestDescriptionChecks:
     def test_help_description(self):
         os.chdir("..")

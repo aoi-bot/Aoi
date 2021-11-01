@@ -31,10 +31,10 @@ class EmbedCreator:
         self._db = db
 
     async def send(
-            self,
-            ctx: typing.Union[tanjun.abc.SlashContext, tanjun.abc.MessageContext],
-            typ: typing.Literal[0, 1, 2],
-            content: str,
+        self,
+        ctx: typing.Union[tanjun.abc.SlashContext, tanjun.abc.MessageContext],
+        typ: typing.Literal[0, 1, 2],
+        content: str,
     ):
         if isinstance(ctx, tanjun.abc.SlashContext):
             if typ == 2:
@@ -50,12 +50,12 @@ class EmbedCreator:
             )
 
     async def ok_embed(
-            self,
-            ctx: tanjun.abc.Context,
-            /,
-            *,
-            title: typing.Any = None,
-            description: typing.Any = None,
+        self,
+        ctx: tanjun.abc.Context,
+        /,
+        *,
+        title: typing.Any = None,
+        description: typing.Any = None,
     ) -> hikari.Embed:
         assert title or description
         return hikari.Embed(
@@ -65,12 +65,12 @@ class EmbedCreator:
         )
 
     async def error_embed(
-            self,
-            ctx: tanjun.abc.Context,
-            /,
-            *,
-            title: typing.Any = None,
-            description: typing.Any = None,
+        self,
+        ctx: tanjun.abc.Context,
+        /,
+        *,
+        title: typing.Any = None,
+        description: typing.Any = None,
     ) -> hikari.Embed:
         assert title or description
         return hikari.Embed(
@@ -80,12 +80,12 @@ class EmbedCreator:
         )
 
     async def info_embed(
-            self,
-            ctx: tanjun.abc.Context,
-            /,
-            *,
-            title: typing.Any = None,
-            description: typing.Any = None,
+        self,
+        ctx: tanjun.abc.Context,
+        /,
+        *,
+        title: typing.Any = None,
+        description: typing.Any = None,
     ) -> hikari.Embed:
         assert title or description
         return hikari.Embed(

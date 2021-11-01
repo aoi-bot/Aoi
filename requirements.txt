@@ -1,5 +1,7 @@
 git+https://github.com/hikari-py/hikari@master#egg=hikari==2.0.0.dev104
 git+https://github.com/FasterSpeeding/Tanjun@v2.1.2a1
+git+https://github.com/FasterSpeeding/Yuyo@v1.0.3a1
+
 discord~=1.0.1
 Pillow~=8.2.0
 aiohttp~=3.7.4.post0

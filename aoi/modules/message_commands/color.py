@@ -36,37 +36,47 @@ async def color_palette(
 ):
     await impl.color_palette(ctx, color_list)
 
+
 @component.with_command
-@tanjun.with_argument("number_of_colors", converters=(int, ), default=4)
-@tanjun.with_option("sort_by", "--sort", converters=(str, ), default="hue")
+@tanjun.with_argument("number_of_colors", converters=(int,), default=4)
+@tanjun.with_option("sort_by", "--sort", converters=(str,), default="hue")
 @with_description("Show a random color palette")
 @tanjun.with_parser
 @tanjun.as_message_command("randomcolors", "ranclr")
 async def random_colors(
-        ctx: tanjun.abc.MessageContext, number_of_colors: int, sort_by: str,
-        _embed: EmbedCreator = tanjun.injected(type=EmbedCreator),
-        _database: AoiDatabase = tanjun.injected(type=AoiDatabase)
+    ctx: tanjun.abc.MessageContext,
+    number_of_colors: int,
+    sort_by: str,
+    _embed: EmbedCreator = tanjun.injected(type=EmbedCreator),
+    _database: AoiDatabase = tanjun.injected(type=AoiDatabase),
 ):
     await impl.random_colors(ctx, number_of_colors, sort_by, _embed, _database)
 
+
 @component.with_command
-@tanjun.with_argument("number_of_colors", converters=(int, ), default=4)
-@tanjun.with_argument("color2", converters=(AoiColor.convert, ))
-@tanjun.with_argument("color1", converters=(AoiColor.convert, ))
-@tanjun.with_option("rgb", "--rgb", converters=(bool, ), default=False, empty_value=True)
+@tanjun.with_argument("number_of_colors", converters=(int,), default=4)
+@tanjun.with_argument("color2", converters=(AoiColor.convert,))
+@tanjun.with_argument("color1", converters=(AoiColor.convert,))
+@tanjun.with_option("rgb", "--rgb", converters=(bool,), default=False, empty_value=True)
 @with_description("Make a gradient between colors")
 @tanjun.with_parser
 @tanjun.as_message_command("gradient")
 async def gradient(
-        ctx: tanjun.abc.MessageContext, color1: AoiColor, color2: AoiColor, number_of_colors: int, rgb: bool,
-        _database: AoiDatabase = tanjun.injected(type=AoiDatabase),
-        _colors: ColorService = tanjun.injected(type=ColorService)
+    ctx: tanjun.abc.MessageContext,
+    color1: AoiColor,
+    color2: AoiColor,
+    number_of_colors: int,
+    rgb: bool,
+    _database: AoiDatabase = tanjun.injected(type=AoiDatabase),
+    _colors: ColorService = tanjun.injected(type=ColorService),
 ):
     await impl.gradient(ctx, color1, color2, number_of_colors, rgb, _database, _colors)
+
 
 # TODO add duotone
 # TODO add adaptive
 # TODO add histogram
+
 
 @tanjun.as_loader
 def load(client: tanjun.Client):

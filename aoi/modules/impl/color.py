@@ -31,8 +31,8 @@ from aoi.libs.converters import FuzzyAoiColor, AoiColor
 
 
 async def color_palette(
-        ctx: typing.Union[tanjun.abc.MessageContext, tanjun.abc.SlashContext],
-        colors: Sequence[FuzzyAoiColor],
+    ctx: typing.Union[tanjun.abc.MessageContext, tanjun.abc.SlashContext],
+    colors: Sequence[FuzzyAoiColor],
 ):
     valid_colors = [color for color in colors if not color.attempt]
     invalid_colors = [color.attempt for color in colors if color.attempt]
@@ -54,25 +54,34 @@ async def color_palette(
                 "#" + "".join(hex(channel)[2:].rjust(2, "0") for channel in c.to_rgb())
                 for c in valid_colors
             )
-                        + (
-                            "\nUnknown Colors: " + ", ".join(invalid_colors)
-                            if invalid_colors
-                            else ""
-                        ),
+            + (
+                "\nUnknown Colors: " + ", ".join(invalid_colors)
+                if invalid_colors
+                else ""
+            ),
         ).set_image(buf)
     )
 
 
 async def random_colors(
-        ctx: tanjun.abc.MessageContext, number_of_colors: int, sort_by: str,
-        _embed: EmbedCreator, _database: AoiDatabase
+    ctx: tanjun.abc.MessageContext,
+    number_of_colors: int,
+    sort_by: str,
+    _embed: EmbedCreator,
+    _database: AoiDatabase,
 ):
     colors: list[hikari.Color] = []
     if number_of_colors > 250 or number_of_colors < 2:
         await _embed.error_embed(ctx, description="Number of colors must be 2-250")
         return
     for i in range(number_of_colors):
-        colors.append(hikari.Color.from_rgb(random.randint(0, 0xff), random.randint(0, 0xff), random.randint(0, 0xff)))
+        colors.append(
+            hikari.Color.from_rgb(
+                random.randint(0, 0xFF),
+                random.randint(0, 0xFF),
+                random.randint(0, 0xFF),
+            )
+        )
     if sort_by == "hue":
         colors.sort(key=lambda x: colorsys.rgb_to_hsv(*x.rgb)[0])
     if sort_by in ("brightness", "bright"):
@@ -93,20 +102,31 @@ async def random_colors(
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     buf.seek(0)
-    await ctx.respond(embed=hikari.Embed(
-        title="Color Palette",
-        description=" ".join(map(str, colors[:50])) + ("..." if len(colors) >= 50 else ""),
-        color=(await _database.guild_setting(ctx.guild_id)).info_color
-    ).set_image(buf))
+    await ctx.respond(
+        embed=hikari.Embed(
+            title="Color Palette",
+            description=" ".join(map(str, colors[:50]))
+            + ("..." if len(colors) >= 50 else ""),
+            color=(await _database.guild_setting(ctx.guild_id)).info_color,
+        ).set_image(buf)
+    )
 
 
 async def gradient(
-        ctx: tanjun.abc.MessageContext, color1: AoiColor, color2: AoiColor, number_of_colors: int, rgb: bool,
-        _database: AoiDatabase, _colors: ColorService):
+    ctx: tanjun.abc.MessageContext,
+    color1: AoiColor,
+    color2: AoiColor,
+    number_of_colors: int,
+    rgb: bool,
+    _database: AoiDatabase,
+    _colors: ColorService,
+):
     buf, colors = _colors.gradient_buffer(color1, color2, number_of_colors, not rgb)
-    await ctx.respond(embed=hikari.Embed(
-        title="Gradient",
-        description=" ".join(
-            "#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in colors
-        )
-    ).set_image(buf))
+    await ctx.respond(
+        embed=hikari.Embed(
+            title="Gradient",
+            description=" ".join(
+                "#" + "".join(hex(x)[2:].rjust(2, "0") for x in c) for c in colors
+            ),
+        ).set_image(buf)
+    )

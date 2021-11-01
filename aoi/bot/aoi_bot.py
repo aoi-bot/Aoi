@@ -8,12 +8,22 @@ import random
 import re
 import subprocess
 from datetime import datetime, timedelta
-from typing import (TYPE_CHECKING, Any, Awaitable, Callable, Dict, List,
-                    Optional, Tuple, Union)
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union,
+)
 
 import aiohttp.client_exceptions
 import discord
 import ksoftapi
+
 # import pixivapi
 from discord.ext import commands, tasks
 from ruamel.yaml import YAML

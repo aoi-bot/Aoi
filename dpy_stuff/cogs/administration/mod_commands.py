@@ -6,8 +6,7 @@ import discord
 from discord.ext import commands
 
 from aoi import bot
-from aoi.bot import (PunishmentModel, PunishmentTypeModel,
-                     TimedPunishmentModel)
+from aoi.bot import PunishmentModel, PunishmentTypeModel, TimedPunishmentModel
 
 
 def _soft_check_role(ctx: bot.AoiContext, member: discord.Member, action: str = "edit"):
