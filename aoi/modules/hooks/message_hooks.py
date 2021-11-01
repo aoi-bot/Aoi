@@ -14,6 +14,9 @@ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEM
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+import logging
+from datetime import datetime
+
 import tanjun
 
 from aoi.bot.injected import EmbedCreator
@@ -63,6 +66,19 @@ async def on_parser_error(
                 f"{ctx.triggering_prefix}help {ctx.triggering_name}.",
             )
         )
+
+
+@hooks.with_post_execution
+async def post_exec(ctx: tanjun.abc.Context):
+    logger = logging.getLogger(f"cmd")
+    executed = datetime.now(tz=ctx.created_at.tzinfo) - ctx.created_at
+    executed_str = f"{executed.total_seconds():>7.3f}s"
+    message = (
+        f"{ctx.triggering_name[:20]:>15} executed in {executed_str} from "
+        f"{ctx.get_guild().name[:20]:>20} ({ctx.guild_id}) | "
+        f"{ctx.get_channel().name[:10]:>10} ({ctx.channel_id})"
+    )
+    logger.info(message)
 
 
 @tanjun.as_loader

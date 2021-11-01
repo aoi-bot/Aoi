@@ -42,7 +42,7 @@ client = tanjun.Client.from_gateway_bot(
 ).load_modules(
     *Path("aoi/modules/message_commands").glob("**/*.py"),
     *Path("aoi/modules/slash_commands").glob("**/*.py"),
-    *Path("aoi/modules/hooks").glob("**/*.py")
+    *Path("aoi/modules/hooks").glob("**/*.py"),
 )
 aoi_database = AoiDatabase(aoi)
 help_client = HelpClient()
@@ -68,13 +68,11 @@ async def get_prefix(ctx: tanjun.abc.MessageContext):
 
 
 (
-    client.set_type_dependency(
-        injected.EmbedCreator, embed_creator
-    )
-        .set_type_dependency(AoiDatabase, aoi_database)
-        .set_type_dependency(ColorService, ColorService())
-        .set_type_dependency(HelpClient, help_client)
-        .set_prefix_getter(get_prefix)
+    client.set_type_dependency(injected.EmbedCreator, embed_creator)
+    .set_type_dependency(AoiDatabase, aoi_database)
+    .set_type_dependency(ColorService, ColorService())
+    .set_type_dependency(HelpClient, help_client)
+    .set_prefix_getter(get_prefix)
 )
 
 print(help_client.descriptions)
