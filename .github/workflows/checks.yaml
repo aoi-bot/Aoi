@@ -7,7 +7,7 @@ on:
     branches: [develop, master]
 
 jobs:
-  nox:
+  flake:
     strategy:
       fail-fast: false
       matrix:
