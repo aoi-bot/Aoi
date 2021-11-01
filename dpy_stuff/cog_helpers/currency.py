@@ -11,9 +11,7 @@ from aoi.libs.conversions import escape
 class CurrencyService:
     def __init__(self, bot: AoiBot):
         self.bot = bot
-        self.active_catches: Dict[
-            discord.TextChannel, List[Tuple[discord.Message, int]]
-        ] = {}
+        self.active_catches: Dict[discord.TextChannel, List[Tuple[discord.Message, int]]] = {}
         self.lock = asyncio.Lock()
 
     async def maybe_gen_currency(self, msg: discord.Message):
@@ -47,9 +45,7 @@ class CurrencyService:
             )
         else:
             msg: discord.Message = await msg.channel.send(
-                random.choice(
-                    ["<:mokke:798002325036728350>", "<:mokke_jump:798073920104169492>"]
-                )
+                random.choice(["<:mokke:798002325036728350>", "<:mokke_jump:798073920104169492>"])
                 + random.choice(
                     [
                         f" A mokke passes by you carrying ${amount}. `{prefix}grab` it.",
@@ -71,17 +67,13 @@ class CurrencyService:
             if not self.active_catches[ctx.channel]:
                 return None
 
-            messages: List[discord.Message] = [
-                catch[0] for catch in self.active_catches[ctx.channel]
-            ]
+            messages: List[discord.Message] = [catch[0] for catch in self.active_catches[ctx.channel]]
             amount: int = sum(catch[1] for catch in self.active_catches[ctx.channel])
             del self.active_catches[ctx.channel]
 
         if len(messages) == 1:
             asyncio.create_task(messages[0].delete())
         else:
-            asyncio.create_task(
-                self.bot.http.delete_messages(ctx.channel.id, [m.id for m in messages])
-            )
+            asyncio.create_task(self.bot.http.delete_messages(ctx.channel.id, [m.id for m in messages]))
         await self.bot.db.award_guild_currency(ctx.author, amount)
         return amount

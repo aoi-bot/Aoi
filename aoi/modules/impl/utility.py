@@ -35,9 +35,7 @@ async def baseconvert(
         return
     conv = {"hex": hex, "dec": int, "bin": bin, "oct": oct}[base2](dec)
     if base2 == "dec":
-        return await _embed.send(
-            ctx, _embed.OK, f"\n{base1} `{value}` is {base2} `{conv:,}`"
-        )
+        return await _embed.send(ctx, _embed.OK, f"\n{base1} `{value}` is {base2} `{conv:,}`")
     return await _embed.send(ctx, _embed.OK, f"\n{base1} `{value}` is {base2} `{conv}`")
 
 

@@ -14,27 +14,16 @@ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEM
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-import typing
-
-import tanjun
-
-_descriptions: dict[tanjun.abc.MessageCommand, str] = {}
+import nox
 
 
-class HelpClient:
-    def __init__(self):
-        pass
-
-    @property
-    def descriptions(self) -> dict[tanjun.abc.MessageCommand, str]:
-        return _descriptions
+@nox.session
+def lint(session):
+    session.install("black")
+    session.run("black", ".")
 
 
-def with_description(
-    description: str,
-) -> typing.Callable[[tanjun.abc.MessageCommand], tanjun.abc.MessageCommand]:
-    def deco(command: tanjun.abc.MessageCommand):
-        _descriptions[command] = description
-        return command
-
-    return deco
+@nox.session
+def flake8(session):
+    session.install("flake8")
+    session.run("flake8", "aoi/")

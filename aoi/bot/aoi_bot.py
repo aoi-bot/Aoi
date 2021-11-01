@@ -8,22 +8,31 @@ import random
 import re
 import subprocess
 from datetime import datetime, timedelta
-from typing import (TYPE_CHECKING, Any, Awaitable, Callable, Dict, List,
-                    Optional, Tuple, Union)
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union,
+)
 
 import aiohttp.client_exceptions
 import discord
 import ksoftapi
+
 # import pixivapi
 from discord.ext import commands, tasks
 from ruamel.yaml import YAML
 
-from .. import bot
-from ..wrappers import imgur
-
-from .cmds_gen import generate
+from dpy_stuff.cmds_gen import generate
 from .config import ConfigHandler
 from .database import AoiDatabase
+from .. import bot
+from ..wrappers import imgur
 
 if TYPE_CHECKING:
     from aoi.bot import AoiContext
@@ -41,19 +50,13 @@ class PlaceholderManager:
         return ctx.author.name if isinstance(ctx, bot.AoiContext) else ctx.name
 
     def user_discrim(self, ctx: Union[bot.AoiContext, discord.Member]) -> str:  # noqa
-        return (
-            ctx.author.discriminator
-            if isinstance(ctx, bot.AoiContext)
-            else ctx.discriminator
-        )
+        return ctx.author.discriminator if isinstance(ctx, bot.AoiContext) else ctx.discriminator
 
     def user_mention(self, ctx: Union[bot.AoiContext, discord.Member]) -> str:  # noqa
         return ctx.author.mention if isinstance(ctx, bot.AoiContext) else ctx.mention
 
     def user_avatar(self, ctx: Union[bot.AoiContext, discord.Member]) -> str:  # noqa
-        return str(
-            ctx.author.avatar.url if isinstance(ctx, bot.AoiContext) else ctx.avatar.url
-        )
+        return str(ctx.author.avatar.url if isinstance(ctx, bot.AoiContext) else ctx.avatar.url)
 
     def user_tag(self, ctx: Union[bot.AoiContext, discord.Member]) -> str:  # noqa
         return str(ctx.author if isinstance(ctx, bot.AoiContext) else ctx)
@@ -71,8 +74,7 @@ class PlaceholderManager:
     def supported(self) -> List[str]:
         return list(
             filter(
-                lambda x: not x.startswith("_")
-                and x not in ["supported", "replace", "dict"],
+                lambda x: not x.startswith("_") and x not in ["supported", "replace", "dict"],
                 self.__class__.__dict__.keys(),
             )
         )
@@ -95,9 +97,7 @@ class AoiBot(commands.AutoShardedBot):
             "discord.http",
             "discord.ext.commands.core",
         ]:
-            logging.getLogger(logger).setLevel(
-                logging.DEBUG if logger == "aoi" else logging.INFO
-            )
+            logging.getLogger(logger).setLevel(logging.DEBUG if logger == "aoi" else logging.INFO)
             logging.getLogger(logger).addHandler(bot.LoggingHandler())
         self.logger = logging.getLogger("aoi")
         self.config = ConfigHandler()
@@ -111,7 +111,6 @@ class AoiBot(commands.AutoShardedBot):
         self.nasa: str = ""
         self.ksoft_api: str = ""
         self.accuweather: str = ""
-        self.gmap: Optional[gmaps.GeoLocation] = None
         self.imgur_user: str = ""
         self.imgur_secret: str = ""
         # self.pixiv = pixivapi.Client()
@@ -120,12 +119,7 @@ class AoiBot(commands.AutoShardedBot):
         self.commands_executed = 0
         self.start_time = datetime.now()
         self.cog_groups = {}
-        version = (
-            subprocess.check_output(["git", "describe", "--tags"])
-            .strip()
-            .decode("utf-8")
-            .split("-")
-        )
+        version = subprocess.check_output(["git", "describe", "--tags"]).strip().decode("utf-8").split("-")
         self.version = "+".join(version[:-1]) if len(version) > 2 else version[0]
         self.logger.debug(f"Found version string {version}")
         self.placeholders = PlaceholderManager()
@@ -150,9 +144,7 @@ class AoiBot(commands.AutoShardedBot):
 
         async def on_ready():
             self.logger.info(f"Aoi {self.version} online!")
-            await self.change_presence(
-                activity=discord.Game(f",help | {len(self.guilds)} servers")
-            )
+            await self.change_presence(activity=discord.Game(f",help | {len(self.guilds)} servers"))
             self.status_loop.start()
             await self.load_thumbnails()
 
@@ -174,9 +166,7 @@ class AoiBot(commands.AutoShardedBot):
     @tasks.loop(minutes=20)
     async def status_loop(self):
         await self.change_presence(
-            activity=discord.Game(
-                f",help | {len(self.guilds)} servers | New support server in ,help"
-            )
+            activity=discord.Game(f",help | {len(self.guilds)} servers | New support server in ,help")
         )
 
     def create_task(
@@ -233,7 +223,7 @@ class AoiBot(commands.AutoShardedBot):
         self.accuweather = os.getenv("ACCUWEATHER")
         self.imgur_user = os.getenv("IMGUR")
         self.imgur_secret = os.getenv("IMGUR_SECRET")
-        self.gmap = gmaps.GeoLocation(self.google)
+        self.gmaps = None
         self.ksoft_api = os.getenv("KSOFT")
         self.twitter_bearer = os.getenv("TWITTER_BEARER")
 
@@ -270,10 +260,7 @@ class AoiBot(commands.AutoShardedBot):
 
         for cog in self.cogs:
             cog = self.get_cog(cog)
-            if (
-                not cog.description
-                and cog.qualified_name not in self.cog_groups["Hidden"]
-            ):
+            if not cog.description and cog.qualified_name not in self.cog_groups["Hidden"]:
                 self.logger.critical(f"bot:cog {cog.qualified_name} has no description")
                 return
 
@@ -319,8 +306,7 @@ class AoiBot(commands.AutoShardedBot):
             raise commands.BadArgument(f"Module {name} not found.")
         if len(found) > 1 and not allow_ambiguous:
             raise commands.BadArgument(
-                f"Name {name} can refer to multiple modules: "
-                f"{', '.join(found)}. Use a more specific name."
+                f"Name {name} can refer to multiple modules: " f"{', '.join(found)}. Use a more specific name."
             )
         return found
 
@@ -349,9 +335,7 @@ class AoiBot(commands.AutoShardedBot):
                 self.set_cog_group(cog_name, grp_name)
 
     def random_thumbnail(self) -> str:
-        return (
-            random.choice(self.thumbnails) if self.thumbnails else self.user.avatar.url
-        )
+        return random.choice(self.thumbnails) if self.thumbnails else self.user.avatar.url
 
     async def load_thumbnails(self):
         if os.path.exists("loaders/thumbnails.txt"):
@@ -398,9 +382,7 @@ class AoiBot(commands.AutoShardedBot):
         else:
             content = None
         if len(msg.keys()) < 2:  # no embed here:
-            return await self.get_channel(channel).send(
-                content=content, delete_after=delete_after
-            )
+            return await self.get_channel(channel).send(content=content, delete_after=delete_after)
         thumbnail = msg.pop("thumbnail", None) if msg else None
         image = msg.pop("image", None) if msg else None
         msg["description"] = msg.get("description", "_ _")
@@ -409,9 +391,7 @@ class AoiBot(commands.AutoShardedBot):
             embed.set_thumbnail(url=thumbnail)
         if image:
             embed.set_image(url=image)
-        await self.get_channel(channel).send(
-            content=content, embed=embed, delete_after=delete_after
-        )
+        await self.get_channel(channel).send(content=content, embed=embed, delete_after=delete_after)
 
     async def check_slowmode(self, message: discord.Message):
         if message.channel.id not in self.slowmodes:
@@ -426,9 +406,7 @@ class AoiBot(commands.AutoShardedBot):
             )
         ).fetchone()
         last = row[0] if row else 0
-        if message.created_at < datetime.fromtimestamp(last) + timedelta(
-            seconds=duration
-        ):
+        if message.created_at < datetime.fromtimestamp(last) + timedelta(seconds=duration):
             await message.delete()
             return True
         if last:
@@ -449,18 +427,13 @@ class AoiBot(commands.AutoShardedBot):
             return message
 
         if content.split(" ")[0] in self.aliases[message.guild.id]:
-            message.content = " ".join(
-                [self.aliases[message.guild.id][content.split(" ")[0]]]
-                + content.split(" ")[1:]
-            )
+            message.content = " ".join([self.aliases[message.guild.id][content.split(" ")[0]]] + content.split(" ")[1:])
             return message
         return message
 
     async def rev_alias(self, ctx, command: str) -> Optional[List[Tuple[str, str]]]:
         if ctx.guild.id in self.aliases and self.aliases[ctx.guild.id]:
             return [
-                (alias, to)
-                for alias, to in self.aliases[ctx.guild.id].items()
-                if to[0].split(" ")[0] == command
+                (alias, to) for alias, to in self.aliases[ctx.guild.id].items() if to[0].split(" ")[0] == command
             ] or None
         return None

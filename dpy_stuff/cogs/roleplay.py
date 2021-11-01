@@ -38,9 +38,7 @@ def setup(bot: bot.AoiBot) -> None:
             async with sess.get(f"https://api.waifu.pics/sfw/{name}") as resp:
                 return fun.roleplay_responses[name], (await resp.json())["url"]
 
-    async def exec_multi_rp_command(
-        self: Roleplay, ctx: bot.AoiContext, user: discord.Member
-    ):
+    async def exec_multi_rp_command(self: Roleplay, ctx: bot.AoiContext, user: discord.Member):
         resp, image = await get_data(ctx.command.name)
         await ctx.embed(
             description=random.choice(resp.phrases).format(
@@ -52,9 +50,7 @@ def setup(bot: bot.AoiBot) -> None:
     async def exec_single_rp_command(self: Roleplay, ctx: bot.AoiContext):
         resp, image = await get_data(ctx.command.name)
         await ctx.embed(
-            description=random.choice(resp.phrases).format(
-                f"**{ctx.author.display_name}**"
-            ),
+            description=random.choice(resp.phrases).format(f"**{ctx.author.display_name}**"),
             image=image,
         )
 
@@ -64,18 +60,12 @@ def setup(bot: bot.AoiBot) -> None:
             if doc[key]["enabled"] == "no":
                 continue
 
-            fun.roleplay_responses[key] = RoleplayResponse(
-                doc[key]["multi"] == "yes", doc[key]["phrases"]
-            )
+            fun.roleplay_responses[key] = RoleplayResponse(doc[key]["multi"] == "yes", doc[key]["phrases"])
 
             cmd = commands.Command(
                 name=key,
-                func=exec_multi_rp_command
-                if fun.roleplay_responses[key].multi
-                else exec_single_rp_command,
-                brief=f"{key} someone"
-                if fun.roleplay_responses[key].multi
-                else f"{key} roleplay command",
+                func=exec_multi_rp_command if fun.roleplay_responses[key].multi else exec_single_rp_command,
+                brief=f"{key} someone" if fun.roleplay_responses[key].multi else f"{key} roleplay command",
                 usage="@member" if fun.roleplay_responses[key].multi else None,
             )
 

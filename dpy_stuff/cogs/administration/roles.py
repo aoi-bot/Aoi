@@ -24,37 +24,23 @@ class Roles(commands.Cog, ColorService):
     def description(self):
         return "Commands to modify roles"
 
-    def _check_role(
-        self, ctx: bot.AoiContext, role: discord.Role, action: str = "edit"
-    ):
+    def _check_role(self, ctx: bot.AoiContext, role: discord.Role, action: str = "edit"):
         if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
-            raise bot.RoleHierarchyError(
-                f"Role to {action} must be lower than your highest"
-            )
+            raise bot.RoleHierarchyError(f"Role to {action} must be lower than your highest")
         if role >= ctx.me.top_role:
-            raise bot.RoleHierarchyError(
-                f"I can't {action} a role higher than or equal to mine"
-            )
+            raise bot.RoleHierarchyError(f"I can't {action} a role higher than or equal to mine")
 
-    def _soft_check_role(
-        self, ctx: bot.AoiContext, role: discord.Role, action: str = "edit"
-    ):
+    def _soft_check_role(self, ctx: bot.AoiContext, role: discord.Role, action: str = "edit"):
         if role >= ctx.me.top_role:
-            raise bot.RoleHierarchyError(
-                f"I can't {action} a role higher than or equal to mine"
-            )
+            raise bot.RoleHierarchyError(f"I can't {action} a role higher than or equal to mine")
 
     @commands.bot_has_permissions(manage_roles=True)
     @commands.has_permissions(manage_roles=True)
-    @commands.command(
-        brief="Toggles if a role is mentionable", aliases=["rolem", "mentionable"]
-    )
+    @commands.command(brief="Toggles if a role is mentionable", aliases=["rolem", "mentionable"])
     async def rolementionable(self, ctx: bot.AoiContext, *, role: discord.Role):
         self._check_role(ctx, role)
         await role.edit(mentionable=not role.mentionable)
-        await ctx.send_info(
-            f"{role.mention} is now {'' if role.mentionable else 'un'}mentionable"
-        )
+        await ctx.send_info(f"{role.mention} is now {'' if role.mentionable else 'un'}mentionable")
 
     @commands.bot_has_permissions(manage_roles=True)
     @commands.has_permissions(manage_roles=True)
@@ -62,9 +48,7 @@ class Roles(commands.Cog, ColorService):
     async def rolehoist(self, ctx: bot.AoiContext, *, role: discord.Role):
         self._check_role(ctx, role)
         await role.edit(hoist=not role.hoist)
-        await ctx.send_info(
-            f"{role.mention} is now {'' if role.hoist else 'un'}hoisted"
-        )
+        await ctx.send_info(f"{role.mention} is now {'' if role.hoist else 'un'}hoisted")
 
     @commands.bot_has_permissions(manage_roles=True)
     @commands.has_permissions(manage_roles=True)
@@ -77,15 +61,10 @@ class Roles(commands.Cog, ColorService):
     @commands.bot_has_permissions(manage_roles=True)
     @commands.has_permissions(manage_roles=True)
     @commands.command(brief="Changes a roles color", aliases=["rclr", "roleclr"])
-    async def rolecolor(
-        self, ctx: bot.AoiContext, role: discord.Role, *, color: AoiColor
-    ):
+    async def rolecolor(self, ctx: bot.AoiContext, role: discord.Role, *, color: AoiColor):
         self._check_role(ctx, role)
         await role.edit(colour=color.to_discord_color())
-        await ctx.send_info(
-            f"Changed {role.mention}'s color to "
-            f"#{conversions.color_to_string(role.colour)}"
-        )
+        await ctx.send_info(f"Changed {role.mention}'s color to " f"#{conversions.color_to_string(role.colour)}")
 
     @commands.bot_has_permissions(manage_roles=True)
     @commands.has_permissions(manage_roles=True)
@@ -120,9 +99,7 @@ class Roles(commands.Cog, ColorService):
         await ctx.send_info(f"Creating {num} roles. Will take at least {num}s")
         await self.bot.create_task(ctx, do_op(), lambda: f"{n}/{num}")
 
-        await ctx.send_ok(
-            f"Created {' '.join(r.mention for r in roles)}", ping=len(roles) > 10
-        )
+        await ctx.send_ok(f"Created {' '.join(r.mention for r in roles)}", ping=len(roles) > 10)
 
     @commands.bot_has_permissions(manage_roles=True)
     @commands.has_permissions(manage_roles=True)
@@ -152,9 +129,7 @@ class Roles(commands.Cog, ColorService):
 
         await ctx.trigger_typing()
         if len(roles) > 3:
-            await ctx.send_info(
-                f"Deleting {len(roles)} roles. Will take at least {len(roles)}s"
-            )
+            await ctx.send_info(f"Deleting {len(roles)} roles. Will take at least {len(roles)}s")
         await self.bot.create_task(ctx, do_op(), lambda: f"{n}/{(len(roles))}")
         await ctx.send_ok(
             f"Deleted {' '.join('`' + r.name + '`' for r in roles)}",
@@ -180,11 +155,7 @@ class Roles(commands.Cog, ColorService):
         for role in roles:
             self._check_role(ctx, role)
         num = len(roles)
-        colors = (
-            self.hls_gradient(color1, color2, num)
-            if hls
-            else self.rgb_gradient(color1, color2, num)
-        )
+        colors = self.hls_gradient(color1, color2, num) if hls else self.rgb_gradient(color1, color2, num)
         img = Image.new("RGB", (240, 48))
         await ctx.trigger_typing()
         img_draw = ImageDraw.Draw(img)
@@ -227,13 +198,10 @@ class Roles(commands.Cog, ColorService):
         with_role = flags.get("withrole", None)
         if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
             raise bot.RoleHierarchyError(
-                f"{role.mention} must be below your highest role in order for "
-                f"you to delete it."
+                f"{role.mention} must be below your highest role in order for " f"you to delete it."
             )
         if role >= ctx.me.top_role:
-            raise bot.RoleHierarchyError(
-                f"{role.mention} must be above my highest role for me to delete it."
-            )
+            raise bot.RoleHierarchyError(f"{role.mention} must be above my highest role for me to delete it.")
         members: List[discord.Member] = list(
             filter(
                 lambda x: role.id not in [r.id for r in x.roles],  # noqa
@@ -243,11 +211,7 @@ class Roles(commands.Cog, ColorService):
         if ignore_bots:
             members = [member for member in members if not member.bot]
         if with_role:
-            members = [
-                member
-                for member in members
-                if with_role.id in [r.id for r in member.roles]
-            ]
+            members = [member for member in members if with_role.id in [r.id for r in member.roles]]
         await ctx.send_ok(
             f"Adding {role.mention} to {len(members)} that don't have it"
             + (", while ignoring bots" if ignore_bots else "")
@@ -263,9 +227,7 @@ class Roles(commands.Cog, ColorService):
                     continue
                 if with_role and with_role.id not in [r.id for r in m.roles]:
                     continue
-                await m.add_roles(
-                    role, reason=f"roleall by {ctx.author} | {ctx.author.id}"
-                )
+                await m.add_roles(role, reason=f"roleall by {ctx.author} | {ctx.author.id}")
                 n += 1
                 await bot.asyncio.sleep(1)
 
@@ -304,10 +266,7 @@ class Roles(commands.Cog, ColorService):
         if isinstance(role, discord.Role):
             role = role.id
             was_role = True
-        if (
-            ctx.guild.id not in self.bot.db.auto_roles
-            or role not in self.bot.db.auto_roles[ctx.guild.id]
-        ):
+        if ctx.guild.id not in self.bot.db.auto_roles or role not in self.bot.db.auto_roles[ctx.guild.id]:
             return await ctx.send_error(
                 f"{'<@&' if was_role else ''}{role}{'>' if was_role else ''} is not in the "
                 f"list if automatically assigned roles in this server. You can "
@@ -320,17 +279,10 @@ class Roles(commands.Cog, ColorService):
         )
 
     @commands.max_concurrency(1, per=commands.BucketType.guild)
-    @commands.command(
-        brief="Shows the list of roles a user gets on join", aliases=["larole"]
-    )
+    @commands.command(brief="Shows the list of roles a user gets on join", aliases=["larole"])
     async def listautoroles(self, ctx: bot.AoiContext):
-        if (
-            ctx.guild.id not in self.bot.db.auto_roles
-            or not self.bot.db.auto_roles[ctx.guild.id]
-        ):
-            return await ctx.send_info(
-                "There are no automatically assigned roles on this server."
-            )
+        if ctx.guild.id not in self.bot.db.auto_roles or not self.bot.db.auto_roles[ctx.guild.id]:
+            return await ctx.send_info("There are no automatically assigned roles on this server.")
 
         # remove invalid roles from the auto role list
         lost_roles = []
@@ -342,13 +294,8 @@ class Roles(commands.Cog, ColorService):
         for r in lost_roles:
             await self.bot.db.del_auto_role(ctx.guild, r)
 
-        if (
-            ctx.guild.id not in self.bot.db.auto_roles
-            or not self.bot.db.auto_roles[ctx.guild.id]
-        ):
-            return await ctx.send_info(
-                "There are no automatically assigned roles on this server."
-            )
+        if ctx.guild.id not in self.bot.db.auto_roles or not self.bot.db.auto_roles[ctx.guild.id]:
+            return await ctx.send_info("There are no automatically assigned roles on this server.")
 
         await ctx.send_info(
             "Automatically assigned roles on this server\n"
@@ -366,9 +313,7 @@ class Roles(commands.Cog, ColorService):
         def _(s):
             return s if len(s) < 11 else f"{s[:10]}..."
 
-        if (
-            "audit" in ctx.flags or "full" in ctx.flags
-        ) and not ctx.author.guild_permissions.manage_roles:
+        if ("audit" in ctx.flags or "full" in ctx.flags) and not ctx.author.guild_permissions.manage_roles:
             ctx.flags = {}
 
         if "audit" in ctx.flags and "full" in ctx.flags:
@@ -494,10 +439,7 @@ class Roles(commands.Cog, ColorService):
                 ],
                 20,
                 "Role list",
-                fmt="```Pos     Name\n%s```\n"
-                "M-Mentionable  ?  "
-                "H-Hoisted  ?  "
-                "C-Colored",
+                fmt="```Pos     Name\n%s```\n" "M-Mentionable  ?  " "H-Hoisted  ?  " "C-Colored",
             )
 
     @commands.command(brief="List the server's self-assignable roles", aliases=["lsr"])
@@ -522,18 +464,14 @@ class Roles(commands.Cog, ColorService):
         )
 
     @commands.has_permissions(manage_roles=True)
-    @commands.command(
-        brief="Adds a self-assignable to the server", aliases=["asr", "asrole"]
-    )
+    @commands.command(brief="Adds a self-assignable to the server", aliases=["asr", "asrole"])
     async def addselfrole(self, ctx: bot.AoiContext, *, role: discord.Role):
         self._soft_check_role(ctx, role, "add")
         await self.bot.db.add_self_role(ctx.guild, role)
         await ctx.send_ok(f"{role.mention} added to self-assignable roles")
 
     @commands.has_permissions(manage_roles=True)
-    @commands.command(
-        brief="Adds a self-assignable to the server", aliases=["rsr", "rsrole"]
-    )
+    @commands.command(brief="Adds a self-assignable to the server", aliases=["rsr", "rsrole"])
     async def removeselfrole(self, ctx: bot.AoiContext, *, role: discord.Role):
         await self.bot.db.remove_self_role(role)
         await ctx.send_ok(f"{role.mention} removed from self-assignable roles")
@@ -606,9 +544,7 @@ class Roles(commands.Cog, ColorService):
         await ctx.trigger_typing()
 
         for color, value in colors.items():
-            created.append(
-                await ctx.guild.create_role(name=color, color=discord.Colour(value))
-            )
+            created.append(await ctx.guild.create_role(name=color, color=discord.Colour(value)))
             await asyncio.sleep(0.5)
 
         await ctx.send_info(f"Created " + " ".join(r.mention for r in created))

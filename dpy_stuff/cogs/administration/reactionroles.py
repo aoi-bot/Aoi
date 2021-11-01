@@ -80,9 +80,7 @@ class ReactionRoles(commands.Cog):
         if self._emoji(payload.emoji) in self._roles[payload.message_id]:
             # inject payload member
             # come on discord, why not just tell us who un-reacted :(
-            payload.member = self.bot.get_guild(payload.guild_id).get_member(
-                payload.user_id
-            )
+            payload.member = self.bot.get_guild(payload.guild_id).get_member(payload.user_id)
             if payload.message_id not in self._roles:
                 return
             if str(payload.emoji.id) in self._roles[payload.message_id]:
@@ -96,12 +94,8 @@ class ReactionRoles(commands.Cog):
                     await payload.member.remove_roles(role)
 
     @commands.has_permissions(manage_roles=True)
-    @commands.command(
-        brief="Add a reaction role message, pass them in emoji - role pairs"
-    )
-    async def addrero(
-        self, ctx: bot.AoiContext, message: discord.Message, *, args: str
-    ):  # noqa c901
+    @commands.command(brief="Add a reaction role message, pass them in emoji - role pairs")
+    async def addrero(self, ctx: bot.AoiContext, message: discord.Message, *, args: str):  # noqa c901
         split = ctx.group_list(args.split(), 2)
         role_converter = commands.RoleConverter()
         for i in split:
@@ -114,9 +108,7 @@ class ReactionRoles(commands.Cog):
             except commands.RoleNotFound:
                 return await ctx.send_error(f"Role {i[1]} invalid")
             if role >= ctx.author.top_role and ctx.guild.owner_id != ctx.author.id:
-                raise bot.RoleHierarchyError(
-                    f"Role {role} must be lower than your highest"
-                )
+                raise bot.RoleHierarchyError(f"Role {role} must be lower than your highest")
             if role >= ctx.me.top_role:
                 raise bot.RoleHierarchyError(f"Role {role} must be lower than mine")
             try:
@@ -127,14 +119,9 @@ class ReactionRoles(commands.Cog):
                 return await ctx.send_error(f"Emoji {i[0]} invalid")
             if message.id not in self._roles:
                 self._roles[message.id] = {}
-            if (
-                emoji.name in self._roles[message.id]
-                or str(emoji.id) in self._roles[message.id]
-            ):
+            if emoji.name in self._roles[message.id] or str(emoji.id) in self._roles[message.id]:
                 return await ctx.send_error("That emoji is already being used")
-            self._roles[message.id][
-                str(emoji.id) if emoji.id else emoji.name
-            ] = _ReactionRoleData(role)
+            self._roles[message.id][str(emoji.id) if emoji.id else emoji.name] = _ReactionRoleData(role)
             await self._db.conn.execute(
                 "insert into rero values (?,?,?,?,?,0,0)",
                 (
@@ -150,17 +137,13 @@ class ReactionRoles(commands.Cog):
 
     @commands.has_permissions(manage_roles=True)
     @commands.command(brief="Clear reaction roles from a message")
-    async def clearrero(
-        self, ctx: bot.AoiContext, message: discord.Message, emoji: str = None
-    ):
+    async def clearrero(self, ctx: bot.AoiContext, message: discord.Message, emoji: str = None):
         if message.id not in self._roles:
             return await ctx.send_error("Message has no reaction roles!")
         if not emoji:
             await message.clear_reactions()
             del self._roles[message.id]
-            await self._db.conn.execute(
-                "delete from rero where message=?", (message.id,)
-            )
+            await self._db.conn.execute("delete from rero where message=?", (message.id,))
             await self._db.conn.commit()
             return await ctx.send_ok("Cleared all reaction roles from message")
         emoji = await partial_emoji_convert(ctx, emoji)

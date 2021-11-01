@@ -29,9 +29,7 @@ component = tanjun.Component(name="fun")
 @tanjun.with_argument("height", converters=(int,), default=10)
 @tanjun.with_argument("width", converters=(int,), default=10)
 @tanjun.with_argument("bombs", converters=(int,), default=10)
-@tanjun.with_option(
-    "raw", "--raw", "-r", converters=(bool,), default=False, empty_value=True
-)
+@tanjun.with_option("raw", "--raw", "-r", converters=(bool,), default=False, empty_value=True)
 @tanjun.with_option(
     "no_spoiler",
     "--no-spoiler",

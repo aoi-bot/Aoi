@@ -52,6 +52,7 @@ class ColorService:
             )
         buf = io.BytesIO()
         img.save(buf, format="PNG")
+        buf.seek(0)
         return buf, colors
 
     @staticmethod
@@ -74,14 +75,7 @@ class ColorService:
     def hls_gradient(color1: AoiColor, color2: AoiColor, num: int) -> list[ColorTuple]:
         hls, hls2 = color1.to_hls(), color2.to_hls()
         steps = [(hls[x] - hls2[x]) / (num - 1) for x in range(3)]
-        colors = list(
-            reversed(
-                [
-                    tuple(hls2[x] + steps[x] * n for x in range(3))
-                    for n in range(num + 1)
-                ]
-            )
-        )[1:]
+        colors = list(reversed([tuple(hls2[x] + steps[x] * n for x in range(3)) for n in range(num + 1)]))[1:]
         return [
             typing.cast(
                 ColorTuple,

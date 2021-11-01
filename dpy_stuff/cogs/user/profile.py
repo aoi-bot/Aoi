@@ -72,9 +72,7 @@ def _fit(w, h, text, size, draw, *, w_pad=5, h_pad=5):
 
 
 def _center_and_fit(x, y, x2, y2, text, size, draw, *, w_pad=5, h_pad=5):
-    w, h, sz = _fit(
-        abs(x - x2), abs(y - y2), text, size, draw, w_pad=w_pad, h_pad=h_pad
-    )
+    w, h, sz = _fit(abs(x - x2), abs(y - y2), text, size, draw, w_pad=w_pad, h_pad=h_pad)
     x, y = _center(x, y, x2, y2, w, h)
     return x, y, w, h, sz
 
@@ -149,9 +147,7 @@ class Profile(commands.Cog):
                 card_bg = card_bg.resize((512, 512))
         except Exception as error:  # noqa
             card_bg = self.default_bg.copy()
-            traceback.print_exception(
-                type(error), error, error.__traceback__, file=sys.stderr
-            )
+            traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
         card_bg = card_bg.convert("RGBA")
         await self.bot.db.ensure_xp_entry(member)
         global_xp = self.bot.db.global_xp[member.id]
@@ -204,9 +200,7 @@ class Profile(commands.Cog):
         )
         img_draw.text((x, y), (await self.bot.db.get_titles(member))[0], font=_font(sz))
 
-        x, y, _, _, sz = _center_and_fit(
-            217.6, 80, 480, 32, member.name, 32, img_draw, w_pad=24
-        )
+        x, y, _, _, sz = _center_and_fit(217.6, 80, 480, 32, member.name, 32, img_draw, w_pad=24)
         img_draw.text((x, y), member.name, font=_font(sz))
 
         x, y, _, _, sz = _center_and_fit(
@@ -235,9 +229,7 @@ class Profile(commands.Cog):
             img_draw,
             w_pad=24,
         )
-        img_draw.text(
-            (x, y), f"Level {server_level} - # {self._get_rank(member)}", font=_font(sz)
-        )
+        img_draw.text((x, y), f"Level {server_level} - # {self._get_rank(member)}", font=_font(sz))
 
         x, y, _, _, sz = _center_and_fit(
             115.8,
@@ -280,9 +272,7 @@ class Profile(commands.Cog):
     @commands.command(brief="Change your profile card for $7500 (global)")
     async def profilecard(self, ctx: bot.AoiContext, url: str):
         if await self.bot.db.get_global_currency(ctx.author) < 7500:
-            return await ctx.send_error(
-                "You don't have enough global currency for this."
-            )
+            return await ctx.send_error("You don't have enough global currency for this.")
         try:
             cur_removed = False
             # make sure that the user has a record in the db
@@ -299,9 +289,7 @@ class Profile(commands.Cog):
             _buf2 = io.BytesIO()
             card_bg.save(_buf2, format="png")
             await ctx.embed(image=_buf2, trash_reaction=False)
-            if await ctx.confirm(
-                "Set this image as your background?", "Image set", "Image not set"
-            ):
+            if await ctx.confirm("Set this image as your background?", "Image set", "Image not set"):
                 await self.bot.db.award_global_currency(ctx.author, -7500)
                 cur_removed = True
                 if ctx.author.id not in self.bot.db.changed_global_users:
@@ -311,13 +299,8 @@ class Profile(commands.Cog):
         except Exception as error:  # noqa
             if cur_removed:  # noqa
                 await self.bot.db.award_global_currency(ctx.author, 7500)
-            await ctx.send_error(
-                "An error occured while setting the background - your currency was not "
-                "affected"
-            )
-            traceback.print_exception(
-                type(error), error, error.__traceback__, file=sys.stderr
-            )
+            await ctx.send_error("An error occured while setting the background - your currency was not " "affected")
+            traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
 
 
 def setup(bot: bot.AoiBot) -> None:

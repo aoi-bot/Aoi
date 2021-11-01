@@ -14,27 +14,48 @@ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEM
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-import typing
-
 import tanjun
 
-_descriptions: dict[tanjun.abc.MessageCommand, str] = {}
+from aoi.bot.injected import EmbedCreator
+from aoi.modules.impl import modules as impl
+
+component = tanjun.Component(name="modules")
 
 
-class HelpClient:
-    def __init__(self):
-        pass
-
-    @property
-    def descriptions(self) -> dict[tanjun.abc.MessageCommand, str]:
-        return _descriptions
+@component.with_command
+@tanjun.as_message_command_group("modules")
+async def modules(ctx: tanjun.abc.MessageContext):
+    await impl.list_modules(ctx)
 
 
-def with_description(
-    description: str,
-) -> typing.Callable[[tanjun.abc.MessageCommand], tanjun.abc.MessageCommand]:
-    def deco(command: tanjun.abc.MessageCommand):
-        _descriptions[command] = description
-        return command
+@modules.with_command
+@tanjun.with_owner_check
+@tanjun.as_message_command("list")
+async def modules_list(
+    ctx: tanjun.abc.MessageContext,
+    _embed: EmbedCreator = tanjun.injected(type=EmbedCreator),
+):
+    await impl.list_modules(ctx, _embed)
 
-    return deco
+
+@modules.with_command
+@tanjun.with_owner_check
+@tanjun.with_greedy_argument("module")
+@tanjun.with_parser
+@tanjun.as_message_command("reload")
+async def modules_reload(
+    ctx: tanjun.abc.MessageContext,
+    module: str,
+    _embed: EmbedCreator = tanjun.injected(type=EmbedCreator),
+):
+    await impl.reload_module(ctx, module, _embed)
+
+
+@tanjun.as_loader
+def load(client: tanjun.Client):
+    client.add_component(component.copy())
+
+
+@tanjun.as_unloader
+def unload(client: tanjun.Client):
+    client.remove_component_by_name(component.name)

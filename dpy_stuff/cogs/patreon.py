@@ -43,9 +43,9 @@ if os.getenv("PATREON_ID") and os.getenv("PATREON_SECRET"):  # noqa c901
                     self.patrons = {}
                     for user in json["data"]:
                         try:
-                            self.patrons[
-                                user["relationships"]["patron"]["data"]["id"]
-                            ] = user["attributes"]["amount_cents"]
+                            self.patrons[user["relationships"]["patron"]["data"]["id"]] = user["attributes"][
+                                "amount_cents"
+                            ]
                         except KeyError:
                             pass
                 self.patreon_resp = json
@@ -60,9 +60,7 @@ if os.getenv("PATREON_ID") and os.getenv("PATREON_SECRET"):  # noqa c901
                     if user["type"] != "user":
                         continue
                     try:
-                        patreon_discord_user_id = user["attributes"][
-                            "social_connections"
-                        ]["discord"]["user_id"]
+                        patreon_discord_user_id = user["attributes"]["social_connections"]["discord"]["user_id"]
                     except KeyError:
                         continue
                     if user_id == patreon_discord_user_id:
@@ -77,31 +75,21 @@ if os.getenv("PATREON_ID") and os.getenv("PATREON_SECRET"):  # noqa c901
                         ", and waited at least 5 minutes."
                     )
                 row = await (
-                    await self.bot.db.conn.execute(
-                        "select * from patreon where user=?", (int(user_id),)
-                    )
+                    await self.bot.db.conn.execute("select * from patreon where user=?", (int(user_id),))
                 ).fetchone()  # noqa
                 dt = datetime.now()
                 dtf = f"{dt.month:0>2}{dt.year}"
                 if not row:
-                    await self.bot.db.conn.execute(
-                        "insert into patreon values (?,?)", (int(user_id), dtf)
-                    )
+                    await self.bot.db.conn.execute("insert into patreon values (?,?)", (int(user_id), dtf))
                     await self.bot.db.conn.commit()
                     cur = int(self.patrons[patreon_user])
                     await self.bot.db.award_global_currency(ctx.author, cur)
-                    return await ctx.send_ok(
-                        f"Awarded you ${cur}. Thanks for supporting! ♥"
-                    )
+                    return await ctx.send_ok(f"Awarded you ${cur}. Thanks for supporting! ♥")
                 if row[1] == dtf:
-                    return await ctx.send_error(
-                        "You've already claimed your reward this month."
-                    )
+                    return await ctx.send_error("You've already claimed your reward this month.")
                 cur = int(self.patrons[patreon_user])
                 await self.bot.db.award_global_currency(ctx.author, cur)
-                await self.bot.db.conn.execute(
-                    "update patreon set last_claim=? where user=?", (dtf, int(user_id))
-                )
+                await self.bot.db.conn.execute("update patreon set last_claim=? where user=?", (dtf, int(user_id)))
                 await self.bot.db.conn.commit()
                 await ctx.send_ok(f"Awarded you ${cur}. Thanks for supporting! ♥")
 
@@ -115,7 +103,5 @@ else:
 def setup(bot: bot.AoiBot) -> None:
     if not bot.patreon_id or not bot.patreon_secret:
         bot.logger.warn("patreon:Not loading cog")
-        bot.logger.warn(
-            "patreon: both PATREON_ID and PATREON_CAMPAIGN must be present in .env"
-        )
+        bot.logger.warn("patreon: both PATREON_ID and PATREON_CAMPAIGN must be present in .env")
     bot.add_cog(Patreon(bot))

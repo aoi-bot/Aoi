@@ -7,21 +7,15 @@ from discord.ext import commands
 
 
 class AoiTask:
-    def __init__(
-        self, task: asyncio.Task, ctx: commands.Context, status: Callable[[], str]
-    ):
+    def __init__(self, task: asyncio.Task, ctx: commands.Context, status: Callable[[], str]):
         self.task = task
         self.ctx = ctx
         self._status = status
         self.time = datetime.now()
-        self.ctx.bot.logger.info(
-            f"Creating task for {ctx.author.id} {ctx.message.content}"
-        )
+        self.ctx.bot.logger.info(f"Creating task for {ctx.author.id} {ctx.message.content}")
 
     def __del__(self):
-        self.ctx.bot.logger.info(
-            f"Deleting task for {self.ctx.author.id} {self.ctx.message.content}"
-        )
+        self.ctx.bot.logger.info(f"Deleting task for {self.ctx.author.id} {self.ctx.message.content}")
 
     def __str__(self) -> str:
         return (

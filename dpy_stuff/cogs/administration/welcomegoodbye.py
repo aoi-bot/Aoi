@@ -53,9 +53,7 @@ class WelcomeGoodbye(commands.Cog):
 
     @commands.has_permissions(manage_guild=True)
     @commands.command(brief="Set the channel the goodbye message displays in")
-    async def leavemsgchnl(
-        self, ctx: bot.AoiContext, channel: Optional[Union[discord.TextChannel, str]]
-    ):
+    async def leavemsgchnl(self, ctx: bot.AoiContext, channel: Optional[Union[discord.TextChannel, str]]):
         if isinstance(channel, str):
             if channel.lower() == "off":
                 await self.bot.db.set_goodbye_message(ctx.guild.id, channel=None)
@@ -66,21 +64,16 @@ class WelcomeGoodbye(commands.Cog):
             )
         if not channel:
             message = await self.bot.db.get_goodbye_message(ctx.guild.id)
-            return await ctx.send_ok(
-                f"Leave message is enabled on <#{message.channel}>"
-            )
+            return await ctx.send_ok(f"Leave message is enabled on <#{message.channel}>")
         await self.bot.db.set_goodbye_message(ctx.guild.id, channel=channel)
         return await ctx.send_ok(f"Leave message is enabled on {channel.mention}")
 
     @commands.has_permissions(manage_guild=True)
-    @commands.command(
-        brief="Set the deletion delay for the leave message, 0 to disable"
-    )
+    @commands.command(brief="Set the deletion delay for the leave message, 0 to disable")
     async def leavemsgdel(self, ctx: bot.AoiContext, secs: int):
         await self.bot.db.set_goodbye_message(ctx.guild.id, delete=secs)
         await ctx.send_ok(
-            f"Leave messages will {'never ' if not secs else ''}delete"
-            + (f" after {secs}s" if secs else "")
+            f"Leave messages will {'never ' if not secs else ''}delete" + (f" after {secs}s" if secs else "")
         )
 
     @commands.has_permissions(manage_guild=True)
@@ -91,9 +84,7 @@ class WelcomeGoodbye(commands.Cog):
 
     @commands.has_permissions(manage_guild=True)
     @commands.command(brief="Set the channel the welcome message displays in")
-    async def joinmsgchnl(
-        self, ctx: bot.AoiContext, channel: Optional[Union[discord.TextChannel, str]]
-    ):
+    async def joinmsgchnl(self, ctx: bot.AoiContext, channel: Optional[Union[discord.TextChannel, str]]):
         if isinstance(channel, str):
             if channel.lower() == "off":
                 await self.bot.db.set_welcome_message(ctx.guild.id, channel=None)
@@ -109,14 +100,11 @@ class WelcomeGoodbye(commands.Cog):
         return await ctx.send_ok(f"Join message is enabled on {channel.mention}")
 
     @commands.has_permissions(manage_guild=True)
-    @commands.command(
-        brief="Set the deletion delay for the welcome message, 0 to disable"
-    )
+    @commands.command(brief="Set the deletion delay for the welcome message, 0 to disable")
     async def joinmsgdel(self, ctx: bot.AoiContext, secs: int):
         await self.bot.db.set_welcome_message(ctx.guild.id, delete=secs)
         await ctx.send_ok(
-            f"Join messages will {'never ' if not secs else ''}delete"
-            + (f" after {secs}s" if secs else "")
+            f"Join messages will {'never ' if not secs else ''}delete" + (f" after {secs}s" if secs else "")
         )
 
     @commands.Cog.listener()
@@ -141,12 +129,7 @@ class WelcomeGoodbye(commands.Cog):
                 await self.bot.db.del_auto_role(member.guild, r)
 
             if self.bot.db.auto_roles[member.guild.id]:
-                await member.add_roles(
-                    *[
-                        member.guild.get_role(r)
-                        for r in self.bot.db.auto_roles[member.guild.id]
-                    ]
-                )
+                await member.add_roles(*[member.guild.get_role(r) for r in self.bot.db.auto_roles[member.guild.id]])
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):

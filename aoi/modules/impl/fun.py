@@ -18,12 +18,12 @@ import io
 import typing
 from textwrap import dedent
 
-import aiohttp
-import hikari
 import PIL.Image
 import PIL.ImageDraw
 import PIL.ImageFont
 import PIL.ImageOps
+import aiohttp
+import hikari
 import tanjun
 
 from aoi.bot import injected
@@ -50,19 +50,10 @@ async def anime_quote(
             if resp.status == 200:
                 master_resp = await resp.json()
                 await ctx.respond(
-                    dedent(
-                        f"""
-                    > {master_resp['quote']}
-                    ~ {master_resp['character']}
-                    
-                    Anime: {master_resp['anime']}"
-                    """
-                    )
+                    f"> {master_resp['quote']}" f"~ {master_resp['character']}" f"Anime: {master_resp['anime']}"
                 )
             else:
-                await ctx.respond(
-                    f"API returned code: `{resp.status}`. Try again later..."
-                )
+                await ctx.respond(f"API returned code: `{resp.status}`. Try again later...")
 
 
 async def minesweeper(
@@ -76,8 +67,7 @@ async def minesweeper(
 ):
     try:
         await ctx.respond(
-            ("```%s```" if raw else "%s")
-            % SpoilerMinesweeper(height, width, bombs).discord_str(no_spoiler)
+            ("```%s```" if raw else "%s") % SpoilerMinesweeper(height, width, bombs).discord_str(no_spoiler)
         )
     except MinesweeperError as e:
         await ctx.respond(embed=_embed.error_embed(ctx, description=str(e)))
@@ -86,20 +76,14 @@ async def minesweeper(
 async def waifu(ctx: typing.Union[tanjun.abc.SlashContext, tanjun.abc.MessageContext]):
     async with aiohttp.ClientSession() as sess:
         async with sess.get("https://api.waifu.pics/sfw/waifu") as resp:
-            await ctx.respond(
-                embed=hikari.Embed(title="A waifu").set_image(
-                    (await resp.json())["url"]
-                )
-            )
+            await ctx.respond(embed=hikari.Embed(title="A waifu").set_image((await resp.json())["url"]))
 
 
 async def simp(
     ctx: typing.Union[tanjun.abc.SlashContext, tanjun.abc.MessageContext],
     _member: typing.Optional[hikari.Member],
 ):
-    member: hikari.Member = _member or ctx.cache.get_guild(ctx.guild_id).get_member(
-        ctx.author.id
-    )
+    member: hikari.Member = _member or ctx.cache.get_guild(ctx.guild_id).get_member(ctx.author.id)
     bounds = (490, 145, 685, 178)
     target_width = bounds[2] - bounds[0]
     img_copy: PIL.Image = simp_img.copy().convert("RGBA")

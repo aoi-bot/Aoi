@@ -2,14 +2,11 @@ from __future__ import annotations
 
 import colorsys
 import datetime
-import math
 import re
 import typing
 
-import dateparser
 import discord
 import webcolors
-from discord.ext import commands
 from discord.ext.commands import BadArgument
 
 duration_parser = re.compile(
@@ -41,9 +38,7 @@ def t_delta() -> typing.Callable[[str], datetime.timedelta]:
             if not match:
                 raise BadArgument(f"`{arg}` is not a valid duration string.")
 
-            duration_dict = {
-                unit: int(amount) for unit, amount in match.groupdict(default=0).items()
-            }
+            duration_dict = {unit: int(amount) for unit, amount in match.groupdict(default=0).items()}
             delta = datetime.timedelta(**duration_dict)
 
         return delta
@@ -75,12 +70,10 @@ class AoiColor:
                 clr = webcolors.html5_parse_simple_color(f"#{arg}")
                 return cls(clr.red, clr.green, clr.blue)
             except ValueError:
-                raise commands.BadColourArgument(orig)
+                raise ValueError(orig)
         elif len(arg) == 3:
             try:
-                clr = webcolors.html5_parse_simple_color(
-                    "#" + "".join(f"{c}{c}" for c in arg)
-                )
+                clr = webcolors.html5_parse_simple_color("#" + "".join(f"{c}{c}" for c in arg))
                 return cls(clr.red, clr.green, clr.blue)
             except ValueError:
                 raise ValueError(orig)
@@ -123,25 +116,8 @@ class FuzzyAoiColor(AoiColor):
                 return cls(0, 0, 0, attempt=orig)
         elif len(arg) == 3:
             try:
-                clr = webcolors.html5_parse_simple_color(
-                    "#" + "".join(f"{c}{c}" for c in arg)
-                )
+                clr = webcolors.html5_parse_simple_color("#" + "".join(f"{c}{c}" for c in arg))
                 return cls(clr.red, clr.green, clr.blue)
             except ValueError:
                 return cls(0, 0, 0, attempt=orig)
         return cls(0, 0, 0, attempt=orig)
-
-
-async def partial_emoji_convert(ctx: AoiContext, arg: str) -> discord.PartialEmoji:
-    match = re.match(r"<(a?):([a-zA-Z0-9_]+):([0-9]+)>$", arg)
-
-    if match:
-        emoji_animated = bool(match.group(1))
-        emoji_name = match.group(2)
-        emoji_id = int(match.group(3))
-
-        return discord.PartialEmoji.with_state(
-            ctx.bot._connection, animated=emoji_animated, name=emoji_name, id=emoji_id
-        )
-
-    return discord.PartialEmoji.with_state(ctx.bot._connection, name=arg)

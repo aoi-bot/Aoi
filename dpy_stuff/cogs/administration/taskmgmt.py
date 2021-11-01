@@ -19,9 +19,7 @@ class TaskManagement(commands.Cog):
     @commands.command(brief="List your active tasks")
     async def mytasks(self, ctx: bot.AoiContext):
         if ctx.author in self.bot.tasks and self.bot.tasks[ctx.author]:
-            return await ctx.paginate(
-                self.bot.tasks[ctx.author], 5, "Your running tasks", numbered=True
-            )
+            return await ctx.paginate(self.bot.tasks[ctx.author], 5, "Your running tasks", numbered=True)
         await ctx.send_info("You have no running tasks")
 
     @commands.is_owner()
@@ -42,9 +40,7 @@ class TaskManagement(commands.Cog):
         if ctx.author not in self.bot.tasks or not self.bot.tasks[ctx.author]:
             return await ctx.send_info("You have no running tasks")
         if num < -1 or num >= len(self.bot.tasks[ctx.author]):
-            return await ctx.send_error(
-                f"Invalid task, do `{ctx.prefix}mytasks` to see your tasks."
-            )
+            return await ctx.send_error(f"Invalid task, do `{ctx.prefix}mytasks` to see your tasks.")
         task = self.bot.tasks[ctx.author][num]
         await ctx.send_ok("Cancel task?\n" + str(task) + "\n`yes` or `cancel`")
         conf = await ctx.input(str, ch=lambda m: m.lower() in ["yes"])

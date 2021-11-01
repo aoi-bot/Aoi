@@ -18,7 +18,9 @@ import typing
 
 import hikari
 import tanjun
+
 import aoi
+
 
 class EmbedCreator:
     OK = 0
@@ -40,16 +42,12 @@ class EmbedCreator:
             await ctx.respond(content)
         else:
             await ctx.respond(
-                embed=await (
-                    [self.ok_embed, self.info_embed, self.error_embed][typ](
-                        ctx, description=content
-                    )
-                )
+                embed=await ([self.ok_embed, self.info_embed, self.error_embed][typ](ctx, description=content))
             )
 
     async def ok_embed(
         self,
-        ctx: typing.Union[tanjun.abc.SlashContext, tanjun.abc.MessageContext],
+        ctx: tanjun.abc.Context,
         /,
         *,
         title: typing.Any = None,
@@ -64,7 +62,7 @@ class EmbedCreator:
 
     async def error_embed(
         self,
-        ctx: typing.Union[tanjun.abc.SlashContext, tanjun.abc.MessageContext],
+        ctx: tanjun.abc.Context,
         /,
         *,
         title: typing.Any = None,
@@ -79,7 +77,7 @@ class EmbedCreator:
 
     async def info_embed(
         self,
-        ctx: typing.Union[tanjun.abc.SlashContext, tanjun.abc.MessageContext],
+        ctx: tanjun.abc.Context,
         /,
         *,
         title: typing.Any = None,

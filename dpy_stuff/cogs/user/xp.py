@@ -116,9 +116,7 @@ class XP(commands.Cog):
             font=name_font,
             fill=color,
         )
-        rem_level_size = draw.textsize(
-            f"{x}/" f"{_xp_per_level(l + 1)}", font=self.text_font
-        )[0]
+        rem_level_size = draw.textsize(f"{x}/" f"{_xp_per_level(l + 1)}", font=self.text_font)[0]
         # y 10 x 111 364
         draw.text(
             (230 - rem_level_size / 2, 19),
@@ -128,9 +126,7 @@ class XP(commands.Cog):
         )
         return img
 
-    async def _xp_values(
-        self, ctx: bot.AoiContext, member: discord.Member, rank_func: callable, xp: int
-    ):
+    async def _xp_values(self, ctx: bot.AoiContext, member: discord.Member, rank_func: callable, xp: int):
         member = member or ctx.author
         await self.bot.db.ensure_xp_entry(member)
         level, partial = _level(xp)
@@ -146,8 +142,7 @@ class XP(commands.Cog):
                 ctx, member, self._get_rank, self.bot.db.xp[ctx.guild.id][member.id]
             )
             return await ctx.send(
-                f"**{member}'s Server XP**\n"
-                f"#**{rank}**  Level: **{level}**  **{partial}**/**{required}**"
+                f"**{member}'s Server XP**\n" f"#**{rank}**  Level: **{level}**  **{partial}**/**{required}**"
             )
         buf = io.BytesIO()
         (
@@ -171,8 +166,7 @@ class XP(commands.Cog):
                 ctx, member, self._get_global_rank, self.bot.db.global_xp[member.id]
             )
             return await ctx.send(
-                f"**{member}'s Global XP**\n"
-                f"#**{rank}**  Level: **{level}**  **{partial}**/**{required}**"
+                f"**{member}'s Global XP**\n" f"#**{rank}**  Level: **{level}**  **{partial}**/**{required}**"
             )
         buf = io.BytesIO()
         (
@@ -206,20 +200,13 @@ class XP(commands.Cog):
         if self.bot.db.xp[member.guild.id][member.id] < 0:
             self.bot.db.xp[member.guild.id][member.id] = 0
         await self.bot.db.cache_flush()
-        await ctx.send_ok(
-            f"{abs(xp)} xp {'added to' if xp >= 0 else 'taken from'} {member.mention}"
-        )
+        await ctx.send_ok(f"{abs(xp)} xp {'added to' if xp >= 0 else 'taken from'} {member.mention}")
 
     @commands.command(brief="Checks server xp leaderboard")
     async def xplb(self, ctx: bot.AoiContext, page: int = 1):
         r = self._get_ranked(ctx.guild.id)
         _n_per_page = 10
-        top_10 = {
-            k: (n, r[k])
-            for n, k in enumerate(
-                list(r.keys())[(page - 1) * _n_per_page : page * _n_per_page]
-            )
-        }
+        top_10 = {k: (n, r[k]) for n, k in enumerate(list(r.keys())[(page - 1) * _n_per_page : page * _n_per_page])}
         await ctx.embed(
             title="Leaderboard",
             fields=[

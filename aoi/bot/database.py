@@ -12,9 +12,14 @@ import hikari
 from aiosqlite import Connection
 from discord.ext import commands, tasks
 
-from aoi.bot.database_models import (AoiMessageModel, GuildSettingModel,
-                                     PunishmentModel, PunishmentTypeModel,
-                                     RoleShopItemModel, TimedPunishmentModel)
+from aoi.bot.database_models import (
+    AoiMessageModel,
+    GuildSettingModel,
+    PunishmentModel,
+    PunishmentTypeModel,
+    RoleShopItemModel,
+    TimedPunishmentModel,
+)
 
 if TYPE_CHECKING:
     from aoi import bot
@@ -246,12 +251,8 @@ class AoiDatabase:
 
         self.blacklisted: List[int] = []
 
-        self.xp_cooldown = commands.CooldownMapping.from_cooldown(
-            1.0, 180.0, commands.BucketType.member
-        )
-        self.global_currency_cooldown = commands.CooldownMapping.from_cooldown(
-            1.0, 60.0, commands.BucketType.user
-        )
+        self.xp_cooldown = commands.CooldownMapping.from_cooldown(1.0, 180.0, commands.BucketType.member)
+        self.global_currency_cooldown = commands.CooldownMapping.from_cooldown(1.0, 60.0, commands.BucketType.user)
 
     async def perform_migrations(self):
         version = (await (await self.conn.execute("pragma user_version")).fetchone())[0]
@@ -380,26 +381,20 @@ class AoiDatabase:
                 for u in users:
                     xp = self.xp[guild][u]
 
-                    a = await self.conn.execute(
-                        "SELECT * from xp where guild = ? and user=?", (guild, u)
-                    )
+                    a = await self.conn.execute("SELECT * from xp where guild = ? and user=?", (guild, u))
                     if not await a.fetchall():
                         await self.conn.execute(
                             "INSERT INTO xp (user, guild, xp) values (?,?,?)",
                             (u, guild, 0),
                         )
 
-                    await self.conn.execute(
-                        "UPDATE xp set xp=? where user=? and guild=?", (xp, u, guild)
-                    )
+                    await self.conn.execute("UPDATE xp set xp=? where user=? and guild=?", (xp, u, guild))
             await self.conn.commit()
             self.changed_xp = {}
 
         async with self.global_currency_lock:
             for u in self.changed_global_currency:
-                a = await self.conn.execute(
-                    "SELECT * from global_currency where user=?", (u,)
-                )
+                a = await self.conn.execute("SELECT * from global_currency where user=?", (u,))
                 if not await a.fetchall():
                     await self.conn.execute(
                         "insert into global_currency (user, amount) " "values (?,?)",
@@ -413,9 +408,7 @@ class AoiDatabase:
             self.changed_global_currency = []
         async with self.title_lock:
             for u in self.changed_global_users:
-                a = await self.conn.execute(
-                    "select * from user_global where user=?", (u,)
-                )
+                a = await self.conn.execute("select * from user_global where user=?", (u,))
                 if not await a.fetchall():
                     await self.conn.execute(
                         "insert into user_global (user, title, badges, owned_titles, owned_badges,"
@@ -460,9 +453,7 @@ class AoiDatabase:
             self.changed_guild_currency = {}
         async with self.currency_gain_lock:
             for g in self.changed_currency_gains:
-                a = await self.conn.execute(
-                    "SELECT * from currency_gains where guild=?", (g,)
-                )
+                a = await self.conn.execute("SELECT * from currency_gains where guild=?", (g,))
                 if not await a.fetchall():
                     await self.conn.execute(
                         "insert into currency_gains (guild, gain) " "values (?,?)",
@@ -477,9 +468,7 @@ class AoiDatabase:
 
         async with self.guild_shop_lock:
             for guild in self.changed_guild_shop:
-                await self.conn.execute(
-                    "DELETE FROM guild_shop WHERE guild=?", (guild,)
-                )
+                await self.conn.execute("DELETE FROM guild_shop WHERE guild=?", (guild,))
                 for shop_item in self.guild_shop[guild]:
                     await self.conn.execute(
                         "INSERT INTO guild_shop (guild, type, data, cost) values (?,?,?,?)",
@@ -550,21 +539,12 @@ class AoiDatabase:
     # region # Self roles
 
     async def get_self_roles(self, guild: hikari.PartialGuild) -> List[int]:
-        return [
-            a[0]
-            for a in await self.conn.execute_fetchall(
-                f"select role from selfrole where guild=?", (guild.id,)
-            )
-        ]
+        return [a[0] for a in await self.conn.execute_fetchall("select role from selfrole where guild=?", (guild.id,))]
 
-    async def add_self_role(
-        self, guild: hikari.PartialGuild, role: discord.Role
-    ) -> None:
+    async def add_self_role(self, guild: hikari.PartialGuild, role: discord.Role) -> None:
         if role.id in await self.get_self_roles(guild):
             return
-        await self.conn.execute(
-            "insert into selfrole (guild, role) values (?,?)", (guild.id, role.id)
-        )
+        await self.conn.execute("insert into selfrole (guild, role) values (?,?)", (guild.id, role.id))
         await self.conn.commit()
 
     async def remove_self_role(self, role: Union[discord.Role, int]) -> None:
@@ -584,24 +564,18 @@ class AoiDatabase:
                 if guild.id not in self.changed_guild_shop:
                     self.changed_guild_shop.append(guild.id)
 
-    async def get_guild_shop(
-        self, guild: hikari.PartialGuild
-    ) -> List[RoleShopItemModel]:
+    async def get_guild_shop(self, guild: hikari.PartialGuild) -> List[RoleShopItemModel]:
         await self.ensure_guild_shop(guild)
         return self.guild_shop[guild.id]
 
-    async def add_guild_shop_item(
-        self, guild: hikari.PartialGuild, typ: str, data: str, cost: int
-    ) -> None:
+    async def add_guild_shop_item(self, guild: hikari.PartialGuild, typ: str, data: str, cost: int) -> None:
         await self.ensure_guild_shop(guild)
         async with self.guild_shop_lock:
             self.guild_shop[guild.id].append(RoleShopItemModel(typ, data, cost))
             if guild.id not in self.changed_guild_shop:
                 self.changed_guild_shop.append(guild.id)
 
-    async def del_guild_shop_item(
-        self, guild: hikari.PartialGuild, typ: str, data: str
-    ):
+    async def del_guild_shop_item(self, guild: hikari.PartialGuild, typ: str, data: str):
         await self.ensure_guild_shop(guild)
         for i in self.guild_shop[guild.id]:
             if i.data == data and i.type == typ:
@@ -616,9 +590,7 @@ class AoiDatabase:
 
     # region # Helper Methods
 
-    async def add_guild_shop_role(
-        self, guild: hikari.PartialGuild, role: discord.Role, cost: int
-    ) -> None:
+    async def add_guild_shop_role(self, guild: hikari.PartialGuild, role: discord.Role, cost: int) -> None:
         await self.add_guild_shop_item(guild, "role", str(role.id), cost)
 
     # endregion
@@ -684,9 +656,7 @@ class AoiDatabase:
             self.titles[member.id] = self.owned_titles[member.id][index]
         await self.cache_flush()
 
-    async def get_badges_titles(
-        self, member: hikari.Member
-    ) -> Tuple[str, List[str], List[str], List[str], str]:
+    async def get_badges_titles(self, member: hikari.Member) -> Tuple[str, List[str], List[str], List[str], str]:
         await self.ensure_user_entry(member)
         async with self.title_lock:
             if member.id not in self.titles:
@@ -695,8 +665,7 @@ class AoiDatabase:
                 self.owned_badges[member.id] = []
                 self.owned_titles[member.id] = []
                 await self.conn.execute(
-                    "insert into user_global (user, title, badges, owned_titles, owned_badges) "
-                    "values (?,?,?,?,?)",
+                    "insert into user_global (user, title, badges, owned_titles, owned_badges) " "values (?,?,?,?,?)",
                     (member.id, "", "", "", ""),
                 )
                 await self.conn.commit()
@@ -748,9 +717,7 @@ class AoiDatabase:
 
     async def award_global_currency(self, member: hikari.Member, amount: int):
         async with self.global_currency_lock:
-            self.global_currency[member.id] = (
-                self.global_currency.get(member.id, 0) + amount
-            )
+            self.global_currency[member.id] = self.global_currency.get(member.id, 0) + amount
             if member.id not in self.changed_global_currency:
                 self.changed_global_currency.append(member.id)
 
@@ -767,9 +734,7 @@ class AoiDatabase:
         if self.global_currency_cooldown.get_bucket(msg).update_rate_limit():
             return
         async with self.global_currency_lock:
-            self.global_currency[msg.author.id] = (
-                self.global_currency.get(msg.author.id, 0) + 1
-            )
+            self.global_currency[msg.author.id] = self.global_currency.get(msg.author.id, 0) + 1
             if msg.author.id not in self.changed_global_currency:
                 self.changed_global_currency.append(msg.author.id)
 
@@ -826,13 +791,9 @@ class AoiDatabase:
                 self.changed_xp[msg.guild.id].append(msg.author.id)
 
         await self.ensure_currency_gain(msg.guild)
-        await self.ensure_guild_currency_entry(
-            self.bot.cache.get_guild(msg.guild_id).get_member(msg.author.id)
-        )
+        await self.ensure_guild_currency_entry(self.bot.cache.get_guild(msg.guild_id).get_member(msg.author.id))
         async with self.guild_currency_lock:
-            self.guild_currency[msg.guild.id][msg.author.id] += self.currency_gains[
-                msg.guild.id
-            ]
+            self.guild_currency[msg.guild.id][msg.author.id] += self.currency_gains[msg.guild.id]
             if msg.guild.id not in self.changed_guild_currency:
                 self.changed_guild_currency[msg.guild.id] = []
             if msg.author.id not in self.changed_guild_currency[msg.guild.id]:
@@ -843,9 +804,7 @@ class AoiDatabase:
     # region # Moderation
 
     async def lookup_punishments(self, user: int) -> List[PunishmentModel]:
-        cursor = await self.conn.execute(
-            "SELECT * from punishments where user=?", (user,)
-        )
+        cursor = await self.conn.execute("SELECT * from punishments where user=?", (user,))
         punishments = await cursor.fetchall()
         return [
             PunishmentModel(
@@ -857,36 +816,24 @@ class AoiDatabase:
             for p in punishments
         ]
 
-    async def add_punishment(
-        self, user: int, guild: int, staff: int, typ: int, reason: str = None
-    ):
+    async def add_punishment(self, user: int, guild: int, staff: int, typ: int, reason: str = None):
         await self.conn.execute(
-            "INSERT INTO punishments "
-            "(user, guild, staff, type, reason, timestamp) values"
-            "(?,?,?,?,?,?)",
+            "INSERT INTO punishments " "(user, guild, staff, type, reason, timestamp) values" "(?,?,?,?,?,?)",
             (user, guild, staff, typ, reason, datetime.datetime.now().timestamp()),
         )
         await self.conn.commit()
 
     async def add_user_ban(self, user: int, ctx: bot.AoiContext, reason: str = None):
-        await self.add_punishment(
-            user, ctx.guild.id, ctx.author.id, PunishmentTypeModel.BAN, reason
-        )
+        await self.add_punishment(user, ctx.guild.id, ctx.author.id, PunishmentTypeModel.BAN, reason)
 
     async def add_user_mute(self, user: int, ctx: bot.AoiContext, reason: str = None):
-        await self.add_punishment(
-            user, ctx.guild.id, ctx.author.id, PunishmentTypeModel.MUTE, reason
-        )
+        await self.add_punishment(user, ctx.guild.id, ctx.author.id, PunishmentTypeModel.MUTE, reason)
 
     async def add_user_warn(self, user: int, ctx: bot.AoiContext, reason: str = None):
-        await self.add_punishment(
-            user, ctx.guild.id, ctx.author.id, PunishmentTypeModel.WARN, reason
-        )
+        await self.add_punishment(user, ctx.guild.id, ctx.author.id, PunishmentTypeModel.WARN, reason)
 
     async def add_user_kick(self, user: int, ctx: bot.AoiContext, reason: str = None):
-        await self.add_punishment(
-            user, ctx.guild.id, ctx.author.id, PunishmentTypeModel.KICK, reason
-        )
+        await self.add_punishment(user, ctx.guild.id, ctx.author.id, PunishmentTypeModel.KICK, reason)
 
     async def get_warnp(self, guild: int, warns: int) -> Optional[str]:
         rows = list(
@@ -898,9 +845,7 @@ class AoiDatabase:
         return rows[0][0] if rows else None
 
     async def set_warnp(self, guild: int, warns: int, action: str):
-        await self.conn.execute(
-            "delete from warnpunish where guild=? and level=?", (guild, warns)
-        )
+        await self.conn.execute("delete from warnpunish where guild=? and level=?", (guild, warns))
         await self.conn.execute(
             "insert into warnpunish (guild, level, action) values (?,?,?)",
             (guild, warns, action),
@@ -908,9 +853,7 @@ class AoiDatabase:
         await self.conn.commit()
 
     async def del_warnp(self, guild: int, warns: int):
-        await self.conn.execute(
-            "delete from warnpunish where guild=? and level=?", (guild, warns)
-        )
+        await self.conn.execute("delete from warnpunish where guild=? and level=?", (guild, warns))
         await self.conn.commit()
 
     async def get_all_warnp(self, guild: int) -> List[Tuple[int, str]]:
@@ -922,9 +865,7 @@ class AoiDatabase:
         )
         return list(map(tuple, rows))
 
-    async def add_timed_punishment(
-        self, guild: int, duration: datetime.timedelta, user: int, role: int, mute: bool
-    ):
+    async def add_timed_punishment(self, guild: int, duration: datetime.timedelta, user: int, role: int, mute: bool):
         await self.conn.execute(
             "insert into punishments (id, guild, end, user, role, ismute) values (?,?,?,?,?)",
             (
@@ -949,18 +890,14 @@ class AoiDatabase:
             _id, guild, role, end, ismute, user = *r[0:4], r[4] == 1, r[5]  # noqa
             if guild not in punishments:
                 punishments[guild] = []
-            punishments[guild].append(
-                TimedPunishmentModel(_id, guild, role, end, ismute, user)
-            )
+            punishments[guild].append(TimedPunishmentModel(_id, guild, role, end, ismute, user))
         return punishments
 
     # endregion
 
     # region # Config
 
-    async def _auto_messages(
-        self, guild: int
-    ) -> Tuple[AoiMessageModel, AoiMessageModel]:
+    async def _auto_messages(self, guild: int) -> Tuple[AoiMessageModel, AoiMessageModel]:
         if guild not in self.messages:
             async with self.messages_lock:
                 try:
@@ -1030,9 +967,7 @@ class AoiDatabase:
     async def guild_setting(self, guild: int) -> GuildSettingModel:
         if guild not in self.guild_settings:
             try:
-                await self.conn.execute(
-                    "INSERT INTO guild_settings (Guild) values (?)", (guild,)
-                )
+                await self.conn.execute("INSERT INTO guild_settings (Guild) values (?)", (guild,))
             except sqlite3.IntegrityError:
                 self.logger.warning(f"Passing IntegrityError for guild {guild}")
             await self.conn.commit()
@@ -1064,21 +999,12 @@ class AoiDatabase:
 
     async def add_currency_channel(self, channel: discord.TextChannel):
         await self.guild_setting(channel.guild.id)
-        if (
-            channel.id
-            not in self.guild_settings[channel.guild.id].currency_gen_channels
-        ):
-            self.guild_settings[channel.guild.id].currency_gen_channels.append(
-                channel.id
-            )
+        if channel.id not in self.guild_settings[channel.guild.id].currency_gen_channels:
+            self.guild_settings[channel.guild.id].currency_gen_channels.append(channel.id)
         await self.conn.execute(
-            f"UPDATE guild_settings SET currency_gen_channels=? WHERE Guild=?",
+            "UPDATE guild_settings SET currency_gen_channels=? WHERE Guild=?",
             (
-                ",".join(
-                    map(
-                        str, self.guild_settings[channel.guild.id].currency_gen_channels
-                    )
-                ),
+                ",".join(map(str, self.guild_settings[channel.guild.id].currency_gen_channels)),
                 channel.guild.id,
             ),
         )
@@ -1087,40 +1013,28 @@ class AoiDatabase:
     async def remove_currency_channel(self, channel: discord.TextChannel):
         await self.guild_setting(channel.guild.id)
         if channel.id in self.guild_settings[channel.guild.id].currency_gen_channels:
-            self.guild_settings[channel.guild.id].currency_gen_channels.remove(
-                channel.id
-            )
+            self.guild_settings[channel.guild.id].currency_gen_channels.remove(channel.id)
         await self.conn.execute(
-            f"UPDATE guild_settings SET currency_gen_channels=? WHERE Guild=?",
+            "UPDATE guild_settings SET currency_gen_channels=? WHERE Guild=?",
             (
-                ",".join(
-                    map(
-                        str, self.guild_settings[channel.guild.id].currency_gen_channels
-                    )
-                ),
+                ",".join(map(str, self.guild_settings[channel.guild.id].currency_gen_channels)),
                 channel.guild.id,
             ),
         )
         await self.conn.commit()
 
     async def set_ok_color(self, guild: int, value: str):
-        await self.conn.execute(
-            f"UPDATE guild_settings SET OkColor=? WHERE Guild=?", (value, guild)
-        )
+        await self.conn.execute("UPDATE guild_settings SET OkColor=? WHERE Guild=?", (value, guild))
         await self.conn.commit()
         self.guild_settings[guild].ok_color = int(value, 16)
 
     async def set_error_color(self, guild: int, value: str):
-        await self.conn.execute(
-            f"UPDATE guild_settings SET ErrorColor=? WHERE Guild=?", (value, guild)
-        )
+        await self.conn.execute("UPDATE guild_settings SET ErrorColor=? WHERE Guild=?", (value, guild))
         await self.conn.commit()
         self.guild_settings[guild].error_color = int(value, 16)
 
     async def set_info_color(self, guild: int, value: str):
-        await self.conn.execute(
-            f"UPDATE guild_settings SET InfoColor=? WHERE Guild=?", (value, guild)
-        )
+        await self.conn.execute("UPDATE guild_settings SET InfoColor=? WHERE Guild=?", (value, guild))
         await self.conn.commit()
         self.guild_settings[guild].info_color = int(value, 16)
 
@@ -1133,17 +1047,13 @@ class AoiDatabase:
         self.guild_settings[guild].reply_embeds = value
 
     async def set_prefix(self, guild: int, prefix: str):
-        await self.conn.execute(
-            f"UPDATE guild_settings SET Prefix=? WHERE Guild=?", (prefix, guild)
-        )
+        await self.conn.execute("UPDATE guild_settings SET Prefix=? WHERE Guild=?", (prefix, guild))
         await self.conn.commit()
         self.prefixes[guild] = prefix
 
     async def get_permissions(self, guild: int):
         if guild not in self.perm_chains:
-            await self.conn.execute(
-                "INSERT INTO permissions (guild) values (?)", (guild,)
-            )
+            await self.conn.execute("INSERT INTO permissions (guild) values (?)", (guild,))
             await self.conn.commit()
             self.perm_chains[guild] = ["asm enable"]
         return [s for s in self.perm_chains[guild]]
