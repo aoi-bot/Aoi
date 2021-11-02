@@ -17,13 +17,14 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 import tanjun
 
 import aoi.modules.impl.poll as impl
-from aoi import AoiMessageContext
+from aoi import AoiMessageContext, with_description
 
 component = tanjun.Component(name="polls")
 
 
 @component.with_command
 @tanjun.with_greedy_argument("content")
+@with_description("Create a poll")
 @tanjun.with_parser
 @tanjun.as_message_command("poll")
 async def poll(ctx: AoiMessageContext, content: str):

@@ -19,15 +19,38 @@ import typing
 import tanjun
 
 _descriptions: dict[tanjun.abc.MessageCommand, str] = {}
+_hidden: list[tanjun.abc.MessageCommand] = []
 
 
 class HelpClient:
     def __init__(self):
         pass
 
-    @property
-    def descriptions(self) -> dict[tanjun.abc.MessageCommand, str]:
-        return _descriptions
+    @staticmethod
+    def get_help_for(command_name: typing.Union[str, tanjun.abc.MessageCommand]) -> typing.Optional[str]:
+        if isinstance(command_name, tanjun.abc.MessageCommand):
+            command_name = typing.cast(list[str], command_name.names)[0]
+        for command, help_str in _descriptions.items():
+            if command_name in command.names:
+                return help_str
+
+    @staticmethod
+    def is_hidden(command_name: typing.Union[str, tanjun.abc.MessageCommand]) -> bool:
+        if isinstance(command_name, tanjun.abc.MessageCommand):
+            command_name = typing.cast(list[str], command_name.names)[0]
+        for command in _hidden:
+            if command_name in command.names:
+                return True
+        return False
+
+    @staticmethod
+    def is_visible(command_name: typing.Union[str, tanjun.abc.MessageCommand]) -> bool:
+        if isinstance(command_name, tanjun.abc.MessageCommand):
+            command_name = typing.cast(list[str], command_name.names)[0]
+        for command in _hidden:
+            if command_name in command.names:
+                return False
+        return True
 
 
 def with_description(
@@ -38,3 +61,10 @@ def with_description(
         return command
 
     return deco
+
+
+def as_hidden(command: tanjun.abc.MessageCommand) -> tanjun.abc.MessageCommand:
+    if command in _hidden:
+        raise ValueError("Command already hidden")
+    _hidden.append(command)
+    return command

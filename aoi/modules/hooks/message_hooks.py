@@ -25,15 +25,6 @@ component = tanjun.Component(name="message_hooks")
 hooks = tanjun.MessageHooks()
 
 
-@component.with_command
-@tanjun.with_owner_check
-@tanjun.with_argument("foo", converters=(int,))
-@tanjun.with_parser
-@tanjun.as_message_command("foo")
-async def modules_reload(ctx: tanjun.abc.MessageContext, foo: int):
-    await ctx.respond(foo)
-
-
 @hooks.with_on_parser_error
 async def on_parser_error(ctx: tanjun.abc.MessageContext, error: tanjun.errors.ParserError) -> None:
     embed_creator: EmbedCreator = ctx.client.metadata["_embed"]

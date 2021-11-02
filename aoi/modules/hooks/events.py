@@ -14,34 +14,32 @@ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEM
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+import logging
+import typing
+
+import hikari
 import tanjun
 
-import aoi.modules.impl.utility as impl
-from aoi import AoiMessageContext, with_description
-from aoi.bot import injected
+from aoi import HelpClient
 
-component = tanjun.Component(name="utility")
+component = tanjun.Component(name="events")
+tanjun_client: typing.Optional[tanjun.Client] = None
 
 
-@component.with_command
-@tanjun.with_argument("base1", converters=(str,))
-@tanjun.with_argument("base2", converters=(str,))
-@tanjun.with_argument("value", converters=(str,))
-@with_description("Convert a number between bases")
-@tanjun.with_parser
-@tanjun.as_message_command("baseconvert", "bconv")
-async def baseconvert(
-    ctx: AoiMessageContext,
-    base1: str,
-    base2: str,
-    value: str,
-    _embed: injected.EmbedCreator = tanjun.injected(type=injected.EmbedCreator),
-):
-    await impl.baseconvert(ctx, base1, base2, value, _embed)
+@component.with_listener(hikari.StartedEvent)
+async def bot_started(event: hikari.StartedEvent, help_client: HelpClient = tanjun.injected(type=HelpClient)):
+    logger = logging.getLogger("check.commands")
+    for command in tanjun_client.iter_message_commands():
+        if not help_client.get_help_for(command) and help_client.is_visible(command):
+            logger.warning(
+                f"Command {command.component.name}.{typing.cast(list[str], command.names)[0]} has no help description"
+            )
 
 
 @tanjun.as_loader
 def load(client: tanjun.Client):
+    global tanjun_client
+    tanjun_client = client
     client.add_component(component.copy())
 
 
