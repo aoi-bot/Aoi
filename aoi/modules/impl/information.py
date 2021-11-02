@@ -135,8 +135,10 @@ async def voiceinfo(ctx: AoiContextMixin, channel: hikari.GuildVoiceChannel):
     ).send()
 
 
-async def textinfo(self, ctx: AoiContextMixin, channel: hikari.GuildTextChannel):
-    ...  # TODO Waiting on text converter
+async def textinfo(ctx: AoiContextMixin, channel: hikari.GuildTextChannel):
+    await ctx.get_builder().with_title(f"Info for {channel}").add_field("ID", str(channel.id)).add_field(
+        "Created at", str(channel.created_at.strftime("%c"))
+    ).add_field("Slowmode", f"{channel.rate_limit_per_user}s" if channel.rate_limit_per_user else "No Slowmode").send()
 
 
 async def emojiinfo(ctx: AoiContextMixin, emoji: hikari.CustomEmoji):

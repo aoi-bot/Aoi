@@ -20,7 +20,7 @@ import hikari
 import tanjun
 
 import aoi.modules.impl.information as impl
-from aoi import AoiMessageContext, to_voice_channel
+from aoi import AoiMessageContext, to_voice_channel, to_text_channel
 from aoi.bot import with_description
 
 component = tanjun.Component(name="information")
@@ -79,11 +79,11 @@ async def voiceinfo(ctx: AoiMessageContext, channel: hikari.GuildVoiceChannel):
 
 
 @component.with_command
-@tanjun.with_greedy_argument("channel", converters=(tanjun.to_channel,), default=None)
+@tanjun.with_greedy_argument("channel", converters=(to_text_channel,), default=None)
 @with_description("Reveal information about a specific text channel")
 @tanjun.with_parser
-@tanjun.as_message_command("textinfo", "tinfo")
-async def textinfo(ctx: AoiMessageContext, channel: hikari.GuildVoiceChannel):
+@tanjun.as_message_command("textinfo", "tcinfo")
+async def textinfo(ctx: AoiMessageContext, channel: hikari.GuildTextChannel):
     await impl.textinfo(ctx, channel)
 
 
