@@ -83,7 +83,7 @@ async def serverinfo(ctx: AoiContextMixin):
         if member.is_bot:
             statuses["bot"] += 1
         if not member.get_presence():
-                statuses["offline"] += 1
+            statuses["offline"] += 1
         else:
             statuses[member.get_presence().visible_status] += 1
 
@@ -91,7 +91,7 @@ async def serverinfo(ctx: AoiContextMixin):
     for channel in guild.get_channels().values():
         try:
             num_channels[channel.type] += 1
-        except KeyError:  # ??
+        except KeyError:
             num_channels[channel.type] = 1
 
     await ctx.get_builder().with_thumbnail(guild.icon_url).add_field("ID", str(ctx.guild_id)).add_field(
@@ -99,7 +99,7 @@ async def serverinfo(ctx: AoiContextMixin):
     ).add_field("Owner", str(guild.get_member(guild.owner_id))).add_field(
         "Channels",
         f"Text: {num_channels.get(hikari.ChannelType.GUILD_TEXT, 0)}\n"
-        f"Voice: {num_channels.get(hikari.ChannelType.GUILD_VOICE, 0)}"
+        f"Voice: {num_channels.get(hikari.ChannelType.GUILD_VOICE, 0)}",
     ).add_field(
         "System Channel", f"<#{guild.system_channel_id}>" if guild.system_channel_id else "None"
     ).add_field(
@@ -115,5 +115,5 @@ async def serverinfo(ctx: AoiContextMixin):
         f":red_circle: {statuses['dnd']} DND\n"
         f":white_circle: {statuses['offline']} Offline\n"
         f":robot: {statuses['bot']} Bots",
-        inline=True
+        inline=True,
     ).send()
