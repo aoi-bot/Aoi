@@ -21,9 +21,9 @@ import hikari
 import tanjun
 
 BARE_ID = re.compile(r"\d{18,21}")
-CHANNEL = re.compile(r"<#\d{18, 21}>")
-ROLE = re.compile(r"<@&\d{18, 21}>")
-USER = re.compile(r"<@!?\d{18, 21}>")
+CHANNEL = re.compile(r"<#\d{18,21}>")
+ROLE = re.compile(r"<@&\d{18,21}>")
+USER = re.compile(r"<@!?\d{18,21}>")
 
 
 async def to_voice_channel(
@@ -39,3 +39,20 @@ async def to_voice_channel(
         else:
             raise ValueError("Argument passed was not a valid voice channel")
     return typing.cast(hikari.GuildVoiceChannel, ctx.get_guild().get_channel(channel_id))
+
+
+async def to_text_channel(
+    argument: str, ctx: tanjun.abc.Context = tanjun.injected(type=tanjun.abc.Context)
+) -> hikari.GuildTextChannel:
+    if re.match(BARE_ID, argument):
+        channel_id = hikari.Snowflake(argument)
+    elif re.match(CHANNEL, argument):
+        channel_id = hikari.Snowflake(argument[2:-1])
+    else:
+        for snowflake, channel in ctx.get_guild().get_channels().items():
+            if channel.type == hikari.ChannelType.GUILD_TEXT and channel.name.lower() == argument.lower():
+                channel_id = snowflake
+                break
+        else:
+            raise ValueError("Argument passed was not a valid text channel")
+    return typing.cast(hikari.GuildTextChannel, ctx.get_guild().get_channel(channel_id))

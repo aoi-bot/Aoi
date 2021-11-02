@@ -17,4 +17,4 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 from .embeds import EmbedBuilder
 from .help import with_description, HelpClient
 from .input import InputHelper
-from .converters import to_voice_channel
+from .converters import to_voice_channel, to_text_channel
