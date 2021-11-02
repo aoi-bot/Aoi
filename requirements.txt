@@ -12,3 +12,4 @@ dateparser~=1.0.0
 webcolors~=1.11.1
 python-dotenv~=0.17.1
 redis~=3.5.3
+pre-commit
