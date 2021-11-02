@@ -20,7 +20,7 @@ import hikari
 import tanjun
 
 import aoi.modules.impl.information as impl
-from aoi import AoiMessageContext
+from aoi import AoiMessageContext, to_voice_channel
 from aoi.bot import with_description
 
 component = tanjun.Component(name="information")
@@ -59,6 +59,41 @@ async def userinfo(ctx: AoiMessageContext, member: Optional[hikari.Member]):
 @tanjun.as_message_command("serverinfo", "sinfo")
 async def serverinfo(ctx: AoiMessageContext):
     await impl.serverinfo(ctx)
+
+
+@component.with_command
+@with_description("Show all the mentionable roles for this guild")
+@tanjun.with_parser
+@tanjun.as_message_command("menroles", "mentionableroles")
+async def menroles(ctx: AoiMessageContext):
+    await impl.menroles(ctx)
+
+
+@component.with_command
+@tanjun.with_greedy_argument("channel", converters=(to_voice_channel,), default=None)
+@with_description("Reveal information about a specific voice channel")
+@tanjun.with_parser
+@tanjun.as_message_command("voiceinfo", "vinfo")
+async def voiceinfo(ctx: AoiMessageContext, channel: hikari.GuildVoiceChannel):
+    await impl.voiceinfo(ctx, channel)
+
+
+@component.with_command
+@tanjun.with_greedy_argument("channel", converters=(tanjun.to_channel,), default=None)
+@with_description("Reveal information about a specific text channel")
+@tanjun.with_parser
+@tanjun.as_message_command("textinfo", "tinfo")
+async def textinfo(ctx: AoiMessageContext, channel: hikari.GuildVoiceChannel):
+    await impl.textinfo(ctx, channel)
+
+
+@component.with_command
+@tanjun.with_greedy_argument("emoji", converters=(tanjun.to_emoji,), default=None)
+@with_description("Reveal information about a specific CUSTOM emoji")
+@tanjun.with_parser
+@tanjun.as_message_command("emojiinfo", "einfo")
+async def emojiinfo(ctx: AoiMessageContext, emoji: hikari.CustomEmoji):
+    await impl.emojiinfo(ctx, emoji)
 
 
 @tanjun.as_loader

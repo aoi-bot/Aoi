@@ -1,4 +1,5 @@
 import hikari
+import tanjun
 
 from aoi import AoiContextMixin
 
@@ -116,4 +117,40 @@ async def serverinfo(ctx: AoiContextMixin):
         f":white_circle: {statuses['offline']} Offline\n"
         f":robot: {statuses['bot']} Bots",
         inline=True,
+    ).send()
+
+
+async def menroles(ctx: AoiContextMixin):
+    roles: list[hikari.Role] = [r for r in ctx.get_guild().get_roles().values() if r.is_mentionable]
+    await ctx.get_builder().with_title("Mentionable Roles").with_description(
+        " ".join(r.mention for r in roles) if roles else "None"
+    ).send()
+
+
+async def voiceinfo(ctx: AoiContextMixin, channel: hikari.GuildVoiceChannel):
+    await ctx.get_builder().with_title(f"Info for {channel}").add_field("ID", str(channel.id)).add_field(
+        "Created at", str(channel.created_at.strftime("%c"))
+    ).add_field("Max Users", str(channel.user_limit) or "No limit").add_field(
+        "Bitrate", f"{channel.bitrate // 1000}kbps"
+    ).send()
+
+
+async def textinfo(self, ctx: AoiContextMixin, channel: hikari.GuildTextChannel):
+    ...  # TODO Waiting on text converter
+
+
+async def emojiinfo(ctx: AoiContextMixin, emoji: hikari.CustomEmoji):
+    def _(typ: str) -> str:
+        return f"https://cdn.discordapp.com/emojis/{emoji.id}.{typ}?v=1"
+
+    await ctx.get_builder().with_title(f"Info for {emoji}").add_field("ID", str(emoji.id)).add_field(
+        "Name", emoji.name
+    ).add_field("Animated", str(emoji.is_animated)).add_field(
+        "Links",
+        f"[jpeg]({_('jpeg')}) "
+        f"[png]({_('png')}) "
+        f"[webp]({_('webp')}) "
+        f"{f'[gif]({emoji})' if emoji.is_animated else ''}",
+    ).add_field(
+        "Usage", emoji.mention
     ).send()
