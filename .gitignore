@@ -19,3 +19,5 @@ loaders/thumbnails.txt
 
 www/
 /assets/config.yaml
+
+aoi/modules/message_commands/scratch.py
