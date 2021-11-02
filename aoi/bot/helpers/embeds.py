@@ -110,7 +110,7 @@ class EmbedBuilder:
 
         embed = hikari.Embed(color=color, title=self._title, description=self._description, url=self._url)
         for field in self._fields:
-            embed.add_field(*field)
+            embed.add_field(field[0], field[1], inline=field[2])
         if self._thumbnail:
             embed.set_thumbnail(self._thumbnail)
         if self._image:
