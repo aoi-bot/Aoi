@@ -41,7 +41,7 @@ async def reload_module(ctx: AoiContextMixin, module: str, _embed: EmbedCreator)
         importlib.reload(sys.modules[f"aoi.modules.impl.{module}"])
     except Exception as e:
         await ctx.get_builder().as_error().with_description(
-            "An error occurred while reloading " f"the module. `importlib` raised {e}"
+            "An error occurred while reloading the module. `importlib` raised {e}"
         ).send()
         raise e
     try:

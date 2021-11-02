@@ -145,5 +145,17 @@ class EmbedBuilder:
             builder += self._footer
         return (builder, self._image) if return_image else builder
 
-    async def send(self):
+    @typing.overload
+    async def send(self) -> None:
+        ...
+
+    @typing.overload
+    async def send(self, *, ensure_result: bool = typing.Literal[True]) -> hikari.Message:
+        ...
+
+    async def send(self, *, ensure_result: bool = False) -> typing.Optional[hikari.Message]:
+        if ensure_result:
+            if not isinstance(self._ctx, tanjun.abc.MessageContext):
+                raise ValueError("Can't use ensure_result with a non-message context")
+            return await self._ctx.respond(await self.build(), ensure_result=True)
         await self._ctx.respond(await self.build())

@@ -17,6 +17,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 import tanjun
 
 from aoi import AoiMessageContext
+from aoi.bot.helpers.help import as_hidden
 from aoi.bot.injected import EmbedCreator
 from aoi.modules.impl import modules as impl
 
@@ -24,6 +25,7 @@ component = tanjun.Component(name="modules")
 
 
 @component.with_command
+@as_hidden
 @tanjun.as_message_command_group("modules")
 async def modules(ctx: AoiMessageContext):
     await impl.list_modules(ctx)

@@ -20,7 +20,7 @@ import hikari
 import tanjun
 
 import aoi.modules.impl.fun as impl
-from aoi import AoiMessageContext
+from aoi import AoiMessageContext, with_description
 from aoi.bot import injected
 
 component = tanjun.Component(name="fun")
@@ -39,6 +39,7 @@ component = tanjun.Component(name="fun")
     default=True,
     empty_value=False,
 )
+@with_description("Make a spoiler minesweeper game")
 @tanjun.with_parser
 @tanjun.as_message_command("minesweeper", "mines")
 async def minesweeper(
@@ -55,6 +56,7 @@ async def minesweeper(
 
 @component.with_command
 @tanjun.with_greedy_argument("member", converters=(tanjun.to_member,), default=None)
+@with_description("Hehe..simp")
 @tanjun.with_parser
 @tanjun.as_message_command("simp")
 async def simp(ctx: AoiMessageContext, member: typing.Optional[hikari.Member]):
@@ -65,6 +67,7 @@ async def simp(ctx: AoiMessageContext, member: typing.Optional[hikari.Member]):
 
 
 @component.with_command
+@with_description("Show a random anime quote")
 @tanjun.as_message_command("animequote")
 # TODO this needs a cooldown once tanjun implements - dpy was 1/5s/user
 async def anime_quote(
@@ -75,6 +78,7 @@ async def anime_quote(
 
 
 @component.with_command
+@with_description("Waifu :D")
 @tanjun.as_message_command("waifu")
 async def waifu(ctx: AoiMessageContext):
     await impl.waifu(ctx)

@@ -21,7 +21,12 @@ from aoi import AoiContextMixin
 async def poll(ctx: AoiContextMixin, content: str):
     split = content.split(";;")
     if len(split) == 1:
-        msg = await ctx.get_builder().with_title(split[0]).with_footer(text=f"Poll by {ctx.author}").send()
+        msg = (
+            await ctx.get_builder()
+            .with_title(split[0])
+            .with_footer(text=f"Poll by {ctx.author}")
+            .send(ensure_result=True)
+        )
         await msg.add_reaction("👍")
         await msg.add_reaction("👎")
     else:
@@ -31,7 +36,7 @@ async def poll(ctx: AoiContextMixin, content: str):
             .with_title(split[0])
             .with_description("\n".join(f"{choices[n]} {split[n + 1]}" for n in range(len(split) - 1)))
             .with_footer(f"Poll by {ctx.author}")
-            .send()
+            .send(ensure_result=True)
         )
         for i in range(len(split) - 1):
             await msg.add_reaction(choices[i])

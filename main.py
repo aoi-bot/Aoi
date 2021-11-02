@@ -102,6 +102,4 @@ async def get_prefix(ctx: tanjun.abc.MessageContext):
     .set_message_ctx_maker(message_ctx_maker)
 )
 
-print(help_client.descriptions)
-
 aoi.run()
