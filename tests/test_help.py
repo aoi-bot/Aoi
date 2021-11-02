@@ -14,5 +14,25 @@ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEM
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-from .bot.contexts import *
-from .bot.helpers import *
+from pathlib import Path
+
+import hikari
+import tanjun
+
+from aoi.bot import HelpClient
+import os
+
+
+class TestDescriptionChecks:
+    def test_help_description(self):
+        os.chdir("..")
+        aoi = hikari.GatewayBot("", intents=hikari.Intents.ALL)
+        client = tanjun.Client.from_gateway_bot(aoi).load_modules(
+            *Path("aoi/modules/message_commands/").glob("**/*.py"),
+            *Path("aoi/modules/slash_commands/").glob("**/*.py"),
+        )
+        print(client.components)
+        help_client = HelpClient()
+        for command in client.iter_message_commands():
+            if command not in help_client.descriptions:
+                print(command.names[0])

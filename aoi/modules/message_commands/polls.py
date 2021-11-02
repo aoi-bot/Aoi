@@ -14,5 +14,28 @@ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEM
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-from .bot.contexts import *
-from .bot.helpers import *
+import tanjun
+
+import aoi.modules.impl.poll as impl
+from aoi import AoiMessageContext, with_description
+
+component = tanjun.Component(name="polls")
+
+
+@component.with_command
+@tanjun.with_greedy_argument("content")
+@with_description("Create a reaction poll")
+@tanjun.with_parser
+@tanjun.as_message_command("poll")
+async def poll(ctx: AoiMessageContext, content: str):
+    await impl.poll(ctx, content)
+
+
+@tanjun.as_loader
+def load(client: tanjun.Client):
+    client.add_component(component.copy())
+
+
+@tanjun.as_unloader
+def unload(client: tanjun.Client):
+    client.remove_component_by_name(component.name)

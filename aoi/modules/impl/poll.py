@@ -14,5 +14,29 @@ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEM
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-from .bot.contexts import *
-from .bot.helpers import *
+
+from aoi import AoiContextMixin
+
+
+async def poll(ctx: AoiContextMixin, content: str):
+    split = content.split(";;")
+    if len(split) == 1:
+        msg = (
+            await ctx.get_builder()
+            .with_title(split[0])
+            .with_footer(text=f"Poll by {ctx.author}")
+            .send(ensure_result=True)
+        )
+        await msg.add_reaction("👍")
+        await msg.add_reaction("👎")
+    else:
+        choices = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"]
+        msg = (
+            await ctx.get_builder()
+            .with_title(split[0])
+            .with_description("\n".join(f"{choices[n]} {split[n + 1]}" for n in range(len(split) - 1)))
+            .with_footer(f"Poll by {ctx.author}")
+            .send(ensure_result=True)
+        )
+        for i in range(len(split) - 1):
+            await msg.add_reaction(choices[i])

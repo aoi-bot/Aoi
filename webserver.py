@@ -23,27 +23,25 @@ aoi_purple = 0x63, 0x44, 0x87
 
 @app.route("/")
 async def main(request):
-    return json({
-        "members": cache.get("aoi-members"),
-        "guilds": cache.get("aoi-guilds"),
-        "success": True
-    }, 200, headers={"Access-Control-Allow-Origin": "*"})
+    return json(
+        {
+            "members": cache.get("aoi-members"),
+            "guilds": cache.get("aoi-guilds"),
+            "success": True,
+        },
+        200,
+        headers={"Access-Control-Allow-Origin": "*"},
+    )
 
 
 @app.route("/tictactoe")
 async def ttt(request):
     query = request.args
     if "board" not in query:
-        return json({
-            "success": False,
-            "error": "board parameter missing"
-        }, 400)
+        return json({"success": False, "error": "board parameter missing"}, 400)
     board: str = query.pop("board")[0]
     if not re.match(r"[xo-]{9}", board):
-        return json({
-            "success": False,
-            "error": "board parameter malformed"
-        }, 400)
+        return json({"success": False, "error": "board parameter malformed"}, 400)
     copy: Image.Image = image.copy()
     drw = ImageDraw.Draw(copy)
     pairs = [
@@ -55,7 +53,7 @@ async def ttt(request):
         [355, 220],
         [56, 336],
         [210, 336],
-        [355, 336]
+        [355, 336],
     ]
     for i, char in enumerate(board):
         x = pairs[i][0] + random.randrange(-10, 10)

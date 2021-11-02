@@ -14,5 +14,37 @@ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEM
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-from .bot.contexts import *
-from .bot.helpers import *
+import tanjun
+
+import aoi.modules.impl.utility as impl
+from aoi import AoiMessageContext, with_description
+from aoi.bot import injected
+
+component = tanjun.Component(name="utility")
+
+
+@component.with_command
+@tanjun.with_argument("base1", converters=(str,))
+@tanjun.with_argument("base2", converters=(str,))
+@tanjun.with_argument("value", converters=(str,))
+@with_description("Convert a number between bases")
+@tanjun.with_parser
+@tanjun.as_message_command("baseconvert", "bconv")
+async def baseconvert(
+    ctx: AoiMessageContext,
+    base1: str,
+    base2: str,
+    value: str,
+    _embed: injected.EmbedCreator = tanjun.injected(type=injected.EmbedCreator),
+):
+    await impl.baseconvert(ctx, base1, base2, value, _embed)
+
+
+@tanjun.as_loader
+def load(client: tanjun.Client):
+    client.add_component(component.copy())
+
+
+@tanjun.as_unloader
+def unload(client: tanjun.Client):
+    client.remove_component_by_name(component.name)

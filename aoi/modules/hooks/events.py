@@ -14,5 +14,35 @@ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEM
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-from .bot.contexts import *
-from .bot.helpers import *
+import logging
+import typing
+
+import hikari
+import tanjun
+
+from aoi import HelpClient
+
+component = tanjun.Component(name="events")
+tanjun_client: typing.Optional[tanjun.Client] = None
+
+
+@component.with_listener(hikari.StartedEvent)
+async def bot_started(event: hikari.StartedEvent, help_client: HelpClient = tanjun.injected(type=HelpClient)):
+    logger = logging.getLogger("check.commands")
+    for command in tanjun_client.iter_message_commands():
+        if not help_client.get_help_for(command) and help_client.is_visible(command):
+            logger.warning(
+                f"Command {command.component.name}.{typing.cast(list[str], command.names)[0]} has no help description"
+            )
+
+
+@tanjun.as_loader
+def load(client: tanjun.Client):
+    global tanjun_client
+    tanjun_client = client
+    client.add_component(component.copy())
+
+
+@tanjun.as_unloader
+def unload(client: tanjun.Client):
+    client.remove_component_by_name(component.name)

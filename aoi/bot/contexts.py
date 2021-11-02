@@ -14,5 +14,25 @@ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEM
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-from .bot.contexts import *
-from .bot.helpers import *
+# TODO find a better way to do what I'm about to do
+import abc
+
+import tanjun
+
+from .helpers import EmbedBuilder
+
+
+class AoiContextMixin(tanjun.abc.Context, abc.ABC):
+    def get_builder(self) -> EmbedBuilder:
+        return EmbedBuilder(self)
+
+    async def send_builder(self, builder: EmbedBuilder):
+        await self.respond(embed=await builder.build())
+
+
+class AoiMessageContext(tanjun.MessageContext, AoiContextMixin):
+    ...
+
+
+class AoiSlashContext(tanjun.SlashContext, AoiContextMixin):
+    ...

@@ -14,5 +14,30 @@ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEM
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-from .bot.contexts import *
-from .bot.helpers import *
+
+from aoi import AoiContextMixin
+from aoi.bot import injected
+
+
+async def baseconvert(
+    ctx: AoiContextMixin,
+    base1: str,
+    base2: str,
+    value: str,
+    _embed: injected.EmbedCreator,
+):
+    try:
+        dec = int(value, {"hex": 16, "dec": 10, "bin": 2, "oct": 8}[base1])
+    except ValueError:
+        await ctx.get_builder().as_error().with_description(f"{value} is not a valid {base1} number").send()
+        return
+    conv = {"hex": hex, "dec": int, "bin": bin, "oct": oct}[base2](dec)
+    if base2 == "dec":
+        await ctx.get_builder().with_description(f"\n{base1} `{value}` is {base2} `{conv:,}`").send()
+    else:
+        await ctx.get_builder().with_description(f"\n{base1} `{value}` is {base2} `{conv}`").send()
+
+
+# TODO add pfact
+# TODO add bigmult
+# TODO add isprime
