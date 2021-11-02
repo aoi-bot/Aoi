@@ -14,14 +14,13 @@ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEM
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-from typing import Optional
-
 import hikari
 import tanjun
 
 import aoi.modules.impl.information as impl
 from aoi import AoiMessageContext, to_voice_channel, to_text_channel
 from aoi.bot import with_description
+
 
 component = tanjun.Component(name="information")
 
@@ -31,12 +30,12 @@ component = tanjun.Component(name="information")
 @with_description("Show a user's avatar")
 @tanjun.with_parser
 @tanjun.as_message_command("avatar", "av")
-async def avatar(ctx: AoiMessageContext, member: Optional[hikari.Member]):
+async def avatar(ctx: AoiMessageContext, member: hikari.Member):
     await impl.avatar(ctx, member)
 
 
 @component.with_command
-@tanjun.with_argument("role", converters=(tanjun.to_role,), default=None)
+@tanjun.with_greedy_argument("role", converters=(tanjun.to_role,), default=None)
 @with_description("Reveal some info about a role")
 @tanjun.with_parser
 @tanjun.as_message_command("roleinfo", "rinfo")
@@ -45,11 +44,11 @@ async def roleinfo(ctx: AoiMessageContext, role: hikari.Role):
 
 
 @component.with_command
-@tanjun.with_argument("user", converters=(tanjun.to_member,), default=None)
+@tanjun.with_greedy_argument("user", converters=(tanjun.to_member,), default=None)
 @with_description("Reveal some info about a user")
 @tanjun.with_parser
 @tanjun.as_message_command("userinfo", "uinfo")
-async def userinfo(ctx: AoiMessageContext, member: Optional[hikari.Member]):
+async def userinfo(ctx: AoiMessageContext, member: hikari.Member):
     await impl.userinfo(ctx, member)
 
 
