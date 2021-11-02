@@ -24,7 +24,7 @@ component = tanjun.Component(name="polls")
 
 @component.with_command
 @tanjun.with_greedy_argument("content")
-@with_description("Create a poll")
+@with_description("Create a reaction poll")
 @tanjun.with_parser
 @tanjun.as_message_command("poll")
 async def poll(ctx: AoiMessageContext, content: str):
