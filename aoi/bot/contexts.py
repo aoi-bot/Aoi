@@ -26,7 +26,7 @@ class AoiContextMixin(tanjun.abc.Context, abc.ABC):
     def get_builder(self) -> EmbedBuilder:
         return EmbedBuilder(self)
 
-    def send_builder(self, builder: EmbedBuilder):
+    async def send_builder(self, builder: EmbedBuilder):
         await self.respond(embed=await builder.build())
 
 

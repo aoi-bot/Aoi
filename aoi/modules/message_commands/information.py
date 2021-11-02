@@ -16,10 +16,12 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 """
 from typing import Optional
 
-import aoi.modules.impl.information as impl
-from aoi.bot import with_description
-import tanjun
 import hikari
+import tanjun
+
+import aoi.modules.impl.information as impl
+from aoi import AoiMessageContext
+from aoi.bot import with_description
 
 component = tanjun.Component(name="information")
 
@@ -29,7 +31,7 @@ component = tanjun.Component(name="information")
 @with_description("Show a user's avatar")
 @tanjun.with_parser
 @tanjun.as_message_command("avatar", "av")
-async def avatar(ctx: tanjun.abc.MessageContext, member: Optional[hikari.Member]):
+async def avatar(ctx: AoiMessageContext, member: Optional[hikari.Member]):
     await impl.avatar(ctx, member)
 
 
@@ -37,8 +39,8 @@ async def avatar(ctx: tanjun.abc.MessageContext, member: Optional[hikari.Member]
 @tanjun.with_argument("role", converters=(tanjun.to_role,), default=None)
 @with_description("Reveal some info about a role")
 @tanjun.with_parser
-@tanjun.as_message_command("roleinfo")
-async def roleinfo(ctx: tanjun.abc.MessageContext, role: hikari.Role):
+@tanjun.as_message_command("roleinfo", "rinfo")
+async def roleinfo(ctx: AoiMessageContext, role: hikari.Role):
     await impl.roleinfo(ctx, role)
 
 
@@ -47,8 +49,16 @@ async def roleinfo(ctx: tanjun.abc.MessageContext, role: hikari.Role):
 @with_description("Reveal some info about a user")
 @tanjun.with_parser
 @tanjun.as_message_command("userinfo", "uinfo")
-async def userinfo(ctx: tanjun.abc.MessageContext, member: Optional[hikari.Member]):
+async def userinfo(ctx: AoiMessageContext, member: Optional[hikari.Member]):
     await impl.userinfo(ctx, member)
+
+
+@component.with_command
+@with_description("Reveal some info about the current server")
+@tanjun.with_parser
+@tanjun.as_message_command("serverinfo", "sinfo")
+async def serverinfo(ctx: AoiMessageContext):
+    await impl.serverinfo(ctx)
 
 
 @tanjun.as_loader
