@@ -28,3 +28,24 @@ async def nsfw(ctx: AoiContextMixin, channel: hikari.GuildTextChannel):
     await ctx.get_builder().as_ok().with_description(
         f"{channel.mention}'s NSFW flag has been marked {'off' if channel.is_nsfw else 'on'}"
     ).send()
+
+
+async def chanmute(ctx: AoiContextMixin, member: hikari.Member, channel: hikari.GuildTextChannel):
+    if not channel:
+        channel = ctx.get_channel()
+    await channel.edit_overwrite(target=member, deny=hikari.Permissions.SEND_MESSAGES)
+    await ctx.get_builder().as_ok().with_description(f"{member.mention} muted in {channel.mention}").send()
+
+
+async def remchanmute(ctx: AoiContextMixin, member: hikari.Member, channel: hikari.GuildTextChannel):
+    if not channel:
+        channel = ctx.get_channel()
+    await channel.edit_overwrite(target=member, allow=hikari.Permissions.SEND_MESSAGES)
+    await ctx.get_builder().as_ok().with_description(f"{member.mention} unmuted in {channel.mention}").send()
+
+
+async def lockout(ctx: AoiContextMixin, member: hikari.Member, channel: hikari.GuildTextChannel):
+    if not channel:
+        channel = ctx.get_channel()
+    await channel.edit_overwrite(target=member, deny=hikari.Permissions.VIEW_CHANNEL)
+    await ctx.get_builder().as_ok().with_description(f"{member.mention} locked out of {channel.mention}").send()

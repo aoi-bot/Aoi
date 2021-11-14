@@ -37,6 +37,30 @@ async def nsfw(ctx: AoiMessageContext, channel: hikari.GuildTextChannel):
     await impl.nsfw(ctx, channel)
 
 
+@component.with_command
+@tanjun.with_author_permission_check(hikari.Permissions.MANAGE_CHANNELS)
+@tanjun.with_own_permission_check(hikari.Permissions.MANAGE_CHANNELS)
+@tanjun.with_greedy_argument("channel", converters=(to_text_channel,), default=None)
+@tanjun.with_argument("member", converters=(tanjun.to_member,))
+@with_description("Block a user's permission to speak in a channel")
+@tanjun.with_parser
+@tanjun.as_message_command("chanmute")
+async def chanmute(ctx: AoiMessageContext, member: hikari.Member, channel: hikari.GuildTextChannel):
+    await impl.chanmute(ctx, member, channel)
+
+
+@component.with_command
+@tanjun.with_author_permission_check(hikari.Permissions.MANAGE_CHANNELS)
+@tanjun.with_own_permission_check(hikari.Permissions.MANAGE_CHANNELS)
+@tanjun.with_greedy_argument("channel", converters=(to_text_channel,), default=None)
+@tanjun.with_argument("member", converters=(tanjun.to_member,))
+@with_description("Unblock a user's permission to speak in a channel")
+@tanjun.with_parser
+@tanjun.as_message_command("remchanmute", "unchanmute")
+async def remchanmute(ctx: AoiMessageContext, member: hikari.Member, channel: hikari.GuildTextChannel):
+    await impl.remchanmute(ctx, member, channel)
+
+
 @tanjun.as_loader
 def load(client: tanjun.Client):
     client.add_component(component.copy())
